@@ -275,8 +275,8 @@ class SettingsMenuOption(object):
                 The key that's used to refer to the role ID in the `role_list` table
         """
 
-        def wrapper(self, ctx, role_id:int):
-            async def callback():
+        def wrapper(menu, ctx, role_id:int):
+            async def callback(menu):
                 """The function that actually deletes the role from the database
                 Any input to this function will be silently discarded, since the actual input to this function is defined
                 in the callback definition
@@ -318,8 +318,8 @@ class SettingsMenuOption(object):
                 The default serialize function doesn't do anything, but is provided so you don't have to provide one yourself
         """
 
-        def wrapper(self, ctx):
-            async def callback(*data):
+        def wrapper(menu, ctx):
+            async def callback(menu, *data):
                 """The function that actually adds the role to the table in the database
                 Any input to this function will be direct outputs from perform_action's convert_prompted_information
                 This is a function that creates a callback, so the expectation of `data` in this instance is that data is either
