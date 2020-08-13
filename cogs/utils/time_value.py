@@ -24,11 +24,13 @@ class TimeValue(object):
     def __init__(self, duration:float):
         self.duration = math.ceil(duration)
         remaining = self.duration
+
         years, remaining = self.get_quotient_and_remainder(remaining, 60 * 60 * 24 * 365)
         days, remaining = self.get_quotient_and_remainder(remaining, 60 * 60 * 24)
         hours, remaining = self.get_quotient_and_remainder(remaining, 60 * 60)
         minutes, remaining = self.get_quotient_and_remainder(remaining, 60)
         seconds = remaining
+
         self.clean_spaced = ' '.join([i for i in [
             f"{years}y" if years > 0 else None,
             f"{days}d" if days > 0 else None,
@@ -36,6 +38,7 @@ class TimeValue(object):
             f"{minutes}m" if minutes > 0 else None,
             f"{seconds}s" if seconds > 0 else None,
         ] if i])
+
         self.clean_full = ' '.join([i for i in [
             f"{years} years" if years > 0 else None,
             f"{days} days" if days > 0 else None,
@@ -43,8 +46,10 @@ class TimeValue(object):
             f"{minutes} minutes" if minutes > 0 else None,
             f"{seconds} seconds" if seconds > 0 else None,
         ] if i])
+
         if self.duration > self.MAX_SIZE:
             raise InvalidTimeDuration(self.clean)
+
         self.clean = self.clean_spaced.replace(" ", "")
         self.delta = timedelta(seconds=self.duration)
 
