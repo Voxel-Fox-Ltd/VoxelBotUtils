@@ -276,7 +276,7 @@ class SettingsMenuOption(object):
         """
 
         def wrapper(self, ctx, role_id:int):
-            async def callback(self):
+            async def callback():
                 """The function that actually deletes the role from the database
                 Any input to this function will be silently discarded, since the actual input to this function is defined
                 in the callback definition
@@ -319,7 +319,7 @@ class SettingsMenuOption(object):
         """
 
         def wrapper(self, ctx):
-            async def callback(self, *data):
+            async def callback(*data):
                 """The function that actually adds the role to the table in the database
                 Any input to this function will be direct outputs from perform_action's convert_prompted_information
                 This is a function that creates a callback, so the expectation of `data` in this instance is that data is either
@@ -492,7 +492,7 @@ class SettingsMenuIterableBase(SettingsMenu):
         key_display_function : typing.Callable
             The function used to display the data provided from the cache
             Something like `guild.get_role(key).name`
-        value_display_function : typing.Callable = None
+        value_display_function : typing.Callable = str
             The function used to display the data provided from the cache
             Something like `guild.get_role(key).name`
             Not necessary if the cached item is a _list_ rather than a dict
@@ -507,7 +507,7 @@ class SettingsMenuIterableBase(SettingsMenu):
     """
 
     def __init__(
-            self, cache_key:str, key_display_function:typing.Callable[[typing.Any], str]=None, value_display_function:typing.Callable[[typing.Any], str]=None,
+            self, cache_key:str, key_display_function:typing.Callable[[typing.Any], str]=None, value_display_function:typing.Callable[[typing.Any], str]=str,
             *, iterable_add_callback:typing.Callable=None, iterable_delete_callback:typing.Callable=None):
         super().__init__()
 
@@ -532,9 +532,9 @@ class SettingsMenuIterableBase(SettingsMenu):
                 A function used to take the converted value and change it into something database-friendly
         """
 
-        self.convertable_values.append((self.prompt, "value", converter))
+        self.convertable_values.append((prompt, "value", converter))
 
-    def bulk_add_values(self, ctx:commands.Context, *args):
+    def bulk_add_convertable_value(self, ctx:commands.Context, *args):
         """Add MULTIPLE options to the settings list
         Each option is simply thrown into a SettingsMenuOption item and then added to the options list
         """
