@@ -5,8 +5,7 @@ import aioredis
 
 
 class RedisConnection(object):
-    """A wrapper for an aioredis.Redis object, to make things easier to work
-    with for me"""
+    """A wrapper for an aioredis.Redis object"""
 
     config: dict = None
     pool: aioredis.Redis = None

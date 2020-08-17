@@ -508,7 +508,7 @@ class SettingsMenuIterableBase(SettingsMenu):
 
     def __init__(
             self, cache_key:str, key_display_function:typing.Callable[[typing.Any], str]=None, value_display_function:typing.Callable[[typing.Any], str]=str,
-            *, iterable_add_callback:typing.Callable=None, iterable_delete_callback:typing.Callable=None):
+            *, iterable_add_callback:typing.Callable=None, iterable_delete_callback:typing.Callable=None, max_iterable_count:int=10):
         super().__init__()
 
         self.cache_key = cache_key
@@ -517,6 +517,8 @@ class SettingsMenuIterableBase(SettingsMenu):
 
         self.iterable_add_callback = iterable_add_callback
         self.iterable_delete_callback = iterable_delete_callback
+
+        self.max_iterable_count = max_iterable_count
 
         self.convertable_values = []
 
@@ -557,7 +559,7 @@ class SettingsMenuIterableBase(SettingsMenu):
                 )
                 for i, o in data_points.items()
             ]
-            if len(self.options) < 10:
+            if len(self.options) < self.max_iterable_count:
                 self.options.append(
                     SettingsMenuOption(
                         ctx, "", self.convertable_values,
@@ -577,7 +579,7 @@ class SettingsMenuIterableBase(SettingsMenu):
                 )
                 for i in data_points
             ]
-            if len(self.options) < 10:
+            if len(self.options) < self.max_iterable_count:
                 self.options.append(
                     SettingsMenuOption(
                         ctx, "", self.convertable_values,
