@@ -141,39 +141,48 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @commands.command(cls=utils.Command)
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def runsql(self, ctx:utils.Context, *, content:str):
+    async def runsql(self, ctx:utils.Context, *, sql:str):
         """Runs a line of SQL into the sparcli database"""
 
-        # Grab data
+        # Get the data we asked for
         async with self.bot.database() as db:
-            database_data = await db(content) or 'No content.'
+            rows = await db(sql.format(guild=ctx.guild.id, author=ctx.author.id, channel=ctx.channel.id))
+        if not rows:
+            return await ctx.send("No content.")
 
-        # Single line output
-        if type(database_data) in [str, type(None)]:
-            await ctx.send(database_data)
-            return
+        # Set up some metadata for us to format things nicely
+        headers = list(rows[0].keys())
+        column_widths = {i: len(i) for i in headers}
+        lines = []
 
-        # Get columns and widths
-        column_headers = list(database_data[0].keys())
-        column_max_lengths = {i:0 for i in column_headers}
-        for row in [{i:i for i in column_headers}] + list(database_data):
-            for header in column_headers:
-                column_max_lengths[header] = max(column_max_lengths[header], len(str(row[header])))
+        # See how long our lines are
+        for row in rows:
+            for header in headers:
+                column_widths[header] = max([column_widths[header], len(str(row[header]))])
 
-        # Sort our output
-        output = []  # List of lines
-        for row in [{i:i for i in column_headers}] + list(database_data):
-            current_line = ""
-            for header in column_headers:
-                current_line += format(str(row[header]), f"<{column_max_lengths[header]}") + '|'
-            output.append(current_line.strip('| '))
+        # Work out our rows
+        for row in rows:
+            working = ""
+            for header in headers:
+                working += format(str(row[header]), f" <{column_widths[header]}") + "|"
+            lines.append(working[:-1])
 
-        # Send it to user
-        string_output = '\n'.join(output)
+        # Add on our headers
+        header_working = ""
+        spacer_working = ""
+        for header in headers:
+            header_working += format(header, f" <{column_widths[header]}") + "|"
+            spacer_working += "-" * column_widths[header] + "|"
+        lines.insert(0, spacer_working[:-1])
+        lines.insert(0, header_working[:-1])
+
+        # Send it out
+        string_output = '\n'.join(lines)
         try:
-            await ctx.send('```\n{}```'.format(string_output))
+            await ctx.send(f"```\n{string_output}```")
         except discord.HTTPException:
-            await ctx.send(file=discord.File(io.StringIO(string_output), filename="runsql.txt"))
+            file = discord.File(io.StringIO(string_output), filename="runsql.txt")
+            await ctx.send(file=file)
 
     @commands.group(cls=utils.Group)
     @commands.is_owner()
