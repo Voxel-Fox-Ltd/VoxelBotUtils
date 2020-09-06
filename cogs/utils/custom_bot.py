@@ -86,6 +86,13 @@ class CustomBot(commands.AutoShardedBot):
         # Get database connection
         db = await self.database.get_connection()
 
+        # Get default guild settings
+        default_guild_settings = await db("SELECT * FROM guild_settings WHERE guild_id=0")
+        if not default_guild_settings:
+            default_guild_settings = await db("INSERT INTO guild_settings (guild_id) VALUES (0) RETURNING *")
+        for i, o in default_guild_settings[0].items():
+            self.DEFAULT_GUILD_SETTINGS.setdefault(i, o)
+
         # Get guild settings
         data = await self.get_all_table_data(db, "guild_settings")
         for row in data:
