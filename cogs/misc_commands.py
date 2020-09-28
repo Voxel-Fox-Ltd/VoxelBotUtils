@@ -41,6 +41,15 @@ class MiscCommands(utils.Cog):
         await ctx.send(f"<{self.bot.get_invite_link()}>")
 
     @commands.command(cls=utils.Command)
+    @commands.bot_has_permissions(send_messages=True)
+    @utils.checks.is_config_set('command_data', 'vote_command_enabled')
+    async def vote(self, ctx:utils.Context):
+        """Gives you a link to vote for the bot"""
+
+        bot_user_id = self.bot.config.get('oauth', {}).get('client_id', None) or self.bot.user.id
+        await ctx.send(f"<https://top.gg/bot/{bot_user_id}/vote>")
+
+    @commands.command(cls=utils.Command)
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(send_messages=True)
     @utils.checks.is_config_set('command_data', 'echo_command_enabled')

@@ -14,6 +14,7 @@ event_webhook_url = ""
     invite_command_enabled = true
     echo_command_enabled = true
     stats_command_enabled = true
+    vote_command_enabled = false
 
 # This data is passed directly over to asyncpg
 [database]
