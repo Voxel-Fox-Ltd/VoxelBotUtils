@@ -82,38 +82,46 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         except Exception:
             # Oh no it caused an error
             stdout_value = stdout.getvalue() or None
-            await ctx.send(f'```py\n{stdout_value}\n{traceback.format_exc()}\n```')
-        else:
-            # Oh no it didn't cause an error
-            stdout_value = stdout.getvalue() or None
+            return await ctx.send(f'```py\n{stdout_value}\n{traceback.format_exc()}\n```')
 
-            # Give reaction just to show that it ran
+        # Oh no it didn't cause an error
+        stdout_value = stdout.getvalue() or None
+
+        # Give reaction just to show that it ran
+        try:
             await ctx.message.add_reaction("\N{OK HAND SIGN}")
+        except discord.HTTPException:
+            pass
 
-            # If the function returned nothing
-            if ret is None:
-                # It might have printed something
-                if stdout_value is not None:
-                    await ctx.send(f'```py\n{stdout_value}\n```')
-                return
+        # If the function returned nothing
+        if ret is None:
+            # It might have printed something
+            if stdout_value is not None:
+                await ctx.send(f'```py\n{stdout_value}\n```')
+            return
 
-            # If the function did return a value
-            result_raw = stdout_value or ret  # What's returned from the function
-            result = str(result_raw)  # The result as a string
-            if result_raw is None:
-                return
-            text = f'```py\n{result}\n```'
-            if type(result_raw) == dict:
-                try:
-                    result = json.dumps(result_raw, indent=4)
-                except Exception:
-                    pass
-                else:
-                    text = f'```json\n{result}\n```'
-            if len(text) > 2000:
-                await ctx.send(file=discord.File(io.StringIO(result), filename='ev.txt'))
+        # If the function did return a value
+        result_raw = stdout_value or ret  # What's returned from the function
+        result = str(result_raw)  # The result as a string
+        if result_raw is None:
+            return
+        text = f'```py\n{result}\n```'
+        if type(result_raw) == dict:
+            try:
+                result = json.dumps(result_raw, indent=4)
+            except Exception:
+                pass
             else:
-                await ctx.send(text)
+                text = f'```json\n{result}\n```'
+
+        # Output to chat
+        if len(text) > 2000:
+            try:
+                return await ctx.send(file=discord.File(io.StringIO(result), filename='ev.txt'))
+            except discord.HTTPException:
+                return await ctx.send("I don't have permission to attach files here.")
+        else:
+            return await ctx.send(text)
 
     @commands.command(aliases=['rld'], cls=utils.Command)
     @commands.is_owner()
