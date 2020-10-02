@@ -150,9 +150,12 @@ class CustomBot(commands.AutoShardedBot):
     def get_invite_link(self, *, scope:str='bot', response_type:str=None, redirect_uri:str=None, guild_id:int=None, **kwargs):
         """Gets the invite link for the bot, with permissions all set properly"""
 
+        # Make the permissions object
         permissions = discord.Permissions()
         for name, value in kwargs.items():
             setattr(permissions, name, value)
+
+        # Make the params for the url
         data = {
             'client_id': self.config.get('oauth', {}).get('client_id', None) or self.user.id,
             'scope': scope,
@@ -164,6 +167,8 @@ class CustomBot(commands.AutoShardedBot):
             data['guild_id'] = guild_id
         if response_type:
             data['response_type'] = response_type
+
+        # Return url
         return 'https://discordapp.com/oauth2/authorize?' + urlencode(data)
 
     async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, delete:typing.List[discord.Message]=None, timeout=60.0):
