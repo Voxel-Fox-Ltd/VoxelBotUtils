@@ -1,5 +1,5 @@
 import math
-import re as regex
+import re
 from datetime import timedelta
 
 from discord.ext import commands
@@ -18,33 +18,33 @@ class InvalidTimeDuration(commands.BadArgument):
 class TimeValue(object):
     """An object that nicely converts an integer value into an easily readable string"""
 
-    time_value_regex = regex.compile(r"^(?:(?P<years>\d+)y)?(?:(?P<weeks>\d+)w)?(?:(?P<days>\d+)d)?(?:(?P<hours>\d+)h)?(?:(?P<minutes>\d+)m)?(?:(?P<seconds>\d+)s)?$")
+    TIME_VALUE_REGEX = re.compile(r"^(?:(?P<years>\d+)y)? *(?:(?P<weeks>\d+)w)? *(?:(?P<days>\d+)d)? *(?:(?P<hours>\d+)h)? *(?:(?P<minutes>\d+)m)? *(?:(?P<seconds>\d+)s)?$")
     MAX_SIZE = 0b1111111111111111111111111111111  # 2**31 - this is about 68 years so anything above this is a bit...... much
 
     def __init__(self, duration:float):
         self.duration = math.ceil(duration)
         remaining = self.duration
 
-        years, remaining = self.get_quotient_and_remainder(remaining, 60 * 60 * 24 * 365)
-        days, remaining = self.get_quotient_and_remainder(remaining, 60 * 60 * 24)
-        hours, remaining = self.get_quotient_and_remainder(remaining, 60 * 60)
-        minutes, remaining = self.get_quotient_and_remainder(remaining, 60)
-        seconds = remaining
+        self.years, remaining = self.get_quotient_and_remainder(remaining, 60 * 60 * 24 * 365)
+        self.days, remaining = self.get_quotient_and_remainder(remaining, 60 * 60 * 24)
+        self.hours, remaining = self.get_quotient_and_remainder(remaining, 60 * 60)
+        self.minutes, remaining = self.get_quotient_and_remainder(remaining, 60)
+        self.seconds = remaining
 
         self.clean_spaced = ' '.join([i for i in [
-            f"{years}y" if years > 0 else None,
-            f"{days}d" if days > 0 else None,
-            f"{hours}h" if hours > 0 else None,
-            f"{minutes}m" if minutes > 0 else None,
-            f"{seconds}s" if seconds > 0 else None,
+            f"{self.years}y" if self.years > 0 else None,
+            f"{self.days}d" if self.days > 0 else None,
+            f"{self.hours}h" if self.hours > 0 else None,
+            f"{self.minutes}m" if self.minutes > 0 else None,
+            f"{self.seconds}s" if self.seconds > 0 else None,
         ] if i])
 
         self.clean_full = ' '.join([i for i in [
-            f"{years} years" if years > 0 else None,
-            f"{days} days" if days > 0 else None,
-            f"{hours} hours" if hours > 0 else None,
-            f"{minutes} minutes" if minutes > 0 else None,
-            f"{seconds} seconds" if seconds > 0 else None,
+            f"{self.years} years" if self.years > 0 else None,
+            f"{self.days} days" if self.days > 0 else None,
+            f"{self.hours} hours" if self.hours > 0 else None,
+            f"{self.minutes} minutes" if self.minutes > 0 else None,
+            f"{self.seconds} seconds" if self.seconds > 0 else None,
         ] if i])
 
         if self.duration > self.MAX_SIZE:
@@ -78,7 +78,7 @@ class TimeValue(object):
     def parse(cls, value:str) -> 'TimeValue':
         """Takes a value (1h/30m/10s/2d etc) and returns a TimeValue instance with the duration"""
 
-        match = cls.time_value_regex.search(value)
+        match = cls.TIME_VALUE_REGEX.search(value)
         if match is None:
             raise InvalidTimeDuration(value)
         duration = 0
