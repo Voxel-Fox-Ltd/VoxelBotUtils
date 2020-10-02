@@ -82,6 +82,13 @@ class DatabaseConnection(object):
             return []
         return None
 
+    async def execute_many(self, sql, *args) -> None:
+        """Runs an executemany query"""
+
+        self.logger.debug(f"Running SQL: {sql} {args!s}")
+        await self.conn.execute(sql, args)
+        return None
+
     async def copy_records_to_table(self, table_name, *, records, columns=None, timeout=None):
         """Copies a series of records to a given table"""
 
