@@ -127,8 +127,6 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
             self.bot.load_extension(cog_name)
         except commands.ExtensionAlreadyLoaded:
             try:
-                # self.bot.unload_extension(cog_name)
-                # self.bot.load_extension(cog_name)
                 self.bot.reload_extension(cog_name)
             except Exception:
                 await ctx.send('```py\n' + traceback.format_exc() + '```')
@@ -238,19 +236,27 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     async def status(self, ctx:utils.Context, status:str):
         """Changes the online status of the bot"""
 
-        status_o = getattr(discord.Status, status.lower())
-        await self.bot.change_presence(activity=self.bot.guilds[0].me.activity, status=status_o)
+        status = getattr(discord.Status, status.lower())
+        await self.bot.change_presence(activity=self.bot.guilds[0].me.activity, status=status)
 
-    @commands.command(cls=utils.Command)
+    @commands.command(cls=utils.Command, aliases=['sudo'])
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def sudo(self, ctx, who:discord.User, *, command: str):
+    async def su(self, ctx, who:discord.User, *, command:str):
         """Run a command as another user optionally in another channel."""
 
+        # Make a copy of the message so we can pretend the other user said it
         msg = copy.copy(ctx.message)
+
+        # Change the author and content
         msg.author = ctx.guild.get_member(who.id) or who
         msg.content = ctx.prefix + command
+
+        # Make a context
         new_ctx = await self.bot.get_context(msg, cls=type(ctx))
+        new_ctx.original_author_id = ctx.author.id
+
+        # Invoke it dab
         await self.bot.invoke(new_ctx)
 
     @commands.command(cls=utils.Command)
