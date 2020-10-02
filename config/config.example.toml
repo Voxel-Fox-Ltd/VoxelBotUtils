@@ -9,9 +9,9 @@ event_webhook_url = ""
 # Data that's copied directly over to a command without processing
 [command_data]
     guild_invite = ""
-    github = ""
-    patreon = ""
-    invite_command_enabled = true
+    github_link = ""
+    donate_link = ""
+    invite_command_permissions = [ "read_messages", ]
     echo_command_enabled = true
     stats_command_enabled = true
     vote_command_enabled = false

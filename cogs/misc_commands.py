@@ -9,12 +9,12 @@ from cogs import utils
 class MiscCommands(utils.Cog):
 
     @commands.command(aliases=['git', 'code'], cls=utils.Command)
-    @utils.checks.is_config_set('command_data', 'github')
+    @utils.checks.is_config_set('command_data', 'github_link')
     @commands.bot_has_permissions(send_messages=True)
     async def github(self, ctx:utils.Context):
         """Sends the GitHub Repository link"""
 
-        await ctx.send(f"<{self.bot.config['command_data']['github']}>")
+        await ctx.send(f"<{self.bot.config['command_data']['github_link']}>")
 
     @commands.command(aliases=['support', 'guild'], cls=utils.Command)
     @utils.checks.is_config_set('command_data', 'guild_invite')
@@ -25,20 +25,21 @@ class MiscCommands(utils.Cog):
         await ctx.send(f"<{self.bot.config['command_data']['guild_invite']}>")
 
     @commands.command(aliases=['patreon'], cls=utils.Command)
-    @utils.checks.is_config_set('command_data', 'patreon')
+    @utils.checks.is_config_set('command_data', 'donate_link')
     @commands.bot_has_permissions(send_messages=True)
     async def donate(self, ctx:utils.Context):
         """Gives you the bot's creator's Patreon"""
 
-        await ctx.send(f"<{self.bot.config['command_data']['patreon']}>")
+        await ctx.send(f"<{self.bot.config['command_data']['donate_link']}>")
 
     @commands.command(cls=utils.Command)
     @commands.bot_has_permissions(send_messages=True)
-    @utils.checks.is_config_set('command_data', 'invite_command_enabled')
+    @utils.checks.is_config_set('command_data', 'invite_command_permissions')
     async def invite(self, ctx:utils.Context):
         """Gives you the bot's invite link"""
 
-        await ctx.send(f"<{self.bot.get_invite_link()}>")
+        invite_permissions = {i: True for i in self.bot.config['command_data']['invite_command_permissions']}
+        await ctx.send(f"<{self.bot.get_invite_link(**invite_permissions)}>")
 
     @commands.command(cls=utils.Command)
     @commands.bot_has_permissions(send_messages=True)
