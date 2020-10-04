@@ -50,7 +50,10 @@ class CustomBot(commands.AutoShardedBot):
     """A child of discord.ext.commands.AutoShardedBot to make things a little easier when
     doing my own stuff"""
 
-    def __init__(self, config_file:str='config/config.toml', logger:logging.Logger=None, *args, **kwargs):
+    def __init__(
+            self, config_file:str='config/config.toml', logger:logging.Logger=None, activity:discord.Activity=discord.Game(name="Reconnecting..."),
+            status:discord.Status=discord.Status.dnd, case_insensitive:bool=True, max_messages:int=100, intents:discord.Intents=discord.Intents.all(),
+            allowed_mentions:discord.AllowedMentions=discord.AllowedMentions(everyone=False), *args, **kwargs):
         """The initialiser for the bot object
         Note that we load the config before running the original method"""
 
@@ -61,7 +64,10 @@ class CustomBot(commands.AutoShardedBot):
         self.reload_config()
 
         # Run original
-        super().__init__(command_prefix=get_prefix, *args, **kwargs)
+        super().__init__(
+            command_prefix=get_prefix, activity=activity, status=status, case_insensitive=case_insensitive, max_messages=max_messages,
+            intents=intents, allowed_mentions=allowed_mentions, *args, **kwargs,
+        )
 
         # Set up our default guild settings
         self.DEFAULT_GUILD_SETTINGS = {
@@ -356,3 +362,11 @@ class CustomBot(commands.AutoShardedBot):
         await asyncio.wait_for(self.session.close(), timeout=None)
         self.logger.debug("Running original D.py logout method")
         await super().close(*args, **kwargs)
+
+    async def on_ready(self):
+        """On ready event dab"""
+
+        self.logger.info(f"Bot connected - {self.user} // {self.user.id}")
+        self.logger.info("Setting activity to default")
+        await self.set_default_presence()
+        self.logger.info('Bot loaded.')
