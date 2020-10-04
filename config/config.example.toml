@@ -39,10 +39,10 @@ event_webhook_url = ""
     colour = 0  # a specific colour for the embed - 0 means random
     [embed.author]
         enabled = false
-        name = "{bot.user}"
-        icon_url = ""
+        name = "{ctx.bot.user}"
+        url = ""  # the url added to the author
     [[embed.footer]]  # an array of possible footers
-        text = "Add the bot to your server! ({prefix}invite)"  # text to appear in the footer
+        text = "Add the bot to your server! ({ctx.clean_prefix}invite)"  # text to appear in the footer
         amount = 1  # the amount of times this particular text is added to the pool
 
 # What the bot is playing

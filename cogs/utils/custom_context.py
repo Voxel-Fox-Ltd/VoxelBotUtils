@@ -31,7 +31,7 @@ class CustomContext(commands.Context):
             if amount <= 0:
                 continue
             text = safe_data.pop('text')
-            text = text.replace("{prefix}", self.clean_prefix)
+            text = text.format(ctx=self)
             safe_data['text'] = text
             for _ in range(amount):
                 pool.append(safe_data.copy())
@@ -87,13 +87,13 @@ class CustomContext(commands.Context):
                 embed.set_image(url=f'attachment://{file.filename}')
 
         # Reset content
-        content = self.bot.config.get('embed', dict()).get('content') or None
+        content = self.bot.config.get('embed', dict()).get('content', '').format(ctx=self) or None
 
         # Set author
         author_data = self.bot.config.get('embed', dict()).get('author')
         if author_data.get('enabled', False):
-            name = author_data.get('name', '').format(bot=self.bot) or discord.Embed.Empty
-            url = author_data.get('url', '').format(bot=self.bot) or discord.Embed.Empty
+            name = author_data.get('name', '').format(ctx=self) or discord.Embed.Empty
+            url = author_data.get('url', '').format(ctx=self) or discord.Embed.Empty
             author_data = {
                 'name': name,
                 'url': url,
