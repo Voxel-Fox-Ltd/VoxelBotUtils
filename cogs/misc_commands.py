@@ -59,7 +59,7 @@ class MiscCommands(utils.Cog):
 
         await ctx.send(content, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
-    @commands.command(aliases=['status'])
+    @commands.command(aliases=['status', 'botinfo'])
     @commands.bot_has_permissions(send_messages=True, embed_links=True)
     @utils.checks.is_config_set('command_data', 'stats_command_enabled')
     async def stats(self, ctx:utils.Context):

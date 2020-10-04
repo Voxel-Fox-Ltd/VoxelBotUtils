@@ -234,6 +234,15 @@ class CustomBot(commands.AutoShardedBot):
 
         pass
 
+    @property
+    def embeddify(self) -> bool:
+        """Whether or not to set the custom context to by default"""
+
+        try:
+            return self.config['embed']['enabled']
+        except Exception:
+            return False
+
     def get_uptime(self) -> float:
         """Gets the uptime of the bot in seconds
         Uptime is a bit of a misnomer, since it starts when the instance is created, but
@@ -244,9 +253,7 @@ class CustomBot(commands.AutoShardedBot):
     async def get_context(self, message, *, cls=CustomContext):
         """Gently insert a new original_author field into the context"""
 
-        ctx = await super().get_context(message, cls=cls)
-        ctx.original_author_id = ctx.author.id
-        return ctx
+        return await super().get_context(message, cls=cls)
 
     def get_extensions(self) -> list:
         """Gets a list of filenames of all the loadable cogs"""

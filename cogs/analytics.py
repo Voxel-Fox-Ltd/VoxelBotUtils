@@ -36,7 +36,7 @@ class Analytics(utils.Cog):
     def cog_unload(self):
         self.post_guild_count.stop()
 
-    @tasks.loop(minutes=30)
+    @tasks.loop(minutes=5)
     async def post_guild_count(self):
         """Post the average guild count to DiscordBots.org"""
 
