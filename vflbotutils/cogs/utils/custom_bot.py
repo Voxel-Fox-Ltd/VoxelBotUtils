@@ -13,9 +13,10 @@ import discord
 import toml
 from discord.ext import commands
 
-from cogs.utils.custom_context import CustomContext
-from cogs.utils.database import DatabaseConnection
-from cogs.utils.redis import RedisConnection
+from .custom_context import CustomContext
+from .database import DatabaseConnection
+from .redis import RedisConnection
+from .. import all_packages as all_vfl_package_names
 
 
 def get_prefix(bot, message:discord.Message):
@@ -266,6 +267,7 @@ class CustomBot(commands.AutoShardedBot):
 
         ext = glob.glob('cogs/[!_]*.py')
         extensions = [i.replace('\\', '.').replace('/', '.')[:-3] for i in ext]
+        extensions.extend([f'vflbotutils.cogs.{i}' for i in all_vfl_package_names])
         self.logger.debug("Getting all extensions: " + str(extensions))
         return extensions
 

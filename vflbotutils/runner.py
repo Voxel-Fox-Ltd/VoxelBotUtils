@@ -4,6 +4,16 @@ import logging
 import sys
 import typing
 
+from . import utils
+
+
+__all__ = (
+    'get_default_program_arguments',
+    'validate_sharding_information',
+    'set_default_log_levels',
+    'run_bot',
+)
+
 
 # Set up the loggers
 def set_log_level(logger_to_change:logging.Logger, loglevel:str) -> None:
@@ -99,6 +109,7 @@ def validate_sharding_information(min_shard:int, max_shard:int, shard_count:int)
     if shard_count is not None and not (min_shard is not None and max_shard is not None):
         logger.critical("You set a shardcount but not min/max shards")
         exit(1)
+    return shard_ids
 
 # # Set up intents
 # intents = discord.Intents(
