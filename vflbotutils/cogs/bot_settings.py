@@ -25,7 +25,7 @@ class BotSettings(utils.Cog):
             await db("INSERT INTO guild_settings (guild_id, prefix) VALUES ($1, $2) ON CONFLICT (guild_id) DO UPDATE SET prefix=excluded.prefix", ctx.guild.id, new_prefix)
         await ctx.send(f"My prefix has been updated to `{new_prefix}`.")
 
-    @commands.command(cls=utils.Command)
+    @commands.command(cls=utils.Command, aloases=['follow'])
     @commands.has_permissions(manage_guild=True, manage_channels=True)
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, manage_channels=True)
     @commands.guild_only()

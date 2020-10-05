@@ -10,7 +10,7 @@ from . import utils
 class CustomHelpCommand(commands.MinimalHelpCommand):
 
     def __init__(self, **options):
-        self.include_invite = options.pop("include_invite", True)
+        self.include_invite = options.pop("include_invite", False)
         super().__init__(**options)
 
     async def filter_commands(self, commands:typing.List[utils.Command]) -> typing.List[utils.Command]:
@@ -40,20 +40,9 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
     async def send_command_help(self, command:utils.Command):
         """Sends the help command for a given command"""
 
-        # Make an embed
-        help_embed = self.get_initial_embed()
-
-        # Add each command to the embed
-        help_embed.add_field(
-            name=f"{self.clean_prefix}{command.qualified_name} {command.signature}",
-            value=f"{command.help}"
-        )
-
-        # Send it to the destination
-        data = {"embed": help_embed}
-        if self.include_invite:
-            data.update({"content": self.context.bot.config['command_data']['guild_invite']})
-        await self.send_to_destination(**data)
+        return await self.send_bot_help({
+            command: []
+        })
 
     async def send_bot_help(self, mapping:typing.Dict[typing.Optional[utils.Cog], typing.List[commands.Command]]):
         """Sends all help to the given channel"""
@@ -74,13 +63,18 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
             value = '\n'.join([self.get_help_line(command) for command in cog_commands])
             command_strings.append((getattr(cog, 'get_name', lambda: cog.name)(), value))
 
+            # See if it's a command with subcommands
+            if isinstance(cog, commands.Command):
+                help_embed.description = self.get_help_line(cog)
+
         # Order embed by length before embedding
         command_strings.sort(key=lambda x: len(x[1]), reverse=True)
         for name, value in command_strings:
-            help_embed.add_field(
-                name=name,
-                value=value,
-            )
+            if value.strip():
+                help_embed.add_field(
+                    name=name,
+                    value=value.strip(),
+                )
 
         # Send it to the destination
         data = {"embed": help_embed}
@@ -127,8 +121,8 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         """Gets a doc line of help for a given command"""
 
         if command.short_doc:
-            return f"{self.clean_prefix}{command.qualified_name} - *{command.short_doc}*"
-        return f"{self.clean_prefix}{command.qualified_name}"
+            return f"**{self.clean_prefix}{command.qualified_name}** - {command.short_doc}"
+        return f"**{self.clean_prefix}{command.qualified_name}**"
 
 
 class Help(utils.Cog):
