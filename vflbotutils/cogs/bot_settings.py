@@ -70,6 +70,10 @@ class BotSettings(utils.Cog):
             await self.bot.wait_for("message", check=lambda m: m.content == f"{channel.guild.name} #{channel.name}", timeout=5)
         except asyncio.TimeoutError:
             pass
+        try:
+            await m.delete()
+        except discord.HTTPException:
+            pass
         return await ctx.send("Now following the bot's updates channel!", ignore_error=True)
 
     @commands.group(cls=utils.Group, enabled=False)
