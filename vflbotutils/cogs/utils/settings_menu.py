@@ -4,7 +4,7 @@ import typing
 import discord
 from discord.ext import commands
 
-from cogs import utils
+from .errors import InvokedMetaCommand
 
 
 class SettingsMenuError(commands.CommandError):
@@ -102,7 +102,7 @@ class SettingsMenuOption(object):
                 content = user_message.content
         except asyncio.TimeoutError:
             await self.context.send(f"Timed out asking for {asking_for}.")
-            raise utils.errors.InvokedMetaCommand()
+            raise InvokedMetaCommand()
 
         # Run converter
         conversion_failed = False

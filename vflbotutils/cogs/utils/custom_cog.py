@@ -3,7 +3,7 @@ import re as regex
 
 from discord.ext.commands import Cog as OriginalCog
 
-from cogs.utils.custom_bot import CustomBot
+from .custom_bot import CustomBot
 
 
 class CustomCog(OriginalCog):

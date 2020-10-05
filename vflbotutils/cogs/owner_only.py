@@ -8,7 +8,7 @@ import traceback
 import discord
 from discord.ext import commands
 
-from cogs import utils
+from . import utils
 
 
 class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):

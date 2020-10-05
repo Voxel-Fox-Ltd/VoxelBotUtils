@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from cogs.utils.checks.cooldown.cooldown import Cooldown, CooldownMapping
+from .cooldown import Cooldown, CooldownMapping
 
 
 class RoleBasedCooldown(Cooldown):

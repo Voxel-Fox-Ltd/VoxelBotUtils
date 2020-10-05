@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from cogs import utils
+from . import utils
 
 
 class BotSettings(utils.Cog):

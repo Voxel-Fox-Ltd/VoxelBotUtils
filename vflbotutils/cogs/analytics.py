@@ -3,7 +3,7 @@ import json
 import discord
 from discord.ext import tasks
 
-from cogs import utils
+from . import utils
 
 
 class Analytics(utils.Cog):

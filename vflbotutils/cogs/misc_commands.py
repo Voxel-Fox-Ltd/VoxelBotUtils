@@ -3,7 +3,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from cogs import utils
+from . import utils
 
 
 class MiscCommands(utils.Cog):

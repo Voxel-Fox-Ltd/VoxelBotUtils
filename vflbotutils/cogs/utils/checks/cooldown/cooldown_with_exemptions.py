@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from cogs.utils.checks.cooldown import Cooldown
+from .cooldown import Cooldown
 
 
 class CooldownWithChannelExemptions(Cooldown):

@@ -2,7 +2,7 @@ from datetime import datetime as dt
 
 import discord
 
-from cogs import utils
+from . import utils
 
 
 class ConnectEvent(utils.Cog):

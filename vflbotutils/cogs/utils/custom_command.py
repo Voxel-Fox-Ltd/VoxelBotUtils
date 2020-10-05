@@ -3,7 +3,7 @@ import typing
 
 from discord.ext import commands
 
-from cogs.utils.checks.meta_command import InvokedMetaCommand
+from .checks.meta_command import InvokedMetaCommand
 
 
 class CustomCommand(commands.Command):

@@ -1,4 +1,4 @@
-from cogs import utils
+from . import utils
 
 
 class CommandEvent(utils.Cog):

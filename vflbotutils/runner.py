@@ -4,7 +4,8 @@ import logging
 import sys
 import typing
 
-from . import utils
+from .cogs.utils.database import DatabaseConnection
+from .cogs.utils.redis import RedisConnection
 
 
 __all__ = (
@@ -163,14 +164,14 @@ def set_default_log_levels(bot, args):
     set_log_level('discord', args.loglevel_discord)
 
 
-async def start_database_pool(self, bot, loop):
+async def start_database_pool(bot):
     """Start the database pool connection"""
 
     # Connect the database pool
     if bot.config['database']['enabled']:
         logger.info("Creating database pool")
         try:
-            await utils.DatabaseConnection.create_pool(bot.config['database'])
+            await DatabaseConnection.create_pool(bot.config['database'])
         except KeyError:
             raise Exception("KeyError creating database pool - is there a 'database' object in the config?")
         except ConnectionRefusedError:
@@ -182,14 +183,14 @@ async def start_database_pool(self, bot, loop):
         logger.info("Database connection has been disabled")
 
 
-async def start_redis_pool(self, bot, loop):
+async def start_redis_pool(bot):
     """Start the redis pool conneciton"""
 
     # Connect the redis pool
     if bot.config['redis']['enabled']:
         logger.info("Creating redis pool")
         try:
-            await utils.RedisConnection.create_pool(bot.config['redis'])
+            await RedisConnection.create_pool(bot.config['redis'])
         except KeyError:
             raise KeyError("KeyError creating redis pool - is there a 'redis' object in the config?")
         except ConnectionRefusedError:
@@ -213,11 +214,11 @@ def run_bot(bot):
     loop = bot.loop
 
     # Connect the database pool
-    db_connect_task = loop.create_task(utils.DatabaseConnection.create_pool(bot))
+    db_connect_task = start_database_pool(bot)
     loop.run_until_complete(db_connect_task)
 
     # Connect the redis pool
-    re_connect = loop.create_task(utils.RedisConnection.create_pool(bot))
+    re_connect = start_redis_pool(bot)
     loop.run_until_complete(re_connect)
 
     # Load the bot's extensions
@@ -235,10 +236,10 @@ def run_bot(bot):
     # We're now done running the bot, time to clean up and close
     if bot.config['database']['enabled']:
         logger.info("Closing database pool")
-        loop.run_until_complete(utils.DatabaseConnection.pool.close())
+        loop.run_until_complete(DatabaseConnection.pool.close())
     if bot.config['redis']['enabled']:
         logger.info("Closing redis pool")
-        utils.RedisConnection.pool.close()
+        RedisConnection.pool.close()
 
     logger.info("Closing asyncio loop")
     loop.close()

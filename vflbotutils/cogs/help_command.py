@@ -4,7 +4,7 @@ import typing
 import discord
 from discord.ext import commands
 
-from cogs import utils
+from . import utils
 
 
 class CustomHelpCommand(commands.MinimalHelpCommand):
