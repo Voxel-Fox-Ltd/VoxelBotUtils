@@ -11,3 +11,14 @@ from .database import DatabaseConnection
 from .redis import RedisConnection
 from .time_value import TimeValue
 from .settings_menu import SettingsMenu, SettingsMenuOption, SettingsMenuIterable, SettingsMenuIterableBase
+
+
+from discord.ext import commands as _dpy_commands
+
+
+def command(*args, **kwargs):
+    return _dpy_commands.command(*args, cls=Command, **kwargs)
+
+
+def group(*args, **kwargs):
+    return _dpy_commands.group(*args, cls=Group, **kwargs)

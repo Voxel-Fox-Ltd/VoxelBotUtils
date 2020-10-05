@@ -53,7 +53,7 @@ class CustomBot(commands.AutoShardedBot):
 
     def __init__(
             self, config_file:str='config/config.toml', logger:logging.Logger=None, activity:discord.Activity=discord.Game(name="Reconnecting..."),
-            status:discord.Status=discord.Status.dnd, case_insensitive:bool=True, max_messages:int=100, intents:discord.Intents=discord.Intents.all(),
+            status:discord.Status=discord.Status.dnd, case_insensitive:bool=True, intents:discord.Intents=discord.Intents.all(),
             allowed_mentions:discord.AllowedMentions=discord.AllowedMentions(everyone=False), *args, **kwargs):
         """The initialiser for the bot object
         Note that we load the config before running the original method"""
@@ -66,8 +66,8 @@ class CustomBot(commands.AutoShardedBot):
 
         # Run original
         super().__init__(
-            command_prefix=get_prefix, activity=activity, status=status, case_insensitive=case_insensitive, max_messages=max_messages,
-            intents=intents, allowed_mentions=allowed_mentions, *args, **kwargs,
+            command_prefix=get_prefix, activity=activity, status=status, case_insensitive=case_insensitive, intents=intents,
+            allowed_mentions=allowed_mentions, *args, **kwargs,
         )
 
         # Set up our default guild settings

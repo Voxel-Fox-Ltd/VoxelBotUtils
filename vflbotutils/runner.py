@@ -82,7 +82,9 @@ def get_default_program_arguments() -> argparse.Namespace:
         "--loglevel-redis", default=None,
         help="Logging level for redis - probably most useful is INFO and DEBUG"
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    args.shard_count = args.shardcount
+    return args
 
 
 # Set up loggers
@@ -90,7 +92,8 @@ logger = logging.getLogger('vflbotutils')
 
 
 # Make sure the sharding info provided is correctish
-def validate_sharding_information(min_shard:int, max_shard:int, shard_count:int) -> typing.List[int]:
+# def validate_sharding_information(min_shard:int, max_shard:int, shard_count:int) -> typing.List[int]:
+def validate_sharding_information(args:argparse.Namespace) -> typing.List[int]:
     """Validate the given shard information and make sure that what's passed in is accurate
 
     Args:
@@ -99,15 +102,15 @@ def validate_sharding_information(min_shard:int, max_shard:int, shard_count:int)
         shard_count (int): The shard count
     """
 
-    if shard_count is None:
-        shard_count = 1
-        min_shard = 0
-        max_shard = 0
-    shard_ids = list(range(min_shard, max_shard + 1))
-    if shard_count is None and (min_shard or max_shard):
+    if args.shard_count is None:
+        args.shard_count = 1
+        args.min = 0
+        args.max = 0
+    shard_ids = list(range(args.min, args.max + 1))
+    if args.shard_count is None and (args.min or args.max):
         logger.critical("You set a min/max shard handler but no shard count")
         exit(1)
-    if shard_count is not None and not (min_shard is not None and max_shard is not None):
+    if args.shard_count is not None and not (args.min is not None and args.max is not None):
         logger.critical("You set a shardcount but not min/max shards")
         exit(1)
     return shard_ids

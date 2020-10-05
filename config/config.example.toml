@@ -15,6 +15,7 @@ event_webhook_url = ""
     echo_command_enabled = true
     stats_command_enabled = true
     vote_command_enabled = false
+    updates_channel_id = 0
 
 # This data is passed directly over to asyncpg
 [database]
