@@ -3,6 +3,7 @@ import asyncio
 import logging
 import sys
 import typing
+import pathlib
 
 from .cogs.utils.database import DatabaseConnection
 from .cogs.utils.redis import RedisConnection
@@ -14,6 +15,10 @@ __all__ = (
     'set_default_log_levels',
     'run_bot',
 )
+
+
+def get_package_folder() -> str:
+    return pathlib.Path(__file__).parent.absolute()
 
 
 # Set up the loggers
@@ -42,14 +47,15 @@ def set_log_level(logger_to_change:logging.Logger, loglevel:str) -> None:
 
 
 # Parse arguments
-def get_default_program_arguments() -> argparse.Namespace:
+def get_default_program_arguments(include_config_file:bool=True) -> argparse.ArgumentParser:
     """Get the default commandline args for the file
 
     Returns:
         argparse.Namespace: The arguments that were parsed
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("config_file", help="The configuration for the bot")
+    if include_config_file:
+        parser.add_argument("config_file", help="The configuration for the bot")
     parser.add_argument(
         "--min", type=int, default=None,
         help="The minimum shard ID that this instance will run with (inclusive)"
@@ -82,9 +88,7 @@ def get_default_program_arguments() -> argparse.Namespace:
         "--loglevel-redis", default=None,
         help="Logging level for redis - probably most useful is INFO and DEBUG"
     )
-    args = parser.parse_args()
-    args.shard_count = args.shardcount
-    return args
+    return parser
 
 
 # Set up loggers
@@ -102,15 +106,15 @@ def validate_sharding_information(args:argparse.Namespace) -> typing.List[int]:
         shard_count (int): The shard count
     """
 
-    if args.shard_count is None:
-        args.shard_count = 1
+    if args.shardcount is None:
+        args.shardcount = 1
         args.min = 0
         args.max = 0
     shard_ids = list(range(args.min, args.max + 1))
-    if args.shard_count is None and (args.min or args.max):
+    if args.shardcount is None and (args.min or args.max):
         logger.critical("You set a min/max shard handler but no shard count")
         exit(1)
-    if args.shard_count is not None and not (args.min is not None and args.max is not None):
+    if args.shardcount is not None and not (args.min is not None and args.max is not None):
         logger.critical("You set a shardcount but not min/max shards")
         exit(1)
     return shard_ids
@@ -167,6 +171,18 @@ def set_default_log_levels(bot, args):
     set_log_level('discord', args.loglevel_discord)
 
 
+async def create_initial_database(bot):
+    """Create the initial database using the internal database.psql file"""
+
+    with open(f"{get_package_folder()}/config/database.pgsql") as a:
+        data = a.read().strip()
+    create_table_statemenets = data.split(';')
+    async with bot.database() as db:
+        for i in create_table_statemenets:
+            await db(i)
+    return True
+
+
 async def start_database_pool(bot):
     """Start the database pool connection"""
 
@@ -182,6 +198,8 @@ async def start_database_pool(bot):
         except Exception:
             raise Exception("Error creating database pool")
         logger.info("Created database pool successfully")
+        logger.info("Creating initial database tables")
+        await create_initial_database(bot)
     else:
         logger.info("Database connection has been disabled")
 
