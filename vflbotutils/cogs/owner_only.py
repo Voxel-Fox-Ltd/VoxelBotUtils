@@ -262,19 +262,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
 
         # Make a context
         new_ctx = await self.bot.get_context(msg, cls=type(ctx))
-        new_ctx.original_author_id = ctx.author.id
+        new_ctx.original_author_id = ctx.original_author_id
 
         # Invoke it dab
         await self.bot.invoke(new_ctx)
-
-    @commands.command(cls=utils.Command)
-    @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True, add_reactions=True)
-    async def addreaction(self, ctx, message:discord.Message, reaction:str):
-        """Adds a reaction to a message"""
-
-        await message.add_reaction(reaction)
-        await ctx.message.add_reaction("\N{OK HAND SIGN}")
 
 
 def setup(bot:utils.Bot):
