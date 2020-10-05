@@ -1,13 +1,13 @@
 import setuptools
 
 try:
-    with open("README.md", "r") as fh:
-        long_description = fh.read()
+    with open("README.md", "r") as a:
+        long_description = a.read()
 except Exception:
     long_description = ""
 
 setuptools.setup(
-    name="vflbotutils",
+    name="voxelbotutils",
     version="0.0.1",
     author="Caleb Bartlett",
     author_email="callum@voxelfox.co.uk",
