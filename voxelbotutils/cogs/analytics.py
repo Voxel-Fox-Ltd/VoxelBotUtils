@@ -18,7 +18,7 @@ class Analytics(utils.Cog):
     an  : application name   : ?from config
     dp  : document path      : command/event name
     dh  : document host      : ?from config
-    uid : user ID            : Discord user ID
+    cid : user ID            : Discord user ID
     cs  : campaign source    : guild ID
     cm  : campaign medium
     cd  : screen name

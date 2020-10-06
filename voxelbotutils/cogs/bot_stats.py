@@ -45,17 +45,27 @@ class BotStats(utils.Cog):
         creator = self.bot.get_user(creator_id) or await self.bot.fetch_user(creator_id)
 
         # Make embed
-        with utils.Embed(colour=0x1e90ff) as embed:
-            embed.set_footer(str(self.bot.user), icon_url=self.bot.user.avatar_url)
-            embed.add_field("Creator", f"{creator!s}\n{creator_id}")
-            embed.add_field("Library", f"Discord.py {discord.__version__}")
-            if self.bot.shard_count != len(self.bot.shard_ids):
-                embed.add_field("Average Guild Count", int((len(self.bot.guilds) / len(self.bot.shard_ids)) * self.bot.shard_count))
-            else:
-                embed.add_field("Guild Count", len(self.bot.guilds))
-            embed.add_field("Shard Count", self.bot.shard_count)
-            embed.add_field("Average WS Latency", f"{(self.bot.latency * 1000):.2f}ms")
-            embed.add_field("Coroutines", f"{len([i for i in asyncio.Task.all_tasks() if not i.done()])} running, {len(asyncio.Task.all_tasks())} total.")
+        embed = utils.Embed(use_random_colour=True)
+        embed.set_footer(str(self.bot.user), icon_url=self.bot.user.avatar_url)
+        embed.add_field("Creator", f"{creator!s}\n{creator_id}")
+        embed.add_field("Library", f"Discord.py {discord.__version__}")
+        if self.bot.shard_count != len(self.bot.shard_ids):
+            embed.add_field("Approximate Guild Count", int((len(self.bot.guilds) / len(self.bot.shard_ids)) * self.bot.shard_count))
+        else:
+            embed.add_field("Guild Count", len(self.bot.guilds))
+        embed.add_field("Shard Count", self.bot.shard_count)
+        embed.add_field("Average WS Latency", f"{(self.bot.latency * 1000):.2f}ms")
+        embed.add_field("Coroutines", f"{len([i for i in asyncio.Task.all_tasks() if not i.done()])} running, {len(asyncio.Task.all_tasks())} total.")
+        if self.bot.config.get("topgg_token"):
+            params = {"fields": "points,monthlyPoints"}
+            headers = {"Authorization": self.bot.config['topgg_token']}
+            async with self.bot.session.get(f"https://top.gg/api/bots/{self.bot.user.id}", params=params, headers=headers) as r:
+                try:
+                    data = await r.json()
+                except Exception:
+                    data = {}
+            if "points" in data and "monthlyPoints" in data:
+                embed.add_field("Top.gg Points", f"{data['points']} ({data['monthlyPoints']} this month)")
 
         # Send it out wew let's go
         await ctx.send(embed=embed)
