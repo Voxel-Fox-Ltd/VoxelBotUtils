@@ -32,6 +32,11 @@ if __name__ == '__main__':
                 a.write(config.config_file.lstrip())
         except FileExistsError as e:
             raise FileExistsError("A config/config.toml file already exists in this directory") from e
+        try:
+            with open("./cogs/ping_command.py", "x") as a:
+                a.write(config.cog_example.lstrip())
+        except FileExistsError:
+            pass
 
         # Exit
         exit(1)
