@@ -1,3 +1,4 @@
+database_file = """
 CREATE TABLE guild_settings IF NOT EXISTS(
     guild_id BIGINT PRIMARY KEY,
     prefix VARCHAR(30)
@@ -25,3 +26,4 @@ CREATE TABLE channel_list IF NOT EXISTS(
     value VARCHAR(50),
     PRIMARY KEY (guild_id, channel_id, key)
 );
+"""

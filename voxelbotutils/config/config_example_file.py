@@ -1,3 +1,4 @@
+config_file = """
 token = "bot_token"  # The token for the bot
 topgg_token = ""  # The token used to post data to top.gg
 owners = [ 141231597155385344, ]  # The first should always be the developer
@@ -61,3 +62,4 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
     tracking_id = ""  # Tracking ID for your GA instance
     app_name = ""  # The name of your bot - what you want GA to name this traffic source
     document_host = ""  # The (possibly fake) URL you want to tell GA this website is
+"""

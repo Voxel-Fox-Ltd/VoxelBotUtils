@@ -3,7 +3,6 @@ import asyncio
 import logging
 import sys
 import typing
-import pathlib
 
 from .cogs.utils.database import DatabaseConnection
 from .cogs.utils.redis import RedisConnection
@@ -16,10 +15,6 @@ __all__ = (
     'set_default_log_levels',
     'run_bot',
 )
-
-
-def get_package_folder() -> str:
-    return pathlib.Path(__file__).parent.absolute()
 
 
 # Set up the loggers
@@ -151,9 +146,8 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
 async def create_initial_database(bot:Bot) -> None:
     """Create the initial database using the internal database.psql file"""
 
-    with open(f"{get_package_folder()}/config/database.pgsql") as a:
-        data = a.read().strip()
-    create_table_statemenets = data.split(';')
+    from .config.database_base_file import database_file
+    create_table_statemenets = database_file.split(';')
     async with bot.database() as db:
         for i in create_table_statemenets:
             await db(i)
