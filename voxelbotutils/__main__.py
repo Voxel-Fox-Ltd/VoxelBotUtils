@@ -20,6 +20,10 @@ if __name__ == '__main__':
             os.mkdir("./config")
         except FileExistsError:
             pass
+        try:
+            os.mkdir("./cogs")
+        except FileExistsError:
+            pass
 
         # Write file
         from . import config
