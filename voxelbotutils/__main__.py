@@ -8,9 +8,14 @@ def create_file(*path, content:str=None, throw_error:bool=False):
     for index, i in enumerate(path[:-1]):
         try:
             os.mkdir(f"./{os.sep.join(path[:index + 1])}")
-        except FileExistsError as e:
-            if throw_error:
-                raise e
+        except FileExistsError:
+            pass
+    try:
+        with open(f"./{os.sep.join(path)}", "x") as a:
+            a.write(content)
+    except FileExistsError as e:
+        if throw_error:
+            raise e
 
 
 if __name__ == '__main__':
