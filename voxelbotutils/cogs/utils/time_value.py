@@ -6,23 +6,38 @@ from discord.ext import commands
 
 
 class InvalidTimeDuration(commands.BadArgument):
-    """A conversion error for time durations"""
+    """
+    A conversion error for time durations.
+    """
 
     def __init__(self, value:str):
-        self.value = value
+        self.value: str = value
 
     def __str__(self):
         return f"The value `{self.value}` could not be converted to a valid time duration."
 
 
 class TimeValue(object):
-    """An object that nicely converts an integer value into an easily readable string"""
+    """
+    An object that nicely converts an integer value into an easily readable string.
+    """
 
     TIME_VALUE_REGEX = re.compile(r"^(?:(?P<years>\d+)y)? *(?:(?P<weeks>\d+)w)? *(?:(?P<days>\d+)d)? *(?:(?P<hours>\d+)h)? *(?:(?P<minutes>\d+)m)? *(?:(?P<seconds>\d+)s)?$")
     MAX_SIZE = 0b1111111111111111111111111111111  # 2**31 - this is about 68 years so anything above this is a bit...... much
 
     def __init__(self, duration:float):
-        self.duration = math.ceil(duration)
+        """
+        Args:
+            duration (float): The duration to be converted.
+
+        Warning:
+            Provided values will be rounded up to the nearest integer.
+
+        Raises:
+            InvalidTimeDuration: If the provided time duration was invalid.
+        """
+
+        self.duration: int = math.ceil(duration)
         remaining = self.duration
 
         self.years, remaining = self.get_quotient_and_remainder(remaining, 60 * 60 * 24 * 365)
@@ -55,7 +70,9 @@ class TimeValue(object):
 
     @staticmethod
     def get_quotient_and_remainder(value:int, divisor:int):
-        """Gets the quotiend AND remainder of a given value"""
+        """
+        A divmod wrapper that just catches a zero division error.
+        """
 
         try:
             return divmod(value, divisor)
@@ -70,13 +87,26 @@ class TimeValue(object):
 
     @classmethod
     async def convert(cls, ctx:commands.Context, value:str) -> 'TimeValue':
-        """Takes a value (1h/30m/10s/2d etc) and returns a TimeValue instance with the duration"""
+        """
+        Takes a value (1h/30m/10s/2d etc) and returns a TimeValue instance with the duration. Provided for use of the Discord.py module.
+        """
 
         return cls.parse(value)
 
     @classmethod
     def parse(cls, value:str) -> 'TimeValue':
-        """Takes a value (1h/30m/10s/2d etc) and returns a TimeValue instance with the duration"""
+        """
+        Takes a value (1h/30m/10s/2d etc) and returns a TimeValue instance with the duration
+
+        Args:
+            value (str): The value string to be converted
+
+        Returns:
+            TimeValue: A time value instance
+
+        Raises:
+            InvalidTimeDuration: If the time could not be successfully converted.
+        """
 
         match = cls.TIME_VALUE_REGEX.search(value)
         if match is None:

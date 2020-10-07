@@ -5,8 +5,9 @@ import asyncpg
 
 
 class DatabaseConnection(object):
-    """A helper class to wrap around an asyncpg.Connection object so as
-    to make it a little easier to use"""
+    """
+    A helper class to wrap around an asyncpg.Connection object so as to make it a little easier to use.
+    """
 
     config: dict = None
     pool: asyncpg.pool.Pool = None
@@ -19,7 +20,12 @@ class DatabaseConnection(object):
 
     @classmethod
     async def create_pool(cls, config:dict) -> None:
-        """Creates the database pool and plonks it in DatabaseConnection.pool"""
+        """
+        Creates the database pool and plonks it in DatabaseConnection.pool.
+
+        Args:
+            config (dict): The configuration for the dictionary, passed directly to `asyncpg.create_pool` as kwargs.
+        """
 
         cls.config = config.copy()
         modified_config = config.copy()
@@ -30,26 +36,37 @@ class DatabaseConnection(object):
 
     @classmethod
     async def get_connection(cls) -> 'DatabaseConnection':
-        """Acquires a connection to the database from the pool"""
+        """
+        Acquires a connection to the database from the pool.
+
+        Returns:
+            DatabaseConnection: The connection that was aquired from the pool.
+        """
 
         conn = await cls.pool.acquire()
         return cls(conn)
 
     async def disconnect(self) -> None:
-        """Releases a connection from the pool back to the mix"""
+        """
+        Releases a connection from the pool back to the mix.
+        """
 
         await self.pool.release(self.conn)
         self.conn = None
         del self
 
     async def start_transaction(self):
-        """Creates a database object for a transaction"""
+        """
+        Creates a database object for a transaction.
+        """
 
         self.transaction = self.conn.transaction()
         await self.transaction.start()
 
     async def commit_transaction(self):
-        """Commits the transaction wew lad"""
+        """
+        Commits the transaction wew lad.
+        """
 
         await self.transaction.commit()
         self.transaction = None
@@ -64,8 +81,17 @@ class DatabaseConnection(object):
         del self
 
     async def __call__(self, sql:str, *args) -> typing.Union[typing.List[dict], None]:
-        """Runs a line of SQL and returns a list, if things are expected back,
-        or None, if nothing of interest is happening"""
+        """
+        Runs a line of SQL and returns a list, if things are expected back,
+        or None, if nothing of interest is happening.
+
+        Args:
+            sql (str): The SQL that you want to run.
+            *args: The args that are passed to the SQL, in order.
+
+        Returns:
+            typing.Union[typing.List[dict], None]: The list of rows that were returned from the database.
+        """
 
         # Runs the SQL
         self.logger.debug(f"Running SQL: {sql} {args!s}")
@@ -82,15 +108,32 @@ class DatabaseConnection(object):
             return []
         return None
 
-    async def execute_many(self, sql, *args) -> None:
-        """Runs an executemany query"""
+    async def execute_many(self, sql:str, *args) -> None:
+        """
+        Runs an executemany query.
+
+        Args:
+            sql (str): The SQL that you want to run.
+            *args: A list of tuples of arguments to sent to the database.
+        """
 
         self.logger.debug(f"Running SQL: {sql} {args!s}")
-        await self.conn.execute(sql, args)
+        await self.conn.executemany(sql, args)
         return None
 
-    async def copy_records_to_table(self, table_name, *, records, columns=None, timeout=None):
-        """Copies a series of records to a given table"""
+    async def copy_records_to_table(self, table_name:str, *, records:typing.List[typing.Any], columns:typing.Tuple[str]=None, timeout:float=None) -> str:
+        """
+        Copies a series of records to a given table.
+
+        Args:
+            table_name (str): The name of the table you want to copy to.
+            records (typing.List[typing.Any]): The list of records you want to input to the database.
+            columns (typing.Tuple[str], optional): The columns (in order) that you want to insert to.
+            timeout (float, optional): The timeout for the copy command.
+
+        Returns:
+            str: The COPY status string
+        """
 
         return await self.conn.copy_records_to_table(
             table_name=table_name, records=records,

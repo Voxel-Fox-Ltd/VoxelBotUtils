@@ -48,15 +48,27 @@ def get_prefix(bot, message:discord.Message):
 
 
 class CustomBot(commands.AutoShardedBot):
-    """A child of discord.ext.commands.AutoShardedBot to make things a little easier when
-    doing my own stuff"""
+    """
+    A child of discord.ext.commands.AutoShardedBot to make things a little easier when
+    doing my own stuff.
+    """
 
     def __init__(
             self, config_file:str='config/config.toml', logger:logging.Logger=None, activity:discord.Activity=discord.Game(name="Reconnecting..."),
             status:discord.Status=discord.Status.dnd, case_insensitive:bool=True, intents:discord.Intents=discord.Intents.all(),
             allowed_mentions:discord.AllowedMentions=discord.AllowedMentions(everyone=False), *args, **kwargs):
-        """The initialiser for the bot object
-        Note that we load the config before running the original method"""
+        """
+        Args:
+            config_file (str, optional): The path to the config file for the bot.
+            logger (logging.Logger, optional): The logger object that the bot should use.
+            activity (discord.Activity, optional): The default activity of the bot.
+            status (discord.Status, optional): The default status of the bot.
+            case_insensitive (bool, optional): Whether or not commands are case insensitive.
+            intents (discord.Intents, optional): The default intents for the bot.
+            allowed_mentions (discord.AllowedMentions, optional): The default allowed mentions for the bot.
+            *args: The default args that are sent to the `discord.ext.commands.Bot` object.
+            **kwargs: The default args that are sent to the `discord.ext.commands.Bot` object.
+        """
 
         # Store the config file for later
         self.config = None
@@ -81,12 +93,10 @@ class CustomBot(commands.AutoShardedBot):
         self.session = aiohttp.ClientSession(loop=self.loop)
 
         # Allow database connections like this
-        # if self.config['database'].get('enabled'):
         self.database = DatabaseConnection
         self.database.logger = self.logger.getChild('database')
 
         # Allow redis connections like this
-        # if self.config['redis'].get('enabled'):
         self.redis = RedisConnection
         self.redis.logger = self.logger.getChild('redis')
 
@@ -99,7 +109,9 @@ class CustomBot(commands.AutoShardedBot):
         self.user_settings = collections.defaultdict(lambda: copy.deepcopy(self.DEFAULT_USER_SETTINGS))
 
     async def startup(self):
-        """Clears all the bot's caches and fills them from a DB read"""
+        """
+        Clears all the bot's caches and fills them from a DB read
+        """
 
         # Remove caches
         self.logger.debug("Clearing caches")
@@ -117,13 +129,13 @@ class CustomBot(commands.AutoShardedBot):
             self.DEFAULT_GUILD_SETTINGS.setdefault(i, o)
 
         # Get guild settings
-        data = await self.get_all_table_data(db, "guild_settings")
+        data = await self._get_all_table_data(db, "guild_settings")
         for row in data:
             for key, value in row.items():
                 self.guild_settings[row['guild_id']][key] = value
 
         # Get user settings
-        data = await self.get_all_table_data(db, "user_settings")
+        data = await self._get_all_table_data(db, "user_settings")
         for row in data:
             for key, value in row.items():
                 self.user_settings[row['user_id']][key] = value
@@ -135,7 +147,7 @@ class CustomBot(commands.AutoShardedBot):
         # Close database connection
         await db.disconnect()
 
-    async def run_sql_exit_on_error(self, db, sql, *args):
+    async def _run_sql_exit_on_error(self, db, sql, *args):
         """Get data form a table, exiting if it can't"""
 
         try:
@@ -144,18 +156,30 @@ class CustomBot(commands.AutoShardedBot):
             self.logger.critical(f"Error selecting from table - {e}")
             exit(1)
 
-    async def get_all_table_data(self, db, table_name):
+    async def _get_all_table_data(self, db, table_name):
         """Get all data from a table"""
 
-        return await self.run_sql_exit_on_error(db, "SELECT * FROM {0}".format(table_name))
+        return await self._run_sql_exit_on_error(db, "SELECT * FROM {0}".format(table_name))
 
-    async def get_list_table_data(self, db, table_name, key):
+    async def _get_list_table_data(self, db, table_name, key):
         """Get all data from a table"""
 
-        return await self.run_sql_exit_on_error(db, "SELECT * FROM {0} WHERE key=$1".format(table_name), key)
+        return await self._run_sql_exit_on_error(db, "SELECT * FROM {0} WHERE key=$1".format(table_name), key)
 
-    def get_invite_link(self, *, scope:str='bot', response_type:str=None, redirect_uri:str=None, guild_id:int=None, **kwargs):
-        """Gets the invite link for the bot, with permissions all set properly"""
+    def get_invite_link(self, *, scope:str='bot', response_type:str=None, redirect_uri:str=None, guild_id:int=None, **kwargs) -> str:
+        """
+        Gets the invite link for the bot, with permissions all set properly.
+
+        Args:
+            scope (str, optional): The scope for the invite link.
+            response_type (str, optional): The response type of the invite link.
+            redirect_uri (str, optional): The redirect URI for the invite link.
+            guild_id (int, optional): The guild ID that the invite link should default to.
+            **kwargs: The permissions that should be attached to the invite link - passed directly to `discord.Permissions`.
+
+        Returns:
+            str: The URL for the invite.
+        """
 
         # Make the permissions object
         permissions = discord.Permissions()
@@ -178,8 +202,16 @@ class CustomBot(commands.AutoShardedBot):
         # Return url
         return 'https://discordapp.com/oauth2/authorize?' + urlencode(data)
 
-    async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, delete:typing.List[discord.Message]=None, timeout=60.0):
-        """Adds a delete button to the given message"""
+    async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, delete:typing.List[discord.Message]=None, timeout=60.0) -> None:
+        """
+        Adds a delete button to the given message.
+
+        Args:
+            message (discord.Message): The message you want to add a delete button to.
+            valid_users (typing.List[discord.User]): The users who have permission to use the message's delete button.
+            delete (typing.List[discord.Message], optional): The messages that should be deleted on clicking the delete button.
+            timeout (float, optional): How long the delete button should persist for.
+        """
 
         # Let's not add delete buttons to DMs
         if isinstance(message.channel, discord.DMChannel):
@@ -231,48 +263,53 @@ class CustomBot(commands.AutoShardedBot):
 
     @property
     def owner_ids(self) -> list:
-        """Gives you a list of the owner IDs"""
-
         return self.config['owners']
 
     @owner_ids.setter
     def owner_ids(self, value):
-        """A setter method so that the original bot object doesn't complain"""
-
         pass
 
     @property
     def embeddify(self) -> bool:
-        """Whether or not to set the custom context to by default"""
-
         try:
             return self.config['embed']['enabled']
         except Exception:
             return False
 
     def get_uptime(self) -> float:
-        """Gets the uptime of the bot in seconds
-        Uptime is a bit of a misnomer, since it starts when the instance is created, but
-        yknow that's close enough"""
+        """
+        Gets the uptime of the bot in seconds.
+        Uptime is a bit of a misnomer, since it starts when the instance is created, but yknow that's close enough.
+
+        Returns:
+            float: The total seconds that the bot's instance has been created for.
+        """
 
         return (dt.now() - self.startup_time).total_seconds()
 
-    async def get_context(self, message, *, cls=CustomContext):
-        """Gently insert a new original_author field into the context"""
+    async def get_context(self, message, *, cls=CustomContext) -> 'discord.ext.commands.Context':
+        """Create a new context object using the utils' CustomContext"""
 
         return await super().get_context(message, cls=cls)
 
-    def get_extensions(self) -> list:
-        """Gets a list of filenames of all the loadable cogs"""
+    def get_extensions(self) -> typing.List[str]:
+        """
+        Gets a list of filenames of all the loadable cogs.
+
+        Returns:
+            typing.List[str]: A list of the extensions found in the cogs/ folder, as well as the cogs included with the library.
+        """
 
         ext = glob.glob('cogs/[!_]*.py')
         extensions = [i.replace('\\', '.').replace('/', '.')[:-3] for i in ext]
-        extensions.extend([f'vflbotutils.cogs.{i}' for i in all_vfl_package_names])
+        extensions.extend([f'voxelbotutils.cogs.{i}' for i in all_vfl_package_names])
         self.logger.debug("Getting all extensions: " + str(extensions))
         return extensions
 
-    def load_all_extensions(self):
-        """Loads all the given extensions from self.get_extensions()"""
+    def load_all_extensions(self) -> None:
+        """
+        Loads all the given extensions from self.get_extensions().
+        """
 
         # Unload all the given extensions
         self.logger.info('Unloading extensions... ')
@@ -295,8 +332,13 @@ class CustomBot(commands.AutoShardedBot):
             else:
                 self.logger.info(f' * {i}... success')
 
-    async def set_default_presence(self, shard_id:int=None):
-        """Sets the default presence for the bot as appears in the config file"""
+    async def set_default_presence(self, shard_id:int=None) -> None:
+        """
+        Sets the default presence for the bot as appears in the config file.
+
+        Args:
+            shard_id (int, optional): The shard to set the presence for.
+        """
 
         # Update presence
         self.logger.info("Setting default bot presence")
@@ -329,8 +371,10 @@ class CustomBot(commands.AutoShardedBot):
             status = getattr(discord.Status, presence['status'].lower())
             await self.change_presence(activity=activity, status=status)
 
-    def reload_config(self):
-        """Re-reads the config file into cache"""
+    def reload_config(self) -> None:
+        """
+        Re-reads the config file into cache.
+        """
 
         self.logger.info("Reloading config")
         try:
@@ -341,13 +385,9 @@ class CustomBot(commands.AutoShardedBot):
             exit(1)
 
     async def login(self, token:str=None, *args, **kwargs):
-        """The original login method with optional token"""
-
         await super().login(token or self.config['token'], *args, **kwargs)
 
     async def start(self, token:str=None, *args, **kwargs):
-        """Start the bot with the given token, create the startup method task"""
-
         if self.config['database']['enabled']:
             self.logger.info("Running startup method")
             self.startup_method = self.loop.create_task(self.startup())
@@ -357,17 +397,12 @@ class CustomBot(commands.AutoShardedBot):
         await super().start(token or self.config['token'], *args, **kwargs)
 
     async def close(self, *args, **kwargs):
-        """The original bot close method, but with the addition of closing the
-        aiohttp ClientSession that was opened on bot creation"""
-
         self.logger.debug("Closing aiohttp ClientSession")
         await asyncio.wait_for(self.session.close(), timeout=None)
         self.logger.debug("Running original D.py logout method")
         await super().close(*args, **kwargs)
 
     async def on_ready(self):
-        """On ready event dab"""
-
         self.logger.info(f"Bot connected - {self.user} // {self.user.id}")
         self.logger.info("Setting activity to default")
         await self.set_default_presence()

@@ -4,21 +4,28 @@ from .cooldown import Cooldown
 
 
 class CooldownWithChannelExemptions(Cooldown):
-    """A custom cooldown which allows for channel white/blacklisting
+    """
+    A custom cooldown which allows for channel white/blacklisting by name.
 
     Params:
         cooldown_in : typing.List[str]
-            A list of channel names where the cooldown should apply
-            If left blank, it'll apply everywhere minus the blacklist given
+            A list of channel names where the cooldown should apply. If left blank, it'll apply everywhere minus the blacklist given.
         no_cooldown_in : typing.List[str]
-            A list of channel names where the cooldown shouldn't apply
-            If left blank, it won't apply anywhere apart from the whitelist
+            A list of channel names where the cooldown shouldn't apply. If left blank, it won't apply anywhere apart from the whitelist.
     """
 
     _copy_kwargs = ('cooldown_in', 'no_cooldown_in')
 
     def __init__(self, *, cooldown_in:list=None, no_cooldown_in:list=None, **kwargs):
-        """Store our nice ol lists of things"""
+        """
+        Args:
+            cooldown_in (list, optional): A list of channel names where the cooldown should apply. If left blank, it'll apply everywhere minus the blacklist given.
+            no_cooldown_in (list, optional): A list of channel names where the cooldown shouldn't apply. If left blank, it won't apply anywhere apart from the whitelist.
+            **kwargs: The default kwargs to be passed to the original cooldown class.
+
+        Raises:
+            ValueError: There are no channels set to blacklist or whitelist.
+        """
 
         super().__init__(**kwargs)
         if cooldown_in is None and no_cooldown_in is None:
@@ -31,7 +38,9 @@ class CooldownWithChannelExemptions(Cooldown):
         return self
 
     def predicate(self, ctx) -> bool:
-        """The check to see if this cooldown is applied"""
+        """
+        The check to see if this cooldown is applied.
+        """
 
         # Check if invoked in a channel where there should be no cooldown
         if self.no_cooldown_in:

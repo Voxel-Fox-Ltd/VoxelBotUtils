@@ -12,17 +12,25 @@ class CustomContext(commands.Context):
         super().__init__(*args, **kwargs)
         self.original_author_id = self.author.id
 
-    async def okay(self):
-        """Adds the okay hand reaction to a message"""
+    async def okay(self) -> None:
+        """
+        Adds the okay hand reaction to a message.
+        """
+
         return await self.message.add_reaction("\N{OK HAND SIGN}")
 
     @property
     def clean_prefix(self):
-        """Gives the prefix used to run the command but cleans up the bot mention"""
+        """
+        Gives the prefix used to run the command but cleans up the bot mention.
+        """
+
         return self.prefix.replace(f"<@{self.bot.user.id}>", f"@{self.bot.user.name}").replace(f"<@!{self.bot.user.id}>", f"@{self.bot.user.name}")
 
     def _set_footer(self, embed:discord.Embed) -> None:
-        """Sets a footer on the embed from the config"""
+        """
+        Sets a footer on the embed from the config
+        """
 
         pool = []
         for data in self.bot.config.get('embed', dict()).get('footer', list()):
@@ -39,8 +47,29 @@ class CustomContext(commands.Context):
             return
         embed.set_footer(**random.choice(pool), icon_url=self.bot.user.avatar_url)
 
-    async def send(self, content:str=None, *args, embed:discord.Embed=None, file:discord.File=None, ignore_error:bool=False, embeddify:bool=None, embeddify_image:bool=True, **kwargs):
-        """The normal ctx.send but with an optional arg to ignore errors"""
+    async def send(
+            self, content:str=None, *args, embed:discord.Embed=None, file:discord.File=None, ignore_error:bool=False, embeddify:bool=None,
+            embeddify_image:bool=True, **kwargs) -> discord.Message:
+        """
+        The normal `discord.abc.Messageable.send` but with an optional arg to ignore errors, as well as automatically
+        embedding the content based on the bot's config.
+
+        Args:
+            content (str, optional): The content to be sent.
+            *args: The default args for `discord.abc.Messageable.send`.
+            embed (discord.Embed, optional): The embed object to be sent with the message.
+            file (discord.File, optional): The file object to be sent with the message.
+            ignore_error (bool, optional): Whether or not to ignore `discord.HTTPException` errors on message send.
+            embeddify (bool, optional): Whether or not to automatically embed the content of the message.
+            embeddify_image (bool, optional): Whether or not ot automatically embed the image of the message.
+            **kwargs: The default args for `discord.abc.Messageable.send`.
+
+        Returns:
+            discord.Message: The message that was returned to Discord.
+
+        Raises:
+            discord.HTTPException: If the message send should fail, this is the erorr that was raised.
+        """
 
         # Set default embeddify
         if embeddify is None:

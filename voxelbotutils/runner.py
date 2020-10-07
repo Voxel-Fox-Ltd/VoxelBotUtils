@@ -7,6 +7,7 @@ import pathlib
 
 from .cogs.utils.database import DatabaseConnection
 from .cogs.utils.redis import RedisConnection
+from .cogs.utils.custom_bot import CustomBot as Bot
 
 
 __all__ = (
@@ -50,8 +51,11 @@ def set_log_level(logger_to_change:logging.Logger, loglevel:str) -> None:
 def get_default_program_arguments(include_config_file:bool=True) -> argparse.ArgumentParser:
     """Get the default commandline args for the file
 
+    Args:
+        include_config_file (bool, optional): Whether or not to include the config file arugment
+
     Returns:
-        argparse.Namespace: The arguments that were parsed
+        argparse.ArgumentParser: The arguments that were parsed
     """
     parser = argparse.ArgumentParser()
     if include_config_file:
@@ -101,9 +105,10 @@ def validate_sharding_information(args:argparse.Namespace) -> typing.List[int]:
     """Validate the given shard information and make sure that what's passed in is accurate
 
     Args:
-        min_shard (int): The minimum shard ID
-        max_shard (int): The maximum shard ID
-        shard_count (int): The shard count
+        args (argparse.Namespace): The parsed argparse namespace for the program
+
+    Returns:
+        typing.List[int]: A list of shard IDs to use with the bot
     """
 
     if args.shardcount is None:
@@ -119,42 +124,14 @@ def validate_sharding_information(args:argparse.Namespace) -> typing.List[int]:
         exit(1)
     return shard_ids
 
-# # Set up intents
-# intents = discord.Intents(
-#     guilds=True,  # guild/channel join/remove/update
-#     members=True,  # member join/remove/update
-#     bans=True,  # member ban/unban
-#     emojis=True,  # emoji update
-#     integrations=True,  # integrations update
-#     webhooks=True,  # webhook update
-#     invites=True,  # invite create/delete
-#     voice_states=True,  # voice state update
-#     presences=True,  # member/user update for games/activities
-#     guild_messages=True,  # message create/update/delete
-#     dm_messages=True,  # message create/update/delete
-#     guild_reactions=True,  # reaction add/remove/clear
-#     dm_reactions=True,  # reaction add/remove/clear
-#     guild_typing=True,  # on typing
-#     dm_typing=True,  # on typing
-# )
 
-# # Okay cool make the bot object
-# bot = utils.Bot(
-#     config_file=args.config_file,
-#     activity=discord.Game(name="Reconnecting..."),
-#     status=discord.Status.dnd,
-#     case_insensitive=True,
-#     shard_count=args.shardcount,
-#     shard_ids=shard_ids,
-#     shard_id=args.min,
-#     max_messages=100,  # The lowest amount that we can actually cache
-#     logger=logger.getChild('bot'),
-#     allowed_mentions=discord.AllowedMentions(everyone=False),
-#     intents=intents,
-# )
+def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
+    """Set the default levels for the logger
 
-def set_default_log_levels(bot, args):
-    """Set the default levels for the logger"""
+    Args:
+        bot (Bot): The custom bot object containing the logger, database logger, and redis logger
+        args (argparse.Namespace): The argparse namespace saying what levels to set each logger to
+    """
 
     logging.basicConfig(format='%(asctime)s:%(name)s:%(levelname)s: %(message)s', stream=sys.stdout)
 
@@ -171,7 +148,7 @@ def set_default_log_levels(bot, args):
     set_log_level('discord', args.loglevel_discord)
 
 
-async def create_initial_database(bot):
+async def create_initial_database(bot:Bot) -> None:
     """Create the initial database using the internal database.psql file"""
 
     with open(f"{get_package_folder()}/config/database.pgsql") as a:
@@ -183,7 +160,7 @@ async def create_initial_database(bot):
     return True
 
 
-async def start_database_pool(bot):
+async def start_database_pool(bot:Bot) -> None:
     """Start the database pool connection"""
 
     # Connect the database pool
@@ -204,7 +181,7 @@ async def start_database_pool(bot):
         logger.info("Database connection has been disabled")
 
 
-async def start_redis_pool(bot):
+async def start_redis_pool(bot:Bot) -> None:
     """Start the redis pool conneciton"""
 
     # Connect the redis pool
@@ -223,8 +200,12 @@ async def start_redis_pool(bot):
         logger.info("Redis connection has been disabled")
 
 
-def run_bot(bot):
-    """Starts the bot, connects the database, runs the async loop forever"""
+def run_bot(bot:Bot) -> None:
+    """Starts the bot, connects the database, runs the async loop forever
+
+    Args:
+        bot (Bot): The bot you want to run
+    """
 
     # Use right event loop
     if sys.platform == 'win32':

@@ -2,13 +2,17 @@ from discord.ext import commands
 
 
 class ConfigNotSet(commands.DisabledCommand):
-    """A failure for the config not being set"""
+    """
+    A failure for the config not being set.
+    """
 
     pass
 
 
 def is_config_set(*config_keys):
-    """Checks that your config has been set given the keys for the item"""
+    """
+    Checks that your config has been set given the keys for the item.
+    """
 
     def predicate(ctx:commands.Context):
         working_config = ctx.bot.config

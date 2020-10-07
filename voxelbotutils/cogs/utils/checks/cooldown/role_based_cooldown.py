@@ -1,22 +1,28 @@
 from discord.ext import commands
 
-from .cooldown import Cooldown, CooldownMapping
+from .cooldown import Cooldown
 
 
 class RoleBasedCooldown(Cooldown):
-
-    tier_cooldowns = {
-        1: 60,
-        2: 60 * 2,
-        3: 60 * 3,
-        4: 60 * 4,
-        5: 60 * 5,
-    }  # RoleID: CooldownSeconds
+    """
+    A cooldown that lets you set a cooldown for a command based on the user's roles.
+    """
 
     _copy_kwargs = ()
 
+    def __init__(self, tiers:dict, **kwargs):
+        """
+        Args:
+            tiers (dict): The dictionary of `{role_id: seconds}` that should be used for this cooldown.
+            **kwargs: **kwargs: The default kwargs to be passed to the original cooldown class.
+        """
+        super().__init__(**kwargs)
+        self.tier_cooldowns = tiers  # RoleID: CooldownSeconds
+
     def predicate(self, ctx:commands.Context):
-        """Update the cooldown based on the given guild member"""
+        """
+        Update the cooldown based on the given guild member.
+        """
 
         message = ctx.message
         if message.guild is None:

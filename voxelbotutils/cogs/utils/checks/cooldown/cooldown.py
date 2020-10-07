@@ -7,48 +7,55 @@ from discord.ext import commands
 
 
 class CooldownMapping(commands.CooldownMapping):
-    """A mapping of cooldowns and who's run them, so we can keep track of individuals' rate limits
-
-    Attrs:
-        _cache : typing.Dict[int, commands.Cooldown]
-            The cache for the individual and the applied cooldown
+    """
+    A mapping of cooldowns and who's run them, so we can keep track of individuals' rate limits.
     """
 
     def __init__(self):
         pass
 
     def copy(self) -> commands.CooldownMapping:
-        """Retuns a copy of the mapping, including a copy of its current cache"""
+        """
+        Retuns a copy of the mapping, including a copy of its current cache.
+        """
 
         return super().copy()
 
     @property
     def valid(self) -> bool:
-        """Whether or not the mapping is valid"""
+        """
+        Whether or not the mapping is valid.
+        """
 
         return super().valid
 
     def _bucket_key(self, message:discord.Message) -> typing.Optional[int]:
-        """Gets the key for the given cooldown mapping, depending on the type of the cooldown"""
+        """
+        Gets the key for the given cooldown mapping, depending on the type of the cooldown.
+        """
 
         return super()._bucket_key(message)
 
     def get_bucket(self, message:discord.Message, current:float=None) -> commands.Cooldown:
-        """Gives you the applied cooldown for a message, which you can use to work out whether to run the command or not"""
+        """
+        Gives you the applied cooldown for a message, which you can use to work out whether to run the command or not.
+        """
 
         return super().get_bucket(message, current)
 
     def update_rate_limit(self, message:discord.Message, current:float=None) -> None:
-        """Updates the rate limit for a given message"""
+        """
+        Updates the rate limit for a given message.
+        """
 
         return super().update_rate_limit(message, current)
 
     def __call__(self, original:commands.Cooldown):
-        """Runs the original init method
+        """
+        Runs the original init method.
 
-        Params:
-            original : commands.Cooldown
-                The original cooldown that this mapping refers to
+        Args:
+            original (commands.Cooldown): The original cooldown that this mapping refers to.
         """
 
         self._cooldown = original
@@ -77,23 +84,8 @@ class GroupedCooldownMapping(CooldownMapping):
 
 
 class Cooldown(commands.Cooldown):
-    """A class handling the cooldown for an individual user
-
-    Params:
-        error : discord.ext.commands.CommandOnCooldown
-            The error that should be raised when the cooldown is triggered
-            Defaults to discord.ext.commands.CommandOnCooldown
-        mapping: CooldownMapping
-            An _instance_ of a cooldown mapping
-            Will not accept the raw class object
-            Defaults to cls.default_mapping_class
-    Attrs:
-        _window : float
-            The start time (time.time(), Unix timestamp) for the cooldown
-        _tokens : int
-            How many more times the given command can be called in the timeframe
-        _last : float
-            The time (time.time(), Unix timestamp) that the command was last sucessfully called at
+    """
+    A class handling the cooldown for an individual user.
     """
 
     default_cooldown_error = commands.CommandOnCooldown
@@ -103,44 +95,54 @@ class Cooldown(commands.Cooldown):
     __slots__ = ('rate', 'per', 'type', 'error', 'mapping', '_window', '_tokens', '_last')
 
     def __init__(self, *, error=None, mapping:CooldownMapping=None):
+        """
+        Args:
+            error (None, optional): The error instance to be raised if the user is on cooldown.
+            mapping (CooldownMapping, optional): The cooldown mapping to be used.
+        """
+
         self.error = error or commands.CommandOnCooldown
         self.mapping = mapping
 
     def predicate(self, ctx) -> bool:
-        """A function that runs before each command call, so you're able to update anything
+        """
+        A function that runs before each command call, so you're able to update anything
         before the command runs. Most likely you'll be using this to update the self.per attr so that
         cooldowns can be tailored to the individual. Everything this method returns is discarded.
-        This method CAN be a coroutine."""
+        This method CAN be a coroutine.
+        """
 
         return True
 
     def get_tokens(self, current:float=None) -> int:
         """Gets the number of command calls that can still be made before hitting the rate limit
 
-        Params:
-            current : float = None
-                The current time, or now (via time.time())
-                Is _not_ used to update self._last, since the command may not have actually been called
+        Args:
+            current (float, optional): The current time, or now (via `time.time()`). Is _not_ used to update self._last, since the command may not have actually been called.
+
         Returns:
-            How many more times the comman can be called before hitting the rate limit
+            int: The number of times this command has been used given the time limit.
         """
 
         return super().get_tokens(current)
 
     def update_rate_limit(self, current:float=None) -> typing.Optional[int]:
-        """Updates the rate limit for the command, as it has now been called
+        """
+        Updates the rate limit for the command, as it has now been called.
 
-        Params:
-            current : float = None
-                The current time, or now (via time.time())
+        Args:
+            current (float, optional): The current time, or now (via `time.time()`).
+
         Returns:
-            The amount of time left on the cooldown if there is any, else None
+            typing.Optional[int]: Something
         """
 
         return super().update_rate_limit(current)
 
     def get_remaining_cooldown(self, current:float=None) -> typing.Optional[float]:
-        """Gets the remaining rate limit for the command"""
+        """
+        Gets the remaining rate limit for the command.
+        """
 
         current = current or time.time()
         if self.get_tokens() == 0:
@@ -148,28 +150,33 @@ class Cooldown(commands.Cooldown):
         return None
 
     def reset(self) -> None:
-        """Resets the cooldown for the given command"""
+        """
+        Resets the cooldown for the given command.
+        """
 
         return super().reset()
 
     def copy(self) -> commands.Cooldown:
-        """Returns a copy of the cooldown"""
+        """
+        Returns a copy of the cooldown.
+        """
 
         kwargs = {attr: getattr(getattr(self, attr, None), 'copy', lambda: attr)() for attr in self._copy_kwargs}
         cooldown = self.__class__(error=self.error, mapping=self.mapping, **kwargs)
         cooldown = cooldown(rate=self.rate, per=self.per, type=self.type)
         return cooldown
 
-    def __call__(self, rate:float, per:int, type:commands.BucketType) -> None:
-        """Runs the original init method. MUST return self
+    def __call__(self, rate:float, per:int, type:commands.BucketType) -> 'Cooldown':
+        """
+        Runs the original init method. MUST return self.
 
-        Params:
-            rate : int
-                How many times the command can be called (rate) in a given amount of time (per) before being applied
-            per : float
-                How many times the command can be called (rate) in a given amount of time (per) before being applied
-            type : discord.ext.commands.BucketType
-                How the cooldown should be applied
+        Args:
+            rate (float): How many times the command can be called (rate) in a given amount of time (per) before being applied.
+            per (int): How many times the command can be called (rate) in a given amount of time (per) before being applied.
+            type (commands.BucketType): How the cooldown should be applied.
+
+        Returns:
+            Cooldown: The cooldown object.
         """
 
         try:
@@ -181,36 +188,16 @@ class Cooldown(commands.Cooldown):
         return self
 
 
-def cooldown(rate, per, type=commands.BucketType.default, *, cls:commands.Cooldown=None):
-    """A decorator that adds a cooldown to a :class:`.Command`
-    or its subclasses.
+def cooldown(rate:int, per:int, type:commands.BucketType=commands.BucketType.default, *, cls:commands.Cooldown=None) -> typing.Callable:
+    """
+    Args:
+        rate (int): How many times this command can be run.
+        per (int): The time before which the cooldown for this command is reset.
+        type (commands.BucketType, optional): The bucked that the cooldown should be applied for.
+        cls (commands.Cooldown, optional): The cooldown class instance.
 
-    A cooldown allows a command to only be used a specific amount
-    of times in a specific time frame. These cooldowns can be based
-    either on a per-guild, per-channel, per-user, or global basis.
-    Denoted by the third argument of ``type`` which must be of enum
-    type ``BucketType`` which could be either:
-
-    - ``BucketType.default`` for a global basis.
-    - ``BucketType.user`` for a per-user basis.
-    - ``BucketType.guild`` for a per-guild basis.
-    - ``BucketType.channel`` for a per-channel basis.
-    - ``BucketType.member`` for a per-member basis.
-    - ``BucketType.category`` for a per-category basis.
-
-    If a cooldown is triggered, then :exc:`.CommandOnCooldown` is triggered in
-    :func:`.on_command_error` and the local error handler.
-
-    A command can only have a single cooldown.
-
-    Parameters
-    ------------
-    rate: :class:`int`
-        The number of times a command can be used before triggering a cooldown.
-    per: :class:`float`
-        The amount of seconds to wait for a cooldown when it's been triggered.
-    type: ``BucketType``
-        The type of cooldown to have.
+    Returns:
+        typing.Callable: The decorator that should be applied to the command.
     """
 
     if cls is None:
