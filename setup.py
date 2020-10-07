@@ -1,4 +1,5 @@
 import setuptools
+from voxelbotutils import __version__
 
 try:
     with open("README.md", "r") as a:
@@ -8,7 +9,7 @@ except Exception:
 
 setuptools.setup(
     name="voxelbotutils",
-    version="0.0.3",
+    version=__version__,
     author="Caleb Bartlett",
     author_email="callum@voxelfox.co.uk",
     description="A set of bot utilities for Discord.py",
