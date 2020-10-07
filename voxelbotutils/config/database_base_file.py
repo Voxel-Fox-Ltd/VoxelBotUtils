@@ -1,4 +1,6 @@
 database_file = """
+-- The contents of this file are automatcally thrown into the database at bot startup
+
 CREATE TABLE guild_settings IF NOT EXISTS(
     guild_id BIGINT PRIMARY KEY,
     prefix VARCHAR(30)

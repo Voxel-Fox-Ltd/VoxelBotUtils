@@ -33,6 +33,11 @@ if __name__ == '__main__':
         except FileExistsError as e:
             raise FileExistsError("A config/config.toml file already exists in this directory") from e
         try:
+            with open("./config/database.pgsql", "x") as a:
+                a.write(config.database_file.lstrip())
+        except FileExistsError:
+            pass
+        try:
             with open("./cogs/ping_command.py", "x") as a:
                 a.write(config.cog_example.lstrip())
         except FileExistsError:
