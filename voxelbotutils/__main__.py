@@ -35,7 +35,7 @@ if __name__ == '__main__':
         create_file("cogs", "ping_command.py", content=config.cog_example.lstrip())
         create_file("run.bat", content="py -m voxelbotutils .\n")
         create_file("run.sh", content="python3 -m voxelbotutils .\n")
-        create_file(".gitignore", content="__pycache__/\n*.toml\n!*.example*\nconfig/config.toml\n")
+        create_file(".gitignore", content="__pycache__/\nconfig/config.toml\n")
         create_file("requirements.txt", content="voxelbotutils\n")
         exit(1)
 
