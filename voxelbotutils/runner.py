@@ -4,6 +4,7 @@ import logging
 import sys
 import typing
 
+from . import _config
 from .cogs.utils.database import DatabaseConnection
 from .cogs.utils.redis import RedisConnection
 from .cogs.utils.custom_bot import CustomBot as Bot
@@ -146,8 +147,7 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
 async def create_initial_database(bot:Bot) -> None:
     """Create the initial database using the internal database.psql file"""
 
-    from .config.database_base_file import database_file
-    create_table_statemenets = database_file.split(';')
+    create_table_statemenets = _config.database_file.split(';')
     async with bot.database() as db:
         for i in create_table_statemenets:
             await db(i)
