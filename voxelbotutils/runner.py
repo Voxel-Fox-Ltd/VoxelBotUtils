@@ -130,6 +130,7 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     """
 
     logging.basicConfig(format='%(asctime)s:%(name)s:%(levelname)s: %(message)s', stream=sys.stdout)
+    bot.logger = logger
 
     # Set loglevel defaults
     set_log_level(logger, args.loglevel)
