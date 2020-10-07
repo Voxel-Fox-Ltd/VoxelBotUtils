@@ -3,6 +3,7 @@ import asyncio
 import logging
 import sys
 import typing
+import textwrap
 
 from .cogs.utils.database import DatabaseConnection
 from .cogs.utils.redis import RedisConnection
@@ -154,7 +155,8 @@ async def create_initial_database(bot:Bot) -> None:
     create_table_statemenets = data.split(';')
     async with bot.database() as db:
         for i in create_table_statemenets:
-            await db(i.strip())
+            if i and i.strip():
+                await db(i.strip())
     return True
 
 

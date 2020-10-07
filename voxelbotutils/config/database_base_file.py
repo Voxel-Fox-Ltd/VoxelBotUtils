@@ -1,18 +1,19 @@
 database_file = """
--- The contents of this file are automatcally thrown into the database at bot startup
+-- The contents of this file are automatcally thrown into the database at bot startup;
+-- you need to remove these lines for the bot to run
 
-CREATE TABLE guild_settings IF NOT EXISTS(
+CREATE TABLE IF NOT EXISTS guild_settings(
     guild_id BIGINT PRIMARY KEY,
     prefix VARCHAR(30)
 );
 
 
-CREATE TABLE user_settings IF NOT EXISTS(
+CREATE TABLE IF NOT EXISTS user_settings(
     user_id BIGINT PRIMARY KEY
 );
 
 
-CREATE TABLE role_list IF NOT EXISTS(
+CREATE TABLE IF NOT EXISTS role_list(
     guild_id BIGINT,
     role_id BIGINT,
     key VARCHAR(50),
@@ -21,7 +22,7 @@ CREATE TABLE role_list IF NOT EXISTS(
 );
 
 
-CREATE TABLE channel_list IF NOT EXISTS(
+CREATE TABLE IF NOT EXISTS channel_list(
     guild_id BIGINT,
     channel_id BIGINT,
     key VARCHAR(50),
