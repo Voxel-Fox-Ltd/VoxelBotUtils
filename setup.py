@@ -8,7 +8,7 @@ except Exception:
 
 setuptools.setup(
     name="voxelbotutils",
-    version="0.0.2",
+    version="0.0.3",
     author="Caleb Bartlett",
     author_email="callum@voxelfox.co.uk",
     description="A set of bot utilities for Discord.py",
