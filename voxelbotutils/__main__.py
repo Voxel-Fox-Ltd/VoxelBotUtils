@@ -1,7 +1,7 @@
 import os
 
 from .runner import get_default_program_arguments, validate_sharding_information, set_default_log_levels, run_bot
-from . import Bot, _config
+from . import Bot
 
 
 if __name__ == '__main__':
@@ -22,9 +22,10 @@ if __name__ == '__main__':
             pass
 
         # Write file
+        from . import config
         try:
             with open("./config/config.toml", "x") as a:
-                a.write(_config.config_file)
+                a.write(config.config_file.lstrip())
         except FileExistsError as e:
             raise FileExistsError("A config/config.toml file already exists in this directory") from e
 
