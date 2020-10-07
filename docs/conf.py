@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.abspath('./../'))
 project = 'VoxelBotUtils'
 copyright = '2020, Caleb Bartlett'
 author = 'Caleb Bartlett'
+master_doc = "index"
 
 
 # -- General configuration ---------------------------------------------------
