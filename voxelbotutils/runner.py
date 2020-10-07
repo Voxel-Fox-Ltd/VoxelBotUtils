@@ -146,8 +146,12 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
 async def create_initial_database(bot:Bot) -> None:
     """Create the initial database using the internal database.psql file"""
 
-    from . import config
-    create_table_statemenets = config.database_file.split(';')
+    try:
+        with open("./config/database.pgsql") as a:
+            data = a.read()
+    except Exception:
+        return False
+    create_table_statemenets = data.split(';')
     async with bot.database() as db:
         for i in create_table_statemenets:
             await db(i.strip())
