@@ -4,6 +4,15 @@ from .runner import get_default_program_arguments, validate_sharding_information
 from . import Bot
 
 
+def create_file(*path, content:str=None, throw_error:bool=False):
+    for index, i in enumerate(path[:-1]):
+        try:
+            os.mkdir(f"./{os.sep.join(path[:index + 1])}")
+        except FileExistsError as e:
+            if throw_error:
+                raise e
+
+
 if __name__ == '__main__':
 
     # Wew let's see if we want to run a bot
@@ -14,36 +23,14 @@ if __name__ == '__main__':
 
     # Let's see if we copyin bois
     if args.create_config_file:
-
-        # Make dir
-        try:
-            os.mkdir("./config")
-        except FileExistsError:
-            pass
-        try:
-            os.mkdir("./cogs")
-        except FileExistsError:
-            pass
-
-        # Write file
         from . import config
-        try:
-            with open("./config/config.toml", "x") as a:
-                a.write(config.config_file.lstrip())
-        except FileExistsError as e:
-            raise FileExistsError("A config/config.toml file already exists in this directory") from e
-        try:
-            with open("./config/database.pgsql", "x") as a:
-                a.write(config.database_file.lstrip())
-        except FileExistsError:
-            pass
-        try:
-            with open("./cogs/ping_command.py", "x") as a:
-                a.write(config.cog_example.lstrip())
-        except FileExistsError:
-            pass
-
-        # Exit
+        create_file("config", "config.toml", content=config.config_file.lstrip(), throw_error=True)
+        create_file("config", "config.example.toml", content=config.config_file.lstrip())
+        create_file("config", "database.pgsql", content=config.database_file.lstrip())
+        create_file("cogs", "ping_command.py", content=config.cog_example.lstrip())
+        create_file("run.bat", content="py -m voxelbotutils .\n")
+        create_file("run.sh", content="python3 -m voxelbotutils .\n")
+        create_file(".gitignore", content="__pycache__/\n*.toml\n!*.example*\nconfig/config.toml\n")
         exit(1)
 
     # And run file

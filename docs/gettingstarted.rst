@@ -12,7 +12,16 @@ To get started, you'll need to make a config file. The library is nice enough to
 
     python -m voxelbotutils --create-config-file
 
-Doing this will make a file `config/config.toml`. This file should be pretty self explanatory for your usage.
+Doing this will make a few files and folders:
+
+* `config/config.toml` - this is your bot's config file
+* `config/config.example.toml` - this is a git-safe version of your config file; you can commit this as you please
+* `config/database.pgsql` - this file should contain your database schema; it'll be pushed to your bot's database at every startup
+* `run.bat` and `run.sh` - these are just shortcuts to running your bot; you may need to edit them depending on how you have Python installed to your system
+* `.gitignore` - a default Gitignore file to ignore your config file
+* `cogs/ping_command.py` - explained below
+
+The only file that's _guarenteed_ to be created by this process is `config/config.toml` - the other files will silently fail if they already exist in your directory.
 
 Making a Bot
 --------------------------------------
