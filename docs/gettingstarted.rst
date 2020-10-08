@@ -25,7 +25,7 @@ The only file that's _guarenteed_ to be created by this process is `config/confi
 
 Here's what your directory should look like after running this command:
 
-.. code-block
+.. code-block:: none
 
    Root
       |--- config
