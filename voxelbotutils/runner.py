@@ -20,7 +20,8 @@ __all__ = (
 
 # Set up the loggers
 def set_log_level(logger_to_change:logging.Logger, loglevel:str) -> None:
-    """Set a logger to a default loglevel
+    """
+    Set a logger to a default loglevel
 
     Args:
         logger_to_change (logging.Logger): The logger you want to change
@@ -45,7 +46,8 @@ def set_log_level(logger_to_change:logging.Logger, loglevel:str) -> None:
 
 # Parse arguments
 def get_default_program_arguments(include_config_file:bool=True) -> argparse.ArgumentParser:
-    """Get the default commandline args for the file
+    """
+    Get the default commandline args for the file
 
     Args:
         include_config_file (bool, optional): Whether or not to include the config file arugment
@@ -96,9 +98,9 @@ logger = logging.getLogger('vflbotutils')
 
 
 # Make sure the sharding info provided is correctish
-# def validate_sharding_information(min_shard:int, max_shard:int, shard_count:int) -> typing.List[int]:
 def validate_sharding_information(args:argparse.Namespace) -> typing.List[int]:
-    """Validate the given shard information and make sure that what's passed in is accurate
+    """
+    Validate the given shard information and make sure that what's passed in is accurate
 
     Args:
         args (argparse.Namespace): The parsed argparse namespace for the program
@@ -122,7 +124,8 @@ def validate_sharding_information(args:argparse.Namespace) -> typing.List[int]:
 
 
 def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
-    """Set the default levels for the logger
+    """
+    Set the default levels for the logger
 
     Args:
         bot (Bot): The custom bot object containing the logger, database logger, and redis logger
@@ -146,7 +149,9 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
 
 
 async def create_initial_database(bot:Bot) -> None:
-    """Create the initial database using the internal database.psql file"""
+    """
+    Create the initial database using the internal database.psql file
+    """
 
     try:
         with open("./config/database.pgsql") as a:
@@ -162,7 +167,9 @@ async def create_initial_database(bot:Bot) -> None:
 
 
 async def start_database_pool(bot:Bot) -> None:
-    """Start the database pool connection"""
+    """
+    Start the database pool connection
+    """
 
     # Connect the database pool
     if bot.config['database']['enabled']:
@@ -183,7 +190,9 @@ async def start_database_pool(bot:Bot) -> None:
 
 
 async def start_redis_pool(bot:Bot) -> None:
-    """Start the redis pool conneciton"""
+    """
+    Start the redis pool conneciton
+    """
 
     # Connect the redis pool
     if bot.config['redis']['enabled']:
@@ -202,7 +211,8 @@ async def start_redis_pool(bot:Bot) -> None:
 
 
 def run_bot(bot:Bot) -> None:
-    """Starts the bot, connects the database, runs the async loop forever
+    """
+    Starts the bot, connects the database, runs the async loop forever
 
     Args:
         bot (Bot): The bot you want to run

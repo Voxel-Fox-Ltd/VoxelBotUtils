@@ -23,7 +23,7 @@ if __name__ == '__main__':
     # Wew let's see if we want to run a bot
     parser = get_default_program_arguments(include_config_file=False)
     parser.add_argument("bot_directory", nargs="?", default=".", help="The directory containing a config and a cogs folder for the bot to run")
-    parser.add_argument("--create-config-file", action="store_true", help="The bot will ignore running the bot, and instead create a config file as config/config.toml", default=False)
+    parser.add_argument("--create-config-file", action="store_true", help="The module will ignore running the bot and all relevant args, and instead create a config file as config/config.toml", default=False)
     args = parser.parse_args()
 
     # Let's see if we copyin bois

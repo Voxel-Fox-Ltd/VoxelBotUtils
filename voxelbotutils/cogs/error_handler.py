@@ -11,6 +11,110 @@ from . import utils
 
 class ErrorHandler(utils.Cog):
 
+    COMMAND_ERROR_RESPONSES = (
+        (
+            utils.errors.MissingRequiredArgumentString,
+            lambda ctx, error: f"You're missing the `{error.param}` argument, which is required for this command - see `{ctx.clean_prefix}help {ctx.command.name}`."
+        ),
+        (
+            commands.MissingRequiredArgument,
+            lambda ctx, error: f"You're missing the `{error.param.name}` argument, which is required for this command - see `{ctx.clean_prefix}help {ctx.command.name}`."
+        ),
+        (
+            (commands.UnexpectedQuoteError, commands.InvalidEndOfQuotedStringError, commands.ExpectedClosingQuoteError),
+            lambda ctx, error: "The quotes in your message have been done incorrectly."
+        ),
+        (
+            commands.CommandOnCooldown,
+            lambda ctx, error: f"You can't use this command again for another {utils.TimeValue(error.retry_after).clean_spaced}."
+        ),
+        (
+            commands.NSFWChannelRequired,
+            lambda ctx, error: "This command can't be run in a non-NSFW channel."
+        ),
+        (
+            commands.DisabledCommand,
+            lambda ctx, error: "This command has been disabled."
+        ),
+        (
+            commands.MissingAnyRole,
+            lambda ctx, error: f"You need to have one of the {', '.join(['`' + i + '`' for i in error.missing_roles])} roles to be able to run this command."
+        ),
+        (
+            commands.BotMissingAnyRole,
+            lambda ctx, error: f"I need to have one of the {', '.join(['`' + i + '`' for i in error.missing_roles])} roles for you to be able to run this command."
+        ),
+        (
+            commands.MissingRole,
+            lambda ctx, error: f"You need to have the `{error.missing_role}` role to be able to run this command."
+        ),
+        (
+            commands.BotMissingRole,
+            lambda ctx, error: f"I need to have the `{error.missing_role}` role for you to be able to run this command."
+        ),
+        (
+            commands.MissingPermissions,
+            lambda ctx, error: f"You need the `{error.missing_perms[0]}` permission to run this command."
+        ),
+        (
+            commands.BotMissingPermissions,
+            lambda ctx, error: f"I need the `{error.missing_perms[0]}` permission for me to be able to run this command."
+        ),
+        (
+            commands.NoPrivateMessage,
+            lambda ctx, error: "This command can't be run in DMs."
+        ),
+        (
+            commands.PrivateMessageOnly,
+            lambda ctx, error: "This command can only be run in DMs."
+        ),
+        (
+            commands.NotOwner,
+            lambda ctx, error: "You need to be registered as an owner to run this command."
+        ),
+        (
+            (commands.BadArgument, commands.BadUnionArgument),
+            lambda ctx, error: str(error)
+        ),
+        (
+            commands.TooManyArguments,
+            lambda ctx, error: f"You gave too many arguments to this command - see `{ctx.clean_prefix}help {ctx.command.name}`."
+        ),
+        (
+            discord.NotFound,
+            lambda ctx, error: None
+        ),
+        (
+            discord.Forbidden,
+            lambda ctx, error: ("Discord is saying I'm unable to perform that action.", "Discord is saying I'm unable to perform that action - I probably don't have permission to talk in that channel.")
+        ),
+        (
+            (discord.HTTPException, aiohttp.ClientOSError),
+            lambda ctx, error: f"Discord messed up there somewhere - do you mind trying again? I received a {error.status} error."
+        ),
+
+        # Disabled because they're base classes for the subclasses above
+        # (commands.CommandError, lambda ctx, error: ""),
+        # (commands.CheckFailure, lambda ctx, error: ""),
+        # (commands.CheckAnyFailure, lambda ctx, error: ""),
+        # (commands.CommandInvokeError, lambda ctx, error: ""),
+        # (commands.UserInputError, lambda ctx, error: ""),
+        # (commands.ConversionError, lambda ctx, error: ""),
+        # (commands.ArgumentParsingError, lambda ctx, error: ""),
+
+        # Disabled because I've literally never used this and don't know anyone who has
+        # (commands.MaxConcurrencyReached, lambda ctx, error: ""),
+
+        # Disabled because they all refer to extension and command loading
+        # (commands.ExtensionError, lambda ctx, error: ""),
+        # (commands.ExtensionAlreadyLoaded, lambda ctx, error: ""),
+        # (commands.ExtensionNotLoaded, lambda ctx, error: ""),
+        # (commands.NoEntryPointError, lambda ctx, error: ""),
+        # (commands.ExtensionFailed, lambda ctx, error: ""),
+        # (commands.ExtensionNotFound, lambda ctx, error: ""),
+        # (commands.CommandRegistrationError, lambda ctx, error: ""),
+    )
+
     async def send_to_ctx_or_author(self, ctx:utils.Context, text:str, author_text:str=None) -> typing.Optional[discord.Message]:
         """Tries to send the given text to ctx, but failing that, tries to send it to the author
         instead. If it fails that too, it just stays silent."""
@@ -42,86 +146,25 @@ class ErrorHandler(utils.Cog):
 
         # Set up some errors that the owners are able to bypass
         owner_reinvoke_errors = (
-            commands.MissingAnyRole, commands.MissingPermissions,
-            commands.MissingRole, commands.CommandOnCooldown, commands.DisabledCommand,
+            commands.MissingRole, commands.MissingAnyRole,
+            commands.MissingPermissions,
+            commands.CommandOnCooldown, commands.DisabledCommand,
         )
         if ctx.original_author_id in self.bot.owner_ids and isinstance(error, owner_reinvoke_errors):
             return await ctx.reinvoke()
 
-        # Missing argument (string)
-        elif isinstance(error, utils.errors.MissingRequiredArgumentString):
-            return await self.send_to_ctx_or_author(ctx, f"You're missing the `{error.param}` argument, which is required for this command to work properly.")
-
-        # Did the quotemarks wrong
-        elif isinstance(error, (commands.UnexpectedQuoteError, commands.InvalidEndOfQuotedStringError, commands.ExpectedClosingQuoteError)):
-            return await self.send_to_ctx_or_author(ctx, "The quotes in your message have been done incorrectly.")
-
-        # Missing argument
-        elif isinstance(error, commands.MissingRequiredArgument):
-            return await self.send_to_ctx_or_author(ctx, f"You're missing the `{error.param.name}` argument, which is required for this command to work properly.")
-
-        # Cooldown
-        elif isinstance(error, commands.CommandOnCooldown):
-            return await self.send_to_ctx_or_author(ctx, f"You can't use this command again for another {utils.TimeValue(error.retry_after).clean_spaced}.")
-
-        # NSFW channel
-        elif isinstance(error, commands.NSFWChannelRequired):
-            return await self.send_to_ctx_or_author(ctx, "This command can't be run in a non-NSFW channel.")
-
-        # Disabled command
-        elif isinstance(error, commands.DisabledCommand):
-            return await self.send_to_ctx_or_author(ctx, "This command has been disabled.")
-
-        # User is missing a role
-        elif isinstance(error, commands.MissingAnyRole):
-            return await self.send_to_ctx_or_author(ctx, f"You need to have one of the {', '.join(['`' + i + '`' for i in error.missing_roles])} roles to run this command.")
-
-        # Bot is missing a given permission
-        elif isinstance(error, commands.BotMissingPermissions):
-            return await self.send_to_ctx_or_author(ctx, f"I'm missing the `{error.missing_perms[0]}` permission, which is needed for me to run this command.")
-
-        # Missing permission
-        elif isinstance(error, commands.MissingPermissions):
-            return await self.send_to_ctx_or_author(ctx, f"You need the `{error.missing_perms[0]}` permission to run this command.")
-
-        # Missing role
-        elif isinstance(error, commands.MissingRole):
-            return await self.send_to_ctx_or_author(ctx, f"You need to have the `{error.missing_role}` role to run this command.")
-
-        # Guild only
-        elif isinstance(error, commands.NoPrivateMessage):
-            return await self.send_to_ctx_or_author(ctx, "This command can't be run in DMs.")
-
-        # DMs only
-        elif isinstance(error, commands.PrivateMessageOnly):
-            return await self.send_to_ctx_or_author(ctx, "This command can only be run in DMs.")
-
-        # Not owner
-        elif isinstance(error, commands.NotOwner):
-            return await self.send_to_ctx_or_author(ctx, "You need to be registered as an owner to run this command.")
-
-        # Argument conversion error
-        elif isinstance(error, (commands.BadArgument, commands.BadUnionArgument)):
-            return await self.send_to_ctx_or_author(ctx, str(error))
-
-        # I'm trying to do something that doesn't exist
-        elif isinstance(error, discord.NotFound):
-            pass  # Gonna pass this so it's raised again
-
-        # Bot can't send in the channel or can't send to the user or something like that
-        elif isinstance(error, discord.Forbidden):
-            return await self.send_to_ctx_or_author(
-                ctx,
-                "Discord is saying I'm unable to perform that action.",
-                "Discord is saying I'm unable to perform that action - I probably don't have permission to talk in that channel."
-            )
-
-        # Discord hecked up
-        elif isinstance(error, (discord.HTTPException, aiohttp.ClientOSError)):
+        # See if it's in our list of common outputs
+        output = None
+        for error_types, function in self.COMMAND_ERROR_RESPONSES:
+            if isinstance(error, error_types):
+                output = function(ctx, error)
+                break
+        if output:
             try:
-                return await ctx.send(f"Discord messed up there somewhere - do you mind trying again? I received a {error.status} error.")
-            except Exception:
-                return
+                _, _ = output
+            except TypeError:
+                output = (output,)
+            return await self.send_to_ctx_or_author(ctx, *output)
 
         # Can't tell what it is? Ah well.
         try:
