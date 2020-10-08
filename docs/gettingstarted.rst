@@ -3,10 +3,10 @@ Getting Started
 
 The simplest case usage of this library, as with many, would be to just use everything as default.
 
-Config File
+Configuration File
 -------------------------------------
 
-To get started, you'll need to make a config file. The library is nice enough to do this for you if you run the module via the commandline:
+To get started, you'll need to make a configuration file. The library is nice enough to do this for you if you run the module via the commandline:
 
 .. code-block:: bash
 
@@ -15,10 +15,10 @@ To get started, you'll need to make a config file. The library is nice enough to
 Doing this will make a few files and folders:
 
 * `config/config.toml` - this is your bot's configuration file
-* `config/config.example.toml` - this is a git-safe version of your config file; you can commit this as you please
+* `config/config.example.toml` - this is a git-safe version of your configuration file; you can commit this as you please
 * `config/database.pgsql` - this file should contain your database schema; it'll be pushed to your bot's database at every startup
 * `run.bat` and `run.sh` - these are just shortcuts to running your bot; you may need to edit them depending on how you have Python installed to your system
-* `.gitignore` - a default Gitignore file to ignore your config file
+* `.gitignore` - a default Gitignore file to ignore your configuration file
 * `cogs/ping_command.py` - explained below
 
 The only file that's _guarenteed_ to be created by this process is `config/config.toml` - the other files will silently fail if they already exist in your directory.
