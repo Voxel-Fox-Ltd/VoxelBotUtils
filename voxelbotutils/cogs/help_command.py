@@ -109,6 +109,14 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         except discord.Forbidden:
             pass  # Can't talk in the channel? Shame
 
+    async def send_error_message(self, error):
+        """Sends an error message to the user"""
+
+        try:
+            await self.context.send(error)
+        except discord.Forbidden:
+            pass
+
     def get_initial_embed(self) -> discord.Embed:
         """Get the initial embed for that gets sent"""
 
