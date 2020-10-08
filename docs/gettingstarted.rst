@@ -77,3 +77,60 @@ As you can see, almost everything is pretty much the same, but I'll note some ke
 The cog we have inherits from `voxelbotutils.Cog`. By doing this you can skip out on an `__init__` function, as one is included automatically for you, and it means that the cog has a `.logger` attribute, which you can use to send logging information to your console a la `self.logger.info("Ping commmand has been invoked")`
 
 Our command is defined with `voxelbotutils.command()`. This is literally identical to `discord.ext.commands.command(cls=voxelbotutils.Command)`.
+
+Using More Stuff
+--------------------------------------
+
+There's no easy way to segue into it, so let's just have another cog example with a few more things. I'll give the example and then talk through everything else.
+
+.. code-block:: python
+
+   import discord
+   import voxelbotutils as utils
+
+   class AnimalImageCommands(utils.Cog):
+
+      @utils.command()
+      async def cat(self, ctx:utils.Context):
+         """
+         Gives you a cat image
+         """
+
+         # Send request to the random cat API
+         async with self.bot.session.get("https://aws.random.cat/meow") as r:
+            data = await r.json()
+
+         # Format it into an embed
+         with utils.Embed(use_random_colour=True) as embed:
+            embed.set_image(data['file'])
+         await ctx.send(embed=embed)
+
+         # Dispatch the context to event "on_animal_command"
+         self.bot.dispatch("animal_command", ctx)
+
+      @utils.Cog.listener()
+      async def on_animal_command(self, ctx:utils.Context):
+         """
+         Add the user to the database
+         """
+
+         async with self.bot.database() as db:
+            row_input = await db(
+               """INSERT INTO animal_commands (user_id, animal, count) VALUES ($1, $2, $3)
+               ON CONFLICT (user_id, animal) DO UPDATE SET count=animal_commands.count+excluded.count RETURNING *""",
+               ctx.author.id, ctx.command.name, 1
+            )
+         user_animal_information = row_input[0]  # Data returned from DB calls is a list of dicts, so this would be [{'user_id': ctx.author.id, ...}]
+         self.logger.info(f"Set {ctx.author.id}'s {ctx.command.name} usage to {user_animal_information['count']}")
+
+   def setup(bot:utils.Bot):
+      x = AnimalImageCommands(bot)
+      bot.add_cog(x)
+
+It's a bit of a jump from the previous example, but it shows a lot more.
+
+Firstly, there's the use of `bot.session`, which is an instance of `aiohttp.ClientSession` - you can use this to run web requests through your bot. It's used pretty similarly to the `requests` library, if you're familiar with that.
+
+Secondly, there's the use of the context embeds - `voxelbotutils.Embed`. It's almost the same as a normal Discord.py embed, but you can use it in a `with` block, which I think makes it look a little cleaner. Included in that is the `use_random_colours` attribute, which would set the colour of the embed to a random number.
+
+Thirdly, there's the use of the database. You can see in the custom event that we can open a database connection pretty easily with `async with bot.database() as db`, and then just using that to run your raw SQL. This is pretty much the gist of how the database calls work.
