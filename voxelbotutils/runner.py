@@ -255,4 +255,5 @@ def run_bot(bot:Bot) -> None:
         RedisConnection.pool.close()
 
     logger.info("Closing asyncio loop")
+    loop.stop()
     loop.close()
