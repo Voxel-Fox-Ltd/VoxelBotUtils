@@ -116,8 +116,10 @@ class ErrorHandler(utils.Cog):
     )
 
     async def send_to_ctx_or_author(self, ctx:utils.Context, text:str, author_text:str=None) -> typing.Optional[discord.Message]:
-        """Tries to send the given text to ctx, but failing that, tries to send it to the author
-        instead. If it fails that too, it just stays silent."""
+        """
+        Tries to send the given text to ctx, but failing that, tries to send it to the author
+        instead. If it fails that too, it just stays silent.
+        """
 
         try:
             return await ctx.send(text)
@@ -132,7 +134,9 @@ class ErrorHandler(utils.Cog):
 
     @utils.Cog.listener()
     async def on_command_error(self, ctx:utils.Context, error:commands.CommandError):
-        """Global error handler for all the commands around wew"""
+        """
+        Global error handler for all the commands around wew.
+        """
 
         # Set up some errors that are just straight up ignored
         ignored_errors = (

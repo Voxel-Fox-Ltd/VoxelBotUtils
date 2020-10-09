@@ -38,7 +38,9 @@ class Analytics(utils.Cog):
 
     @tasks.loop(minutes=5)
     async def post_guild_count(self):
-        """Post the average guild count to DiscordBots.org"""
+        """
+        Post the average guild count to Top.gg.
+        """
 
         # Only shard 0 can post
         if self.bot.shard_count and self.bot.shard_count > 1 and 0 not in self.bot.shard_ids:
@@ -67,7 +69,9 @@ class Analytics(utils.Cog):
         await self.bot.wait_until_ready()
 
     async def try_send_ga_data(self, data):
-        """Post the cached data over to Google Analytics"""
+        """
+        Post the cached data over to Google Analytics.
+        """
 
         # See if we should bother doing it
         ga_data = self.bot.config.get('google_analytics')
@@ -92,7 +96,9 @@ class Analytics(utils.Cog):
 
     @utils.Cog.listener()
     async def on_command(self, ctx:utils.Context):
-        """Logs a command that's been sent"""
+        """
+        Logs a command that's been sent.
+        """
 
         params = {
             "dp": f"/commands/{ctx.command.name}",
@@ -104,7 +110,9 @@ class Analytics(utils.Cog):
 
     @utils.Cog.listener()
     async def on_guild_join(self, guild:discord.Guild):
-        """Logs when added to a guild"""
+        """
+        Logs when added to a guild.
+        """
 
         params = {
             "dp": "/events/GUILD_ADD",
@@ -116,7 +124,9 @@ class Analytics(utils.Cog):
 
     @utils.Cog.listener()
     async def on_guild_remove(self, guild:discord.Guild):
-        """Logs when a guild is removed from the client"""
+        """
+        Logs when a guild is removed from the client.
+        """
 
         params = {
             "dp": "/events/GUILD_REMOVE",

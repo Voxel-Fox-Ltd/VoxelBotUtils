@@ -12,13 +12,17 @@ from . import utils
 
 
 class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
-    """Handles commands that only the owner should be able to run"""
+    """
+    Handles commands that only the owner should be able to run.
+    """
 
     @commands.command(aliases=['pm', 'dm'], cls=utils.Command)
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
     async def message(self, ctx:utils.Context, user_id:utils.converters.UserID, *, content:str):
-        """PMs a user the given content"""
+        """
+        DMs a user the given content.
+        """
 
         user = self.bot.get_user(user_id) or await self.bot.fetch_user(user_id)
         try:
@@ -45,10 +49,12 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
     async def ev(self, ctx:utils.Context, *, content:str):
-        """Evaluates some Python code
+        """
+        Evaluates some Python code.
 
         Gracefully stolen from Rapptz ->
-        https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/admin.py#L72-L117"""
+        https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/admin.py#L72-L117
+        """
 
         # Make the environment
         env = {
@@ -127,7 +133,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
     async def reload(self, ctx:utils.Context, *cog_name:str):
-        """Unloads and reloads a cog from the bot"""
+        """
+        Unloads and reloads a cog from the bot.
+        """
 
         cog_name = 'cogs.' + '_'.join([i for i in cog_name])
 
@@ -148,7 +156,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
     async def runsql(self, ctx:utils.Context, *, sql:str):
-        """Runs a line of SQL into the sparcli database"""
+        """
+        Runs a line of SQL into the database.
+        """
 
         # Get the data we asked for
         async with self.bot.database() as db:
@@ -194,7 +204,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
     async def botuser(self, ctx:utils.Context):
-        """A parent command for the bot user configuration section"""
+        """
+        A parent command for the bot user configuration section.
+        """
 
         pass
 
@@ -202,7 +214,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
     async def name(self, ctx:utils.Context, *, username:str):
-        """Lets you set the username for the bot account"""
+        """
+        Lets you set the username for the bot account.
+        """
 
         if len(username) > 32:
             return await ctx.send('That username is too long.')
@@ -213,7 +227,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
     async def picture(self, ctx:utils.Context, *, image_url:str=None):
-        """Lets you set the profile picture of the bot"""
+        """
+        Lets you set the profile picture of the bot.
+        """
 
         if image_url is None:
             try:
@@ -230,7 +246,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
     async def activity(self, ctx:utils.Context, activity_type:str, *, name:str=None):
-        """Changes the activity of the bot"""
+        """
+        Changes the activity of the bot.
+        """
 
         if name:
             activity = discord.Activity(name=name, type=getattr(discord.ActivityType, activity_type.lower()))
@@ -242,7 +260,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
     async def status(self, ctx:utils.Context, status:str):
-        """Changes the online status of the bot"""
+        """
+        Changes the online status of the bot.
+        """
 
         status = getattr(discord.Status, status.lower())
         await self.bot.change_presence(activity=self.bot.guilds[0].me.activity, status=status)
@@ -251,7 +271,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
     async def su(self, ctx, who:discord.User, *, command:str):
-        """Run a command as another user optionally in another channel."""
+        """
+        Run a command as another user optionally in another channel.
+        """
 
         # Make a copy of the message so we can pretend the other user said it
         msg = copy.copy(ctx.message)

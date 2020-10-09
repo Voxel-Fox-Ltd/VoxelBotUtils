@@ -7,7 +7,9 @@ class CommandEvent(utils.Cog):
 
     @utils.Cog.listener()
     async def on_command(self, ctx:utils.Context):
-        """Pinged when a command is invoked"""
+        """
+        Pinged when a command is invoked.
+        """
 
         if ctx.command is None:
             return

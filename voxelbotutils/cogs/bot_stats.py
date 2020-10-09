@@ -12,7 +12,9 @@ class BotStats(utils.Cog):
     @utils.checks.is_config_set('command_data', 'github_link')
     @commands.bot_has_permissions(send_messages=True)
     async def github(self, ctx:utils.Context):
-        """Sends the GitHub Repository link"""
+        """
+        Sends the GitHub Repository link.
+        """
 
         await ctx.send(f"<{self.bot.config['command_data']['github_link']}>")
 
@@ -20,7 +22,9 @@ class BotStats(utils.Cog):
     @commands.bot_has_permissions(send_messages=True)
     @utils.checks.is_config_set('command_data', 'invite_command_permissions')
     async def invite(self, ctx:utils.Context):
-        """Gives you the bot's invite link"""
+        """
+        Gives you the bot's invite link.
+        """
 
         invite_permissions = {i: True for i in self.bot.config['command_data']['invite_command_permissions']}
         await ctx.send(f"<{self.bot.get_invite_link(**invite_permissions)}>")
@@ -29,7 +33,9 @@ class BotStats(utils.Cog):
     @commands.bot_has_permissions(send_messages=True)
     @utils.checks.is_config_set('command_data', 'vote_command_enabled')
     async def vote(self, ctx:utils.Context):
-        """Gives you a link to vote for the bot"""
+        """
+        Gives you a link to vote for the bot.
+        """
 
         bot_user_id = self.bot.config.get('oauth', {}).get('client_id', None) or self.bot.user.id
         await ctx.send(f"<https://top.gg/bot/{bot_user_id}/vote>")
@@ -38,7 +44,9 @@ class BotStats(utils.Cog):
     @commands.bot_has_permissions(send_messages=True, embed_links=True)
     @utils.checks.is_config_set('command_data', 'stats_command_enabled')
     async def stats(self, ctx:utils.Context):
-        """Gives you the stats for the bot"""
+        """
+        Gives you the stats for the bot.
+        """
 
         # Get creator info
         creator_id = self.bot.config["owners"][0]

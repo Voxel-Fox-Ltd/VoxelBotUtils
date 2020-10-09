@@ -14,7 +14,9 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         super().__init__(**options)
 
     async def filter_commands(self, commands:typing.List[utils.Command]) -> typing.List[utils.Command]:
-        """Filter the command list down into a list of _runnable_ commands"""
+        """
+        Filter the command list down into a list of runnable commands.
+        """
 
         if self.context.author.id in self.context.bot.owner_ids:
             return commands
@@ -24,28 +26,36 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         return '{0.clean_prefix}{1.qualified_name} {1.signature}'.format(self, command)
 
     async def send_cog_help(self, cog:utils.Cog):
-        """Sends help command for a cog"""
+        """
+        Sends help command for a cog.
+        """
 
         return await self.send_bot_help({
             cog: cog.get_commands()
         })
 
     async def send_group_help(self, group:commands.Group):
-        """Sends the help command for a given group"""
+        """
+        Sends the help command for a given group.
+        """
 
         return await self.send_bot_help({
             group: group.commands
         })
 
     async def send_command_help(self, command:utils.Command):
-        """Sends the help command for a given command"""
+        """
+        Sends the help command for a given command.
+        """
 
         return await self.send_bot_help({
             command: []
         })
 
     async def send_bot_help(self, mapping:typing.Dict[typing.Optional[utils.Cog], typing.List[commands.Command]]):
-        """Sends all help to the given channel"""
+        """
+        Sends all help to the given channel.
+        """
 
         # Get the visible commands for each of the cogs
         runnable_commands = {}
@@ -83,7 +93,9 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         await self.send_to_destination(**data)
 
     async def send_to_destination(self, *args, **kwargs):
-        """Sends content to the given destination"""
+        """
+        Sends content to the given destination.
+        """
 
         dest = self.get_destination()
 
@@ -110,7 +122,9 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
             pass  # Can't talk in the channel? Shame
 
     async def send_error_message(self, error):
-        """Sends an error message to the user"""
+        """
+        Sends an error message to the user.
+        """
 
         try:
             await self.context.send(error)
@@ -118,7 +132,9 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
             pass
 
     def get_initial_embed(self) -> discord.Embed:
-        """Get the initial embed for that gets sent"""
+        """
+        Get the initial embed for that gets sent.
+        """
 
         embed = discord.Embed()
         embed.set_author(name=self.context.bot.user, icon_url=self.context.bot.user.avatar_url)
@@ -126,7 +142,9 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         return embed
 
     def get_help_line(self, command:utils.Command):
-        """Gets a doc line of help for a given command"""
+        """
+        Gets a doc line of help for a given command.
+        """
 
         if command.short_doc:
             return f"**{self.clean_prefix}{command.qualified_name}** - {command.short_doc}"
