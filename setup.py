@@ -7,6 +7,18 @@ try:
 except Exception:
     long_description = ""
 
+requirements = []
+try:
+    with open("requirements.txt", "r") as a:
+        requirements_string = a.read()
+    for line in requirements_string.strip().split('\n'):
+        if line.startswith('#') or not line.strip():
+            pass
+        else:
+            requirements.append(line.strip())
+except Exception:
+    pass
+
 setuptools.setup(
     name="voxelbotutils",
     version=__version__,
@@ -23,4 +35,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
+    install_requires=requirements,
 )
