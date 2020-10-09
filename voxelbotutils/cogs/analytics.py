@@ -32,9 +32,13 @@ class Analytics(utils.Cog):
     def __init__(self, bot):
         super().__init__(bot)
         self.post_topgg_guild_count.start()
+        self.post_discordbotlist_guild_count.start()
 
     def cog_unload(self):
-        self.post_topgg_guild_count.stop()
+        self.logger.info("Stopping Top.gg guild count poster loop")
+        self.post_topgg_guild_count.cancel()
+        self.logger.info("Stopping DiscordbotList.com guild count poster loop")
+        self.post_discordbotlist_guild_count.cancel()
 
     @tasks.loop(minutes=5)
     async def post_topgg_guild_count(self):
