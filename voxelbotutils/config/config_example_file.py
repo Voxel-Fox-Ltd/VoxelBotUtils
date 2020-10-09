@@ -1,11 +1,14 @@
 config_file = """
 token = "bot_token"  # The token for the bot
-topgg_token = ""  # The token used to post data to top.gg
-owners = [ 141231597155385344, ]  # The first should always be the developer
-dm_uncaught_errors = false  # Whether or not to DM the owners when errors are encountered
+owners = [ 141231597155385344, ]  # List of owner IDs - these people override all permission checks
+dm_uncaught_errors = false  # Whether or not to DM the owners when unhandled errors are encountered
 default_prefix = "!"  # The prefix for the bot's commands
-guild_id = 0  # The ID of the main/support guild
 event_webhook_url = ""  # Some events will be posted via webhook to this url
+
+# Data used to send API requests to whatever service
+[bot_listing_api_keys]
+    topgg_token = ""  # The token used to post data to top.gg
+    discordbotlist_token = ""  # The token used to post data to discordbotlist.com
 
 # Data that's copied directly over to a command
 [command_data]

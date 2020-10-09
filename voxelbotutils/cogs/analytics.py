@@ -31,13 +31,13 @@ class Analytics(utils.Cog):
 
     def __init__(self, bot):
         super().__init__(bot)
-        self.post_guild_count.start()
+        self.post_topgg_guild_count.start()
 
     def cog_unload(self):
-        self.post_guild_count.stop()
+        self.post_topgg_guild_count.stop()
 
     @tasks.loop(minutes=5)
-    async def post_guild_count(self):
+    async def post_topgg_guild_count(self):
         """
         Post the average guild count to Top.gg.
         """
@@ -47,8 +47,8 @@ class Analytics(utils.Cog):
             return
 
         # Only post if there's actually a DBL token set
-        if not self.bot.config.get('topgg_token'):
-            self.logger.warning("No DBL token has been provided")
+        if not self.bot.config.get('bot_listing_api_keys', {}).get('topgg_token'):
+            self.logger.warning("No Top.gg token has been provided")
             return
 
         url = f'https://top.gg/api/bots/{self.bot.user.id}/stats'
@@ -58,14 +58,44 @@ class Analytics(utils.Cog):
             'shard_id': 0,
         }
         headers = {
-            'Authorization': self.bot.config['topgg_token']
+            'Authorization': self.bot.config['bot_listing_api_keys']['topgg_token']
         }
-        self.logger.info(f"Sending POST request to DBL with data {json.dumps(data)}")
+        self.logger.info(f"Sending POST request to Top.gg with data {json.dumps(data)}")
         async with self.bot.session.post(url, json=data, headers=headers):
             pass
 
-    @post_guild_count.before_loop
+    @post_topgg_guild_count.before_loop
     async def before_post_guild_count(self):
+        await self.bot.wait_until_ready()
+
+    @tasks.loop(minutes=5)
+    async def post_discordbotlist_guild_count(self):
+        """
+        Post the average guild count to DiscordBotList.com.
+        """
+
+        # Only shard 0 can post
+        if self.bot.shard_count and self.bot.shard_count > 1 and 0 not in self.bot.shard_ids:
+            return
+
+        # Only post if there's actually a DBL token set
+        if not self.bot.config.get('bot_listing_api_keys', {}).get('discordbotlist_token'):
+            self.logger.warning("No DiscordBotList.com token has been provided")
+            return
+
+        url = f'https://discordbotlist.com/api/v1/bots/{self.bot.user.id}/stats'
+        data = {
+            'guilds': int((len(self.bot.guilds) / len(self.bot.shard_ids)) * self.bot.shard_count),
+        }
+        headers = {
+            'Authorization': self.bot.config['bot_listing_api_keys']['discordbotlist_token']
+        }
+        self.logger.info(f"Sending POST request to DiscordBotList.com with data {json.dumps(data)}")
+        async with self.bot.session.post(url, json=data, headers=headers):
+            pass
+
+    @post_discordbotlist_guild_count.before_loop
+    async def before_post_discordbotlist_guild_count(self):
         await self.bot.wait_until_ready()
 
     async def try_send_ga_data(self, data):
