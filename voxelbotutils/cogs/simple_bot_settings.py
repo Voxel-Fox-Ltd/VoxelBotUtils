@@ -13,7 +13,9 @@ class BotSettings(utils.Cog):
     @commands.bot_has_permissions(send_messages=True)
     @commands.guild_only()
     async def prefix(self, ctx:utils.Context, *, new_prefix:str):
-        """Changes the prefix that the bot uses"""
+        """
+        Changes the prefix that the bot uses.
+        """
 
         # Validate prefix
         if len(new_prefix) > 30:
@@ -31,7 +33,9 @@ class BotSettings(utils.Cog):
     @commands.guild_only()
     @utils.checks.is_config_set('command_data', 'updates_channel_id')
     async def updates(self, ctx:utils.Context):
-        """Get official bot updates from the support server"""
+        """
+        Get official bot updates from the support server.
+        """
 
         # See if they're sure
         m = await ctx.send(f"This will follow the bot's official updates channel from the support server (`{ctx.clean_prefix}support`). Would you like to continue?")
@@ -75,62 +79,6 @@ class BotSettings(utils.Cog):
         except discord.HTTPException:
             pass
         return await ctx.send("Now following the bot's updates channel!", ignore_error=True)
-
-    @commands.group(cls=utils.Group, enabled=False)
-    @commands.has_permissions(manage_guild=True)
-    @commands.bot_has_permissions(send_messages=True, embed_links=True, add_reactions=True)
-    @commands.guild_only()
-    async def setup(self, ctx:utils.Context):
-        """Run the bot setup"""
-
-        # Make sure it's only run as its own command, not a parent
-        if ctx.invoked_subcommand is not None:
-            return
-
-        # Create settings menu
-        menu = utils.SettingsMenu()
-        settings_mention = utils.SettingsMenuOption.get_guild_settings_mention
-        menu.bulk_add_options(
-            ctx,
-            {
-                'display': lambda c: "Set setting (currently {0})".format(settings_mention(c, 'setting_id')),
-                'converter_args': [("What do you want to set the setting to?", "setting channel", commands.TextChannelConverter)],
-                'callback': utils.SettingsMenuOption.get_set_guild_settings_callback('guild_settings', 'setting_id'),
-            },
-        )
-        try:
-            await menu.start(ctx)
-            await ctx.send("Done setting up!")
-        except utils.errors.InvokedMetaCommand:
-            pass
-
-    @commands.group(cls=utils.Group, enabled=False)
-    @commands.bot_has_permissions(send_messages=True, embed_links=True, add_reactions=True)
-    @utils.cooldown.cooldown(1, 60, commands.BucketType.member)
-    @commands.guild_only()
-    async def usersettings(self, ctx:utils.Context):
-        """Run the bot setup"""
-
-        # Make sure it's only run as its own command, not a parent
-        if ctx.invoked_subcommand is not None:
-            return
-
-        # Create settings menu
-        menu = utils.SettingsMenu()
-        settings_mention = utils.SettingsMenuOption.get_user_settings_mention
-        menu.bulk_add_options(
-            ctx,
-            {
-                'display': lambda c: "Set setting (currently {0})".format(settings_mention(c, 'setting_id')),
-                'converter_args': [("What do you want to set the setting to?", "setting channel", commands.TextChannelConverter)],
-                'callback': utils.SettingsMenuOption.get_set_user_settings_callback('user_settings', 'setting_id'),
-            },
-        )
-        try:
-            await menu.start(ctx)
-            await ctx.send("Done setting up!")
-        except utils.errors.InvokedMetaCommand:
-            pass
 
 
 def setup(bot:utils.Bot):
