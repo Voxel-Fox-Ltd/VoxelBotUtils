@@ -5,6 +5,39 @@ dm_uncaught_errors = false  # Whether or not to DM the owners when unhandled err
 default_prefix = "!"  # The prefix for the bot's commands
 event_webhook_url = ""  # Some events will be posted via webhook to this url
 
+# The intents that the bot should start with
+[intents]
+    # Guilds - recommended: true. Used for guild join/remove, channel create/delete/update, Bot.get_channel, Bot.guilds.
+    guilds = true
+    # Members - recommended: false (privileged intent). Used for member join/remove/update, Member.roles, Member.nick, User.name, etc.
+    members = false
+    # Bans - recommended: false. Used for member ban/unban.
+    bans = false
+    # Emojis - recommended: false. Used for guild emojis update, Bot.get_emoji, Guild.emojis.
+    emojis = false
+    # Integrations - recommended: false. Used for guild integrations update.
+    integrations = false
+    # Webhooks - recommended: false. Used for guild webhooks update.
+    webhooks = false
+    # Invites - recommended: false. Used for invite create/delete.
+    invites = false
+    # Voice states - recommended: false. Used for voice state update, VoiceChannel.members, Member.voice.
+    voice_states = false
+    # Presences - recommended: false (privileged intent). Used for member update (for activities and status), Member.status.
+    presences = false
+    # Guild messages - recommended: true. Used for message events in guilds.
+    guild_messages = true
+    # DM messages - recommended: true. Used for message events in DMs.
+    dm_messages = true
+    # Guild reactions - recommended: false. Used for [raw] reaction add/remove/clear events in guilds.
+    guild_reactions = false
+    # DM reactions - recommended: false. Used for [raw] reaction add/remove/clear events in DMs.
+    dm_reactions = false
+    # Guild typing - recommended: false. Used for the typing event in guilds.
+    guild_typing = false
+    # DM typing - recommended: false. Used for the typing event in Dms.
+    dm_typing = false
+
 # Data used to send API requests to whatever service
 [bot_listing_api_keys]
     topgg_token = ""  # The token used to post data to top.gg
