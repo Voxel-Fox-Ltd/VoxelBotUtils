@@ -112,6 +112,25 @@ class ContextEmbed(discord.Embed):
         super().add_field(name=name, value=value, inline=inline)
         return self
 
+    def get_field_by_key(self, key:str) -> dict:
+        """
+        Return the data from a field given its key
+
+        Args:
+            key (str): The name of the field you want to get the data for
+
+        Returns:
+            dict: A dictionary of the attrs for that field
+
+        Raises:
+            KeyError: If the given key doesn't exist in the embed
+        """
+
+        for index, field in enumerate(self.fields):
+            if field.name == key:
+                return {'name': field.name, 'value': field.value, 'inline': field.inline}
+        raise KeyError("Key not found in embed")
+
     def edit_field_by_index(self, index:int, *, name:str=None, value:str=None, inline:bool=None) -> 'ContextEmbed':
         """
         Edit a field in the embed using its index.
