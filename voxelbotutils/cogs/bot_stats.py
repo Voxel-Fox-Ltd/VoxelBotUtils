@@ -75,7 +75,7 @@ class BotStats(utils.Cog):
                 except Exception:
                     data = {}
             if "points" in data and "monthlyPoints" in data:
-                embed.add_field("Bot Votes", f"Top.gg: {data['points']} ({data['monthlyPoints']} this month)")
+                embed.add_field("Bot Votes", f"[Top.gg](https://top.gg/bot/{self.bot.user.id}): {data['points']} ({data['monthlyPoints']} this month)")
 
         # Get discordbotlist data
         if self.bot.config.get('bot_listing_api_keys', {}).get("discordbotlist_token"):
@@ -87,7 +87,16 @@ class BotStats(utils.Cog):
             if "upvotes" in data and "metrics" in data:
                 content = {
                     "name": "Bot Votes",
-                    "value": f"DiscordBotList.com: {data['metrics']['upvotes']} ({data['upvotes']} this month)"
+                    "value": f"[DiscordBotList.com](https://discordbotlist.com/bots/{self.bot.user.id}): {data['metrics']['upvotes']} ({data['upvotes']} this month)"
+                }
+                try:
+                    embed.edit_field_by_key("Bot Votes", **content)
+                except KeyError:
+                    embed.add_field(**content)
+            elif "upvotes" in data:
+                content = {
+                    "name": "Bot Votes",
+                    "value": f"[DiscordBotList.com](https://discordbotlist.com/bots/{self.bot.user.id}): {data['upvotes']}"
                 }
                 try:
                     embed.edit_field_by_key("Bot Votes", **content)
