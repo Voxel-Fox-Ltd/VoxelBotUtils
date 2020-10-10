@@ -55,7 +55,7 @@ class CustomBot(commands.AutoShardedBot):
 
     def __init__(
             self, config_file:str='config/config.toml', logger:logging.Logger=None, activity:discord.Activity=discord.Game(name="Reconnecting..."),
-            status:discord.Status=discord.Status.dnd, case_insensitive:bool=True, intents:discord.Intents=discord.Intents.none(),
+            status:discord.Status=discord.Status.dnd, case_insensitive:bool=True, intents:discord.Intents=None,
             allowed_mentions:discord.AllowedMentions=discord.AllowedMentions(everyone=False), *args, **kwargs):
         """
         Args:
@@ -77,7 +77,10 @@ class CustomBot(commands.AutoShardedBot):
         self.reload_config()
 
         # Let's work out our intents
-        intents = discord.Intents(**self.config.get('intents', {}))
+        if self.config.get('intents', {}):
+            intents = discord.Intents(**self.config.get('intents', {}))
+        else:
+            intents = discord.Intents(guilds=True, guild_messages=True, dm_messages=True)
 
         # Run original
         super().__init__(
