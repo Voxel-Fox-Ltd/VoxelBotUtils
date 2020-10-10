@@ -166,7 +166,7 @@ class ErrorHandler(utils.Cog):
         if output:
             try:
                 _, _ = output
-            except TypeError:
+            except ValueError:
                 output = (output,)
             return await self.send_to_ctx_or_author(ctx, *output)
 
