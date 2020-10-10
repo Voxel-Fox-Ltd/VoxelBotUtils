@@ -14,11 +14,11 @@ class ErrorHandler(utils.Cog):
     COMMAND_ERROR_RESPONSES = (
         (
             utils.errors.MissingRequiredArgumentString,
-            lambda ctx, error: f"You're missing the `{error.param}` argument, which is required for this command - see `{ctx.clean_prefix}help {ctx.command.name}`."
+            lambda ctx, error: f"You're missing the `{error.param}` argument, which is required for this command - see `{ctx.clean_prefix}help {ctx.invoked_with}`."
         ),
         (
             commands.MissingRequiredArgument,
-            lambda ctx, error: f"You're missing the `{error.param.name}` argument, which is required for this command - see `{ctx.clean_prefix}help {ctx.command.name}`."
+            lambda ctx, error: f"You're missing the `{error.param.name}` argument, which is required for this command - see `{ctx.clean_prefix}help {ctx.invoked_with}`."
         ),
         (
             (commands.UnexpectedQuoteError, commands.InvalidEndOfQuotedStringError, commands.ExpectedClosingQuoteError),
@@ -78,7 +78,7 @@ class ErrorHandler(utils.Cog):
         ),
         (
             commands.TooManyArguments,
-            lambda ctx, error: f"You gave too many arguments to this command - see `{ctx.clean_prefix}help {ctx.command.name}`."
+            lambda ctx, error: f"You gave too many arguments to this command - see `{ctx.clean_prefix}help {ctx.invoked_with}`."
         ),
         (
             discord.NotFound,
