@@ -93,6 +93,15 @@ class DatabaseConnection(object):
             typing.Union[typing.List[dict], None]: The list of rows that were returned from the database.
         """
 
+        # Check we don't want to describe the table
+        if sql.casefold().startswith("describe table "):
+            table_name = sql[len("describe table "):].strip("; ")
+            return await self.__call__(
+                """SELECT column_name, column_default, is_nullable, data_type, character_maximum_length
+                FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name=$1""",
+                table_name,
+            )
+
         # Runs the SQL
         self.logger.debug(f"Running SQL: {sql} {args!s}")
         if 'select' in sql.casefold() or 'returning' in sql.casefold():
