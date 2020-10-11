@@ -188,7 +188,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         spacer_working = ""
         for header in headers:
             header_working += format(header, f" <{column_widths[header]}") + "|"
-            spacer_working += "-" * column_widths[header] + "|"
+            spacer_working += "-" * column_widths[header] + "+"
         lines.insert(0, spacer_working[:-1])
         lines.insert(0, header_working[:-1])
 
