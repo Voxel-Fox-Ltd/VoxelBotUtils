@@ -152,7 +152,7 @@ class CustomBot(commands.AutoShardedBot):
                 self.guild_settings[row['guild_id']][key] = value
 
         # Get default user settings
-        default_user_settings = await db("SELECT * FROM user_settings WHERE guild_id=0")
+        default_user_settings = await db("SELECT * FROM user_settings WHERE user_id=0")
         if not default_user_settings:
             default_user_settings = await db("INSERT INTO user_settings (user_id) VALUES (0) RETURNING *")
         for i, o in default_user_settings[0].items():
