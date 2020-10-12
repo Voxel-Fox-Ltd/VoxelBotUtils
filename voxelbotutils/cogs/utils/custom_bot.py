@@ -294,6 +294,10 @@ class CustomBot(commands.AutoShardedBot):
             str: The HTML for a log file.
         """
 
+        # Let's flatten the messages if we need to
+        if isinstance(messages, discord.iterators.HistoryIterator):
+            messages = await messages.flatten()
+
         # Create the data we're gonna send
         data = {
             "channel_name": messages[0].channel.name,
@@ -303,10 +307,6 @@ class CustomBot(commands.AutoShardedBot):
         }
         data_authors = {}
         data_messages = []
-
-        # Let's flatten the messages if we need to
-        if isinstance(messages, discord.iterators.HistoryIterator):
-            messages = await messages.flatten()
 
         # Get the data from the server
         for message in messages:
