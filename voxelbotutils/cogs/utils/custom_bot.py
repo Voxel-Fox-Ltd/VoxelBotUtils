@@ -285,6 +285,62 @@ class CustomBot(commands.AutoShardedBot):
         except Exception:
             return  # Ah well
 
+    async def create_message_log(self, messages:typing.List[discord.Message]) -> str:
+        """
+        Args:
+            messages (typing.List[discord.Message]): The messages you want to create into a log.
+
+        Returns:
+            str: The HTML for a log file.
+        """
+
+        # Create the data we're gonna send
+        data = {
+            "channel_name": messages[0].channel.name,
+            "category_name": messages[0].channel.category.name,
+            "guild_name": messages[0].guild.name,
+            "guild_icon_url": str(messages[0].guild.icon_url),
+        }
+        data_authors = {}
+        data_messages = []
+
+        # Let's flatten the messages if we need to
+        if isinstance(messages, discord.iterators.HistoryIterator):
+            messages = await messages.flatten()
+
+        # Get the data from the server
+        for message in messages:
+            for user in message.mentions + [message.author]:
+                data_authors[user.id] = {
+                    "username": user.name,
+                    "discriminator": user.discriminator,
+                    "avatar_url": str(user.avatar_url),
+                    "bot": user.bot,
+                    "display_name": user.display_name,
+                    "color": user.colour.value,
+                }
+            message_data = {
+                "id": message.id,
+                "content": message.content,
+                "author_id": message.author.id,
+                "timestamp": int(message.created_at.timestamp()),
+                "attachments": [str(i.url) for i in message.attachments],
+                # "embeds": [i.to_dict() for i in message.embeds],
+            }
+            embeds = []
+            for i in message.embeds:
+                embed_data = i.to_dict()
+                if i.timestamp:
+                    embed_data.update({'timestamp': i.timestamp.timestamp()})
+                embeds.append(embed_data)
+            message_data.update({'embeds': embeds})
+            data_messages.append(message_data)
+
+        # Send data to the API
+        data.update({"users": data_authors, "messages": data_messages[::-1]})
+        async with self.session.post("https://voxelfox.co.uk/discord/chatlog", json=data) as r:
+            return await r.text()
+
     @property
     def owner_ids(self) -> list:
         return self.config['owners']
