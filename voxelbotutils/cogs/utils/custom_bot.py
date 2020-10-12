@@ -119,6 +119,17 @@ class CustomBot(commands.AutoShardedBot):
         Clears all the bot's caches and fills them from a DB read
         """
 
+        try:
+            await self._startup()
+        except Exception as e:
+            self.logger.error(e)
+            exit(1)
+
+    async def _startup(self):
+        """
+        Runs the actual db stuff so I can wrap it in a try
+        """
+
         # Remove caches
         self.logger.debug("Clearing caches")
         self.guild_settings.clear()
@@ -139,6 +150,13 @@ class CustomBot(commands.AutoShardedBot):
         for row in data:
             for key, value in row.items():
                 self.guild_settings[row['guild_id']][key] = value
+
+        # Get default user settings
+        default_user_settings = await db("SELECT * FROM user_settings WHERE guild_id=0")
+        if not default_user_settings:
+            default_user_settings = await db("INSERT INTO user_settings (user_id) VALUES (0) RETURNING *")
+        for i, o in default_user_settings[0].items():
+            self.DEFAULT_USER_SETTINGS.setdefault(i, o)
 
         # Get user settings
         data = await self._get_all_table_data(db, "user_settings")
