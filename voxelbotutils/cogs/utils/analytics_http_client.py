@@ -1,3 +1,4 @@
+import aiohttp
 import discord
 
 
@@ -65,8 +66,14 @@ class AnalyticsHTTPClient(discord.client.HTTPClient):
         v.token = client.token
         v.bot_token = client.bot_token
         v.user_agent = client.user_agent
-        v.recreate()
+        v.recreate(force=True)
         return v
+
+    def recreate(self, *, force:bool=False):
+        if force:
+            self.__session = aiohttp.ClientSession(connector=self.connector, ws_response_class=discord.gateway.DiscordClientWebSocketResponse)
+            return
+        return super().recreate()
 
     async def request(self, route, *args, **kwargs):
         stats_route_name = self.EVENT_NAMES.get((route.path, route.method), None)
