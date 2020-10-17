@@ -90,9 +90,9 @@ class CustomBot(commands.AutoShardedBot):
             allowed_mentions=allowed_mentions, *args, **kwargs,
         )
 
-        # Let's update the HTTP client because analytics is pretty fun my dudes
-        self.http = AnalyticsHTTPClient.from_http_client(self.http)
-        self.http.bot = self
+        # # Let's update the HTTP client because analytics is pretty fun my dudes
+        # self.http = AnalyticsHTTPClient.from_http_client(self.http)
+        # self.http.bot = self
 
         # Set up our default guild settings
         self.DEFAULT_GUILD_SETTINGS = {
