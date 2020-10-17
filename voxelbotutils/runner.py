@@ -240,12 +240,6 @@ def run_bot(bot:Bot) -> None:
     re_connect = start_redis_pool(bot)
     loop.run_until_complete(re_connect)
 
-    # Connect to statsd
-    if bot.config.get("statsd", {}).get("enabled"):
-        StatsdConnection.config = bot.config.get("statsd", {})
-    else:
-        logger.info("Statsd connection has been disabled")
-
     # Load the bot's extensions
     logger.info('Loading extensions... ')
     bot.load_all_extensions()

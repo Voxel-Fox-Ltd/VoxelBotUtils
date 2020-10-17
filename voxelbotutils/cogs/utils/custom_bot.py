@@ -120,6 +120,7 @@ class CustomBot(commands.AutoShardedBot):
 
         # Allow Statsd connections like this
         self.stats = StatsdConnection
+        self.stats.config = self.config['statsd']
         self.stats.logger = self.logger.getChild('statsd')
 
         # Store the startup method so I can see if it completed successfully
