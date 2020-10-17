@@ -49,7 +49,9 @@ class RedisConnection(object):
         del self
 
     async def __aenter__(self):
-        return await self.get_connection()
+        v = await self.get_connection()
+        self.conn = v.conn
+        return self
 
     async def __aexit__(self, exc_type, exc, tb):
         await self.disconnect()
