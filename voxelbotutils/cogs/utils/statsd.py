@@ -91,29 +91,29 @@ class StatsdConnection(object):
     async def __aexit__(self, exc_type, exc, tb):
         await self.disconnect()
 
-    @property
-    def increment(self):
-        return self.conn.increment
+    def increment(self, event, *args, **kwargs):
+        self.logger.debug(f"Pinging statsd increment for event {event}")
+        return self.conn.increment(event, *args, **kwargs)
 
-    @property
-    def decrement(self):
-        return self.conn.decrement
+    def decrement(self, event, *args, **kwargs):
+        self.logger.debug(f"Pinging statsd decrement for event {event}")
+        return self.conn.decrement(event, *args, **kwargs)
 
-    @property
-    def gauge(self):
-        return self.conn.gauge
+    def gauge(self, event, *args, **kwargs):
+        self.logger.debug(f"Pinging statsd gauge for event {event}")
+        return self.conn.gauge(event, *args, **kwargs)
 
-    @property
-    def histogram(self):
-        return self.conn.histogram
+    def histogram(self, event, *args, **kwargs):
+        self.logger.debug(f"Pinging statsd histogram for event {event}")
+        return self.conn.histogram(event, *args, **kwargs)
 
-    @property
-    def distribution(self):
-        return self.conn.distribution
+    def distribution(self, event, *args, **kwargs):
+        self.logger.debug(f"Pinging statsd distribution for event {event}")
+        return self.conn.distribution(event, *args, **kwargs)
 
-    @property
-    def timing(self):
-        return self.conn.timing
+    def timing(self, event, *args, **kwargs):
+        self.logger.debug(f"Pinging statsd timing for event {event}")
+        return self.conn.timing(event, *args, **kwargs)
 
     @property
     def timeit(self):
