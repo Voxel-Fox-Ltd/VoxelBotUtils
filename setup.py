@@ -1,5 +1,4 @@
 import setuptools
-from voxelbotutils import __version__
 
 
 try:
@@ -16,6 +15,9 @@ requirements = [
     "aioredis",
     "aiodogstatsd",
 ]
+
+
+__version__ = "0.0.7"
 
 
 setuptools.setup(
