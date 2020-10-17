@@ -19,6 +19,12 @@ class _FakeContextManager(object):
     def __exit__(self, *args, **kwargs):
         pass
 
+    async def __aenter__(self, *args, **kwargs):
+        return self
+
+    async def __aexit__(self, *args, **kwargs):
+        pass
+
 
 class _FakeStatsdConnection(object):
 

@@ -163,6 +163,8 @@ class ErrorHandler(utils.Cog):
             if isinstance(error, error_types):
                 output = function(ctx, error)
                 break
+        if isinstance(error, commands.NotOwner) and output in ctx.message.content:
+            output = "😒"
         if output:
             try:
                 _, _ = output

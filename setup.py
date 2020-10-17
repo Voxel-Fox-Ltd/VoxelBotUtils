@@ -1,23 +1,22 @@
 import setuptools
 from voxelbotutils import __version__
 
+
 try:
     with open("README.md", "r") as a:
         long_description = a.read()
 except Exception:
     long_description = ""
 
-requirements = []
-try:
-    with open("requirements.txt", "r") as a:
-        requirements_string = a.read()
-    for line in requirements_string.strip().split('\n'):
-        if line.startswith('#') or not line.strip():
-            pass
-        else:
-            requirements.append(line.strip())
-except Exception:
-    pass
+
+requirements = [
+    "discord.py>=1.5.0",
+    "toml",
+    "asyncpg",
+    "aioredis",
+    "aiodogstatsd",
+]
+
 
 setuptools.setup(
     name="voxelbotutils",

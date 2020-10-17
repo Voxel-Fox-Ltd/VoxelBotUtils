@@ -17,6 +17,7 @@ from .custom_context import CustomContext
 from .database import DatabaseConnection
 from .redis import RedisConnection
 from .statsd import StatsdConnection
+from .analytics_http_client import AnalyticsHTTPClient
 from .. import all_packages as all_vfl_package_names
 
 
@@ -87,6 +88,15 @@ class CustomBot(commands.AutoShardedBot):
         super().__init__(
             command_prefix=get_prefix, activity=activity, status=status, case_insensitive=case_insensitive, intents=intents,
             allowed_mentions=allowed_mentions, *args, **kwargs,
+        )
+
+        # Let's update the HTTP client because analytics is pretty fun my dudes
+        self.http = AnalyticsHTTPClient(
+            connector=self.http.connector,
+            proxy=self.http.proxy,
+            proxy_auth=self.http.proxy_auth,
+            loop=self.http.loop,
+            unsync_clock=not self.http.use_clock,
         )
 
         # Set up our default guild settings
@@ -492,3 +502,22 @@ class CustomBot(commands.AutoShardedBot):
         self.logger.info("Setting activity to default")
         await self.set_default_presence()
         self.logger.info('Bot loaded.')
+
+    async def _run_event(self, coro, event_name, *args, **kwargs):
+        # I don't know why Danny bothered to add an event_name argument here,
+        # but having it is exceedingly helpful
+        # Thanks Daniel
+        async with self.stats() as stats:
+            stats.increment(f"discord.gateway.{event_name}")
+        await super()._run_event(coro, event_name, *args, **kwargs)
+
+    async def invoke(self, ctx):
+        # Let's just hook into the invoke method so that we can
+        # count command runs
+        if ctx.command is None:
+            return await super().invoke(ctx)
+        async with self.stats() as stats:
+            command_stats_name = ctx.command.qualified_name.replace(' ', ':')
+            stats.increment(f"bot.commands.{command_stats_name}")
+            with stats.timeit(f"bot.commands.{command_stats_name}"):
+                return await super().invoke(ctx)
