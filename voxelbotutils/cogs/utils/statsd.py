@@ -66,8 +66,10 @@ class StatsdConnection(object):
 
         config = cls.config.copy()
         if not config.get("namespace"):
+            cls.logger.debug("Creating fake Statsd connection")
             conn = _FakeStatsdConnection()
         else:
+            cls.logger.debug("Creating real Statsd connection")
             conn = aiodogstatsd.Client(**config)
         await conn.connect()
         return cls(conn)
