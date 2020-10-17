@@ -520,6 +520,6 @@ class CustomBot(commands.AutoShardedBot):
             return await super().invoke(ctx)
         async with self.stats() as stats:
             command_stats_name = ctx.command.qualified_name.replace(' ', ':')
-            stats.increment(f"bot.commands.{command_stats_name}")
-            with stats.timeit(f"bot.commands.{command_stats_name}"):
+            stats.increment(f"discord.bot.commands.{command_stats_name}")
+            with stats.timeit(f"discord.bot.commands.{command_stats_name}"):
                 return await super().invoke(ctx)
