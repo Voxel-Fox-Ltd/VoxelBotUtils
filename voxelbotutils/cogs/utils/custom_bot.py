@@ -98,6 +98,7 @@ class CustomBot(commands.AutoShardedBot):
             loop=self.http.loop,
             unsync_clock=not self.http.use_clock,
         )
+        self.http.bot = self
 
         # Set up our default guild settings
         self.DEFAULT_GUILD_SETTINGS = {
