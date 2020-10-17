@@ -51,6 +51,23 @@ class AnalyticsHTTPClient(discord.client.HTTPClient):
         ('GET', '/users/{user_id}'): 'get_user',
     }
 
+    @classmethod
+    def from_http_client(cls, client:discord.client.HTTPClient):
+        v = cls(
+            connector=client.connector,
+            proxy=client.proxy,
+            proxy_auth=client.proxy_auth,
+            loop=client.loop,
+            unsync_clock=not client.use_clock,
+        )
+        v.__session = client.__session
+        v._locks = client._locks
+        v._global_over = client._global_over
+        v.token = client.token
+        v.bot_token = client.bot_token
+        v.user_agent = client.user_agent
+        return v
+
     async def request(self, route, *args, **kwargs):
         stats_route_name = self.EVENT_NAMES.get((route.path, route.method), None)
         if stats_route_name:
