@@ -91,14 +91,8 @@ class CustomBot(commands.AutoShardedBot):
         )
 
         # Let's update the HTTP client because analytics is pretty fun my dudes
-        self.http = AnalyticsHTTPClient(
-            connector=self.http.connector,
-            proxy=self.http.proxy,
-            proxy_auth=self.http.proxy_auth,
-            loop=self.http.loop,
-            unsync_clock=not self.http.use_clock,
-        )
         self.http.bot = self
+        self.http.request = AnalyticsHTTPClient.request
 
         # Set up our default guild settings
         self.DEFAULT_GUILD_SETTINGS = {
