@@ -13,6 +13,9 @@ async def _fake_async_stats_collection_function(*args, **kwargs):
 
 class _FakeContextManager(object):
 
+    def __init__(self, *args, **kwargs):
+        pass
+
     def __enter__(self, *args, **kwargs):
         return self
 
@@ -39,7 +42,7 @@ class _FakeStatsdConnection(object):
         self.distribution = _fake_stats_collection_function
         self.timing = _fake_stats_collection_function
 
-        self.timeit = _FakeContextManager()
+        self.timeit = _FakeContextManager
 
 
 class StatsdConnection(object):
