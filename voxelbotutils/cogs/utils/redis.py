@@ -32,13 +32,6 @@ class RedisConnection(object):
         address = modified_config.pop('host'), modified_config.pop('port')
         cls.pool = await aioredis.create_redis_pool(address, **modified_config)
 
-    async def __aenter__(self):
-        self.conn = self.pool
-        return self
-
-    async def __aexit__(self, exc_type, exc, tb):
-        pass
-
     @classmethod
     async def get_connection(cls):
         """
@@ -54,6 +47,12 @@ class RedisConnection(object):
         """
 
         del self
+
+    async def __aenter__(self):
+        return await self.get_connection()
+
+    async def __aexit__(self, exc_type, exc, tb):
+        await self.disconnect()
 
     async def publish_json(self, channel:str, json:dict) -> None:
         """

@@ -56,19 +56,19 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
 
 # This data is passed directly over to asyncpg.connect()
 [database]
+    enabled = false
     user = "database_username"
     password = "database_password"
     database = "database_name"
     host = "127.0.0.1"
     port = 5432
-    enabled = false
 
 # This data is passed directly over to aioredis.connect()
 [redis]
+    enabled = false
     host = "127.0.0.1"
     port = 6379
     db = 0
-    enabled = false
 
 # The data that gets shoves into custom context for the embed
 [embed]
@@ -93,9 +93,17 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
 [oauth]
     client_id = ""
 
-# This is where you can set up all of your analytics to be sent to GA
+# This is where you can set up all of your analytics to be sent to GA; automatically disabled if no data is provided
 [google_analytics]
     tracking_id = ""  # Tracking ID for your GA instance
     app_name = ""  # The name of your bot - what you want GA to name this traffic source
     document_host = ""  # The (possibly fake) URL you want to tell GA this website is
+
+# It's time for better analytics! Let's give statsd a little try
+[statsd]
+    namespace = ""  # Put your bot name here - if there isn't one then statsd will just stay disabled
+    host = "127.0.0.1"
+    port = 9125
+    [statsd.constant_tags]
+        service = "discord_bot"
 """

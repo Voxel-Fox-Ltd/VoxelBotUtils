@@ -3,10 +3,10 @@ import asyncio
 import logging
 import sys
 import typing
-import textwrap
 
 from .cogs.utils.database import DatabaseConnection
 from .cogs.utils.redis import RedisConnection
+from .cogs.utils.statsd import StatsdConnection
 from .cogs.utils.custom_bot import CustomBot as Bot
 
 
@@ -90,6 +90,10 @@ def get_default_program_arguments(include_config_file:bool=True) -> argparse.Arg
         "--loglevel-redis", default=None,
         help="Logging level for redis - probably most useful is INFO and DEBUG"
     )
+    parser.add_argument(
+        "--loglevel-statsd", default=None,
+        help="Logging level for statsd - probably most useful is INFO and DEBUG"
+    )
     return parser
 
 
@@ -139,12 +143,14 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     set_log_level(logger, args.loglevel)
     set_log_level(bot.database.logger, args.loglevel)
     set_log_level(bot.redis.logger, args.loglevel)
+    set_log_level(bot.stats.logger, args.loglevel)
     set_log_level('discord', args.loglevel)
 
     # Set loglevels by config
     set_log_level(logger, args.loglevel_bot)
     set_log_level(bot.database.logger, args.loglevel_database)
     set_log_level(bot.redis.logger, args.loglevel_redis)
+    set_log_level(bot.stats.logger, args.loglevel_statsd)
     set_log_level('discord', args.loglevel_discord)
 
 
@@ -233,6 +239,12 @@ def run_bot(bot:Bot) -> None:
     # Connect the redis pool
     re_connect = start_redis_pool(bot)
     loop.run_until_complete(re_connect)
+
+    # Connect to statsd
+    if bot.config.get("statsd", {}).get("enabled"):
+        StatsdConnection.config = bot.config.get("statsd", {})
+    else:
+        logger.info("Statsd connection has been disabled")
 
     # Load the bot's extensions
     logger.info('Loading extensions... ')

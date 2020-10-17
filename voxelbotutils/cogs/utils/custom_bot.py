@@ -16,6 +16,7 @@ from discord.ext import commands
 from .custom_context import CustomContext
 from .database import DatabaseConnection
 from .redis import RedisConnection
+from .statsd import StatsdConnection
 from .. import all_packages as all_vfl_package_names
 
 
@@ -105,6 +106,10 @@ class CustomBot(commands.AutoShardedBot):
         # Allow redis connections like this
         self.redis = RedisConnection
         self.redis.logger = self.logger.getChild('redis')
+
+        # Allow Statsd connections like this
+        self.stats = StatsdConnection
+        self.stats.logger = self.logger.getChild('statsd')
 
         # Store the startup method so I can see if it completed successfully
         self.startup_time = dt.now()
