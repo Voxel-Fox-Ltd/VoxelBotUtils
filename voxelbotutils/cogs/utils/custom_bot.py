@@ -513,9 +513,9 @@ class CustomBot(commands.AutoShardedBot):
         command_stats_name = ctx.command.qualified_name.replace(' ', ':')
         command_stats_tags = {
             "command_name": command_stats_name,
-            "guild_id": "DMs" if ctx.guild is None else ctx.guild.id,
-            "user_id": ctx.author.id,
-            "channel_id": "DMs" if ctx.guild is None else ctx.channel.id,
+            # "guild_id": "DMs" if ctx.guild is None else ctx.guild.id,
+            # "user_id": ctx.author.id,
+            # "channel_id": "DMs" if ctx.guild is None else ctx.channel.id,
         }
         async with self.stats() as stats:
             stats.increment("discord.bot.commands", tags=command_stats_tags)
