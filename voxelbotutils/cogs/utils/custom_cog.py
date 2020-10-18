@@ -4,6 +4,7 @@ import re as regex
 from discord.ext.commands import Cog as OriginalCog
 
 from .custom_bot import CustomBot
+from .database import DatabaseConnection
 
 
 class CustomCog(OriginalCog):
@@ -35,3 +36,9 @@ class CustomCog(OriginalCog):
         """
 
         return regex.sub(r"(?:[A-Z])(?:(?:[a-z0-9])+|[A-Z]+$|[A-Z]+(?=[A-Z]))?", "\\g<0> ", self.__cog_name__.replace(' ', '')).strip()
+
+    async def cache_setup(self, database:DatabaseConnection):
+        """
+        A method that gets run when the bot's startup method is run - intended for setting up cached information
+        in the bot object that aren't in the guild_settings or user_settings tables
+        """

@@ -90,10 +90,6 @@ class CustomBot(commands.AutoShardedBot):
             allowed_mentions=allowed_mentions, connector=kwargs.pop("connector", AnalyticsBaseConnector(self)), *args, **kwargs,
         )
 
-        # # Let's update the HTTP client because analytics is pretty fun my dudes
-        # self.http = AnalyticsHTTPClient.from_http_client(self.http)
-        # self.http.bot = self
-
         # Set up our default guild settings
         self.DEFAULT_GUILD_SETTINGS = {
             'prefix': self.config['default_prefix'],
@@ -174,6 +170,12 @@ class CustomBot(commands.AutoShardedBot):
         for row in data:
             for key, value in row.items():
                 self.user_settings[row['user_id']][key] = value
+
+        # Run the user-added startup methods
+        async def fake_cache_setup_method(db):
+            pass
+        for cog_name, cog in self.cogs.items():
+            self.loop.create_task(getattr(cog, "cache_setup", fake_cache_setup_method)(db))
 
         # Wait for the bot to cache users before continuing
         self.logger.debug("Waiting until ready before completing startup method.")
