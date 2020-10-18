@@ -1,83 +1,66 @@
+import re
+
 import aiohttp
-import discord
 
 
-class AnalyticsHTTPClient(discord.client.HTTPClient):
+class AnalyticsBaseConnector(aiohttp.BaseConnector):
     """Woah sometimes it's nice to send stats requests as well"""
 
-    bot = None
-
     EVENT_NAMES = {
-        ('POST', '/channels/{channel_id}/messages'): 'send_message',
-        ('DELETE', '/channels/{channel_id}/messages/{message_id}'): 'delete_message',
-        ('POST', '/channels/{channel_id}/messages/bulk_delete'): 'bulk_delete',
-        ('PATCH', '/channels/{channel_id}/messages/{message_id}'): 'edit_message',
-        ('PUT', '/channels/{channel_id}/messages/{message_id}/reactions/{emoji}/@me'): 'add_reaction',
-        ('DELETE', '/channels/{channel_id}/messages/{message_id}/reactions/{emoji}/{member_id}'): 'remove_reaction',
-        ('DELETE', '/channels/{channel_id}/messages/{message_id}/reactions/{emoji}/@me'): 'remove_reaction',
-        ('GET', '/channels/{channel_id}/messages/{message_id}/reactions/{emoji}'): 'get_reaction_users',
-        ('DELETE', '/channels/{channel_id}/messages/{message_id}/reactions'): 'clear_reactions',
-        ('DELETE', '/channels/{channel_id}/messages/{message_id}/reactions/{emoji}'): 'clear_single_reaction',
-        ('GET', '/channels/{channel_id}/messages/{message_id}'): 'get_message',
-        ('GET', '/channels/{channel_id}'): 'get_channel',
-        ('DELETE', '/guilds/{guild_id}/members/{user_id}'): 'kick',
-        ('PUT', '/guilds/{guild_id}/bans/{user_id}'): 'ban',
-        ('DELETE', '/guilds/{guild_id}/bans/{user_id}'): 'unban',
-        ('PATCH', '/guilds/{guild_id}/members/@me/nick'): 'change_nickname',
-        ('PATCH', '/guilds/{guild_id}/members/{user_id}'): 'edit_member',
-        ('PATCH', '/channels/{channel_id}'): 'edit_channel',
-        ('POST', '/guilds/{guild_id}/channels'): 'create_channel',
-        ('DELETE', '/channels/{channel_id}'): 'delete_channel',
-        ('GET', '/users/@me/guilds'): 'get_guilds',
-        ('GET', '/guilds/{guild_id}'): 'get_guild',
-        ('PATCH', '/guilds/{guild_id}'): 'edit_guild',
-        ('GET', '/guilds/{guild_id}/bans'): 'get_bans',
-        ('GET', '/guilds/{guild_id}/bans/{user_id}'): 'get_ban',
-        ('GET', '/guilds/{guild_id}/channels'): 'get_channels',
-        ('GET', '/guilds/{guild_id}/members'): 'get_members',
-        ('GET', '/guilds/{guild_id}/members/{member_id}'): 'get_member',
-        ('GET', '/guilds/{guild_id}/emojis'): 'get_custom_emojis',
-        ('GET', '/guilds/{guild_id}/emojis/{emoji_id}'): 'get_custom_emoji',
-        ('POST', '/guilds/{guild_id}/emojis'): 'create_custom_emoji',
-        ('DELETE', '/guilds/{guild_id}/emojis/{emoji_id}'): 'delete_custom_emoji',
-        ('GET', '/guilds/{guild_id}/audit-logs'): 'get_audit_logs',
-        ('GET', '/guilds/{guild_id}/roles'): 'get_roles',
-        ('PATCH', '/guilds/{guild_id}/roles/{role_id}'): 'edit_role',
-        ('DELETE', '/guilds/{guild_id}/roles/{role_id}'): 'delete_role',
-        ('PATCH', '/guilds/{guild_id}/roles'): 'move_role_position',
-        ('PUT', '/guilds/{guild_id}/members/{user_id}/roles/{role_id}'): 'add_member_role',
-        ('DELETE', '/guilds/{guild_id}/members/{user_id}/roles/{role_id}'): 'remove_member_role',
-        ('PUT', '/channels/{channel_id}/permissions/{target}'): 'edit_channel_permissions',
-        ('DELETE', '/channels/{channel_id}/permissions/{target}'): 'remove_channel_permissions',
-        ('GET', '/users/{user_id}'): 'get_user',
+        ('POST', re.compile(r'/channels/([0-9]{15,23})/messages', re.IGNORECASE)): 'send_message',
+        ('GET', re.compile(r'/users/([0-9]{15,23})', re.IGNORECASE)): 'get_user',
+        ('GET', re.compile('/users/@me/guilds', re.IGNORECASE)): 'get_guilds',
+        ('GET', re.compile(r'/guilds/([0-9]{15,23})', re.IGNORECASE)): 'get_guild',
+        ('PUT', re.compile(r'/channels/([0-9]{15,23})/messages/([0-9]{15,23})/reactions/(.+)/@me', re.IGNORECASE)): 'add_reaction',
+        ('DELETE', re.compile(r'/channels/([0-9]{15,23})/messages/([0-9]{15,23})', re.IGNORECASE)): 'delete_message',
+        ('GET', re.compile(r'/channels/([0-9]{15,23})', re.IGNORECASE)): 'get_channel',
+        ('DELETE', re.compile(r'/guilds/([0-9]{15,23})/members/([0-9]{15,23})', re.IGNORECASE)): 'kick',
+        ('PUT', re.compile(r'/guilds/([0-9]{15,23})/bans/([0-9]{15,23})', re.IGNORECASE)): 'ban',
+        ('DELETE', re.compile(r'/guilds/([0-9]{15,23})/bans/([0-9]{15,23})', re.IGNORECASE)): 'unban',
+        ('PATCH', re.compile(r'/guilds/([0-9]{15,23})/members/@me/nick', re.IGNORECASE)): 'change_nickname',
+        ('PATCH', re.compile(r'/guilds/([0-9]{15,23})/members/([0-9]{15,23})', re.IGNORECASE)): 'edit_member',
+        ('POST', re.compile(r'/channels/([0-9]{15,23})/messages/bulk_delete', re.IGNORECASE)): 'bulk_delete',
+        ('PATCH', re.compile(r'/channels/([0-9]{15,23})/messages/([0-9]{15,23})', re.IGNORECASE)): 'edit_message',
+        ('DELETE', re.compile(r'/channels/([0-9]{15,23})/messages/([0-9]{15,23})/reactions/(.+)/([0-9]{15,23})', re.IGNORECASE)): 'remove_reaction',
+        ('DELETE', re.compile(r'/channels/([0-9]{15,23})/messages/([0-9]{15,23})/reactions/(.+)/@me', re.IGNORECASE)): 'remove_reaction',
+        ('GET', re.compile(r'/channels/([0-9]{15,23})/messages/([0-9]{15,23})/reactions/(.+)', re.IGNORECASE)): 'get_reaction_users',
+        ('DELETE', re.compile(r'/channels/([0-9]{15,23})/messages/([0-9]{15,23})/reactions', re.IGNORECASE)): 'clear_reactions',
+        ('DELETE', re.compile(r'/channels/([0-9]{15,23})/messages/([0-9]{15,23})/reactions/(.+)', re.IGNORECASE)): 'clear_single_reaction',
+        ('GET', re.compile(r'/channels/([0-9]{15,23})/messages/([0-9]{15,23})', re.IGNORECASE)): 'get_message',
+        ('PATCH', re.compile(r'/channels/([0-9]{15,23})', re.IGNORECASE)): 'edit_channel',
+        ('POST', re.compile(r'/guilds/([0-9]{15,23})/channels', re.IGNORECASE)): 'create_channel',
+        ('DELETE', re.compile(r'/channels/([0-9]{15,23})', re.IGNORECASE)): 'delete_channel',
+        ('PATCH', re.compile(r'/guilds/([0-9]{15,23})', re.IGNORECASE)): 'edit_guild',
+        ('GET', re.compile(r'/guilds/([0-9]{15,23})/bans', re.IGNORECASE)): 'get_bans',
+        ('GET', re.compile(r'/guilds/([0-9]{15,23})/bans/([0-9]{15,23})', re.IGNORECASE)): 'get_ban',
+        ('GET', re.compile(r'/guilds/([0-9]{15,23})/channels', re.IGNORECASE)): 'get_channels',
+        ('GET', re.compile(r'/guilds/([0-9]{15,23})/members', re.IGNORECASE)): 'get_members',
+        ('GET', re.compile(r'/guilds/([0-9]{15,23})/members/([0-9]{15,23})', re.IGNORECASE)): 'get_member',
+        ('GET', re.compile(r'/guilds/([0-9]{15,23})/emojis', re.IGNORECASE)): 'get_custom_emojis',
+        ('GET', re.compile(r'/guilds/([0-9]{15,23})/emojis/([0-9]{15,23})', re.IGNORECASE)): 'get_custom_emoji',
+        ('POST', re.compile(r'/guilds/([0-9]{15,23})/emojis', re.IGNORECASE)): 'create_custom_emoji',
+        ('DELETE', re.compile(r'/guilds/([0-9]{15,23})/emojis/([0-9]{15,23})', re.IGNORECASE)): 'delete_custom_emoji',
+        ('GET', re.compile(r'/guilds/([0-9]{15,23})/audit-logs', re.IGNORECASE)): 'get_audit_logs',
+        ('GET', re.compile(r'/guilds/([0-9]{15,23})/roles', re.IGNORECASE)): 'get_roles',
+        ('PATCH', re.compile(r'/guilds/([0-9]{15,23})/roles/([0-9]{15,23})', re.IGNORECASE)): 'edit_role',
+        ('DELETE', re.compile(r'/guilds/([0-9]{15,23})/roles/([0-9]{15,23})', re.IGNORECASE)): 'delete_role',
+        ('PATCH', re.compile(r'/guilds/([0-9]{15,23})/roles', re.IGNORECASE)): 'move_role_position',
+        ('PUT', re.compile(r'/guilds/([0-9]{15,23})/members/([0-9]{15,23})/roles/([0-9]{15,23})', re.IGNORECASE)): 'add_member_role',
+        ('DELETE', re.compile(r'/guilds/([0-9]{15,23})/members/([0-9]{15,23})/roles/([0-9]{15,23})', re.IGNORECASE)): 'remove_member_role',
+        ('PUT', re.compile(r'/channels/([0-9]{15,23})/permissions/{target}', re.IGNORECASE)): 'edit_channel_permissions',
+        ('DELETE', re.compile(r'/channels/([0-9]{15,23})/permissions/{target}', re.IGNORECASE)): 'remove_channel_permissions',
     }
 
-    @classmethod
-    def from_http_client(cls, client:discord.client.HTTPClient):
-        v = cls(
-            connector=client.connector,
-            proxy=client.proxy,
-            proxy_auth=client.proxy_auth,
-            loop=client.loop,
-            unsync_clock=not client.use_clock,
-        )
-        v._locks = client._locks
-        v._global_over = client._global_over
-        v.token = client.token
-        v.bot_token = client.bot_token
-        v.user_agent = client.user_agent
-        v.recreate(force=True)
-        return v
+    def __init__(self, bot, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.bot = bot
 
-    def recreate(self, *, force:bool=False):
-        if force:
-            self.__session = aiohttp.ClientSession(connector=self.connector, ws_response_class=discord.gateway.DiscordClientWebSocketResponse)
-            return
-        return super().recreate()
-
-    async def request(self, route, *args, **kwargs):
-        stats_route_name = self.EVENT_NAMES.get((route.path, route.method), None)
-        if stats_route_name:
+    async def connect(self, request:aiohttp.ClientRequest):
+        for (method, path), event in self.EVENT_NAMES.items():
+            if request.method != method:
+                continue
+            if not path.search(str(request.url)):
+                continue
             async with self.bot.stats() as stats:
-                stats.increment(f"discord.api.{stats_route_name}")
-        return await super().request(route, *args, **kwargs)
+                stats.increment("discord.http", tags={"endpoint": event})
+        return await super().connect(request)

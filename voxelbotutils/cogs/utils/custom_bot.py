@@ -17,7 +17,7 @@ from .custom_context import CustomContext
 from .database import DatabaseConnection
 from .redis import RedisConnection
 from .statsd import StatsdConnection
-from .analytics_http_client import AnalyticsHTTPClient
+from .analytics_http_client import AnalyticsBaseConnector
 from .. import all_packages as all_vfl_package_names
 
 
@@ -87,7 +87,7 @@ class CustomBot(commands.AutoShardedBot):
         # Run original
         super().__init__(
             command_prefix=get_prefix, activity=activity, status=status, case_insensitive=case_insensitive, intents=intents,
-            allowed_mentions=allowed_mentions, *args, **kwargs,
+            allowed_mentions=allowed_mentions, connector=kwargs.pop("connector", AnalyticsBaseConnector(self)), *args, **kwargs,
         )
 
         # # Let's update the HTTP client because analytics is pretty fun my dudes
