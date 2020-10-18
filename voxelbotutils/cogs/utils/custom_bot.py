@@ -504,7 +504,7 @@ class CustomBot(commands.AutoShardedBot):
         # but having it is exceedingly helpful
         # Thanks Daniel
         async with self.stats() as stats:
-            stats.increment(f"discord.gateway.{event_name}")
+            stats.increment("discord.gateway", tags={"event_name": event_name})
         await super()._run_event(coro, event_name, *args, **kwargs)
 
     async def invoke(self, ctx):
@@ -514,6 +514,6 @@ class CustomBot(commands.AutoShardedBot):
             return await super().invoke(ctx)
         async with self.stats() as stats:
             command_stats_name = ctx.command.qualified_name.replace(' ', ':')
-            stats.increment(f"discord.bot.commands.{command_stats_name}")
-            with stats.timeit(f"discord.bot.commands.{command_stats_name}"):
+            stats.increment("discord.bot.commands", tags={"command_name": command_stats_name})
+            with stats.timeit("discord.bot.commands", tags={"command_name": command_stats_name}):
                 return await super().invoke(ctx)
