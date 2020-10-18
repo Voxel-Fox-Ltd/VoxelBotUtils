@@ -31,14 +31,20 @@ class Analytics(utils.Cog):
 
     def __init__(self, bot):
         super().__init__(bot)
+        self.post_statsd_guild_count.start()
         self.post_topgg_guild_count.start()
         self.post_discordbotlist_guild_count.start()
 
     def cog_unload(self):
+        self.logger.info("Stopping Statsd guild count poster loop")
+        self.post_statsd_guild_count.cancel()
         self.logger.info("Stopping Top.gg guild count poster loop")
         self.post_topgg_guild_count.cancel()
         self.logger.info("Stopping DiscordbotList.com guild count poster loop")
         self.post_discordbotlist_guild_count.cancel()
+
+    def get_effective_guild_count(self) -> int:
+        return int((len(self.bot.guilds) / len(self.bot.shard_ids)) * self.bot.shard_count)
 
     @tasks.loop(minutes=5)
     async def post_topgg_guild_count(self):
@@ -57,7 +63,7 @@ class Analytics(utils.Cog):
 
         url = f'https://top.gg/api/bots/{self.bot.user.id}/stats'
         data = {
-            'server_count': int((len(self.bot.guilds) / len(self.bot.shard_ids)) * self.bot.shard_count),
+            'server_count': self.get_effective_guild_count(),
             'shard_count': self.bot.shard_count,
             'shard_id': 0,
         }
@@ -89,7 +95,7 @@ class Analytics(utils.Cog):
 
         url = f'https://discordbotlist.com/api/v1/bots/{self.bot.user.id}/stats'
         data = {
-            'guilds': int((len(self.bot.guilds) / len(self.bot.shard_ids)) * self.bot.shard_count),
+            'guilds': self.get_effective_guild_count(),
         }
         headers = {
             'Authorization': self.bot.config['bot_listing_api_keys']['discordbotlist_token']
@@ -100,6 +106,22 @@ class Analytics(utils.Cog):
 
     @post_discordbotlist_guild_count.before_loop
     async def before_post_discordbotlist_guild_count(self):
+        await self.bot.wait_until_ready()
+
+    @tasks.loop(minutes=5)
+    async def post_statsd_guild_count(self):
+        """
+        Post the average guild count to Statsd
+        """
+
+        # Only shard 0 can post
+        if self.bot.shard_count and self.bot.shard_count > 1 and 0 not in self.bot.shard_ids:
+            return
+        async with self.bot.stats() as stats:
+            stats.increment("discord.stats.guild_count", value=self.get_effective_guild_count())
+
+    @post_statsd_guild_count.before_loop
+    async def before_post_statsd_guild_count(self):
         await self.bot.wait_until_ready()
 
     async def try_send_ga_data(self, data):

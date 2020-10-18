@@ -11,7 +11,7 @@ class AnalyticsBaseConnector(aiohttp.TCPConnector):
         ('GET', re.compile(r'/users/([0-9]{15,23})', re.IGNORECASE)): 'get_user',
         ('GET', re.compile('/users/@me/guilds', re.IGNORECASE)): 'get_guilds',
         ('GET', re.compile(r'/guilds/([0-9]{15,23})', re.IGNORECASE)): 'get_guild',
-        ('PUT', re.compile(r'/channels/([0-9]{15,23})/messages/([0-9]{15,23})/reactions/(.+)/@me', re.IGNORECASE)): 'add_reaction',
+        ('PUT', re.compile(r'/channels/([0-9]{15,23})/messages/([0-9]{15,23})/reactions/(.+?)/@me', re.IGNORECASE)): 'add_reaction',
         ('DELETE', re.compile(r'/channels/([0-9]{15,23})/messages/([0-9]{15,23})', re.IGNORECASE)): 'delete_message',
         ('GET', re.compile(r'/channels/([0-9]{15,23})', re.IGNORECASE)): 'get_channel',
         ('DELETE', re.compile(r'/guilds/([0-9]{15,23})/members/([0-9]{15,23})', re.IGNORECASE)): 'kick',
