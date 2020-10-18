@@ -108,7 +108,7 @@ class Analytics(utils.Cog):
     async def before_post_discordbotlist_guild_count(self):
         await self.bot.wait_until_ready()
 
-    @tasks.loop(minutes=5)
+    @tasks.loop(minutes=1)
     async def post_statsd_guild_count(self):
         """
         Post the average guild count to Statsd
@@ -118,7 +118,7 @@ class Analytics(utils.Cog):
         if self.bot.shard_count and self.bot.shard_count > 1 and 0 not in self.bot.shard_ids:
             return
         async with self.bot.stats() as stats:
-            stats.increment("discord.stats.guild_count", value=self.get_effective_guild_count())
+            stats.gauge("discord.stats.guild_count", value=self.get_effective_guild_count())
 
     @post_statsd_guild_count.before_loop
     async def before_post_statsd_guild_count(self):
