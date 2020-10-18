@@ -305,16 +305,22 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         current_data = f"$ {command}\n\n"
         m = await ctx.send(f"```\n{current_data}```")
 
+        # Woah I do this a few times so let's put it in a function
+        async def get_process_data(proc):
+            stdout = await proc.stdout.read()
+            stderr = await proc.stderr.read()
+            return stdout.decode() + stderr.decode()
+
         # Grab new data
         while proc.returncode is None:
-            new_lines = (await proc.stdout.read()).decode() + (await proc.stderr.read()).decode()
+            new_lines = await get_process_data(proc)
             if new_lines:
                 current_data += new_lines + '\n'
                 await m.edit(content=f"```\n{current_data[:1900]}```")
             await asyncio.sleep(1)
 
         # Make sure we got all the data
-        new_lines = (await proc.stdout.read()).decode() + (await proc.stderr.read()).decode()
+        new_lines = await get_process_data(proc)
         if new_lines:
             current_data += new_lines + '\n'
         current_data += f'[RETURN CODE {proc.returncode}]'
