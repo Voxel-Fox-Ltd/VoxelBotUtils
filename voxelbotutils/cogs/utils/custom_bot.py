@@ -508,12 +508,16 @@ class CustomBot(commands.AutoShardedBot):
         await super()._run_event(coro, event_name, *args, **kwargs)
 
     async def invoke(self, ctx):
-        # Let's just hook into the invoke method so that we can
-        # count command runs
         if ctx.command is None:
             return await super().invoke(ctx)
+        command_stats_name = ctx.command.qualified_name.replace(' ', ':')
+        command_stats_tags = {
+            "command_name": command_stats_name,
+            "guild_id": "DMs" if ctx.guild is None else ctx.guild.id,
+            "user_id": ctx.author.id,
+            "channel_id": "DMs" if ctx.guild is None else ctx.channel.id,
+        }
         async with self.stats() as stats:
-            command_stats_name = ctx.command.qualified_name.replace(' ', ':')
-            stats.increment("discord.bot.commands", tags={"command_name": command_stats_name})
-            with stats.timeit("discord.bot.commands", tags={"command_name": command_stats_name}):
+            stats.increment("discord.bot.commands", tags=command_stats_tags)
+            with stats.timeit("discord.bot.commands", tags=command_stats_tags):
                 return await super().invoke(ctx)
