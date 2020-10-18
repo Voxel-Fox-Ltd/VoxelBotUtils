@@ -3,7 +3,7 @@ import re
 import aiohttp
 
 
-class AnalyticsBaseConnector(aiohttp.BaseConnector):
+class AnalyticsBaseConnector(aiohttp.TCPConnector):
     """Woah sometimes it's nice to send stats requests as well"""
 
     EVENT_NAMES = {
