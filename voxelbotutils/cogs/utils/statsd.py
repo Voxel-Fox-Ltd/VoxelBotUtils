@@ -68,7 +68,7 @@ class StatsdConnection(object):
         """
 
         config = cls.config.copy()
-        if not config.get("namespace"):
+        if not config.get("constant_tags", {}).get("service"):
             cls.logger.debug("Creating fake Statsd connection")
             conn = _FakeStatsdConnection()
         else:

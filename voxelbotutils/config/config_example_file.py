@@ -101,9 +101,9 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
 
 # It's time for better analytics! Let's give statsd a little try
 [statsd]
-    namespace = ""  # Put your bot name here - if there isn't one then statsd will just stay disabled
+    enabled = false
     host = "127.0.0.1"
-    port = 9125
+    port = 8125  # This is the DataDog default, 9125 is the general statsd default
     [statsd.constant_tags]
-        service = "discord_bot"
+        service = ""  # Put your bot name here
 """
