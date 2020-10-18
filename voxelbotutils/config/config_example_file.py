@@ -101,9 +101,8 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
 
 # It's time for better analytics! Let's give statsd a little try
 [statsd]
-    enabled = false
     host = "127.0.0.1"
     port = 8125  # This is the DataDog default, 9125 is the general statsd default
     [statsd.constant_tags]
-        service = ""  # Put your bot name here
+        service = ""  # Put your bot name here - leave blank to disable stats collection
 """
