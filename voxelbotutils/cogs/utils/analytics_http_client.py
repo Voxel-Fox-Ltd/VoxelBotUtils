@@ -55,7 +55,7 @@ class AnalyticsBaseConnector(aiohttp.BaseConnector):
         super().__init__(*args, **kwargs)
         self.bot = bot
 
-    async def connect(self, request:aiohttp.ClientRequest):
+    async def connect(self, request:aiohttp.ClientRequest, *args, **kwargs):
         for (method, path), event in self.EVENT_NAMES.items():
             if request.method != method:
                 continue
@@ -63,4 +63,4 @@ class AnalyticsBaseConnector(aiohttp.BaseConnector):
                 continue
             async with self.bot.stats() as stats:
                 stats.increment("discord.http", tags={"endpoint": event})
-        return await super().connect(request)
+        return await super().connect(request, *args, **kwargs)
