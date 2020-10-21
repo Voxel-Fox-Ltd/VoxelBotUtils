@@ -158,16 +158,31 @@ async def create_initial_database(bot:Bot) -> None:
     Create the initial database using the internal database.psql file
     """
 
+    # Open the db file
     try:
         with open("./config/database.pgsql") as a:
             data = a.read()
     except Exception:
         return False
-    create_table_statemenets = data.split(';')
+
+    # Get the statements
+    create_table_statements = []
+    current_line = ''
+    for line in data.split('\n'):
+        if line.lstrip().startswith('--'):
+            continue
+        current_line += line + '\n'
+        if line.endswith(';') and not line.startswith(' '):
+            create_table_statements.append(current_line.strip())
+            current_line = ''
+
+    # Let's do it baybeee
     async with bot.database() as db:
-        for i in create_table_statemenets:
+        for i in create_table_statements:
             if i and i.strip():
                 await db(i.strip())
+
+    # Sick we're done
     return True
 
 

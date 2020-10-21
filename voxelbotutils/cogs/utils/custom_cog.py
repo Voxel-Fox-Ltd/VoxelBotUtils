@@ -42,3 +42,5 @@ class CustomCog(OriginalCog):
         A method that gets run when the bot's startup method is run - intended for setting up cached information
         in the bot object that aren't in the guild_settings or user_settings tables
         """
+
+        pass
