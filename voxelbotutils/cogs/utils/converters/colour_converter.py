@@ -922,16 +922,19 @@ COLOURS_BY_VALUE = {o:i for i, o in COLOURS_BY_NAME.items()}
 class CustomColourConverter(commands.ColourConverter):
 
     COLOURS_BY_NAME = COLOURS_BY_NAME
-    COLORS_BY_NAME = COLOURS_BY_NAME
     COLOURS_BY_VALUE = COLOURS_BY_VALUE
-    COLORS_BY_VALUE = COLOURS_BY_VALUE
 
-    def __init__(self, *, allow_custom_colour_names:bool=True):
+    def __init__(self, *, allow_custom_colour_names:bool=True, allow_default_colours:bool=True):
         self.allow_custom_colour_names = allow_custom_colour_names
+        self.allow_default_colours = allow_default_colours
 
     async def convert(self, ctx, argument):
         if self.allow_custom_colour_names:
-            v = COLOURS_BY_NAME.get(argument.lower())
+            v = COLOURS_BY_NAME.get(argument.lower().strip())
             if v:
-                return discord.Colour(value=v)
-        return await super().convert(ctx, argument)
+                x = discord.Colour(value=v)
+                x.colour_name = v
+                return x
+        if self.allow_default_colours:
+            return await super().convert(ctx, argument)
+        raise commands.BadArgument()
