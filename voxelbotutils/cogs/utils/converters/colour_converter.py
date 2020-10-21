@@ -921,6 +921,11 @@ COLOURS_BY_VALUE = {o:i for i, o in COLOURS_BY_NAME.items()}
 
 class CustomColourConverter(commands.ColourConverter):
 
+    COLOURS_BY_NAME = COLOURS_BY_NAME
+    COLORS_BY_NAME = COLOURS_BY_NAME
+    COLOURS_BY_VALUE = COLOURS_BY_VALUE
+    COLORS_BY_VALUE = COLOURS_BY_VALUE
+
     def __init__(self, *, allow_custom_colour_names:bool=True):
         self.allow_custom_colour_names = allow_custom_colour_names
 
