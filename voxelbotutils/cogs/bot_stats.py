@@ -87,7 +87,7 @@ class BotStats(utils.Cog):
             if "upvotes" in data and "metrics" in data:
                 content = {
                     "name": "Bot Votes",
-                    "value": f"[DiscordBotList.com](https://discordbotlist.com/bots/{self.bot.user.id}): {data['metrics']['upvotes']} ({data['upvotes']} this month)"
+                    "value": f"[DiscordBotList.com](https://discordbotlist.com/bots/{self.bot.user.id}): {data['metrics'].get('upvotes', 0)} ({data['upvotes']} this month)"
                 }
                 try:
                     current_data = embed.get_field_by_key("Bot Votes")
