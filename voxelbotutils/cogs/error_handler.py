@@ -122,10 +122,10 @@ class ErrorHandler(utils.Cog):
         """
 
         try:
-            return await ctx.send(text)
+            return await ctx.send(text, allowed_mentions=discord.AllowedMentions(users=False, roles=False, everyone=False))
         except discord.Forbidden:
             try:
-                return await ctx.author.send(author_text or text)
+                return await ctx.author.send(author_text or text, allowed_mentions=discord.AllowedMentions(users=False, roles=False, everyone=False))
             except discord.Forbidden:
                 pass
         except discord.NotFound:
