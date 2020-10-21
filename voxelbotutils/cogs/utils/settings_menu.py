@@ -531,7 +531,7 @@ class SettingsMenuIterableBase(SettingsMenu):
 
     def __init__(
             self, cache_key:str, key_display_function:typing.Callable[[typing.Any], str]=None, value_display_function:typing.Callable[[typing.Any], str]=str,
-            *, iterable_add_callback:typing.Callable=None, iterable_delete_callback:typing.Callable=None, max_iterable_count:int=10):
+            default_type:type=list, *, iterable_add_callback:typing.Callable=None, iterable_delete_callback:typing.Callable=None, max_iterable_count:int=10):
         """
         Args:
             cache_key (str): The key used to grab the cached data from the `bot.guild_settings`.
@@ -547,6 +547,7 @@ class SettingsMenuIterableBase(SettingsMenu):
         self.cache_key = cache_key
         self.key_display_function = key_display_function or (lambda x: x)
         self.value_display_function = value_display_function or (lambda x: x)
+        self.default_type = default_type
 
         self.iterable_add_callback = iterable_add_callback
         self.iterable_delete_callback = iterable_delete_callback
@@ -578,7 +579,7 @@ class SettingsMenuIterableBase(SettingsMenu):
     def get_sendable_data(self, ctx:commands.Context):
 
         # Get the current data
-        data_points = ctx.bot.guild_settings[ctx.guild.id][self.cache_key]
+        data_points = ctx.bot.guild_settings[ctx.guild.id].setdefault(self.cache_key, self.default_type())
 
         # Current data is a key-value pair
         if isinstance(data_points, dict):
