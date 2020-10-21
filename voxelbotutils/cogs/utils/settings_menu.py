@@ -299,13 +299,13 @@ class SettingsMenuOption(object):
         return callback
 
     @staticmethod
-    def get_set_iterable_delete_callback(database_name:str, column_name:str, cache_key:str, database_key:str) -> typing.Callable:
+    def get_set_iterable_delete_callback(table_name:str, column_name:str, cache_key:str, database_key:str) -> typing.Callable:
         """
         Return an async method that takes the data retuend by convert_prompted_information and then
         saves it into the database - should be used for the add_option stuff in the SettingsMenu init.
 
         Args:
-            database_name (str): The name of the database that you want to remove data from.
+            table_name (str): The name of the database that you want to remove data from.
             column_name (str): The column name that the key is inserted into in the table.
             cache_key (str): The key that's used to access the cached value for the iterable in `bot.guilds_settings`.
             database_key (str): The key that's used to refer to the role ID in the `role_list` table.
@@ -325,7 +325,7 @@ class SettingsMenuOption(object):
                 # Database it
                 async with ctx.bot.database() as db:
                     await db(
-                        "DELETE FROM {0} WHERE guild_id=$1 AND {1}=$2 AND key=$3".format(database_name, column_name),
+                        "DELETE FROM {0} WHERE guild_id=$1 AND {1}=$2 AND key=$3".format(table_name, column_name),
                         ctx.guild.id, role_id, database_key
                     )
 
@@ -633,13 +633,13 @@ class SettingsMenuIterable(SettingsMenu):
     """
 
     def __init__(
-            self, database_name:str, column_name:str, cache_key:str, database_key:str,
+            self, table_name:str, column_name:str, cache_key:str, database_key:str,
             key_converter:commands.Converter, key_prompt:str, key_display_function:typing.Callable[[typing.Any], str],
             value_converter:commands.Converter=str, value_prompt:str=None, value_serialize_function:typing.Callable=None,
             *, iterable_add_callback:typing.Callable=None, iterable_delete_callback:typing.Callable=None):
         """
         Args:
-            database_name (str): The name of the table that the data should be inserted into.
+            table_name (str): The name of the table that the data should be inserted into.
             column_name (str): The column name for the table where teh key should be inserted to.
             cache_key (str): The key that goes into `bot.guild_settings` to get to the cached iterable.
             database_key (str): The key that would be inserted into the default `role_list` or `channel_list` tables.
@@ -655,7 +655,7 @@ class SettingsMenuIterable(SettingsMenu):
         super().__init__()
 
         # Set up the storage data
-        self.database_name = database_name
+        self.table_name = table_name
         self.column_name = column_name
         self.cache_key = cache_key
         self.database_key = database_key
@@ -671,8 +671,8 @@ class SettingsMenuIterable(SettingsMenu):
         self.value_serialize_function = value_serialize_function or (lambda x: x)
 
         # Callbacks
-        self.iterable_add_callback = iterable_add_callback or SettingsMenuOption.get_set_iterable_add_callback(database_name, column_name, cache_key, database_key, value_serialize_function)
-        self.iterable_delete_callback = iterable_delete_callback or SettingsMenuOption.get_set_iterable_delete_callback(database_name, column_name, cache_key, database_key)
+        self.iterable_add_callback = iterable_add_callback or SettingsMenuOption.get_set_iterable_add_callback(table_name, column_name, cache_key, database_key, value_serialize_function)
+        self.iterable_delete_callback = iterable_delete_callback or SettingsMenuOption.get_set_iterable_delete_callback(table_name, column_name, cache_key, database_key)
 
     def get_sendable_data(self, ctx:commands.Context):
         """Create a list of mentions from the given guild settings key, creating all relevant callbacks"""
@@ -685,7 +685,7 @@ class SettingsMenuIterable(SettingsMenu):
             self.options = [
                 SettingsMenuOption(
                     ctx, f"{self.key_display_function(i)} - {self.value_converter(o)!s}", (),
-                    self.iterable_delete_callback(self.database_name, self.column_name, i, self.cache_key, self.database_key),
+                    self.iterable_delete_callback(self.table_name, self.column_name, i, self.cache_key, self.database_key),
                     allow_nullable=False,
                 )
                 for i, o in data_points.items()
@@ -696,7 +696,7 @@ class SettingsMenuIterable(SettingsMenu):
                         ctx, "", [
                             (self.key_prompt, "value", self.key_converter),
                             (self.value_prompt, "value", self.value_converter)
-                        ], self.iterable_add_callback(self.database_name, self.column_name, self.cache_key, self.database_key, self.value_serialize_function),
+                        ], self.iterable_add_callback(self.table_name, self.column_name, self.cache_key, self.database_key, self.value_serialize_function),
                         emoji=self.PLUS_EMOJI,
                         allow_nullable=False,
                     )
@@ -707,7 +707,7 @@ class SettingsMenuIterable(SettingsMenu):
             self.options = [
                 SettingsMenuOption(
                     ctx, f"{self.key_display_function(i)}", (),
-                    self.iterable_delete_callback(self.database_name, self.column_name, i, self.cache_key, self.database_key),
+                    self.iterable_delete_callback(self.table_name, self.column_name, i, self.cache_key, self.database_key),
                     allow_nullable=False,
                 )
                 for i in data_points
@@ -717,7 +717,7 @@ class SettingsMenuIterable(SettingsMenu):
                     SettingsMenuOption(
                         ctx, "", [
                             (self.key_prompt, "value", self.key_converter),
-                        ], self.iterable_add_callback(self.database_name, self.column_name, self.cache_key, self.database_key),
+                        ], self.iterable_add_callback(self.table_name, self.column_name, self.cache_key, self.database_key),
                         emoji=self.PLUS_EMOJI,
                         allow_nullable=False,
                     )
