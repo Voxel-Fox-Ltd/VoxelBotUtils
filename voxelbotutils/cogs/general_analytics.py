@@ -9,6 +9,7 @@ from . import utils
 class Analytics(utils.Cog):
 
     GOOGLE_ANALYTICS_URL = 'https://www.google-analytics.com/collect'
+    FOUND_GATEWAY_OPCODES = {}
 
     """
     v   : version            : !1
@@ -123,6 +124,38 @@ class Analytics(utils.Cog):
     @post_statsd_guild_count.before_loop
     async def before_post_statsd_guild_count(self):
         await self.bot.wait_until_ready()
+
+    @utils.Cog.listener()
+    async def on_socket_raw_send(self, payload:dict):
+        """A raw socket response message send Discord"""
+
+        event_id = payload['op']
+        event_name = self.FOUND_GATEWAY_OPCODES.get(event_id)
+        if event_name is None:
+            for i in dir(discord.gateway.DiscordWebSocket):
+                if i.isupper():
+                    o = getattr(discord.gateway.DiscordWebSocket, i, None)
+                    if type(o) is int:
+                        self.FOUND_GATEWAY_OPCODES[o] = i
+                        if event_id == o:
+                            event_name = i
+                            break
+
+        async with self.bot.stats() as stats:
+            try:
+                stats.increment("discord.gateway.send", tags={"event_name": event_name})
+            except KeyError:
+                pass
+
+    @utils.Cog.listener()
+    async def on_socket_response(self, payload:dict):
+        """A raw socket response message from Discord"""
+
+        async with self.bot.stats() as stats:
+            try:
+                stats.increment("discord.gateway.receive", tags={"event_name": payload['t']})
+            except KeyError:
+                pass
 
     async def try_send_ga_data(self, data):
         """

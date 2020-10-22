@@ -501,14 +501,6 @@ class CustomBot(commands.AutoShardedBot):
         await self.set_default_presence()
         self.logger.info('Bot loaded.')
 
-    async def _run_event(self, coro, event_name, *args, **kwargs):
-        # I don't know why Danny bothered to add an event_name argument here,
-        # but having it is exceedingly helpful
-        # Thanks Daniel
-        async with self.stats() as stats:
-            stats.increment("discord.gateway", tags={"event_name": event_name})
-        await super()._run_event(coro, event_name, *args, **kwargs)
-
     async def invoke(self, ctx):
         if ctx.command is None:
             return await super().invoke(ctx)
