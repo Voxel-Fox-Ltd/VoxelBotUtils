@@ -66,7 +66,7 @@ with utils.Embed() as embed:
 
 # Docs
 
-TBA.
+Documentation can be found [here](https://voxelbotutils.readthedocs.io/)
 
 # Installing
 
