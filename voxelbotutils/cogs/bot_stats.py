@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 
 from . import utils
+from .. import __version__
 
 
 class BotStats(utils.Cog):
@@ -54,7 +55,7 @@ class BotStats(utils.Cog):
 
         # Make embed
         embed = utils.Embed(use_random_colour=True)
-        embed.set_footer(f"{self.bot.user} - VoxelBotUtils v{utils.__version__}", icon_url=self.bot.user.avatar_url)
+        embed.set_footer(f"{self.bot.user} - VoxelBotUtils v{__version__}", icon_url=self.bot.user.avatar_url)
         embed.add_field("Creator", f"{creator!s}\n{creator_id}")
         embed.add_field("Library", f"Discord.py {discord.__version__}")
         if self.bot.shard_count != len(self.bot.shard_ids):
