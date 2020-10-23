@@ -73,7 +73,51 @@ class ErrorHandler(utils.Cog):
             lambda ctx, error: "You need to be registered as an owner to run this command."
         ),
         (
-            (commands.BadArgument, commands.BadUnionArgument),
+            commands.MessageNotFound,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into a message."
+        ),
+        (
+            commands.MemberNotFound,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into a guild member."
+        ),
+        (
+            commands.UserNotFound,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into a user."
+        ),
+        (
+            commands.ChannelNotFound,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into a channel."
+        ),
+        (
+            commands.ChannelNotReadable,
+            lambda ctx, error: f"I can't read messages in <#{error.argument.id}>."
+        ),
+        (
+            commands.BadColourArgument,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into a colour."
+        ),
+        (
+            commands.RoleNotFound,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into a role."
+        ),
+        (
+            commands.BadInviteArgument,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into an invite."
+        ),
+        (
+            (commands.EmojiNotFound, commands.PartialEmojiConversionFailure),
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into an emoji."
+        ),
+        (
+            commands.BadBooleanArgument,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into a boolean."
+        ),
+        (
+            commands.BadUnionArgument,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into any type of {', '.join([str(i) for i in error.converters])}."
+        ),
+        (
+            commands.BadArgument,
             lambda ctx, error: str(error)
         ),
         (
