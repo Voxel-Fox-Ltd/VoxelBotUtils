@@ -129,7 +129,10 @@ class Analytics(utils.Cog):
     async def on_socket_raw_send(self, payload:dict):
         """A raw socket response message send Discord"""
 
-        event_id = payload['op']
+        try:
+            event_id = json.loads(payload)['op']
+        except Exception:
+            return
         event_name = self.FOUND_GATEWAY_OPCODES.get(event_id)
         if event_name is None:
             for i in dir(discord.gateway.DiscordWebSocket):
