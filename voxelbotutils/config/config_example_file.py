@@ -12,17 +12,17 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
     # Members - recommended: false (privileged intent). Used for member join/remove/update, Member.roles, Member.nick, User.name, etc.
     members = false
     # Bans - recommended: false. Used for member ban/unban.
-    bans = false
+    bans = true
     # Emojis - recommended: false. Used for guild emojis update, Bot.get_emoji, Guild.emojis.
-    emojis = false
+    emojis = true
     # Integrations - recommended: false. Used for guild integrations update.
-    integrations = false
+    integrations = true
     # Webhooks - recommended: false. Used for guild webhooks update.
-    webhooks = false
+    webhooks = true
     # Invites - recommended: false. Used for invite create/delete.
-    invites = false
+    invites = true
     # Voice states - recommended: false. Used for voice state update, VoiceChannel.members, Member.voice.
-    voice_states = false
+    voice_states = true
     # Presences - recommended: false (privileged intent). Used for member update (for activities and status), Member.status.
     presences = false
     # Guild messages - recommended: true. Used for message events in guilds.
@@ -30,9 +30,9 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
     # DM messages - recommended: true. Used for message events in DMs.
     dm_messages = true
     # Guild reactions - recommended: false. Used for [raw] reaction add/remove/clear events in guilds.
-    guild_reactions = false
+    guild_reactions = true
     # DM reactions - recommended: false. Used for [raw] reaction add/remove/clear events in DMs.
-    dm_reactions = false
+    dm_reactions = true
     # Guild typing - recommended: false. Used for the typing event in guilds.
     guild_typing = false
     # DM typing - recommended: false. Used for the typing event in Dms.
