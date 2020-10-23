@@ -65,12 +65,21 @@ class AnalyticsBaseConnector(aiohttp.TCPConnector):
         super().__init__(*args, **kwargs)
         self.bot = bot
 
-    async def request(self, method, url, **kwargs):
-        possible_endpoints = self.EVENT_NAMES.get(method.upper(), {})
-        r = await super().request(method, url, **kwargs)
+    async def connect(self, request:aiohttp.ClientRequest, *args, **kwargs):
+        possible_endpoints = self.EVENT_NAMES.get(request.method.upper(), {})
         for endpoint_regex, event_name in possible_endpoints.items():
-            if endpoint_regex.search(url):
+            if endpoint_regex.search(str(request.url)):
                 async with self.bot.stats() as stats:
-                    stats.increment("discord.http", tags={"endpoint": event_name, "response_code": r.status})
+                    stats.increment("discord.http", tags={"endpoint": event_name})
                 break
-        return r
+        return await super().connect(request, *args, **kwargs)
+
+    # async def request(self, method, url, **kwargs):
+    #     possible_endpoints = self.EVENT_NAMES.get(method.upper(), {})
+    #     r = await super().request(method, url, **kwargs)
+    #     for endpoint_regex, event_name in possible_endpoints.items():
+    #         if endpoint_regex.search(url):
+    #             async with self.bot.stats() as stats:
+    #                 stats.increment("discord.http", tags={"endpoint": event_name, "response_code": r.status})
+    #             break
+    #     return r
