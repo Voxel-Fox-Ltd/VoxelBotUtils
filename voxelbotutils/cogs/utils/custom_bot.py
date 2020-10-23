@@ -513,5 +513,4 @@ class CustomBot(commands.AutoShardedBot):
         }
         async with self.stats() as stats:
             stats.increment("discord.bot.commands", tags=command_stats_tags)
-            with stats.timeit("discord.bot.commands", tags=command_stats_tags):
-                return await super().invoke(ctx)
+        return await super().invoke(ctx)
