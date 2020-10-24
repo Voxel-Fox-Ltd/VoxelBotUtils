@@ -86,4 +86,8 @@ class AnalyticsLogHandler(logging.NullHandler):
         if event_name is None:
             return
         async with self.bot.stats() as stats:
-            stats.increment("discord.http", tags={"endpoint": event_name, "status_code": int(match.group("status"))})
+            stats.increment("discord.http", tags={
+                "endpoint": event_name,
+                "status_code": int(match.group("status")),
+                "status_code_class": match.group("status")[0] + "x" * (len(match.group("status")) - 1)
+            })
