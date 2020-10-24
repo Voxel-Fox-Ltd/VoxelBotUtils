@@ -17,7 +17,7 @@ from .custom_context import CustomContext
 from .database import DatabaseConnection
 from .redis import RedisConnection
 from .statsd import StatsdConnection
-from .analytics_http_client import AnalyticsBaseConnector
+from .analytics_log_handler import AnalyticsLogHandler
 from .. import all_packages as all_vfl_package_names
 
 
@@ -87,7 +87,7 @@ class CustomBot(commands.AutoShardedBot):
         # Run original
         super().__init__(
             command_prefix=get_prefix, activity=activity, status=status, case_insensitive=case_insensitive, intents=intents,
-            allowed_mentions=allowed_mentions, connector=kwargs.pop("connector", AnalyticsBaseConnector(self)), *args, **kwargs,
+            allowed_mentions=allowed_mentions, *args, **kwargs,
         )
 
         # Set up our default guild settings
@@ -116,6 +116,9 @@ class CustomBot(commands.AutoShardedBot):
         # Store the startup method so I can see if it completed successfully
         self.startup_time = dt.now()
         self.startup_method = None
+
+        # Regardless of whether we start statsd or not, I want to add the log handler
+        logging.getLogger('discord.http').addHandler(AnalyticsLogHandler(self))
 
         # Here's the storage for cached stuff
         self.guild_settings = collections.defaultdict(lambda: copy.deepcopy(self.DEFAULT_GUILD_SETTINGS))
@@ -237,7 +240,7 @@ class CustomBot(commands.AutoShardedBot):
             data['response_type'] = response_type
 
         # Return url
-        return 'https://discordapp.com/oauth2/authorize?' + urlencode(data)
+        return 'https://discord.com/oauth2/authorize?' + urlencode(data)
 
     async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, delete:typing.List[discord.Message]=None, timeout=60.0) -> None:
         """

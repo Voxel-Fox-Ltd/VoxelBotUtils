@@ -1,9 +1,8 @@
 import re
+import logging
 
-import aiohttp
 
-
-class AnalyticsBaseConnector(aiohttp.TCPConnector):
+class AnalyticsLogHandler(logging.Handler):
     """Woah sometimes it's nice to send stats requests as well"""
 
     EVENT_NAMES = {
@@ -60,26 +59,31 @@ class AnalyticsBaseConnector(aiohttp.TCPConnector):
             re.compile(r'/guilds/([0-9]{15,23})/roles', re.IGNORECASE): 'move_role_position',
         },
     }
+    MESSAGE_DECONSTRUCTOR = re.compile(r"^(?P<method>.+) https://discord(:?app)?.(?:com|gg)/api/v\d(?P<endpoint>.+) with (?P<payload>.+) has returned (?P<status>\d+)$")
 
     def __init__(self, bot, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.bot = bot
 
-    async def connect(self, request:aiohttp.ClientRequest, *args, **kwargs):
-        possible_endpoints = self.EVENT_NAMES.get(request.method.upper(), {})
+    @classmethod
+    def get_event_name(cls, method:str, url:str) -> str:
+        possible_endpoints = cls.EVENT_NAMES.get(method.upper(), {})
         for endpoint_regex, event_name in possible_endpoints.items():
-            if endpoint_regex.search(str(request.url)):
-                async with self.bot.stats() as stats:
-                    stats.increment("discord.http", tags={"endpoint": event_name})
-                break
-        return await super().connect(request, *args, **kwargs)
+            if endpoint_regex.search(str(url)):
+                return event_name
+        return None
 
-    # async def request(self, method, url, **kwargs):
-    #     possible_endpoints = self.EVENT_NAMES.get(method.upper(), {})
-    #     r = await super().request(method, url, **kwargs)
-    #     for endpoint_regex, event_name in possible_endpoints.items():
-    #         if endpoint_regex.search(url):
-    #             async with self.bot.stats() as stats:
-    #                 stats.increment("discord.http", tags={"endpoint": event_name, "response_code": r.status})
-    #             break
-    #     return r
+    def handle(self, record:logging.LogRecord):
+        message = record.getMessage()
+        self.bot.loop.create_task(self.log_response(message))
+        return super().handle(record)
+
+    async def log_response(self, message):
+        match = self.MESSAGE_DECONSTRUCTOR.search(message)
+        if match is None:
+            return
+        event_name = self.get_event_name(match.group("method"), match.group("endpoint"))
+        if event_name is None:
+            return
+        async with self.bot.stats() as stats:
+            stats.increment("discord.http", tags={"endpoint": event_name, "status_code": int(match.group("status"))})
