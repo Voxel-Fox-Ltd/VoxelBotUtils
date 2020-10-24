@@ -109,7 +109,7 @@ class ErrorHandler(utils.Cog):
             lambda ctx, error: f"I couldn't convert `{error.argument}` into an emoji."
         ),
         (
-            commands.BadBooleanArgument,
+            commands.BadBoolArgument,
             lambda ctx, error: f"I couldn't convert `{error.argument}` into a boolean."
         ),
         (
