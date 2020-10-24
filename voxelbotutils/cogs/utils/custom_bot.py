@@ -33,7 +33,7 @@ def get_prefix(bot, message:discord.Message):
         prefix = bot.guild_settings[message.guild.id]['prefix'] or bot.config['default_prefix']
 
     # Fuck iOS devices
-    if prefix in ["'", "‘"]:
+    if type(prefix) is not list and prefix in ["'", "‘"]:
         prefix = ["'", "‘"]
 
     # Listify it
@@ -43,7 +43,8 @@ def get_prefix(bot, message:discord.Message):
     prefix.extend([i.title() for i in prefix])
 
     # Add spaces for words
-    prefix.extend([f"{i.strip()} " for i in prefix if not any([o in prefix for o in string.punctuation])])
+    possible_word_prefixes = [i for i in prefix if not any([o in i for o in string.punctuation])]
+    prefix.extend([f"{i.strip()} " for i in possible_word_prefixes])
 
     # And we're FINALLY done
     return commands.when_mentioned_or(*prefix)(bot, message)
@@ -180,7 +181,7 @@ class CustomBot(commands.AutoShardedBot):
         async def fake_cache_setup_method(db):
             pass
         for cog_name, cog in self.cogs.items():
-            self.loop.create_task(getattr(cog, "cache_setup", fake_cache_setup_method)(db))
+            await getattr(cog, "cache_setup", fake_cache_setup_method)(db)
 
         # Wait for the bot to cache users before continuing
         self.logger.debug("Waiting until ready before completing startup method.")
