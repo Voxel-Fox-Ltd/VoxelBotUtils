@@ -135,9 +135,7 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
         args (argparse.Namespace): The argparse namespace saying what levels to set each logger to
     """
 
-    root = logging.getLogger()
     formatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s: %(message)s')
-    root.handlers[0].setFormatter(formatter)
     bot.logger = logger
 
     # Make our streams
@@ -146,6 +144,13 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     redis_logger = logging.StreamHandler(sys.stdout)
     stats_logger = logging.StreamHandler(sys.stdout)
     discord_logger = logging.StreamHandler(sys.stdout)
+
+    # Add our formatters
+    bot_logger.setFormatter(formatter)
+    database_logger.setFormatter(formatter)
+    redis_logger.setFormatter(formatter)
+    stats_logger.setFormatter(formatter)
+    discord_logger.setFormatter(formatter)
 
     # Set all the loggers to debug
     set_log_level(bot.logger, logging.DEBUG)
