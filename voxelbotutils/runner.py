@@ -153,11 +153,11 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     discord_logger.setFormatter(formatter)
 
     # Set all the loggers to debug
-    set_log_level(bot.logger, logging.DEBUG)
-    set_log_level(bot.database.logger, logging.DEBUG)
-    set_log_level(bot.redis.logger, logging.DEBUG)
-    set_log_level(bot.stats.logger, logging.DEBUG)
-    set_log_level('discord', logging.DEBUG)
+    set_log_level(bot.logger, 'DEBUG')
+    set_log_level(bot.database.logger, 'DEBUG')
+    set_log_level(bot.redis.logger, 'DEBUG')
+    set_log_level(bot.stats.logger, 'DEBUG')
+    set_log_level('discord', 'DEBUG')
 
     # Set loglevel defaults for the stream handlers
     set_log_level(bot_logger, args.loglevel)
