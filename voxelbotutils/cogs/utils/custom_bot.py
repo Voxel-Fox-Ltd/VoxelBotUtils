@@ -118,7 +118,9 @@ class CustomBot(commands.AutoShardedBot):
         self.startup_method = None
 
         # Regardless of whether we start statsd or not, I want to add the log handler
-        logging.getLogger('discord.http').addHandler(AnalyticsLogHandler(self))
+        handler = AnalyticsLogHandler(self)
+        handler.setLevel(logging.DEBUG)
+        logging.getLogger('discord.http').addHandler(handler)
 
         # Here's the storage for cached stuff
         self.guild_settings = collections.defaultdict(lambda: copy.deepcopy(self.DEFAULT_GUILD_SETTINGS))
