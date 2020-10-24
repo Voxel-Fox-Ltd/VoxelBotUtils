@@ -137,7 +137,7 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
 
     root = logging.getLogger()
     formatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s: %(message)s')
-    root.setFormatter(formatter)
+    root.handlers[0].setFormatter(formatter)
     bot.logger = logger
 
     # Make our streams
