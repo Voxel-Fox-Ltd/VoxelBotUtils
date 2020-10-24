@@ -2,7 +2,7 @@ import re
 import logging
 
 
-class AnalyticsLogHandler(logging.Handler):
+class AnalyticsLogHandler(logging.NullHandler):
     """Woah sometimes it's nice to send stats requests as well"""
 
     EVENT_NAMES = {
