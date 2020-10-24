@@ -135,22 +135,45 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
         args (argparse.Namespace): The argparse namespace saying what levels to set each logger to
     """
 
-    logging.basicConfig(format='%(asctime)s:%(name)s:%(levelname)s: %(message)s', stream=sys.stdout)
+    root = logging.getLogger()
+    formatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s: %(message)s')
+    root.setFormatter(formatter)
     bot.logger = logger
 
-    # Set loglevel defaults
-    set_log_level(logger, args.loglevel)
-    set_log_level(bot.database.logger, args.loglevel)
-    set_log_level(bot.redis.logger, args.loglevel)
-    set_log_level(bot.stats.logger, args.loglevel)
-    set_log_level('discord', args.loglevel)
+    # Make our streams
+    bot_logger = logging.StreamHandler(sys.stdout)
+    database_logger = logging.StreamHandler(sys.stdout)
+    redis_logger = logging.StreamHandler(sys.stdout)
+    stats_logger = logging.StreamHandler(sys.stdout)
+    discord_logger = logging.StreamHandler(sys.stdout)
 
-    # Set loglevels by config
-    set_log_level(logger, args.loglevel_bot)
-    set_log_level(bot.database.logger, args.loglevel_database)
-    set_log_level(bot.redis.logger, args.loglevel_redis)
-    set_log_level(bot.stats.logger, args.loglevel_statsd)
-    set_log_level('discord', args.loglevel_discord)
+    # Set all the loggers to debug
+    set_log_level(bot.logger, logging.DEBUG)
+    set_log_level(bot.database.logger, logging.DEBUG)
+    set_log_level(bot.redis.logger, logging.DEBUG)
+    set_log_level(bot.stats.logger, logging.DEBUG)
+    set_log_level('discord', logging.DEBUG)
+
+    # Set loglevel defaults for the stream handlers
+    set_log_level(bot_logger, args.loglevel)
+    set_log_level(database_logger, args.loglevel)
+    set_log_level(redis_logger, args.loglevel)
+    set_log_level(stats_logger, args.loglevel)
+    set_log_level(discord_logger, args.loglevel)
+
+    # Set loglevels for the streams via the commandline args
+    set_log_level(bot_logger, args.loglevel_bot)
+    set_log_level(database_logger, args.loglevel_database)
+    set_log_level(redis_logger, args.loglevel_redis)
+    set_log_level(stats_logger, args.loglevel_statsd)
+    set_log_level(discord_logger, args.loglevel_discord)
+
+    # Add the stream handlers to the loggers
+    bot.logger.addHandler(bot_logger)
+    bot.database.logger.addHandler(database_logger)
+    bot.redis.logger.addHandler(redis_logger)
+    bot.stats.logger.addHandler(stats_logger)
+    logging.getLogger('discord').addHandler(discord_logger)
 
 
 async def create_initial_database(bot:Bot) -> None:
