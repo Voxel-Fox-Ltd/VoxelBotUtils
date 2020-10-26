@@ -209,6 +209,10 @@ class ErrorHandler(utils.Cog):
         if ctx.original_author_id in self.bot.owner_ids and isinstance(error, owner_reinvoke_errors):
             return await ctx.reinvoke()
 
+        # See if the command itself has an error handler AND it isn't a locally handlled arg
+        if hasattr(ctx.command, "on_error") and not isinstance(ctx.command, utils.Command):
+            return
+
         # See if it's in our list of common outputs
         output = None
         for error_types, function in self.COMMAND_ERROR_RESPONSES:
