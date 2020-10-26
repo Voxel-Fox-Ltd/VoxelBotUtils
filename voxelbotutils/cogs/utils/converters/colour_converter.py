@@ -933,7 +933,7 @@ class CustomColourConverter(commands.ColourConverter):
             v = COLOURS_BY_NAME.get(argument.lower().strip())
             if v:
                 x = discord.Colour(value=v)
-                x.colour_name = v
+                # x.colour_name = v
                 return x
         if self.allow_default_colours:
             return await super().convert(ctx, argument)
