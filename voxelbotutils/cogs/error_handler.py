@@ -29,6 +29,10 @@ class ErrorHandler(utils.Cog):
             lambda ctx, error: f"You can't use this command again for another {utils.TimeValue(error.retry_after).clean_spaced}."
         ),
         (
+            utils.errors.BotNotReady,
+            lambda ctx, error: "The bot isn't ready to start processing that command yet - please wait."
+        ),
+        (
             commands.NSFWChannelRequired,
             lambda ctx, error: "This command can't be run in a non-NSFW channel."
         ),
@@ -127,6 +131,10 @@ class ErrorHandler(utils.Cog):
         (
             discord.NotFound,
             lambda ctx, error: None
+        ),
+        (
+            commands.CheckFailure,
+            lambda ctx, error: str(error)
         ),
         (
             discord.Forbidden,
