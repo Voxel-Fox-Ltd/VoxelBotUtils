@@ -27,8 +27,8 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
                 await comm.can_run(self.context)
             except commands.CommandError as e:
                 if isinstance(e, (commands.DisabledCommand, commands.NotOwner)):
-                    pass
-                returned_commands.append(comm)
+                    continue
+            returned_commands.append(comm)
         return returned_commands
 
     def get_command_signature(self, command:commands.Command):
