@@ -13,14 +13,14 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         self.include_invite = options.pop("include_invite", False)
         super().__init__(**options)
 
-    async def filter_commands(self, commands:typing.List[utils.Command]) -> typing.List[utils.Command]:
+    async def filter_commands(self, commands_to_filter:typing.List[utils.Command]) -> typing.List[utils.Command]:
         """
         Filter the command list down into a list of runnable commands.
         """
 
         if self.context.author.id in self.context.bot.owner_ids:
-            return commands
-        valid_commands = [i for i in commands if i.hidden is False and i.enabled is True]
+            return commands_to_filter
+        valid_commands = [i for i in commands_to_filter if i.hidden is False and i.enabled is True]
         returned_commands = []
         for comm in valid_commands:
             try:
