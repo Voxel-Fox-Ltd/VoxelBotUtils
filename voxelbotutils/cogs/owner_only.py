@@ -138,7 +138,11 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         Unloads and reloads a cog from the bot.
         """
 
-        cog_name = 'cogs.' + '_'.join([i for i in cog_name])
+        filename = '_'.join([i for i in cog_name])
+        if '.' in filename:
+            cog_name = filename
+        else:
+            cog_name = 'cogs.' + filename
 
         try:
             self.bot.load_extension(cog_name)
@@ -316,7 +320,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
             new_lines = await get_process_data(proc)
             if new_lines:
                 current_data += new_lines + '\n'
-                await m.edit(content=f"```\n{current_data[:1900]}```")
+                await m.edit(content=f"```\n{current_data[:-1900]}```")
             await asyncio.sleep(1)
 
         # Make sure we got all the data
@@ -324,7 +328,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         if new_lines:
             current_data += new_lines + '\n'
         current_data += f'[RETURN CODE {proc.returncode}]'
-        await m.edit(content=f"```\n{current_data[:1900]}```")
+        await m.edit(content=f"```\n{current_data[:-1900]}```")
 
         # And now we done
         try:
