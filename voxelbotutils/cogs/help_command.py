@@ -70,7 +70,7 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         runnable_commands = {}
         for cog, cog_commands in mapping.items():
             available_commands = await self.filter_commands(cog_commands)
-            if len(available_commands) > 0:
+            if len(available_commands) > 0 or isinstance(cog, (commands.Command, commands.Group,)):
                 runnable_commands[cog] = available_commands
 
         # Make an embed
@@ -83,7 +83,7 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
             command_strings.append((getattr(cog, 'get_name', lambda: cog.name)(), value))
 
             # See if it's a command with subcommands
-            if isinstance(cog, commands.Command):
+            if isinstance(cog, (commands.Command, commands.Group,)):
                 help_embed.description = self.get_help_line(cog)
 
         # Order embed by length before embedding
