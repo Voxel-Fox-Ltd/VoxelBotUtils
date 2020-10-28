@@ -83,8 +83,10 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
             command_strings.append((getattr(cog, 'get_name', lambda: cog.name)(), value))
 
             # See if it's a command with subcommands
-            if isinstance(cog, (commands.Command, commands.Group,)):
-                help_embed.description = self.get_help_line(cog)
+            if isinstance(cog, commands.Group):
+                help_embed.description = self.get_help_line(cog, with_signature=cog.invoke_without_command)
+            if isinstance(cog, commands.Command):
+                help_embed.description = self.get_help_line(cog, with_signature=True)
 
         # Order embed by length before embedding
         command_strings.sort(key=lambda x: len(x[1]), reverse=True)
@@ -150,14 +152,18 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         embed.colour = random.randint(1, 0xffffff)
         return embed
 
-    def get_help_line(self, command:utils.Command):
+    def get_help_line(self, command:utils.Command, with_signature:bool=False):
         """
         Gets a doc line of help for a given command.
         """
 
         if command.short_doc:
-            return f"**{self.clean_prefix}{command.qualified_name}** - {command.short_doc}"
-        return f"**{self.clean_prefix}{command.qualified_name}**"
+            v = f"**{self.clean_prefix}{command.qualified_name}** - {command.short_doc}"
+        else:
+            v = f"**{self.clean_prefix}{command.qualified_name}**"
+        if with_signature:
+            v += f"\n`{self.clean_prefix}{self.command.qualified_name} {self.command.signature}`"
+        return v
 
 
 class Help(utils.Cog):
