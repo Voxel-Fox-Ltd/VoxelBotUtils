@@ -88,8 +88,12 @@ class CustomCommand(commands.Command):
             else:
                 ret = await injected(ctx, error)
 
-            # If we ping the local error handler, then we should stop here
-            return ret
+            # If we ping the local error handler and it returned FALSE then we ping the other error handlers;
+            # if not then we return here
+            if ret is False:
+                pass
+            else:
+                return ret
 
         # Ping the cog error handler
         try:
@@ -169,8 +173,12 @@ class CustomGroup(commands.Group):
             else:
                 ret = await injected(ctx, error)
 
-            # If we ping the local error handler, then we should stop here
-            return ret
+            # If we ping the local error handler and it returned FALSE then we ping the other error handlers;
+            # if not then we return here
+            if ret is False:
+                pass
+            else:
+                return ret
 
         # Ping the cog error handler
         try:
