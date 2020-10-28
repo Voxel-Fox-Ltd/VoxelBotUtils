@@ -162,7 +162,7 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         else:
             v = f"**{self.clean_prefix}{command.qualified_name}**"
         if with_signature:
-            v += f"\n`{self.clean_prefix}{self.command.qualified_name} {self.command.signature}`"
+            v += f"\n`{self.clean_prefix}{command.qualified_name} {command.signature}`"
         return v
 
 
