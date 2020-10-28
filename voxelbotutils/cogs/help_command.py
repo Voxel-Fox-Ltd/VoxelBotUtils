@@ -20,7 +20,16 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
 
         if self.context.author.id in self.context.bot.owner_ids:
             return commands
-        return [i for i in commands if i.hidden is False and i.enabled is True]
+        valid_commands = [i for i in commands if i.hidden is False and i.enabled is True]
+        returned_commands = []
+        for comm in valid_commands:
+            try:
+                await comm.can_run(self.context)
+            except commands.CommandError as e:
+                if isinstance(e, (commands.DisabledCommand, commands.OwnerOnly)):
+                    pass
+                returned_commands.append(comm)
+        return returned_commands
 
     def get_command_signature(self, command:commands.Command):
         return '{0.clean_prefix}{1.qualified_name} {1.signature}'.format(self, command)
