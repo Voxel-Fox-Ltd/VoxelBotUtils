@@ -116,6 +116,15 @@ def validate_sharding_information(args:argparse.Namespace) -> typing.List[int]:
         args.shardcount = 1
         args.min = 0
         args.max = 0
+    else:
+        if args.min is None and args.max is None:
+            args.min = 0
+            args.max = args.shardcount - 1
+        elif type(args.min) == int and type(args.max) == int:
+            pass
+        else:
+            logger.critical("You set a shardcount but not min/max shards")
+            exit(1)
     shard_ids = list(range(args.min, args.max + 1))
     if args.shardcount is None and (args.min or args.max):
         logger.critical("You set a min/max shard handler but no shard count")
