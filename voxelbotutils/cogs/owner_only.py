@@ -46,7 +46,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         # remove `foo`
         return content.strip('` \n')
 
-    @commands.command(aliases=['evall'], cls=utils.Command)
+    @commands.command(aliases=['evall', 'eval'], cls=utils.Command)
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
     async def ev(self, ctx:utils.Context, *, content:str):
