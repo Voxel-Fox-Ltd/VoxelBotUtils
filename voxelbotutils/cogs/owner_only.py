@@ -1,3 +1,4 @@
+import asyncio
 import contextlib
 import copy
 import io
@@ -272,7 +273,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @commands.bot_has_permissions(send_messages=True)
     async def su(self, ctx, who:discord.User, *, command:str):
         """
-        Run a command as another user optionally in another channel.
+        Run a command as another user.
         """
 
         # Make a copy of the message so we can pretend the other user said it
@@ -288,6 +289,48 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
 
         # Invoke it dab
         await self.bot.invoke(new_ctx)
+
+    @commands.command(cls=utils.Command, aliases=['sh'])
+    @commands.is_owner()
+    @commands.bot_has_permissions(send_messages=True)
+    async def shell(self, ctx, *, command:str):
+        """
+        Run a shell command.
+        """
+
+        # Run stuff
+        proc = await asyncio.create_subprocess_shell(command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+
+        # Send initial message
+        current_data = f"$ {command}\n\n"
+        m = await ctx.send(f"```\n{current_data}```")
+
+        # Woah I do this a few times so let's put it in a function
+        async def get_process_data(proc):
+            stdout = await proc.stdout.read()
+            stderr = await proc.stderr.read()
+            return stdout.decode() + stderr.decode()
+
+        # Grab new data
+        while proc.returncode is None:
+            new_lines = await get_process_data(proc)
+            if new_lines:
+                current_data += new_lines + '\n'
+                await m.edit(content=f"```\n{current_data[:1900]}```")
+            await asyncio.sleep(1)
+
+        # Make sure we got all the data
+        new_lines = await get_process_data(proc)
+        if new_lines:
+            current_data += new_lines + '\n'
+        current_data += f'[RETURN CODE {proc.returncode}]'
+        await m.edit(content=f"```\n{current_data[:1900]}```")
+
+        # And now we done
+        try:
+            await m.add_reaction("\N{OK HAND SIGN}")
+        except discord.HTTPException:
+            pass
 
 
 def setup(bot:utils.Bot):

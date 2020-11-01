@@ -3,7 +3,6 @@ import asyncio
 import logging
 import sys
 import typing
-import textwrap
 
 from .cogs.utils.database import DatabaseConnection
 from .cogs.utils.redis import RedisConnection
@@ -90,6 +89,10 @@ def get_default_program_arguments(include_config_file:bool=True) -> argparse.Arg
         "--loglevel-redis", default=None,
         help="Logging level for redis - probably most useful is INFO and DEBUG"
     )
+    parser.add_argument(
+        "--loglevel-statsd", default=None,
+        help="Logging level for statsd - probably most useful is INFO and DEBUG"
+    )
     return parser
 
 
@@ -139,12 +142,14 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     set_log_level(logger, args.loglevel)
     set_log_level(bot.database.logger, args.loglevel)
     set_log_level(bot.redis.logger, args.loglevel)
+    set_log_level(bot.stats.logger, args.loglevel)
     set_log_level('discord', args.loglevel)
 
     # Set loglevels by config
     set_log_level(logger, args.loglevel_bot)
     set_log_level(bot.database.logger, args.loglevel_database)
     set_log_level(bot.redis.logger, args.loglevel_redis)
+    set_log_level(bot.stats.logger, args.loglevel_statsd)
     set_log_level('discord', args.loglevel_discord)
 
 
@@ -153,16 +158,31 @@ async def create_initial_database(bot:Bot) -> None:
     Create the initial database using the internal database.psql file
     """
 
+    # Open the db file
     try:
         with open("./config/database.pgsql") as a:
             data = a.read()
     except Exception:
         return False
-    create_table_statemenets = data.split(';')
+
+    # Get the statements
+    create_table_statements = []
+    current_line = ''
+    for line in data.split('\n'):
+        if line.lstrip().startswith('--'):
+            continue
+        current_line += line + '\n'
+        if line.endswith(';') and not line.startswith(' '):
+            create_table_statements.append(current_line.strip())
+            current_line = ''
+
+    # Let's do it baybeee
     async with bot.database() as db:
-        for i in create_table_statemenets:
+        for i in create_table_statements:
             if i and i.strip():
                 await db(i.strip())
+
+    # Sick we're done
     return True
 
 

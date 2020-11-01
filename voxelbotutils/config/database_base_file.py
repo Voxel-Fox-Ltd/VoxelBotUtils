@@ -1,7 +1,4 @@
 database_file = """
--- The contents of this file are automatcally thrown into the database at bot startup;
--- you need to remove these lines for the bot to run
-
 CREATE TABLE IF NOT EXISTS guild_settings(
     guild_id BIGINT PRIMARY KEY,
     prefix VARCHAR(30)

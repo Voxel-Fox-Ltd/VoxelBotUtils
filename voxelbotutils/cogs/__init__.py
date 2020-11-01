@@ -1,5 +1,5 @@
 all_packages = (
-    'analytics',
+    'general_analytics',
     'simple_bot_settings',
     'bot_stats',
     'command_event',

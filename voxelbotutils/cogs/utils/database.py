@@ -72,13 +72,12 @@ class DatabaseConnection(object):
         self.transaction = None
 
     async def __aenter__(self):
-        self.conn = await self.pool.acquire()
+        v = await self.get_connection()
+        self.conn = v.conn
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
-        await self.pool.release(self.conn)
-        self.conn = None
-        del self
+        await self.disconnect()
 
     async def __call__(self, sql:str, *args) -> typing.Union[typing.List[dict], None]:
         """

@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 
 from . import utils
+from .. import __version__
 
 
 class BotStats(utils.Cog):
@@ -54,7 +55,7 @@ class BotStats(utils.Cog):
 
         # Make embed
         embed = utils.Embed(use_random_colour=True)
-        embed.set_footer(str(self.bot.user), icon_url=self.bot.user.avatar_url)
+        embed.set_footer(f"{self.bot.user} - VoxelBotUtils v{__version__}", icon_url=self.bot.user.avatar_url)
         embed.add_field("Creator", f"{creator!s}\n{creator_id}")
         embed.add_field("Library", f"Discord.py {discord.__version__}")
         if self.bot.shard_count != len(self.bot.shard_ids):
@@ -87,7 +88,7 @@ class BotStats(utils.Cog):
             if "upvotes" in data and "metrics" in data:
                 content = {
                     "name": "Bot Votes",
-                    "value": f"[DiscordBotList.com](https://discordbotlist.com/bots/{self.bot.user.id}): {data['metrics']['upvotes']} ({data['upvotes']} this month)"
+                    "value": f"[DiscordBotList.com](https://discordbotlist.com/bots/{self.bot.user.id}): {data['metrics'].get('upvotes', 0)} ({data['upvotes']} this month)"
                 }
                 try:
                     current_data = embed.get_field_by_key("Bot Votes")

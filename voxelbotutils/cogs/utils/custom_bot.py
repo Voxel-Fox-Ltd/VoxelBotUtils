@@ -16,6 +16,8 @@ from discord.ext import commands
 from .custom_context import CustomContext
 from .database import DatabaseConnection
 from .redis import RedisConnection
+from .statsd import StatsdConnection
+from .analytics_http_client import AnalyticsBaseConnector
 from .. import all_packages as all_vfl_package_names
 
 
@@ -85,7 +87,7 @@ class CustomBot(commands.AutoShardedBot):
         # Run original
         super().__init__(
             command_prefix=get_prefix, activity=activity, status=status, case_insensitive=case_insensitive, intents=intents,
-            allowed_mentions=allowed_mentions, *args, **kwargs,
+            allowed_mentions=allowed_mentions, connector=kwargs.pop("connector", AnalyticsBaseConnector(self)), *args, **kwargs,
         )
 
         # Set up our default guild settings
@@ -105,6 +107,11 @@ class CustomBot(commands.AutoShardedBot):
         # Allow redis connections like this
         self.redis = RedisConnection
         self.redis.logger = self.logger.getChild('redis')
+
+        # Allow Statsd connections like this
+        self.stats = StatsdConnection
+        self.stats.config = self.config.get('statsd', {})
+        self.stats.logger = self.logger.getChild('statsd')
 
         # Store the startup method so I can see if it completed successfully
         self.startup_time = dt.now()
@@ -163,6 +170,12 @@ class CustomBot(commands.AutoShardedBot):
         for row in data:
             for key, value in row.items():
                 self.user_settings[row['user_id']][key] = value
+
+        # Run the user-added startup methods
+        async def fake_cache_setup_method(db):
+            pass
+        for cog_name, cog in self.cogs.items():
+            self.loop.create_task(getattr(cog, "cache_setup", fake_cache_setup_method)(db))
 
         # Wait for the bot to cache users before continuing
         self.logger.debug("Waiting until ready before completing startup method.")
@@ -487,3 +500,17 @@ class CustomBot(commands.AutoShardedBot):
         self.logger.info("Setting activity to default")
         await self.set_default_presence()
         self.logger.info('Bot loaded.')
+
+    async def invoke(self, ctx):
+        if ctx.command is None:
+            return await super().invoke(ctx)
+        command_stats_name = ctx.command.qualified_name.replace(' ', ':')
+        command_stats_tags = {
+            "command_name": command_stats_name,
+            # "guild_id": "DMs" if ctx.guild is None else ctx.guild.id,
+            # "user_id": ctx.author.id,
+            # "channel_id": "DMs" if ctx.guild is None else ctx.channel.id,
+        }
+        async with self.stats() as stats:
+            stats.increment("discord.bot.commands", tags=command_stats_tags)
+        return await super().invoke(ctx)

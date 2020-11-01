@@ -12,17 +12,17 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
     # Members - recommended: false (privileged intent). Used for member join/remove/update, Member.roles, Member.nick, User.name, etc.
     members = false
     # Bans - recommended: false. Used for member ban/unban.
-    bans = false
+    bans = true
     # Emojis - recommended: false. Used for guild emojis update, Bot.get_emoji, Guild.emojis.
-    emojis = false
+    emojis = true
     # Integrations - recommended: false. Used for guild integrations update.
-    integrations = false
+    integrations = true
     # Webhooks - recommended: false. Used for guild webhooks update.
-    webhooks = false
+    webhooks = true
     # Invites - recommended: false. Used for invite create/delete.
-    invites = false
+    invites = true
     # Voice states - recommended: false. Used for voice state update, VoiceChannel.members, Member.voice.
-    voice_states = false
+    voice_states = true
     # Presences - recommended: false (privileged intent). Used for member update (for activities and status), Member.status.
     presences = false
     # Guild messages - recommended: true. Used for message events in guilds.
@@ -30,9 +30,9 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
     # DM messages - recommended: true. Used for message events in DMs.
     dm_messages = true
     # Guild reactions - recommended: false. Used for [raw] reaction add/remove/clear events in guilds.
-    guild_reactions = false
+    guild_reactions = true
     # DM reactions - recommended: false. Used for [raw] reaction add/remove/clear events in DMs.
-    dm_reactions = false
+    dm_reactions = true
     # Guild typing - recommended: false. Used for the typing event in guilds.
     guild_typing = false
     # DM typing - recommended: false. Used for the typing event in Dms.
@@ -56,19 +56,19 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
 
 # This data is passed directly over to asyncpg.connect()
 [database]
+    enabled = false
     user = "database_username"
     password = "database_password"
     database = "database_name"
     host = "127.0.0.1"
     port = 5432
-    enabled = false
 
 # This data is passed directly over to aioredis.connect()
 [redis]
+    enabled = false
     host = "127.0.0.1"
     port = 6379
     db = 0
-    enabled = false
 
 # The data that gets shoves into custom context for the embed
 [embed]
@@ -93,9 +93,16 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
 [oauth]
     client_id = ""
 
-# This is where you can set up all of your analytics to be sent to GA
+# This is where you can set up all of your analytics to be sent to GA; automatically disabled if no data is provided
 [google_analytics]
     tracking_id = ""  # Tracking ID for your GA instance
     app_name = ""  # The name of your bot - what you want GA to name this traffic source
     document_host = ""  # The (possibly fake) URL you want to tell GA this website is
+
+# It's time for better analytics! Let's give statsd a little try
+[statsd]
+    host = "127.0.0.1"
+    port = 8125  # This is the DataDog default, 9125 is the general statsd default
+    [statsd.constant_tags]
+        service = ""  # Put your bot name here - leave blank to disable stats collection
 """

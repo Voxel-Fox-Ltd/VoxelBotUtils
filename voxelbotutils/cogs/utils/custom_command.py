@@ -87,3 +87,21 @@ class CustomGroup(commands.Group):
             return await super().can_run(ctx)
         except commands.CommandOnCooldown:
             return True
+
+    def command(self, *args, **kwargs):
+        """
+        Add the usual utils.Command to the mix.
+        """
+
+        if 'cls' not in kwargs:
+            kwargs['cls'] = CustomCommand
+        return super().command(*args, **kwargs)
+
+    def group(self, *args, **kwargs):
+        """
+        Add the usual utils.Group to the mix.
+        """
+
+        if 'cls' not in kwargs:
+            kwargs['cls'] = CustomGroup
+        return super().group(*args, **kwargs)

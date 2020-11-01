@@ -42,6 +42,8 @@ voxelbotutils.Cog
 .. autoclass:: voxelbotutils.cogs.utils.custom_cog.CustomCog
    :members:
 
+   Almost everything is still the same as the defaul discord.py cog. Notable changes: `Cog.logger` is a thing - that's a deafult logger that follows the same loglevel as `Bot.logger`; `Cog.cache_setup` is a new awaitable method that's run at bot startup - use it to set up your cache values should you need them, but otherwise you should just pull from your database tbh.
+
 voxelbotutils.Command
 -----------------------------------------------
 
@@ -88,6 +90,11 @@ voxelbotutils.RedisConnection
    .. note::
       This is only enabled if redis is enabled in the config.
 
+voxelbotutils.StatsdConnection
+-------------------------------------
+
+.. autoclass:: voxelbotutils.cogs.utils.statsd.StatsdConnection
+   :members:
 
 voxelbotutils.TimeValue
 -------------------------------------------
