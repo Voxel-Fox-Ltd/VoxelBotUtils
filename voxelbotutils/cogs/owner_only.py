@@ -139,7 +139,6 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         """
         
         codir = []
-        cog_name = '*'
         if cog_name == '*':
              for cog in os.listdir('cogs'):
                   if cog.endswith('.py'):
