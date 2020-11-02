@@ -245,6 +245,12 @@ class CustomBot(commands.AutoShardedBot):
         # Return url
         return 'https://discord.com/oauth2/authorize?' + urlencode(data)
 
+    @property
+    def event_webhook(self):
+        if self.config['event_webhook_url'] in [None, 0, ""]:
+            return None
+        return discord.Webhook(self.config['event_webhook_url'], adapter=discord.AsyncWebhookAdapter(self.session))
+
     async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, delete:typing.List[discord.Message]=None, timeout=60.0, wait:bool=True) -> None:
         """
         Adds a delete button to the given message.
