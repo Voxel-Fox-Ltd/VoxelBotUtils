@@ -245,7 +245,7 @@ class CustomBot(commands.AutoShardedBot):
         # Return url
         return 'https://discord.com/oauth2/authorize?' + urlencode(data)
 
-    async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, delete:typing.List[discord.Message]=None, timeout=60.0) -> None:
+    async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, delete:typing.List[discord.Message]=None, timeout=60.0, wait:bool=True) -> None:
         """
         Adds a delete button to the given message.
 
@@ -256,12 +256,20 @@ class CustomBot(commands.AutoShardedBot):
             timeout (float, optional): How long the delete button should persist for.
         """
 
+        # See if we want to make this as a task or not
+        if wait is False:
+            self.loop.create_task(self.add_delete_button(message=message, valid_users=valid_users, delete=delete, timeout=timeout))
+            return
+
         # Let's not add delete buttons to DMs
         if isinstance(message.channel, discord.DMChannel):
             return
 
         # Add reaction
-        await message.add_reaction("\N{WASTEBASKET}")
+        try:
+            await message.add_reaction("\N{WASTEBASKET}")
+        except discord.HTTPException as e:
+            raise e  # Maybe return none here - I'm not sure yet.
 
         # Fix up arguments
         if not isinstance(valid_users, list):
