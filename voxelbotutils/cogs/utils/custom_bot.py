@@ -209,6 +209,13 @@ class CustomBot(commands.AutoShardedBot):
 
         return await self._run_sql_exit_on_error(db, "SELECT * FROM {0} WHERE key=$1".format(table_name), key)
 
+    async def fetch_support_guild(self):
+        """
+        Fetch the support guild based on the config from the API.
+        """
+
+        return self.get_guild(self.config['support_guild_id']) or await self.fetch_guild(self.config['support_guild_id'])
+
     def get_invite_link(self, *, scope:str='bot', response_type:str=None, redirect_uri:str=None, guild_id:int=None, **kwargs) -> str:
         """
         Gets the invite link for the bot, with permissions all set properly.
