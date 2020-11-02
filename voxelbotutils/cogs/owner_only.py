@@ -137,7 +137,28 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         """
         Unloads and reloads a cog from the bot.
         """
-
+        
+        codir = []
+        cog_name = '*'
+        if cog_name == '*':
+             for cog in os.listdir('cogs'):
+                  if cog.endswith('.py'):
+                       codir.append(cog[:-3])
+                       cog = 'cogs.' + cog[:-3]
+                       try:
+                           self.bot.load_extension(cog)
+                       except commands.ExtensionAlreadyLoaded:
+                           try:
+                               self.bot.reload_extension(cog)
+                           except Exception:
+                               await ctx.send('py\n' + traceback.format_exc())
+                               return
+                       except Exception:
+                           await ctx.send('py\n' + traceback.format_exc())
+                           return
+             await ctx.send('Reloaded: \n' + '\n'.join(codir))
+             return
+        
         cog_name = 'cogs.' + '_'.join([i for i in cog_name])
 
         try:
