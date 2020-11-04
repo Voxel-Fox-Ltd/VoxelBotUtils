@@ -152,6 +152,38 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
             await ctx.send('```py\n' + traceback.format_exc() + '```')
             return
         await ctx.send('Cog reloaded.')
+        
+    @commands.command(aliases=['dlcog'], cls=utils.Command)
+    @commands.is_owner()
+    async def downloadcog(self, ctx: utils.Context, url: str):
+        """Download a cog from github"""
+    
+        #Convert github link to a raw link and grab contents
+        raw_url = url.replace("/blob", "").replace("github.com", "raw.githubusercontent.com")
+        r = await self.bot.session.get(raw_url)
+        file_name =  raw_url[raw_url.rfind("/")+1:]
+        file_path = "./cogs/" + file_name
+
+        try:
+            # Create the file and dump the github content in there
+            with open(file_path, "x", encoding="utf-8") as n:
+                n.write(await r.text())
+        except FileExistsError:
+            return await ctx.send(f"The extension you tried to download was already downloaded.")
+        
+        # Load the cog
+        try:
+            self.bot.load_extension(f"cogs.{file_name[:-3]}")
+        except commands.ExtensionNotFound:
+            return await ctx.send(f"Extension could not be found.")
+        except commands.ExtensionAlreadyLoaded:
+            return await ctx.send(f"The extension you tried to download was already running.")
+        except commands.NoEntryPointError:
+            return await ctx.send(f"No added setup function.")
+        except commands.ExtensionFailed:
+            return await ctx.send(f"Extension failed for some unknown reason.")
+
+        await ctx.send(f"Downloaded `{file_name}` and loaded it.")
 
     @commands.command(cls=utils.Command)
     @commands.is_owner()
