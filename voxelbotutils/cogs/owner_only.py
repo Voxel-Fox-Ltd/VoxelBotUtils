@@ -2,6 +2,7 @@ import asyncio
 import contextlib
 import copy
 import io
+import os
 import json
 import textwrap
 import traceback
@@ -181,7 +182,8 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         except commands.NoEntryPointError:
             return await ctx.send("No added setup function.")
         except commands.ExtensionFailed:
-            return await ctx.send("Extension failed for some unknown reason.")
+            os.remove(file_path)
+            return await ctx.send("Extension failed for some unknown reason. Extension has been deleted.")
 
         await ctx.send(f"Downloaded `{file_name}` and loaded it.")
 
