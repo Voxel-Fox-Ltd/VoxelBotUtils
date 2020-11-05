@@ -158,7 +158,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     async def downloadcog(self, ctx: utils.Context, url: str):
         """Download a cog from github"""
     
-        #Convert github link to a raw link and grab contents
+        # Convert github link to a raw link and grab contents
         raw_url = url.replace("/blob", "").replace("github.com", "raw.githubusercontent.com")
         r = await self.bot.session.get(raw_url, headers={"user-agent": f"Discord Bot - {self.bot.user}")
         file_name =  raw_url[raw_url.rfind("/")+1:]
