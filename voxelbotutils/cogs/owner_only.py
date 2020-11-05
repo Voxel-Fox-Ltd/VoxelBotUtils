@@ -284,7 +284,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         msg = copy.copy(ctx.message)
 
         # Change the author and content
-        msg.author = ctx.guild.get_member(who.id) or who
+        try:
+            msg.author = ctx.guild.get_member(who.id) or await ctx.guild.fetch_member(who.id) or who
+        except discord.HTTPException:
+            msg.author = who
         msg.content = ctx.prefix + command
 
         # Make a context
