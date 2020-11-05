@@ -157,15 +157,15 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
             await ctx.send('```py\n' + traceback.format_exc() + '```')
             return
         await ctx.send('Cog reloaded.')
-        
+
     @commands.command(aliases=['dlcog'], cls=utils.Command)
     @commands.is_owner()
     async def downloadcog(self, ctx: utils.Context, url: str):
         """Download a cog from github"""
-    
+
         # Convert github link to a raw link and grab contents
         raw_url = url.replace("/blob", "").replace("github.com", "raw.githubusercontent.com")
-        r = await self.bot.session.get(raw_url, headers={"user-agent": f"Discord Bot - {self.bot.user}")
+        r = await self.bot.session.get(raw_url, headers={"user-agent": f"Discord Bot - {self.bot.user}"})
         file_name =  raw_url[raw_url.rfind("/")+1:]
         file_path = "./cogs/" + file_name
 
@@ -175,7 +175,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
                 n.write(await r.text())
         except FileExistsError:
             return await ctx.send("The extension you tried to download was already downloaded.")
-        
+
         # Load the cog
         try:
             self.bot.load_extension(f"cogs.{file_name[:-3]}")
