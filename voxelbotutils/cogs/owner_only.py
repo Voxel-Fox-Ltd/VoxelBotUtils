@@ -176,11 +176,14 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         try:
             self.bot.load_extension(f"cogs.{file_name[:-3]}")
         except commands.ExtensionNotFound:
-            return await ctx.send("Extension could not be found.")
+            os.remove(file_path)
+            return await ctx.send("Extension could not be found. Extension has been deleted.")
         except commands.ExtensionAlreadyLoaded:
-            return await ctx.send("The extension you tried to download was already running.")
+            os.remove(file_path)
+            return await ctx.send("The extension you tried to download was already running. Extension has been deleted.")
         except commands.NoEntryPointError:
-            return await ctx.send("No added setup function.")
+            os.remove(file_path)
+            return await ctx.send("No added setup function. Extension has been deleted.")
         except commands.ExtensionFailed:
             os.remove(file_path)
             return await ctx.send("Extension failed for some unknown reason. Extension has been deleted.")
