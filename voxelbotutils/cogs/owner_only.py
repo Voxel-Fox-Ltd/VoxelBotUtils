@@ -158,41 +158,54 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
             return
         await ctx.send('Cog reloaded.')
 
-    @commands.command(aliases=['dlcog'], cls=utils.Command)
+    @commands.command(cls=utils.Command, aliases=['downloadcog', 'dlcog', 'download', 'dl'])
     @commands.is_owner()
-    async def downloadcog(self, ctx: utils.Context, url: str):
+    async def downloadfile(self, ctx:utils.Context, url:str, file_folder:str=None):
         """Download a cog from github"""
 
         # Convert github link to a raw link and grab contents
         raw_url = url.replace("/blob", "").replace("github.com", "raw.githubusercontent.com")
-        r = await self.bot.session.get(raw_url, headers={"user-agent": f"Discord Bot - {self.bot.user}"})
-        file_name =  raw_url[raw_url.rfind("/")+1:]
-        file_path = "./cogs/" + file_name
+        headers = {"User-Agent": f"Discord Bot - {self.bot.user}"}
+        async with self.bot.session.get(raw_url, headers=headers) as r:
+            text = await r.text()
 
+        # Work out our filename/path
+        file_name = raw_url[raw_url.rfind("/") + 1:]
+        if file_folder is None:
+            file_folder = "cogs"
+        file_folder = file_folder.rstrip("/")
+        file_path = f"{file_folder}/{file_name}"
+
+        # Create the file and dump the github content in there
         try:
-            # Create the file and dump the github content in there
             with open(file_path, "x", encoding="utf-8") as n:
-                n.write(await r.text())
+                n.write(text)
         except FileExistsError:
-            return await ctx.send("The extension you tried to download was already downloaded.")
+            return await ctx.send("The file you tried to download was already downloaded.")
+
+        # If it wasn't loaded into the cogs folder, we're probably fine
+        if file_folder != "cogs":
+            return await ctx.send(f"Downloaded the `{file_name}` file, and successfully saved as `{file_path}`.")
 
         # Load the cog
+        errored = True
         try:
             self.bot.load_extension(f"cogs.{file_name[:-3]}")
+            errored = False
         except commands.ExtensionNotFound:
-            os.remove(file_path)
-            return await ctx.send("Extension could not be found. Extension has been deleted.")
+            await ctx.send("Extension could not be found. Extension has been deleted.")
         except commands.ExtensionAlreadyLoaded:
-            os.remove(file_path)
-            return await ctx.send("The extension you tried to download was already running. Extension has been deleted.")
+            await ctx.send("The extension you tried to download was already running. Extension has been deleted.")
         except commands.NoEntryPointError:
-            os.remove(file_path)
-            return await ctx.send("No added setup function. Extension has been deleted.")
+            await ctx.send("No added setup function. Extension has been deleted.")
         except commands.ExtensionFailed:
+            await ctx.send("Extension failed for some unknown reason. Extension has been deleted.")
+        if errored:
             os.remove(file_path)
-            return await ctx.send("Extension failed for some unknown reason. Extension has been deleted.")
+            return
 
-        await ctx.send(f"Downloaded `{file_name}` and loaded it.")
+        # And done
+        await ctx.send(f"Downloaded the `{file_name}` cog, saved as `{file_path}`, and loaded successfully into the bot.")
 
     @commands.command(cls=utils.Command)
     @commands.is_owner()
