@@ -116,6 +116,15 @@ def validate_sharding_information(args:argparse.Namespace) -> typing.List[int]:
         args.shardcount = 1
         args.min = 0
         args.max = 0
+    else:
+        if args.min is None and args.max is None:
+            args.min = 0
+            args.max = args.shardcount - 1
+        elif type(args.min) == int and type(args.max) == int:
+            pass
+        else:
+            logger.critical("You set a shardcount but not min/max shards")
+            exit(1)
     shard_ids = list(range(args.min, args.max + 1))
     if args.shardcount is None and (args.min or args.max):
         logger.critical("You set a min/max shard handler but no shard count")
@@ -135,22 +144,50 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
         args (argparse.Namespace): The argparse namespace saying what levels to set each logger to
     """
 
-    logging.basicConfig(format='%(asctime)s:%(name)s:%(levelname)s: %(message)s', stream=sys.stdout)
+    formatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s: %(message)s')
     bot.logger = logger
 
-    # Set loglevel defaults
-    set_log_level(logger, args.loglevel)
-    set_log_level(bot.database.logger, args.loglevel)
-    set_log_level(bot.redis.logger, args.loglevel)
-    set_log_level(bot.stats.logger, args.loglevel)
-    set_log_level('discord', args.loglevel)
+    # Make our streams
+    bot_logger = logging.StreamHandler(sys.stdout)
+    database_logger = logging.StreamHandler(sys.stdout)
+    redis_logger = logging.StreamHandler(sys.stdout)
+    stats_logger = logging.StreamHandler(sys.stdout)
+    discord_logger = logging.StreamHandler(sys.stdout)
 
-    # Set loglevels by config
-    set_log_level(logger, args.loglevel_bot)
-    set_log_level(bot.database.logger, args.loglevel_database)
-    set_log_level(bot.redis.logger, args.loglevel_redis)
-    set_log_level(bot.stats.logger, args.loglevel_statsd)
-    set_log_level('discord', args.loglevel_discord)
+    # Add our formatters
+    bot_logger.setFormatter(formatter)
+    database_logger.setFormatter(formatter)
+    redis_logger.setFormatter(formatter)
+    stats_logger.setFormatter(formatter)
+    discord_logger.setFormatter(formatter)
+
+    # Set all the loggers to debug
+    set_log_level(bot.logger, 'DEBUG')
+    set_log_level(bot.database.logger, 'DEBUG')
+    set_log_level(bot.redis.logger, 'DEBUG')
+    set_log_level(bot.stats.logger, 'DEBUG')
+    set_log_level('discord', 'DEBUG')
+
+    # Set loglevel defaults for the stream handlers
+    set_log_level(bot_logger, args.loglevel)
+    set_log_level(database_logger, args.loglevel)
+    set_log_level(redis_logger, args.loglevel)
+    set_log_level(stats_logger, args.loglevel)
+    set_log_level(discord_logger, args.loglevel)
+
+    # Set loglevels for the streams via the commandline args
+    set_log_level(bot_logger, args.loglevel_bot)
+    set_log_level(database_logger, args.loglevel_database)
+    set_log_level(redis_logger, args.loglevel_redis)
+    set_log_level(stats_logger, args.loglevel_statsd)
+    set_log_level(discord_logger, args.loglevel_discord)
+
+    # Add the stream handlers to the loggers
+    bot.logger.addHandler(bot_logger)
+    bot.database.logger.addHandler(database_logger)
+    bot.redis.logger.addHandler(redis_logger)
+    bot.stats.logger.addHandler(stats_logger)
+    logging.getLogger('discord').addHandler(discord_logger)
 
 
 async def create_initial_database(bot:Bot) -> None:
@@ -239,6 +276,11 @@ def run_bot(bot:Bot) -> None:
     """
 
     # Use right event loop
+    try:
+        import uvloop
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    except ImportError:
+        pass
     if sys.platform == 'win32':
         loop = asyncio.ProactorEventLoop()
         asyncio.set_event_loop(loop)

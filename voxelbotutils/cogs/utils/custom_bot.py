@@ -17,7 +17,7 @@ from .custom_context import CustomContext
 from .database import DatabaseConnection
 from .redis import RedisConnection
 from .statsd import StatsdConnection
-from .analytics_http_client import AnalyticsBaseConnector
+from .analytics_log_handler import AnalyticsLogHandler
 from .. import all_packages as all_vfl_package_names
 
 
@@ -33,7 +33,7 @@ def get_prefix(bot, message:discord.Message):
         prefix = bot.guild_settings[message.guild.id]['prefix'] or bot.config['default_prefix']
 
     # Fuck iOS devices
-    if prefix in ["'", "‘"]:
+    if type(prefix) is not list and prefix in ["'", "‘"]:
         prefix = ["'", "‘"]
 
     # Listify it
@@ -43,7 +43,8 @@ def get_prefix(bot, message:discord.Message):
     prefix.extend([i.title() for i in prefix])
 
     # Add spaces for words
-    prefix.extend([f"{i.strip()} " for i in prefix if not any([o in prefix for o in string.punctuation])])
+    possible_word_prefixes = [i for i in prefix if not any([o in i for o in string.punctuation])]
+    prefix.extend([f"{i.strip()} " for i in possible_word_prefixes])
 
     # And we're FINALLY done
     return commands.when_mentioned_or(*prefix)(bot, message)
@@ -87,7 +88,7 @@ class CustomBot(commands.AutoShardedBot):
         # Run original
         super().__init__(
             command_prefix=get_prefix, activity=activity, status=status, case_insensitive=case_insensitive, intents=intents,
-            allowed_mentions=allowed_mentions, connector=kwargs.pop("connector", AnalyticsBaseConnector(self)), *args, **kwargs,
+            allowed_mentions=allowed_mentions, *args, **kwargs,
         )
 
         # Set up our default guild settings
@@ -116,6 +117,11 @@ class CustomBot(commands.AutoShardedBot):
         # Store the startup method so I can see if it completed successfully
         self.startup_time = dt.now()
         self.startup_method = None
+
+        # Regardless of whether we start statsd or not, I want to add the log handler
+        handler = AnalyticsLogHandler(self)
+        handler.setLevel(logging.DEBUG)
+        logging.getLogger('discord.http').addHandler(handler)
 
         # Here's the storage for cached stuff
         self.guild_settings = collections.defaultdict(lambda: copy.deepcopy(self.DEFAULT_GUILD_SETTINGS))
@@ -175,7 +181,7 @@ class CustomBot(commands.AutoShardedBot):
         async def fake_cache_setup_method(db):
             pass
         for cog_name, cog in self.cogs.items():
-            self.loop.create_task(getattr(cog, "cache_setup", fake_cache_setup_method)(db))
+            await getattr(cog, "cache_setup", fake_cache_setup_method)(db)
 
         # Wait for the bot to cache users before continuing
         self.logger.debug("Waiting until ready before completing startup method.")
@@ -202,6 +208,13 @@ class CustomBot(commands.AutoShardedBot):
         """Get all data from a table"""
 
         return await self._run_sql_exit_on_error(db, "SELECT * FROM {0} WHERE key=$1".format(table_name), key)
+
+    async def fetch_support_guild(self):
+        """
+        Fetch the support guild based on the config from the API.
+        """
+
+        return self.get_guild(self.config['support_guild_id']) or await self.fetch_guild(self.config['support_guild_id'])
 
     def get_invite_link(self, *, scope:str='bot', response_type:str=None, redirect_uri:str=None, guild_id:int=None, **kwargs) -> str:
         """
@@ -237,9 +250,15 @@ class CustomBot(commands.AutoShardedBot):
             data['response_type'] = response_type
 
         # Return url
-        return 'https://discordapp.com/oauth2/authorize?' + urlencode(data)
+        return 'https://discord.com/oauth2/authorize?' + urlencode(data)
 
-    async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, delete:typing.List[discord.Message]=None, timeout=60.0) -> None:
+    @property
+    def event_webhook(self):
+        if self.config['event_webhook_url'] in [None, 0, ""]:
+            return None
+        return discord.Webhook(self.config['event_webhook_url'], adapter=discord.AsyncWebhookAdapter(self.session))
+
+    async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, delete:typing.List[discord.Message]=None, timeout=60.0, wait:bool=True) -> None:
         """
         Adds a delete button to the given message.
 
@@ -250,12 +269,20 @@ class CustomBot(commands.AutoShardedBot):
             timeout (float, optional): How long the delete button should persist for.
         """
 
+        # See if we want to make this as a task or not
+        if wait is False:
+            self.loop.create_task(self.add_delete_button(message=message, valid_users=valid_users, delete=delete, timeout=timeout))
+            return
+
         # Let's not add delete buttons to DMs
         if isinstance(message.channel, discord.DMChannel):
             return
 
         # Add reaction
-        await message.add_reaction("\N{WASTEBASKET}")
+        try:
+            await message.add_reaction("\N{WASTEBASKET}")
+        except discord.HTTPException as e:
+            raise e  # Maybe return none here - I'm not sure yet.
 
         # Fix up arguments
         if not isinstance(valid_users, list):

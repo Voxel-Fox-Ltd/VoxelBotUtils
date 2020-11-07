@@ -2,8 +2,10 @@ import datetime
 import typing
 
 from discord.ext import commands
+from discord.ext.commands.core import wrap_callback
 
 from .checks.meta_command import InvokedMetaCommand
+from .custom_cog import CustomCog
 
 
 class CustomCommand(commands.Command):
@@ -14,6 +16,7 @@ class CustomCommand(commands.Command):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, cooldown_after_parsing=kwargs.pop('cooldown_after_parsing', True), **kwargs)
         self.ignore_checks_in_help: bool = kwargs.get('ignore_checks_in_help', False)
+        self.locally_handled_errors: list = kwargs.get('locally_handled_errors', None)
 
         # Fix cooldown to be our custom type
         cooldown = self._buckets._cooldown
@@ -63,12 +66,54 @@ class CustomCommand(commands.Command):
                     error = bucket.default_cooldown_error
                 raise error(bucket, retry_after)
 
+    async def dispatch_error(self, ctx, error):
+        """
+        Like how we'd normally dispatch an error, but we deal with local lads
+        """
+
+        # They didn't set anything? Default behaviour then
+        if self.locally_handled_errors is None:
+            return await super().dispatch_error(ctx, error)
+
+        ctx.command_failed = True
+
+        # See if we want to ping the local error handler
+        if isinstance(error, self.locally_handled_errors):
+
+            # If there's no `on_error` attr then this'll fail, but if there IS no `on_error`, there shouldn't
+            # be anything in `self.locally_handled_errors` and we want to raise an error anyway /shrug
+            injected = wrap_callback(self.on_error)
+            if self.cog:
+                ret = await injected(self.cog, ctx, error)
+            else:
+                ret = await injected(ctx, error)
+
+            # If we ping the local error handler and it returned FALSE then we ping the other error handlers;
+            # if not then we return here
+            if ret is False:
+                pass
+            else:
+                return ret
+
+        # Ping the cog error handler
+        try:
+            if self.cog is not None:
+                local = CustomCog._get_overridden_method(self.cog.cog_command_error)
+                if local is not None:
+                    wrapped = wrap_callback(local)
+                    await wrapped(ctx, error)
+
+        # Ping the global error handler
+        except Exception:
+            ctx.bot.dispatch('command_error', ctx, error)
+
 
 class CustomGroup(commands.Group):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, cooldown_after_parsing=kwargs.get('cooldown_after_parsing', True), **kwargs)
         self.ignore_checks_in_help = kwargs.get('ignore_checks_in_help', False)
+        self.locally_handled_errors: list = kwargs.get('locally_handled_errors', None)
 
     async def can_run(self, ctx:commands.Context) -> bool:
         """
@@ -105,3 +150,44 @@ class CustomGroup(commands.Group):
         if 'cls' not in kwargs:
             kwargs['cls'] = CustomGroup
         return super().group(*args, **kwargs)
+
+    async def dispatch_error(self, ctx, error):
+        """
+        Like how we'd normally dispatch an error, but we deal with local lads
+        """
+
+        # They didn't set anything? Default behaviour then
+        if self.locally_handled_errors is None:
+            return await super().dispatch_error(ctx, error)
+
+        ctx.command_failed = True
+
+        # See if we want to ping the local error handler
+        if isinstance(error, self.locally_handled_errors):
+
+            # If there's no `on_error` attr then this'll fail, but if there IS no `on_error`, there shouldn't
+            # be anything in `self.locally_handled_errors` and we want to raise an error anyway /shrug
+            injected = wrap_callback(self.on_error)
+            if self.cog:
+                ret = await injected(self.cog, ctx, error)
+            else:
+                ret = await injected(ctx, error)
+
+            # If we ping the local error handler and it returned FALSE then we ping the other error handlers;
+            # if not then we return here
+            if ret is False:
+                pass
+            else:
+                return ret
+
+        # Ping the cog error handler
+        try:
+            if self.cog is not None:
+                local = CustomCog._get_overridden_method(self.cog.cog_command_error)
+                if local is not None:
+                    wrapped = wrap_callback(local)
+                    await wrapped(ctx, error)
+
+        # Ping the global error handler
+        except Exception:
+            ctx.bot.dispatch('command_error', ctx, error)

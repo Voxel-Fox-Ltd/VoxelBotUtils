@@ -251,7 +251,7 @@ class SettingsMenuOption(object):
             which is then put into the datbase and cache.
             """
 
-            if isinstance(data, (discord.Role, discord.TextChannel)):
+            if isinstance(data, (discord.Role, discord.TextChannel, discord.User, discord.Member, discord.Object, discord.CategoryChannel)):
                 data = data.id
             original_data, data = data, serialize_function(data)
 
@@ -286,7 +286,7 @@ class SettingsMenuOption(object):
             which is then put into the datbase and cache.
             """
 
-            if isinstance(data, (discord.Role, discord.TextChannel)):
+            if isinstance(data, (discord.Role, discord.TextChannel, discord.User, discord.Member, discord.Object, discord.CategoryChannel)):
                 data = data.id
             original_data, data = data, serialize_function(data)
 

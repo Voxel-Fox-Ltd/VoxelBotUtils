@@ -1,3 +1,5 @@
+import re
+
 from discord.ext import commands
 
 
@@ -13,8 +15,7 @@ class UserID(int):
         Converts the given value to a valid user ID.
         """
 
-        commands.IDConverter
-        match = commands.IDConverter()._get_id_match(value)
+        match = commands.IDConverter()._get_id_match(value) or re.match(r'<@!?([0-9]+)>$', value)
         if match is not None:
             return int(match.group(1))
-        raise commands.BadArgument()
+        raise commands.UserNotFound(value)

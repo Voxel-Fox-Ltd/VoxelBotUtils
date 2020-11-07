@@ -3,6 +3,7 @@ token = "bot_token"  # The token for the bot
 owners = [ 141231597155385344, ]  # List of owner IDs - these people override all permission checks
 dm_uncaught_errors = false  # Whether or not to DM the owners when unhandled errors are encountered
 default_prefix = "!"  # The prefix for the bot's commands
+support_guild_id = 0  # The ID for the support guild - used by `Bot.fetch_support_guild()`
 event_webhook_url = ""  # Some events will be posted via webhook to this url
 
 # The intents that the bot should start with
@@ -37,6 +38,11 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
     guild_typing = false
     # DM typing - recommended: false. Used for the typing event in Dms.
     dm_typing = false
+
+# Content to be included in the help command
+[help_command]
+    dm_help = true  # Whether or not the help embed should be DMd to the user
+    text = ""  # Additional content to be sent with the embed
 
 # Data used to send API requests to whatever service
 [bot_listing_api_keys]

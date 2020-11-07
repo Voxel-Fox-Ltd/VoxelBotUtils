@@ -2,6 +2,7 @@ import asyncio
 import contextlib
 import copy
 import io
+import os
 import json
 import textwrap
 import traceback
@@ -46,7 +47,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         # remove `foo`
         return content.strip('` \n')
 
-    @commands.command(aliases=['evall'], cls=utils.Command)
+    @commands.command(aliases=['evall', 'eval'], cls=utils.Command)
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
     async def ev(self, ctx:utils.Context, *, content:str):
@@ -166,6 +167,55 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         else:
             await ctx.send('Reloaded:\n`' + '`\n`'.join(cog_list) + '`')
         return
+
+    @commands.command(cls=utils.Command, aliases=['downloadcog', 'dlcog', 'download', 'dl'])
+    @commands.is_owner()
+    async def downloadfile(self, ctx:utils.Context, url:str, file_folder:str=None):
+        """Download a cog from github"""
+
+        # Convert github link to a raw link and grab contents
+        raw_url = url.replace("/blob", "").replace("github.com", "raw.githubusercontent.com")
+        headers = {"User-Agent": f"Discord Bot - {self.bot.user}"}
+        async with self.bot.session.get(raw_url, headers=headers) as r:
+            text = await r.text()
+
+        # Work out our filename/path
+        file_name = raw_url[raw_url.rfind("/") + 1:]
+        if file_folder is None:
+            file_folder = "cogs"
+        file_folder = file_folder.rstrip("/")
+        file_path = f"{file_folder}/{file_name}"
+
+        # Create the file and dump the github content in there
+        try:
+            with open(file_path, "x", encoding="utf-8") as n:
+                n.write(text)
+        except FileExistsError:
+            return await ctx.send("The file you tried to download was already downloaded.")
+
+        # If it wasn't loaded into the cogs folder, we're probably fine
+        if file_folder != "cogs":
+            return await ctx.send(f"Downloaded the `{file_name}` file, and successfully saved as `{file_path}`.")
+
+        # Load the cog
+        errored = True
+        try:
+            self.bot.load_extension(f"cogs.{file_name[:-3]}")
+            errored = False
+        except commands.ExtensionNotFound:
+            await ctx.send("Extension could not be found. Extension has been deleted.")
+        except commands.ExtensionAlreadyLoaded:
+            await ctx.send("The extension you tried to download was already running. Extension has been deleted.")
+        except commands.NoEntryPointError:
+            await ctx.send("No added setup function. Extension has been deleted.")
+        except commands.ExtensionFailed:
+            await ctx.send("Extension failed for some unknown reason. Extension has been deleted.")
+        if errored:
+            os.remove(file_path)
+            return
+
+        # And done
+        await ctx.send(f"Downloaded the `{file_name}` cog, saved as `{file_path}`, and loaded successfully into the bot.")
 
     @commands.command(cls=utils.Command)
     @commands.is_owner()
@@ -294,7 +344,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         msg = copy.copy(ctx.message)
 
         # Change the author and content
-        msg.author = ctx.guild.get_member(who.id) or who
+        try:
+            msg.author = ctx.guild.get_member(who.id) or await ctx.guild.fetch_member(who.id) or who
+        except discord.HTTPException:
+            msg.author = who
         msg.content = ctx.prefix + command
 
         # Make a context
@@ -330,7 +383,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
             new_lines = await get_process_data(proc)
             if new_lines:
                 current_data += new_lines + '\n'
-                await m.edit(content=f"```\n{current_data[:1900]}```")
+                await m.edit(content=f"```\n{current_data[:-1900]}```")
             await asyncio.sleep(1)
 
         # Make sure we got all the data
@@ -338,13 +391,83 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         if new_lines:
             current_data += new_lines + '\n'
         current_data += f'[RETURN CODE {proc.returncode}]'
-        await m.edit(content=f"```\n{current_data[:1900]}```")
+        await m.edit(content=f"```\n{current_data[:-1900]}```")
 
         # And now we done
         try:
             await m.add_reaction("\N{OK HAND SIGN}")
         except discord.HTTPException:
             pass
+
+    @commands.command(cls=utils.Command)
+    @commands.is_owner()
+    async def exportguilddata(self, ctx, guild_id:int=None):
+        """
+        Exports data for a given guild form the database.
+
+        Autoamtically searches for any public tables with a `guild_id` column, and then exports that as a
+        file of "insert into" statements for you to use.
+        """
+
+        # Open db connection
+        db = await self.bot.database.get_connection()
+
+        # Get the tables that we want to export
+        table_names = await db("SELECT DISTINCT table_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema='public' AND column_name='guild_id'")
+
+        # Go through and make our insert statements
+        insert_statements = []
+        for table in table_names:
+
+            # Select the data we want to export
+            rows = await db("SELECT * FROM {} WHERE guild_id=$1".format(table['table_name']), guild_id or ctx.guild.id)
+            for row in rows:
+                cols = []
+                datas = []
+
+                # Add that data to a big ol list
+                for col, data in row.items():
+                    cols.append(col)
+                    datas.append(data)
+                insert_statements.append(
+                    (
+                        f"INSERT INTO {table['table_name']} ({', '.join(cols)}) VALUES ({', '.join('$' + str(i) for i, _ in enumerate(datas, start=1))});",
+                        datas,
+                    )
+                )
+
+        # Wew nice
+        await db.disconnect()
+
+        # Time to make a script
+        file_content = """
+            DATA = (
+                {data},
+            )
+
+            if __name__ == "__main__":
+                import asyncpg
+                conn = await asyncpg.connect(
+                    user="{user}",
+                    password="",
+                    database="{database}",
+                    port={port},
+                )
+                for query, data in DATA:
+                    await conn.execute(query, data)
+                await conn.disconnect()
+                print("Done.")
+        """.format(
+            user=self.bot.config['database']['user'],
+            database=self.bot.config['database']['database'],
+            port=self.bot.config['database']['port'],
+            data=', '.join(repr(i) for i in insert_statements),
+        )
+        file_content = textwrap.dedent(file_content).lstrip()
+
+        # And donezo
+        file = discord.File(io.StringIO(file_content), filename=f"db_migrate_{guild_id or ctx.guild.id}.py")
+        await ctx.send(file=file)
 
 
 def setup(bot:utils.Bot):

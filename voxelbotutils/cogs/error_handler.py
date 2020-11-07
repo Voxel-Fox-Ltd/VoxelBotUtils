@@ -29,6 +29,10 @@ class ErrorHandler(utils.Cog):
             lambda ctx, error: f"You can't use this command again for another {utils.TimeValue(error.retry_after).clean_spaced}."
         ),
         (
+            utils.errors.BotNotReady,
+            lambda ctx, error: "The bot isn't ready to start processing that command yet - please wait."
+        ),
+        (
             commands.NSFWChannelRequired,
             lambda ctx, error: "This command can't be run in a non-NSFW channel."
         ),
@@ -73,7 +77,51 @@ class ErrorHandler(utils.Cog):
             lambda ctx, error: "You need to be registered as an owner to run this command."
         ),
         (
-            (commands.BadArgument, commands.BadUnionArgument),
+            commands.MessageNotFound,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into a message."
+        ),
+        (
+            commands.MemberNotFound,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into a guild member."
+        ),
+        (
+            commands.UserNotFound,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into a user."
+        ),
+        (
+            commands.ChannelNotFound,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into a channel."
+        ),
+        (
+            commands.ChannelNotReadable,
+            lambda ctx, error: f"I can't read messages in <#{error.argument.id}>."
+        ),
+        (
+            commands.BadColourArgument,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into a colour."
+        ),
+        (
+            commands.RoleNotFound,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into a role."
+        ),
+        (
+            commands.BadInviteArgument,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into an invite."
+        ),
+        (
+            (commands.EmojiNotFound, commands.PartialEmojiConversionFailure),
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into an emoji."
+        ),
+        (
+            commands.BadBoolArgument,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into a boolean."
+        ),
+        (
+            commands.BadUnionArgument,
+            lambda ctx, error: f"I couldn't convert `{error.argument}` into any type of {', '.join([str(i) for i in error.converters])}."
+        ),
+        (
+            commands.BadArgument,
             lambda ctx, error: str(error)
         ),
         (
@@ -83,6 +131,10 @@ class ErrorHandler(utils.Cog):
         (
             discord.NotFound,
             lambda ctx, error: None
+        ),
+        (
+            commands.CheckFailure,
+            lambda ctx, error: str(error)
         ),
         (
             discord.Forbidden,
@@ -150,12 +202,15 @@ class ErrorHandler(utils.Cog):
 
         # Set up some errors that the owners are able to bypass
         owner_reinvoke_errors = (
-            commands.MissingRole, commands.MissingAnyRole,
-            commands.MissingPermissions,
+            commands.MissingRole, commands.MissingAnyRole, commands.MissingPermissions,
             commands.CommandOnCooldown, commands.DisabledCommand,
         )
         if ctx.original_author_id in self.bot.owner_ids and isinstance(error, owner_reinvoke_errors):
             return await ctx.reinvoke()
+
+        # See if the command itself has an error handler AND it isn't a locally handlled arg
+        if hasattr(ctx.command, "on_error") and not isinstance(ctx.command, utils.Command):
+            return
 
         # See if it's in our list of common outputs
         output = None
