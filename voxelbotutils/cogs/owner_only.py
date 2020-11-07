@@ -138,25 +138,35 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         """
         Unloads and reloads a cog from the bot.
         """
-
-        filename = '_'.join([i for i in cog_name])
-        if '.' in filename:
-            cog_name = filename
+        
+        # Get a list of cogs to reload
+        cog_name = 'cogs.' + '_'.join([i for i in cog_name])
+        if cog_name == 'cogs.*':
+            cog_list = [i for i in bot.get_extensions() if i.startswith('cogs.')]
         else:
-            cog_name = 'cogs.' + filename
+            cog_list = [cog_name]
 
-        try:
-            self.bot.load_extension(cog_name)
-        except commands.ExtensionAlreadyLoaded:
+        # Reload our cogs
+        reloaded_cogs = []
+        for cog in cog_list
             try:
-                self.bot.reload_extension(cog_name)
+                self.bot.load_extension(cog)
+                reloaded_cogs.append(cog)
+            except commands.ExtensionAlreadyLoaded:
+                try:
+                    self.bot.reload_extension(cog)
+                    reloaded_cogs.append(cog)
+                except Exception:
+                    await ctx.send(f"Error loading cog `{cog}` py\n{traceback.format_exc()}")  # This would have backticks but I can't put those rn
             except Exception:
-                await ctx.send('```py\n' + traceback.format_exc() + '```')
-                return
-        except Exception:
-            await ctx.send('```py\n' + traceback.format_exc() + '```')
-            return
-        await ctx.send('Cog reloaded.')
+                await ctx.send(f"Error loading cog `{cog}` py\n{traceback.format_exc()}")  # This would have backticks but I can't put those rn
+
+        # Output which cogs have been reloaded
+        if len(cog_list) == 1:
+            await ctx.send("Reloaded: `{cog_list[0]}`")
+        else:
+            await ctx.send('Reloaded:\n`' + '`\n`'.join(cog_list) + '`')
+        return
 
     @commands.command(cls=utils.Command, aliases=['downloadcog', 'dlcog', 'download', 'dl'])
     @commands.is_owner()
