@@ -22,8 +22,14 @@ if __name__ == '__main__':
 
     # Wew let's see if we want to run a bot
     parser = get_default_program_arguments(include_config_file=False)
-    parser.add_argument("bot_directory", nargs="?", default=".", help="The directory containing a config and a cogs folder for the bot to run")
-    parser.add_argument("--create-config-file", action="store_true", help="The module will ignore running the bot and all relevant args, and instead create a config file as config/config.toml", default=False)
+    parser.add_argument(
+        "bot_directory", nargs="?", default=".",
+        help="The directory containing a config and a cogs folder for the bot to run."
+    )
+    parser.add_argument(
+        "--create-config-file", action="store_true", default=False,
+        help="The module will ignore running the bot and all relevant args, and instead create a config file as 'config/config.toml'."
+    )
     args = parser.parse_args()
 
     # Let's see if we copyin bois
@@ -37,7 +43,14 @@ if __name__ == '__main__':
         create_file("run.sh", content="python3 -m voxelbotutils .\n")
         create_file(".gitignore", content="__pycache__/\nconfig/config.toml\n")
         create_file("requirements.txt", content="voxelbotutils\n")
+        print("Created config file.")
         exit(1)
+
+    # Change bot's cwd to where the user specified -
+    # specifically not doing this before the lines above so that they can provide a direct path
+    # from where _they_ are when they run the command, before telling the bot like
+    # "hey yeah this is where we live"
+    os.chdir(args.bot_directory)
 
     # And run file
     shard_ids = validate_sharding_information(args)

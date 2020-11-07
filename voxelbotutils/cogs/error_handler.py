@@ -202,8 +202,7 @@ class ErrorHandler(utils.Cog):
 
         # Set up some errors that the owners are able to bypass
         owner_reinvoke_errors = (
-            commands.MissingRole, commands.MissingAnyRole,
-            commands.MissingPermissions,
+            commands.MissingRole, commands.MissingAnyRole, commands.MissingPermissions,
             commands.CommandOnCooldown, commands.DisabledCommand,
         )
         if ctx.original_author_id in self.bot.owner_ids and isinstance(error, owner_reinvoke_errors):

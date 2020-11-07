@@ -389,6 +389,77 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         except discord.HTTPException:
             pass
 
+    @commands.command(cls=utils.Command)
+    @commands.is_owner()
+    async def exportguilddata(self, ctx, guild_id:int=None):
+        """
+        Exports data for a given guild form the database.
+
+        Autoamtically searches for any public tables with a `guild_id` column, and then exports that as a
+        file of "insert into" statements for you to use.
+        """
+
+        # Open db connection
+        db = await self.bot.database.get_connection()
+
+        # Get the tables that we want to export
+        table_names = await db("SELECT DISTINCT table_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema='public' AND column_name='guild_id'")
+
+        # Go through and make our insert statements
+        insert_statements = []
+        for table in table_names:
+
+            # Select the data we want to export
+            rows = await db("SELECT * FROM {} WHERE guild_id=$1".format(table['table_name']), guild_id or ctx.guild.id)
+            for row in rows:
+                cols = []
+                datas = []
+
+                # Add that data to a big ol list
+                for col, data in row.items():
+                    cols.append(col)
+                    datas.append(data)
+                insert_statements.append(
+                    (
+                        f"INSERT INTO {table['table_name']} ({', '.join(cols)}) VALUES ({', '.join('$' + str(i) for i, _ in enumerate(datas, start=1))});",
+                        datas,
+                    )
+                )
+
+        # Wew nice
+        await db.disconnect()
+
+        # Time to make a script
+        file_content = """
+            import asyncpg
+
+            conn = await asyncpg.connect(
+                user="{user}",
+                password="",
+                database="{database}",
+                port={port},
+            )
+
+            DATA = (
+                {data},
+            )
+
+            for query, data in DATA:
+                await conn.execute(query, data)
+
+            await conn.disconnect()
+        """.format(
+            user=self.bot.config['database']['user'],
+            database=self.bot.config['database']['database'],
+            port=self.bot.config['database']['port'],
+            data=',\n    '.join(repr(i) for i in insert_statements),
+        )
+        file_content = textwrap.dedent(file_content).lstrip()
+
+        # And donezo
+        file = discord.File(io.StringIO(file_content), filename=f"db_migrate_{guild_id}.py")
+        await ctx.send(file=file)
+
 
 def setup(bot:utils.Bot):
     x = OwnerOnly(bot)

@@ -276,6 +276,11 @@ def run_bot(bot:Bot) -> None:
     """
 
     # Use right event loop
+    try:
+        import uvloop
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    except ImportError:
+        pass
     if sys.platform == 'win32':
         loop = asyncio.ProactorEventLoop()
         asyncio.set_event_loop(loop)
