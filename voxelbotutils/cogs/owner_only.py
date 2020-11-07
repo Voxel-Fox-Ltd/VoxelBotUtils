@@ -431,23 +431,22 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
 
         # Time to make a script
         file_content = """
-            import asyncpg
-
-            conn = await asyncpg.connect(
-                user="{user}",
-                password="",
-                database="{database}",
-                port={port},
-            )
-
             DATA = (
                 {data},
             )
 
-            for query, data in DATA:
-                await conn.execute(query, data)
-
-            await conn.disconnect()
+            if __name__ == "__main__":
+                import asyncpg
+                conn = await asyncpg.connect(
+                    user="{user}",
+                    password="",
+                    database="{database}",
+                    port={port},
+                )
+                for query, data in DATA:
+                    await conn.execute(query, data)
+                await conn.disconnect()
+                print("Done.")
         """.format(
             user=self.bot.config['database']['user'],
             database=self.bot.config['database']['database'],
