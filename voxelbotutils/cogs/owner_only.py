@@ -452,9 +452,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
             user=self.bot.config['database']['user'],
             database=self.bot.config['database']['database'],
             port=self.bot.config['database']['port'],
-            data=',\n    '.join(repr(i) for i in insert_statements),
+            data=', '.join(repr(i) for i in insert_statements),
         )
-        file_content = textwrap.dedent(file_content).lstrip("\n")
+        file_content = textwrap.dedent(file_content).lstrip()
 
         # And donezo
         file = discord.File(io.StringIO(file_content), filename=f"db_migrate_{guild_id or ctx.guild.id}.py")
