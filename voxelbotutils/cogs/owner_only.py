@@ -373,7 +373,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
             new_lines = await get_process_data(proc)
             if new_lines:
                 current_data += new_lines + '\n'
-                await m.edit(content=f"```\n{current_data[:-1900]}```")
+                await m.edit(content=f"```\n{current_data[-1900:]}```")
             await asyncio.sleep(1)
 
         # Make sure we got all the data
@@ -381,7 +381,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         if new_lines:
             current_data += new_lines + '\n'
         current_data += f'[RETURN CODE {proc.returncode}]'
-        await m.edit(content=f"```\n{current_data[:-1900]}```")
+        await m.edit(content=f"```\n{current_data[-1900:]}```")
 
         # And now we done
         try:
