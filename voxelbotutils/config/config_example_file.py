@@ -39,6 +39,11 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
     # DM typing - recommended: false. Used for the typing event in Dms.
     dm_typing = false
 
+# Content to be included in the help command
+[help_command]
+    dm_help = true  # Whether or not the help embed should be DMd to the user
+    text = ""  # Additional content to be sent with the embed
+
 # Data used to send API requests to whatever service
 [bot_listing_api_keys]
     topgg_token = ""  # The token used to post data to top.gg

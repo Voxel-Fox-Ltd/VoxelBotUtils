@@ -9,18 +9,14 @@ from . import utils
 
 class CustomHelpCommand(commands.MinimalHelpCommand):
 
-    def __init__(self, **options):
-        self.include_invite = options.pop("include_invite", False)
-        super().__init__(**options)
-
     async def filter_commands(self, commands_to_filter:typing.List[utils.Command]) -> typing.List[utils.Command]:
         """
         Filter the command list down into a list of runnable commands.
         """
 
         if self.context.author.id in self.context.bot.owner_ids:
-            return commands_to_filter
-        valid_commands = [i for i in commands_to_filter if i.hidden is False and i.enabled is True]
+            return [i for i in commands_to_filter if i.name != "help"]
+        valid_commands = [i for i in commands_to_filter if i.hidden is False and i.enabled is True and i.name != "help"]
         returned_commands = []
         for comm in valid_commands:
             try:
@@ -99,8 +95,9 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
 
         # Send it to the destination
         data = {"embed": help_embed}
-        if self.include_invite:
-            data.update({"content": self.context.bot.config['command_data']['guild_invite']})
+        content = self.context.bot.config.get("help_command", {}).get("content", None)
+        if content:
+            data.update({"content": content.format(bot=self.context.bot, prefix=self.clean_prefix)})
         await self.send_to_destination(**data)
 
     async def send_to_destination(self, *args, **kwargs):
@@ -124,6 +121,8 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
                     await self.context.send("I couldn't send you a DM :c")
                 except discord.Forbidden:
                     pass  # Oh no now they won't know anything
+            except discord.HTTPException as e:
+                await self.context.send(f"I couldn't send you the help DM - {e}")  # We couldn't send the embed for some other reason
             return
 
         # If the destination is a channel
@@ -131,6 +130,8 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
             await dest.send(*args, **kwargs)
         except discord.Forbidden:
             pass  # Can't talk in the channel? Shame
+        except discord.HTTPException as e:
+            await self.context.send(f"I couldn't send you the help DM - {e}")  # We couldn't send the embed for some other reason
 
     async def send_error_message(self, error):
         """
@@ -164,6 +165,15 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         if with_signature:
             v += f"\n`{self.clean_prefix}{command.qualified_name} {command.signature}`"
         return v
+
+    def get_destination(self):
+        """
+        Return where we want the bot to send the embed to
+        """
+
+        if self.context.bot.config.get("help_command", {}).get("dm_help", True):
+            return self.context.author
+        return self.context.channel
 
 
 class Help(utils.Cog):
