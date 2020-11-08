@@ -10,14 +10,26 @@ from .. import __version__
 class BotStats(utils.Cog):
 
     @commands.command(aliases=['git', 'code'], cls=utils.Command)
-    @utils.checks.is_config_set('command_data', 'github_link')
     @commands.bot_has_permissions(send_messages=True)
     async def github(self, ctx:utils.Context):
         """
         Sends the GitHub Repository link.
         """
 
-        await ctx.send(f"<{self.bot.config['command_data']['github_link']}>")
+        message_to_send = []
+        
+        # Add the bots repo if it is set in the config
+        bot_repo = self.bot.config['command_data']['github_link']
+        if bot_repo is not None:
+            message = f"Bot Repo: <{bot_repo}>"
+            message_to_send.append(message)
+
+        # Add VBU's repo 
+        base_repo = "https://github.com/Voxel-Fox-Ltd/VoxelBotUtils/"
+        message = f"Bot Repo: <{base_repo}>"
+        message_to_send.append(message)
+
+        await ctx.send("\n".join(message_to_send))
 
     @commands.command(cls=utils.Command)
     @commands.bot_has_permissions(send_messages=True)
