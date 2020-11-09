@@ -163,9 +163,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
 
         # Output which cogs have been reloaded
         if len(cog_list) == 1:
-            await ctx.send("Reloaded: `{cog_list[0]}`")
+            await ctx.send(f"Reloaded: `{cog_list[0]}`")
         else:
-            await ctx.send('Reloaded:\n`' + '`\n`'.join(cog_list) + '`')
+            await ctx.send("Reloaded:\n`" + "`\n`".join(cog_list) + "`")
         return
 
     @commands.command(cls=utils.Command, aliases=['downloadcog', 'dlcog', 'download', 'dl'])
@@ -225,9 +225,12 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         Runs a line of SQL into the database.
         """
 
+        # Remove our backticks
+        sql = self._cleanup_code(sql)
+
         # Get the data we asked for
         async with self.bot.database() as db:
-            rows = await db(sql.format(guild=ctx.guild.id, author=ctx.author.id, channel=ctx.channel.id))
+            rows = await db(sql.format(guild=None if ctx.guild is None else ctx.guild.id, author=ctx.author.id, channel=ctx.channel.id))
         if not rows:
             return await ctx.send("No content.")
 
@@ -438,6 +441,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
 
         # Wew nice
         await db.disconnect()
+
+        # Make sure we have some data
+        if not insert_statements:
+            return await ctx.send("This guild has no non-default settings.")
 
         # Time to make a script
         file_content = """

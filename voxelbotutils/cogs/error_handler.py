@@ -205,7 +205,7 @@ class ErrorHandler(utils.Cog):
             commands.MissingRole, commands.MissingAnyRole, commands.MissingPermissions,
             commands.CommandOnCooldown, commands.DisabledCommand,
         )
-        if ctx.original_author_id in self.bot.owner_ids and isinstance(error, owner_reinvoke_errors):
+        if isinstance(error, owner_reinvoke_errors) and ctx.original_author_id in self.bot.owner_ids:
             return await ctx.reinvoke()
 
         # See if the command itself has an error handler AND it isn't a locally handlled arg
@@ -218,8 +218,12 @@ class ErrorHandler(utils.Cog):
             if isinstance(error, error_types):
                 output = function(ctx, error)
                 break
-        if isinstance(error, commands.NotOwner) and output in ctx.message.content:
-            output = "😒"
+
+        # See if they're tryina fuck me up
+        if output is not None and output in ctx.message.content and isinstance(error, commands.NotOwner):
+            output = "\N{UNAMUSED FACE}"
+
+        # Send a message based on the output
         if output:
             try:
                 _, _ = output
@@ -227,13 +231,13 @@ class ErrorHandler(utils.Cog):
                 output = (output,)
             return await self.send_to_ctx_or_author(ctx, *output)
 
-        # Can't tell what it is? Ah well.
+        # The output isn't a common output -- send them a plain error response
         try:
-            await ctx.send(f'```py\n{error}```')
+            await ctx.send(f"```py\n{error}```")
         except (discord.Forbidden, discord.NotFound):
             pass
 
-        # Can't tell what it is? Let's ping the owner and the relevant webhook
+        # Ping unhandled errors to the owners and to the event webhook
         try:
             raise error
         except Exception as e:
@@ -242,16 +246,16 @@ class ErrorHandler(utils.Cog):
             error_text = f"Error `{e}` encountered.\nGuild `{ctx.guild.id}`, channel `{ctx.channel.id}`, user `{ctx.author.id}`\n```\n{ctx.message.content}\n```"
 
             # DM to owners
-            if getattr(self.bot, "config", {}).get('dm_uncaught_errors', False):
-                for owner_id in self.bot.config['owners']:
+            if getattr(self.bot, "config", {}).get("dm_uncaught_errors", False):
+                for owner_id in self.bot.owner_ids:
                     owner = self.bot.get_user(owner_id) or await self.bot.fetch_user(owner_id)
                     data.seek(0)
                     await owner.send(error_text, file=discord.File(data, filename="error_log.py"))
 
             # Ping to the webook
-            if self.bot.config.get("event_webhook_url"):
+            if getattr(self.bot, "config", {}).get("event_webhook_url"):
                 webhook = discord.Webhook.from_url(
-                    self.bot.config['event_webhook_url'],
+                    self.bot.config["event_webhook_url"],
                     adapter=discord.AsyncWebhookAdapter(self.bot.session)
                 )
                 data.seek(0)
