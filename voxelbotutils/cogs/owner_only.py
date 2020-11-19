@@ -157,9 +157,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
                     self.bot.reload_extension(cog)
                     reloaded_cogs.append(cog)
                 except Exception:
-                    await ctx.send(f"Error loading cog `{cog}`: ```py\n{traceback.format_exc()}```")  # This would have backticks but I can't put those rn
+                    await ctx.send(f"Error loading cog `{cog}`: ```py\n{traceback.format_exc()}```")
             except Exception:
-                await ctx.send(f"Error loading cog `{cog}`: ```py\n{traceback.format_exc()}```")  # This would have backticks but I can't put those rn
+                await ctx.send(f"Error loading cog `{cog}`: ```py\n{traceback.format_exc()}```")
 
         # Output which cogs have been reloaded
         if len(cog_list) == 1:
