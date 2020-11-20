@@ -22,7 +22,7 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
             try:
                 await comm.can_run(self.context)
             except commands.CommandError as e:
-                if isinstance(e, (commands.DisabledCommand, commands.NotOwner)):
+                if isinstance(e, (commands.DisabledCommand, commands.NotOwner, utils.errors.NotBotSupport)):
                     continue
             returned_commands.append(comm)
         return returned_commands
