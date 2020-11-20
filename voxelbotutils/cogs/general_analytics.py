@@ -60,6 +60,7 @@ class Analytics(utils.Cog):
         # Only post if there's actually a DBL token set
         if not self.bot.config.get('bot_listing_api_keys', {}).get('topgg_token'):
             self.logger.warning("No Top.gg token has been provided")
+            self.post_topgg_guild_count.stop()
             return
 
         url = f'https://top.gg/api/bots/{self.bot.user.id}/stats'
@@ -92,6 +93,7 @@ class Analytics(utils.Cog):
         # Only post if there's actually a DBL token set
         if not self.bot.config.get('bot_listing_api_keys', {}).get('discordbotlist_token'):
             self.logger.warning("No DiscordBotList.com token has been provided")
+            self.post_discordbotlist_guild_count.stop()
             return
 
         url = f'https://discordbotlist.com/api/v1/bots/{self.bot.user.id}/stats'
@@ -129,10 +131,13 @@ class Analytics(utils.Cog):
     async def on_socket_raw_send(self, payload:dict):
         """A raw socket response message send Discord"""
 
+        # Get the event opcode
         try:
             event_id = json.loads(payload)['op']
         except Exception:
-            return
+            return  # there isn't one somehow but okay
+
+        # Try and get a name from that opcode
         event_name = self.FOUND_GATEWAY_OPCODES.get(event_id)
         if event_name is None:
             for i in dir(discord.gateway.DiscordWebSocket):
@@ -144,6 +149,7 @@ class Analytics(utils.Cog):
                             event_name = i
                             break
 
+        # Post that to statsd
         async with self.bot.stats() as stats:
             try:
                 stats.increment("discord.gateway.send", tags={"event_name": event_name})
@@ -169,7 +175,7 @@ class Analytics(utils.Cog):
         ga_data = self.bot.config.get('google_analytics')
         if not ga_data:
             return
-        if '' in ga_data.values():
+        if "" in ga_data.values():
             return
 
         # Set up the params for us to use
