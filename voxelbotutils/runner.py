@@ -56,7 +56,7 @@ def get_default_program_arguments(include_config_file:bool=True) -> argparse.Arg
     """
     parser = argparse.ArgumentParser()
     if include_config_file:
-        parser.add_argument("config_file", help="The configuration for the bot")
+        parser.add_argument("config_file", default="config/config.toml", help="The configuration for the bot")
     parser.add_argument(
         "--min", type=int, default=None,
         help="The minimum shard ID that this instance will run with (inclusive)"

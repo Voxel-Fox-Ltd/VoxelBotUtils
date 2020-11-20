@@ -21,7 +21,7 @@ def create_file(*path, content:str=None, throw_error:bool=False):
 if __name__ == '__main__':
 
     # Wew let's see if we want to run a bot
-    parser = get_default_program_arguments(include_config_file=False)
+    parser = get_default_program_arguments()
     parser.add_argument(
         "bot_directory", nargs="?", default=".",
         help="The directory containing a config and a cogs folder for the bot to run."
@@ -54,6 +54,6 @@ if __name__ == '__main__':
 
     # And run file
     shard_ids = validate_sharding_information(args)
-    bot = Bot(shard_count=args.shardcount, shard_ids=shard_ids)
+    bot = Bot(shard_count=args.shardcount, shard_ids=shard_ids, config_file=args.config_file)
     set_default_log_levels(bot, args)
     run_bot(bot)
