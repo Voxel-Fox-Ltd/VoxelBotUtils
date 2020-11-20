@@ -38,8 +38,15 @@ class BotStats(utils.Cog):
         Gives you a link to vote for the bot.
         """
 
-        bot_user_id = self.bot.config.get('oauth', {}).get('client_id', None) or self.bot.user.id
-        await ctx.send(f"<https://top.gg/bot/{bot_user_id}/vote>")
+        bot_user_id = self.bot.user.id
+        output_strings = []
+        if self.bot.config.get('bot_listing_api_keys', {}).get("topgg_token"):
+            output_strings.append(f"<https://top.gg/bot/{bot_user_id}/vote>")
+        if self.bot.config.get('bot_listing_api_keys', {}).get("discordbotlist_token"):
+            output_strings.append(f"<https://discordbotlist.com/bots/{bot_user_id}/upvote>")
+        if not output_strings:
+            return await ctx.send("Despite being enabled, the vote command has no vote links to provide :/")
+        return await ctx.send("\n".join(output_strings))
 
     @commands.command(aliases=['status', 'botinfo'])
     @commands.bot_has_permissions(send_messages=True, embed_links=True)
