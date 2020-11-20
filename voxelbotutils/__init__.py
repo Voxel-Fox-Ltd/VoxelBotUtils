@@ -1,4 +1,4 @@
 from . import runner
 from .cogs.utils import *
 
-__version__ = "0.0.9a"
+__version__ = "0.0.10a"
