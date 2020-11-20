@@ -234,7 +234,7 @@ class ErrorHandler(utils.Cog):
 
         # The output isn't a common output -- send them a plain error response
         try:
-            await ctx.send(f"`\n{error}`")
+            await ctx.send(f"`{str(error).strip()}`")
         except (discord.Forbidden, discord.NotFound):
             pass
 
