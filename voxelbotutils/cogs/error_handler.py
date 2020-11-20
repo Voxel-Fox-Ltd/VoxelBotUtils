@@ -252,12 +252,8 @@ class ErrorHandler(utils.Cog):
 
         # Ping to the webook
         if getattr(self.bot, "config", {}).get("event_webhook_url"):
-            webhook = discord.Webhook.from_url(
-                self.bot.config["event_webhook_url"],
-                adapter=discord.AsyncWebhookAdapter(self.bot.session)
-            )
             file_handle.seek(0)
-            await webhook.send(
+            await self.bot.event_webhook.send(
                 error_text,
                 file=discord.File(file_handle, filename="error_log.py"),
                 username=f"{self.bot.user.name} - Error"

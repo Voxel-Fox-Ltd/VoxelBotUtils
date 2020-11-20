@@ -14,11 +14,7 @@ class ConnectEvent(utils.Cog):
 
         if not self.bot.config.get("event_webhook_url"):
             return False
-        webhook = discord.Webhook.from_url(
-            self.bot.config['event_webhook_url'],
-            adapter=discord.AsyncWebhookAdapter(self.bot.session)
-        )
-        await webhook.send(text, username=username)
+        await self.bot.event_webhook.send(text, username=username)
         self.logger.info(logger)
         return True
 
