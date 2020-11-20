@@ -21,10 +21,14 @@ def create_file(*path, content:str=None, throw_error:bool=False):
 if __name__ == '__main__':
 
     # Wew let's see if we want to run a bot
-    parser = get_default_program_arguments()
+    parser = get_default_program_arguments(include_config_file=False)
     parser.add_argument(
         "bot_directory", nargs="?", default=".",
         help="The directory containing a config and a cogs folder for the bot to run."
+    )
+    parser.add_argument(
+        "config_file", nargs="?", default="config/config.toml",
+        help="The configuration for the bot"
     )
     parser.add_argument(
         "--create-config-file", action="store_true", default=False,

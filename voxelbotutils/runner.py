@@ -68,44 +68,44 @@ def get_default_program_arguments(include_config_file:bool=True) -> argparse.Arg
     parser = argparse.ArgumentParser()
     if include_config_file:
         parser.add_argument(
-            "config_file", default="config/config.toml",
-            help="The configuration for the bot"
+            "config_file", nargs="?", default="config/config.toml",
+            help="The configuration for the bot."
         )
     parser.add_argument(
         "--min", type=int, default=None,
-        help="The minimum shard ID that this instance will run with (inclusive)"
+        help="The minimum shard ID that this instance will run with (inclusive)."
     )
     parser.add_argument(
         "--max", type=int, default=None,
-        help="The maximum shard ID that this instance will run with (inclusive)"
+        help="The maximum shard ID that this instance will run with (inclusive)."
     )
     parser.add_argument(
         "--shardcount", type=int, default=None,
-        help="The amount of shards that the bot should be using"
+        help="The amount of shards that the bot should be using."
     )
     parser.add_argument(
         "--loglevel", default="INFO",
-        help="Global logging level - probably most useful is INFO and DEBUG"
+        help="Global logging level - probably most useful is INFO and DEBUG."
     )
     parser.add_argument(
         "--loglevel-bot", default=None,
-        help="Logging level for the bot - probably most useful is INFO and DEBUG"
+        help="Logging level for the bot - probably most useful is INFO and DEBUG."
     )
     parser.add_argument(
         "--loglevel-discord", default=None,
-        help="Logging level for discord - probably most useful is INFO and DEBUG"
+        help="Logging level for discord - probably most useful is INFO and DEBUG."
     )
     parser.add_argument(
         "--loglevel-database", default=None,
-        help="Logging level for database - probably most useful is INFO and DEBUG"
+        help="Logging level for database - probably most useful is INFO and DEBUG."
     )
     parser.add_argument(
         "--loglevel-redis", default=None,
-        help="Logging level for redis - probably most useful is INFO and DEBUG"
+        help="Logging level for redis - probably most useful is INFO and DEBUG."
     )
     parser.add_argument(
         "--loglevel-statsd", default=None,
-        help="Logging level for statsd - probably most useful is INFO and DEBUG"
+        help="Logging level for statsd - probably most useful is INFO and DEBUG."
     )
     return parser
 
