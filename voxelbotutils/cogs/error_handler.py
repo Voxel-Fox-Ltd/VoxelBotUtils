@@ -202,14 +202,15 @@ class ErrorHandler(utils.Cog):
 
         # Set up some errors that the owners are able to bypass
         owner_reinvoke_errors = (
-            commands.MissingRole, commands.MissingAnyRole, commands.MissingPermissions,
+            # commands.MissingRole, commands.MissingAnyRole, commands.MissingPermissions,
             commands.CommandOnCooldown, commands.DisabledCommand,
         )
         if isinstance(error, owner_reinvoke_errors) and ctx.original_author_id in self.bot.owner_ids:
             return await ctx.reinvoke()
 
         # See if the command itself has an error handler AND it isn't a locally handlled arg
-        if hasattr(ctx.command, "on_error") and not isinstance(ctx.command, utils.Command):
+        # if hasattr(ctx.command, "on_error") and not isinstance(ctx.command, utils.Command):
+        if hasattr(ctx.command, "on_error"):
             return
 
         # See if it's in our list of common outputs
@@ -233,40 +234,39 @@ class ErrorHandler(utils.Cog):
 
         # The output isn't a common output -- send them a plain error response
         try:
-            await ctx.send(f"```py\n{error}```")
+            await ctx.send(f"`\n{error}`")
         except (discord.Forbidden, discord.NotFound):
             pass
 
         # Ping unhandled errors to the owners and to the event webhook
-        try:
-            raise error
-        except Exception as e:
-            exc = traceback.format_exc()
-            data = io.StringIO(exc)
-            error_text = f"Error `{e}` encountered.\nGuild `{ctx.guild.id}`, channel `{ctx.channel.id}`, user `{ctx.author.id}`\n```\n{ctx.message.content}\n```"
+        error_string = "".join(traceback.format_exception(None, error, error.__traceback__))
+        file_handle = io.StringIO(error_string + "\n")
+        error_text = f"Error `{error}` encountered.\nGuild `{ctx.guild.id}`, channel `{ctx.channel.id}`, user `{ctx.author.id}`\n```\n{ctx.message.content}\n```"
 
-            # DM to owners
-            if getattr(self.bot, "config", {}).get("dm_uncaught_errors", False):
-                for owner_id in self.bot.owner_ids:
-                    owner = self.bot.get_user(owner_id) or await self.bot.fetch_user(owner_id)
-                    data.seek(0)
-                    await owner.send(error_text, file=discord.File(data, filename="error_log.py"))
+        # DM to owners
+        if getattr(self.bot, "config", {}).get("dm_uncaught_errors", False):
+            for owner_id in self.bot.owner_ids:
+                owner = self.bot.get_user(owner_id) or await self.bot.fetch_user(owner_id)
+                file_handle.seek(0)
+                await owner.send(error_text, file=discord.File(file_handle, filename="error_log.py"))
 
-            # Ping to the webook
-            if getattr(self.bot, "config", {}).get("event_webhook_url"):
-                webhook = discord.Webhook.from_url(
-                    self.bot.config["event_webhook_url"],
-                    adapter=discord.AsyncWebhookAdapter(self.bot.session)
-                )
-                data.seek(0)
-                await webhook.send(
-                    error_text,
-                    file=discord.File(data, filename="error_log.py"),
-                    username=f"{self.bot.user.name} - Error"
-                )
+        # Ping to the webook
+        if getattr(self.bot, "config", {}).get("event_webhook_url"):
+            webhook = discord.Webhook.from_url(
+                self.bot.config["event_webhook_url"],
+                adapter=discord.AsyncWebhookAdapter(self.bot.session)
+            )
+            file_handle.seek(0)
+            await webhook.send(
+                error_text,
+                file=discord.File(file_handle, filename="error_log.py"),
+                username=f"{self.bot.user.name} - Error"
+            )
 
         # And throw it into the console
-        raise error
+        logger = getattr(getattr(ctx, 'cog', self), 'logger', self.logger)
+        for line in error_string.strip().split("\n"):
+            logger.error(line)
 
 
 def setup(bot:utils.Bot):
