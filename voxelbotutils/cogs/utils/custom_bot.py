@@ -120,6 +120,9 @@ class CustomBot(commands.AutoShardedBot):
         self.startup_time = dt.now()
         self.startup_method = None
 
+        # Store the event webhook so we don't need to generate it multiple times
+        self._event_webhook = None
+
         # Regardless of whether we start statsd or not, I want to add the log handler
         handler = AnalyticsLogHandler(self)
         handler.setLevel(logging.DEBUG)
@@ -256,9 +259,16 @@ class CustomBot(commands.AutoShardedBot):
 
     @property
     def event_webhook(self):
+        """
+        Get the event webhook from the config file.
+        """
+
+        if self._event_webhook is not None:
+            return self._event_webhook
         if self.config['event_webhook_url'] in [None, 0, ""]:
             return None
-        return discord.Webhook(self.config['event_webhook_url'], adapter=discord.AsyncWebhookAdapter(self.session))
+        self._event_webhook = discord.Webhook(self.config['event_webhook_url'], adapter=discord.AsyncWebhookAdapter(self.session))
+        return self._event_webhook
 
     async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, delete:typing.List[discord.Message]=None, timeout=60.0, wait:bool=True) -> None:
         """
@@ -502,6 +512,7 @@ class CustomBot(commands.AutoShardedBot):
         try:
             with open(self.config_file) as a:
                 self.config = toml.load(a)
+            self._event_webhook = None
         except Exception as e:
             self.logger.critical(f"Couldn't read config file - {e}")
             exit(1)
