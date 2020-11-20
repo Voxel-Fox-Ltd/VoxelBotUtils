@@ -1,7 +1,5 @@
 from datetime import datetime as dt
 
-import discord
-
 from . import utils
 
 

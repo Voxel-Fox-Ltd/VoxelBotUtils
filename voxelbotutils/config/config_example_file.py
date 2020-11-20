@@ -42,7 +42,7 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
 # Content to be included in the help command
 [help_command]
     dm_help = true  # Whether or not the help embed should be DMd to the user
-    text = ""  # Additional content to be sent with the embed
+    content = ""  # Additional content to be sent with the embed
 
 # Data used to send API requests to whatever service
 [bot_listing_api_keys]
