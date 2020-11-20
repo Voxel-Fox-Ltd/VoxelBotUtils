@@ -4,6 +4,7 @@ owners = [ 141231597155385344, ]  # List of owner IDs - these people override al
 dm_uncaught_errors = false  # Whether or not to DM the owners when unhandled errors are encountered
 default_prefix = "!"  # The prefix for the bot's commands
 support_guild_id = 0  # The ID for the support guild - used by `Bot.fetch_support_guild()`
+bot_support_role_id = 0  # The ID used to determine whether or not the user is part of the bot's support team - used for `.checks.is_bot_support()` check
 event_webhook_url = ""  # Some events will be posted via webhook to this url
 
 # The intents that the bot should start with

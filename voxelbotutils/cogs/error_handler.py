@@ -41,6 +41,10 @@ class ErrorHandler(utils.Cog):
             lambda ctx, error: "This command has been disabled."
         ),
         (
+            utils.errors.NotBotSupport,
+            lambda ctx, error: "You need to be part of the bot's support team to be able to run this command."
+        ),
+        (
             commands.MissingAnyRole,
             lambda ctx, error: f"You need to have one of the {', '.join(['`' + i + '`' for i in error.missing_roles])} roles to be able to run this command."
         ),
