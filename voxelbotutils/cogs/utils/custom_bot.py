@@ -22,7 +22,9 @@ from .. import all_packages as all_vfl_package_names
 
 
 def get_prefix(bot, message:discord.Message):
-    """Gives the prefix for the bot - override this to make guild-specific prefixes"""
+    """
+    Gives the prefix for the bot - override this to make guild-specific prefixes.
+    """
 
     # Default prefix for DMs
     if message.guild is None:
