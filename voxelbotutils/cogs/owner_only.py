@@ -459,10 +459,11 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
                     password="",
                     database="{database}",
                     port={port},
+                    host="{host}"
                 )
                 for query, data in DATA:
                     await conn.execute(query, data)
-                await conn.disconnect()
+                await conn.close()
                 print("Done.")
 
             if __name__ == "__main__":
@@ -473,6 +474,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
             user=self.bot.config['database']['user'],
             database=self.bot.config['database']['database'],
             port=self.bot.config['database']['port'],
+            host=self.bot.config['database']['host'],
             data=', '.join(repr(i) for i in insert_statements),
         )
         file_content = textwrap.dedent(file_content).lstrip()
