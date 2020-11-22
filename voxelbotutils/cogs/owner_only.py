@@ -448,6 +448,8 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
 
         # Time to make a script
         file_content = """
+            import datetime
+
             DATA = (
                 {data},
             )
@@ -462,7 +464,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
                     host="{host}"
                 )
                 for query, data in DATA:
-                    await conn.execute(query, data)
+                    try:
+                        await conn.execute(query, *data)
+                    except Exception as e:
+                        print(e)
                 await conn.close()
                 print("Done.")
 
