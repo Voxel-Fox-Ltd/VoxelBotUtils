@@ -452,7 +452,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
                 {data},
             )
 
-            if __name__ == "__main__":
+            async def main():
                 import asyncpg
                 conn = await asyncpg.connect(
                     user="{user}",
@@ -464,6 +464,11 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
                     await conn.execute(query, data)
                 await conn.disconnect()
                 print("Done.")
+
+            if __name__ == "__main__":
+                import asyncio
+                loop = asyncio.get_event_loop()
+                loop.run_until_complete(main())
         """.format(
             user=self.bot.config['database']['user'],
             database=self.bot.config['database']['database'],
@@ -473,7 +478,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         file_content = textwrap.dedent(file_content).lstrip()
 
         # And donezo
-        file = discord.File(io.StringIO(file_content), filename=f"db_migrate_{guild_id or ctx.guild.id}.py")
+        file = discord.File(io.StringIO(file_content), filename=f"_db_migrate_{guild_id or ctx.guild.id}.py")
         await ctx.send(file=file)
 
 
