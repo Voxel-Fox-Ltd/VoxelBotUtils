@@ -9,6 +9,8 @@ from . import utils
 
 class CustomHelpCommand(commands.MinimalHelpCommand):
 
+    HELP_COMMAND_HIDDEN_ERRORS = (commands.DisabledCommand, commands.NotOwner, utils.errors.NotBotSupport, utils.errors.InvokedMetaCommand,)
+
     async def filter_commands(self, commands_to_filter:typing.List[utils.Command]) -> typing.List[utils.Command]:
         """
         Filter the command list down into a list of runnable commands.
@@ -22,7 +24,7 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
             try:
                 await comm.can_run(self.context)
             except commands.CommandError as e:
-                if isinstance(e, (commands.DisabledCommand, commands.NotOwner, utils.errors.NotBotSupport)):
+                if isinstance(e, self.HELP_COMMAND_HIDDEN_ERRORS):
                     continue
             returned_commands.append(comm)
         return returned_commands
