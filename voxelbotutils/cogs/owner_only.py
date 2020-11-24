@@ -402,11 +402,54 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         except discord.HTTPException:
             pass
 
-    @commands.command(cls=utils.Command)
+    @commands.group(cls=utils.Group)
     @commands.is_owner()
-    async def exportguilddata(self, ctx, guild_id:int=None):
+    async def export(self, ctx):
         """
-        Exports data for a given guild form the database.
+        The parent group for the export commands.
+        """
+
+        pass
+
+    @export.command(cls=utils.Command)
+    @commands.is_owner()
+    async def commands(self, ctx):
+        """
+        Exports the commands for the bot as a markdown file.
+        """
+
+        # Set up output
+        lines = [f"# {self.bot.user.name} Commands"]
+
+        # Work out prefix
+        prefix = self.bot.config['default_prefix']
+        if isinstance(prefix, (list, tuple,)):
+            prefix = prefix[0]
+
+        # Go through the cogs
+        for cog_name, cog in sorted(self.bot.cogs.items()):
+            if cog_name == 'Help':
+                continue
+
+            # Go through the commands
+            visible_commands = await self.bot.help_command.filter_commands_classmethod(ctx, cog.get_commands())
+            if not visible_commands:
+                continue
+
+            # Add lines
+            lines.append(f"## {cog_name}")
+            for command in visible_commands:
+                lines.append(f"* `{prefix}{command.name} {command.signature}".rstrip() + '`')
+                lines.append(f"\t* {command.help}")
+
+        # Output file
+        await ctx.send(file=discord.File(io.StringIO('\n\n'.join(lines)), filename="commands.md"))
+
+    @export.command(cls=utils.Command)
+    @commands.is_owner()
+    async def guild(self, ctx, guild_id:int=None):
+        """
+        Exports data for a given guild from the database.
 
         Autoamtically searches for any public tables with a `guild_id` column, and then exports that as a
         file of "insert into" statements for you to use.
