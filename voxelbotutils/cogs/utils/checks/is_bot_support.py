@@ -4,6 +4,9 @@ from discord.ext import commands
 class NotBotSupport(commands.MissingRole):
     """The generic error for the bot failing the is_bot_support check"""
 
+    def __init__(self):
+        super().__init__("Bot Support Team")
+
 
 def is_bot_support():
     """The check for whether the bot has cached all of its data yet"""
