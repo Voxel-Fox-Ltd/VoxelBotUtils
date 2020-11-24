@@ -411,9 +411,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
 
         pass
 
-    @export.command(cls=utils.Command)
+    @export.command(cls=utils.Command, name="commands")
     @commands.is_owner()
-    async def commands(self, ctx):
+    async def export_commands(self, ctx):
         """
         Exports the commands for the bot as a markdown file.
         """
@@ -445,9 +445,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         # Output file
         await ctx.send(file=discord.File(io.StringIO('\n\n'.join(lines)), filename="commands.md"))
 
-    @export.command(cls=utils.Command)
+    @export.command(cls=utils.Command, name="guild")
     @commands.is_owner()
-    async def guild(self, ctx, guild_id:int=None):
+    async def export_guild(self, ctx, guild_id:int=None):
         """
         Exports data for a given guild from the database.
 
