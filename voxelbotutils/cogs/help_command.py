@@ -11,23 +11,31 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
 
     HELP_COMMAND_HIDDEN_ERRORS = (commands.DisabledCommand, commands.NotOwner, utils.errors.NotBotSupport, utils.errors.InvokedMetaCommand,)
 
-    async def filter_commands(self, commands_to_filter:typing.List[utils.Command]) -> typing.List[utils.Command]:
+    @classmethod
+    async def filter_commands_classmethod(cls, ctx, commands_to_filter:typing.List[utils.Command]) -> typing.List[utils.Command]:
         """
         Filter the command list down into a list of runnable commands.
         """
 
-        if self.context.author.id in self.context.bot.owner_ids:
+        if ctx.author.id in ctx.bot.owner_ids:
             return [i for i in commands_to_filter if i.name != "help"]
         valid_commands = [i for i in commands_to_filter if i.hidden is False and i.enabled is True and i.name != "help"]
         returned_commands = []
         for comm in valid_commands:
             try:
-                await comm.can_run(self.context)
+                await comm.can_run(ctx)
             except commands.CommandError as e:
-                if isinstance(e, self.HELP_COMMAND_HIDDEN_ERRORS):
+                if isinstance(e, cls.HELP_COMMAND_HIDDEN_ERRORS):
                     continue
             returned_commands.append(comm)
         return returned_commands
+
+    async def filter_commands(self, commands_to_filter:typing.List[utils.Command]) -> typing.List[utils.Command]:
+        """
+        Filter the command list down into a list of runnable commands.
+        """
+
+        return await self.filter_commands_classmethod(self.context, commands_to_filter)
 
     def get_command_signature(self, command:commands.Command):
         return '{0.clean_prefix}{1.qualified_name} {1.signature}'.format(self, command)
