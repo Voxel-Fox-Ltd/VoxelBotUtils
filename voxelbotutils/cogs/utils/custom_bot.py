@@ -267,7 +267,7 @@ class CustomBot(commands.AutoShardedBot):
             return self._event_webhook
         if self.config['event_webhook_url'] in [None, 0, ""]:
             return None
-        self._event_webhook = discord.Webhook(self.config['event_webhook_url'], adapter=discord.AsyncWebhookAdapter(self.session))
+        self._event_webhook = discord.Webhook.from_url(self.config['event_webhook_url'], adapter=discord.AsyncWebhookAdapter(self.session))
         return self._event_webhook
 
     async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, delete:typing.List[discord.Message]=None, timeout=60.0, wait:bool=True) -> None:
