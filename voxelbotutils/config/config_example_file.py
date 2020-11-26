@@ -100,12 +100,6 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
 [oauth]
     client_id = ""
 
-# This is where you can set up all of your analytics to be sent to GA; automatically disabled if no data is provided
-[google_analytics]
-    tracking_id = ""  # Tracking ID for your GA instance
-    app_name = ""  # The name of your bot - what you want GA to name this traffic source
-    document_host = ""  # The (possibly fake) URL you want to tell GA this website is
-
 # It's time for better analytics! Let's give statsd a little try
 [statsd]
     host = "127.0.0.1"
