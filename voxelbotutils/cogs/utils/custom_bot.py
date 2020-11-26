@@ -479,16 +479,11 @@ class CustomBot(commands.AutoShardedBot):
         # Update per shard
         if self.shard_count > 1:
 
-            # Get shard IDs
-            if shard_id:
-                min, max = shard_id, shard_id + 1  # If we're only setting it for one shard
-            else:
-                min, max = self.shard_ids[0], self.shard_ids[-1]  # If we're setting for all shards
-
             # Go through each shard ID
-            for i in range(min, max):
+            config_text = presence['text'].format(bot=self)
+            for i in self.shard_ids:
                 activity = discord.Activity(
-                    name=f"{presence['text']} (shard {i})",
+                    name=f"{config_text} (shard {i})",
                     type=getattr(discord.ActivityType, presence['activity_type'].lower())
                 )
                 status = getattr(discord.Status, presence['status'].lower())
