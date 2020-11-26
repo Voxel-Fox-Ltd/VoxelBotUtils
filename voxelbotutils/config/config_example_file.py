@@ -1,6 +1,6 @@
 config_file = """
 token = "bot_token"  # The token for the bot
-owners = [ 141231597155385344, ]  # List of owner IDs - these people override all permission checks
+owners = [ ]  # List of owner IDs - these people override all permission checks
 dm_uncaught_errors = false  # Whether or not to DM the owners when unhandled errors are encountered
 default_prefix = "!"  # The prefix for the bot's commands
 support_guild_id = 0  # The ID for the support guild - used by `Bot.fetch_support_guild()`
