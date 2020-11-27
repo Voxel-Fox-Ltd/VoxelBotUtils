@@ -124,6 +124,10 @@ class PresenceAutoUpdater(utils.Cog):
         )
         self._user_is_live = True
 
+    @presence_auto_update_loop.before_loop
+    async def presence_auto_update_loop_before_loop(self):
+        await self.bot.wait_until_ready()
+
 
 def setup(bot:utils.Bot):
     x = PresenceAutoUpdater(bot)
