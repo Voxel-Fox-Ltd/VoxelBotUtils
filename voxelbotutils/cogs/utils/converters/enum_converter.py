@@ -1,7 +1,7 @@
 from discord.ext import commands
 
 
-class EnumConverter(str):
+class EnumConverter(commands.Converter):
     """
     A converter that only lets users give a certain range of inputs.
     """
