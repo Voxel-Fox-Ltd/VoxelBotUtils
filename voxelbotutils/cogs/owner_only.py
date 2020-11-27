@@ -23,7 +23,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True)
     async def message(
-            self, ctx:utils.Context, channel_type:typing.Optional[utils.converters.EnumConverter("channel", "user", "c", "u", case_insensitive=True)],
+            self, ctx:utils.Context,  # channel_type:typing.Optional[utils.converters.EnumConverter("channel", "user", "c", "u", case_insensitive=True)],
             snowflake:typing.Optional[typing.Union[utils.converters.UserID, utils.converters.ChannelID]],
             *, content:str=None):
         """
@@ -31,6 +31,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         """
 
         # Work out what we're going to use to convert the snowflake
+        channel_type = None  # This is a later issue
         if channel_type is None:
             converters = [
                 self.bot.get_user,
