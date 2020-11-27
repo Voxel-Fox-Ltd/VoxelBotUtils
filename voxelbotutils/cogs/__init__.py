@@ -8,4 +8,5 @@ all_packages = (
     'help_command',
     'misc_commands',
     'owner_only',
+    'presence_auto_updater',
 )
