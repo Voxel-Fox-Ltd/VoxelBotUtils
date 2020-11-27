@@ -58,7 +58,7 @@ class PresenceAutoUpdater(utils.Cog):
             await self.get_app_token(force_refresh=True)
         if self._refresh_token_task:
             self._refresh_token_task.cancel()
-        self._refresh_token_task = self.bot.loop.create_task(refresh_token_coro)
+        self._refresh_token_task = self.bot.loop.create_task(refresh_token_coro())
 
         # And return the app token
         return self._twitch_app_token
