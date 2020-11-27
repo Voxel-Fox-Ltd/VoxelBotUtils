@@ -141,7 +141,7 @@ class PresenceAutoUpdater(utils.Cog):
         if status_to_set is None and self._user_streaming_status is not None:
             await self.bot.set_default_presence()
             self._user_streaming_status = None
-        if (status_to_set.title, status_to_set.url) != (self._user_streaming_status.title, self._user_streaming_status.url):
+        if (status_to_set.name, status_to_set.url) != (self._user_streaming_status.name, self._user_streaming_status.url):
             await self.bot.change_presence(
                 activity=status_to_set
             )
