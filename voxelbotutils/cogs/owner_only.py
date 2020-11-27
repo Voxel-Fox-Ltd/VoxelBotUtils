@@ -6,6 +6,7 @@ import os
 import json
 import textwrap
 import traceback
+import typing
 
 import discord
 from discord.ext import commands
@@ -18,21 +19,74 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     Handles commands that only the owner should be able to run.
     """
 
-    @commands.command(aliases=['pm', 'dm'], cls=utils.Command)
+    @commands.command(aliases=['pm', 'dm', 'send'], cls=utils.Command)
     @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True)
-    async def message(self, ctx:utils.Context, user_id:utils.converters.UserID, *, content:str):
+    @commands.bot_has_permissions(send_messages=True, add_reactions=True)
+    async def message(
+            self, ctx:utils.Context, channel_type:typing.Optional[utils.converters.EnumConverter("channel", "user", "c", "u", case_insensitive=True)],
+            snowflake:typing.Optional[typing.Union[utils.converters.UserID, utils.converters.ChannelID]],
+            *, content:str=None):
         """
         DMs a user the given content.
         """
 
-        user = self.bot.get_user(user_id) or await self.bot.fetch_user(user_id)
+        # Work out what we're going to use to convert the snowflake
+        if channel_type is None:
+            converters = [
+                self.bot.get_user,
+                self.bot.get_channel,
+                self.bot.fetch_user,
+                self.bot.fetch_channel,
+            ]
+        elif channel_type[0] == "u":
+            converters = [
+                self.bot.get_user,
+                self.bot.fetch_user,
+            ]
+        elif channel_type[0] == "c":
+            converters = [
+                self.bot.get_channel,
+                self.bot.fetch_channel,
+            ]
+
+        # Make sure we gave a snowflake
+        if snowflake is None:
+            snowflake = ctx.channel.id
+
+        # Let's run our converters baybee
+        sendable = None
+        for method in converters:
+            try:
+                sendable = method(snowflake)
+                if asyncio.iscoroutine(sendable):
+                    sendable = await sendable
+            except discord.HTTPException:
+                sendable = None
+            if sendable is not None:
+                break
+
+        # Make sure we have somewhere to send to
+        if sendable is None:
+            return await ctx.send(f"I couldn't work out where `{snowflake}` is meant to refer to.")
+
+        # Set up what we want to send
+        payload = {
+            "content": content,
+            "files": list(),
+        }
+
+        # Add the attachments of the original message
+        for attachment in ctx.message.attachments:
+            async with self.bot.session.get(attachment.url) as r:
+                file_bytes = await r.read()
+            image_file = io.BytesIO(file_bytes)
+            payload["files"].append(discord.File(image_file, filename=attachment.filename))
+
+        # And send our data
         try:
-            await user.send(content)
-        except discord.Forbidden:
-            return await ctx.send("Couldn't send them a DM.")
-        except AttributeError:
-            return await ctx.send("That person doesn't exist.")
+            await sendable.send(**payload)
+        except discord.HTTPException as e:
+            return await ctx.send(f"I couldn't send that message - `{e}`")
         await ctx.okay()
 
     def _cleanup_code(self, content):
