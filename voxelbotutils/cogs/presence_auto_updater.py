@@ -70,8 +70,10 @@ class PresenceAutoUpdater(utils.Cog):
         if username in self.twitch_user_ids:
             return self.twich_user_ids[username]
         headers = {
-            "Client-Id": self.bot.config.get("presence", {}).get("streaming", {}).get("twitch_client_id")
+            "Authorization": f"Bearer {await self.get_app_token()}",
+            "Client-Id": self.bot.config.get("presence", {}).get("streaming", {}).get("twitch_client_id"),
         }
+        self.logger.info(f"Asking Twitch for the username of {username}")
         async with self.bot.session.get(self.TWITCH_USERNAME_URL, params={"login": username}, headers=headers) as r:
             data = await r.json()
         try:
@@ -94,7 +96,7 @@ class PresenceAutoUpdater(utils.Cog):
         # See if we should bother doing this
         twitch_data = self.bot.config.get("presence", {}).get("streaming", {})
         if not twitch_data or "" in twitch_data.values():
-            self.logger.info("Disabling stream presence auto update loop due to missing or invalid config")
+            self.logger.warning("Stream presence config is either missing or invalid")
             self.presence_auto_update_loop.cancel()
             return
 
