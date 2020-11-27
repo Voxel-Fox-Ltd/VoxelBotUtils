@@ -136,20 +136,39 @@ class PresenceAutoUpdater(utils.Cog):
 
             # Yo sick they're live
             status_to_set = discord.Streaming(name=stream_data["title"], url=f"https://twitch.tv/{stream_data['user_name']}")
+            break
 
-        # Update the bot's status
-        if status_to_set is None and self._user_streaming_status is not None:
+        # See if we need to set to default
+        if status_to_set is None:
+
+            # It should be default already
+            if self._user_streaming_status is None:
+                return
+
+            # Alright let's set
             await self.bot.set_default_presence()
             self._user_streaming_status = None
-        if self._user_streaming_status is None or (status_to_set.name, status_to_set.url) != (self._user_streaming_status.name, self._user_streaming_status.url):
-            await self.bot.change_presence(
-                activity=status_to_set
-            )
-            self._user_streaming_status = status_to_set
+            return
+
+        # Let's set a new streaming activity
+        else:
+
+            # We currently aren't streaming
+            if self._user_streaming_status is None:
+                await self.bot.change_presence(activity=status_to_set)
+                self._user_streaming_status = status_to_set
+                return
+
+            # The stream name is different
+            if (status_to_set.name, status_to_set.url) != (self._user_streaming_status.name, self._user_streaming_status.url):
+                await self.bot.change_presence(activity=status_to_set)
+                self._user_streaming_status = status_to_set
+                return
 
     @presence_auto_update_loop.before_loop
     async def presence_auto_update_loop_before_loop(self):
         await self.bot.wait_until_ready()
+        await asyncio.sleep(1)  # Let's sleep here so we don't override our on_ready's set default presence
 
 
 def setup(bot:utils.Bot):
