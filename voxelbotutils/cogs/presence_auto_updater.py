@@ -70,8 +70,9 @@ class PresenceAutoUpdater(utils.Cog):
 
         if username in self.twitch_user_ids:
             return self.twich_user_ids[username]
+        app_token = await self.get_app_token()
         headers = {
-            "Authorization": f"Bearer {await self.get_app_token()}",
+            "Authorization": f"Bearer {app_token}",
             "Client-Id": self.bot.config.get("presence", {}).get("streaming", {}).get("twitch_client_id"),
         }
         self.logger.info(f"Asking Twitch for the username of {username}")
@@ -113,8 +114,9 @@ class PresenceAutoUpdater(utils.Cog):
             "user_id": twitch_user_id,
             "first": 1,
         }
+        app_token = await self.get_app_token()
         headers = {
-            "Authorization": f"Bearer {await self.get_app_token()}",
+            "Authorization": f"Bearer {app_token}",
             "Client-Id": twitch_data.get("twitch_client_id"),
         }
         async with self.bot.session.get(self.TWITCH_SEARCH_URL, params=params, headers=headers) as r:
