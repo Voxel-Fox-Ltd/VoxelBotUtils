@@ -69,7 +69,7 @@ class PresenceAutoUpdater(utils.Cog):
         """
 
         if username in self.twitch_user_ids:
-            return self.twich_user_ids[username]
+            return self.twitch_user_ids[username]
         app_token = await self.get_app_token()
         headers = {
             "Authorization": f"Bearer {app_token}",
