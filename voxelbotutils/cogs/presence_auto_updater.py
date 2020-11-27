@@ -45,9 +45,9 @@ class PresenceAutoUpdater(utils.Cog):
             "client_secret": twitch_data["twitch_client_secret"],
             "grant_type": "client_credentials",
         }
-        async with self.bot.session.get(self.TWITCH_TOKEN_URL, json=json) as r:
+        async with self.bot.session.post(self.TWITCH_TOKEN_URL, json=json) as r:
             data = await r.json()
-        self.logger.debug(f"{self.TWITCH_TOKEN_URL} returned {data}")
+        self.logger.debug(f"POST {self.TWITCH_TOKEN_URL} returned {data}")
 
         # Store it
         self._twitch_app_token = data["access_token"]
@@ -77,7 +77,7 @@ class PresenceAutoUpdater(utils.Cog):
         self.logger.info(f"Asking Twitch for the username of {username}")
         async with self.bot.session.get(self.TWITCH_USERNAME_URL, params={"login": username}, headers=headers) as r:
             data = await r.json()
-        self.logger.debug(f"{self.TWITCH_USERNAME_URL} returned {data}")
+        self.logger.debug(f"GET {self.TWITCH_USERNAME_URL} returned {data}")
         try:
             self.twitch_user_ids[username] = data["data"][0]["id"]
         except KeyError as e:
@@ -119,7 +119,7 @@ class PresenceAutoUpdater(utils.Cog):
         }
         async with self.bot.session.get(self.TWITCH_SEARCH_URL, params=params, headers=headers) as r:
             data = await r.json()
-        self.logger.debug(f"{self.TWITCH_SEARCH_URL} returned {data}")
+        self.logger.debug(f"GET {self.TWITCH_SEARCH_URL} returned {data}")
 
         # See if they're live
         try:
