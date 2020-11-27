@@ -474,28 +474,28 @@ class CustomBot(commands.AutoShardedBot):
 
         # Update presence
         self.logger.info("Setting default bot presence")
-        presence = self.config['presence']  # Get text
+        presence = self.config["presence"]  # Get text
 
         # Update per shard
-        if self.shard_count > 1:
+        if self.shard_count > 1 and presence.get("include_shard_id", True):
 
             # Go through each shard ID
-            config_text = presence['text'].format(bot=self)
+            config_text = presence["text"].format(bot=self)
             for i in self.shard_ids:
                 activity = discord.Activity(
                     name=f"{config_text} (shard {i})",
                     type=getattr(discord.ActivityType, presence['activity_type'].lower())
                 )
-                status = getattr(discord.Status, presence['status'].lower())
+                status = getattr(discord.Status, presence["status"].lower())
                 await self.change_presence(activity=activity, status=status, shard_id=i)
 
         # Not sharded - just do everywhere
         else:
             activity = discord.Activity(
-                name=presence['text'],
-                type=getattr(discord.ActivityType, presence['activity_type'].lower())
+                name=presence["text"],
+                type=getattr(discord.ActivityType, presence["activity_type"].lower())
             )
-            status = getattr(discord.Status, presence['status'].lower())
+            status = getattr(discord.Status, presence["status"].lower())
             await self.change_presence(activity=activity, status=status)
 
     def reload_config(self) -> None:
