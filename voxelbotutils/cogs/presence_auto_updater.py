@@ -30,7 +30,7 @@ class PresenceAutoUpdater(utils.Cog):
         """
 
         # See if there's already one set
-        if self._twitch_app_token and force_refresh is False:
+        if self._twitch_app_token is not None and force_refresh is False:
             return self._twitch_app_token
 
         # See if there's a config set
@@ -47,6 +47,7 @@ class PresenceAutoUpdater(utils.Cog):
         }
         async with self.bot.session.get(self.TWITCH_TOKEN_URL, json=json) as r:
             data = await r.json()
+        self.logger.debug(f"{self.TWITCH_TOKEN_URL} returned {data}")
 
         # Store it
         self._twitch_app_token = data["access_token"]
@@ -76,6 +77,7 @@ class PresenceAutoUpdater(utils.Cog):
         self.logger.info(f"Asking Twitch for the username of {username}")
         async with self.bot.session.get(self.TWITCH_USERNAME_URL, params={"login": username}, headers=headers) as r:
             data = await r.json()
+        self.logger.debug(f"{self.TWITCH_USERNAME_URL} returned {data}")
         try:
             self.twitch_user_ids[username] = data["data"][0]["id"]
         except KeyError as e:
@@ -117,6 +119,7 @@ class PresenceAutoUpdater(utils.Cog):
         }
         async with self.bot.session.get(self.TWITCH_SEARCH_URL, params=params, headers=headers) as r:
             data = await r.json()
+        self.logger.debug(f"{self.TWITCH_SEARCH_URL} returned {data}")
 
         # See if they're live
         try:
