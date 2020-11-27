@@ -10,6 +10,7 @@ class PresenceAutoUpdater(utils.Cog):
 
     TWITCH_TOKEN_URL = "https://id.twitch.tv/oauth2/token"
     TWITCH_SEARCH_URL = "https://api.twitch.tv/helix/streams"
+    TWITCH_USERNAME_URL = "https://api.twitch.tv/helix/users"
 
     def __init__(self, bot:utils.Bot):
         super().__init__(bot)
@@ -69,11 +70,18 @@ class PresenceAutoUpdater(utils.Cog):
         if username in self.twitch_user_ids:
             return self.twich_user_ids[username]
         headers = {
-            "Client-Id": self.bot.config.get("presence", {}).get("streaming", {}).get("twitch_client_id", "")
+            "Client-Id": self.bot.config.get("presence", {}).get("streaming", {}).get("twitch_client_id")
         }
-        async with self.bot.session.get("https://api.twitch.tv/helix/users", params={"login": username}, headers=headers) as r:
+        async with self.bot.session.get(self.TWITCH_USERNAME_URL, params={"login": username}, headers=headers) as r:
             data = await r.json()
-        self.twitch_user_ids[username] = data["data"][0]["id"]
+        try:
+            self.twitch_user_ids[username] = data["data"][0]["id"]
+        except KeyError as e:
+            self.logger.error(f"Failed to get Twitch username from search - {data.get('message') or 'no error message'}")
+            raise e
+        except IndexError as e:
+            self.logger.error("Invalid Twitch username set in config")
+            raise e
         return self.twitch_user_ids[username]
 
     @tasks.loop(seconds=30)
@@ -85,14 +93,13 @@ class PresenceAutoUpdater(utils.Cog):
 
         # See if we should bother doing this
         twitch_data = self.bot.config.get("presence", {}).get("streaming", {})
-        if not twitch_data:
-            self.logger.info("Disabling stream presence auto update loop")
+        if not twitch_data or "" in twitch_data.values():
+            self.logger.info("Disabling stream presence auto update loop due to missing or invalid config")
             self.presence_auto_update_loop.cancel()
             return
 
         # Grab their username from the config
-        twitch_username_url = twitch_data.get("twitch_url", "").strip("/")
-        twitch_username = twitch_username_url.split("/")[-1]
+        twitch_username = twitch_data.get("twitch_username").strip()
 
         # Get their username
         twitch_user_id = await self.get_twitch_user_id(twitch_username)
