@@ -19,7 +19,7 @@ class PresenceAutoUpdater(utils.Cog):
         self._twitch_app_token = None
         self._refresh_token_task = None
         self.twitch_user_ids = {}  # str: str
-        self._user_is_live = False
+        self._user_streaming_status = False
 
     def cog_unload(self):
         self.presence_auto_update_loop.cancel()
@@ -98,45 +98,54 @@ class PresenceAutoUpdater(utils.Cog):
 
         # See if we should bother doing this
         twitch_data = self.bot.config.get("presence", {}).get("streaming", {})
-        if not twitch_data or "" in twitch_data.values():
+        if not twitch_data or "" in twitch_data.values() or not twitch_data.get("twitch_usernames", list()):
             self.logger.warning("Stream presence config is either missing or invalid")
             self.presence_auto_update_loop.cancel()
             return
 
-        # Grab their username from the config
-        twitch_username = twitch_data.get("twitch_username").strip()
-
-        # Get their username
-        twitch_user_id = await self.get_twitch_user_id(twitch_username)
-
-        # Get their data from Twitch
-        params = {
-            "user_id": twitch_user_id,
-            "first": 1,
-        }
+        # Set up the headers we want to use
         app_token = await self.get_app_token()
         headers = {
             "Authorization": f"Bearer {app_token}",
             "Client-Id": twitch_data.get("twitch_client_id"),
         }
-        async with self.bot.session.get(self.TWITCH_SEARCH_URL, params=params, headers=headers) as r:
-            data = await r.json()
-        self.logger.debug(f"GET {self.TWITCH_SEARCH_URL} returned {data}")
 
-        # See if they're live
-        try:
-            stream_data = data["data"][0]
-        except IndexError:
-            if self._user_is_live:
-                await self.bot.set_default_presence()
-                self._user_is_live = False
-            return
+        # Set this up so we know who to set us to
+        status_to_set = None
+
+        # Let's go through each of the usernames available and see which of them is live
+        for twitch_username in twitch_data.get("twitch_usernames"):
+
+            # Get their username
+            twitch_user_id = await self.get_twitch_user_id(twitch_username)
+
+            # Get their data from Twitch
+            params = {
+                "user_id": twitch_user_id,
+                "first": 1,
+            }
+            async with self.bot.session.get(self.TWITCH_SEARCH_URL, params=params, headers=headers) as r:
+                data = await r.json()
+            self.logger.debug(f"GET {self.TWITCH_SEARCH_URL} returned {data}")
+
+            # See if they're live
+            try:
+                stream_data = data["data"][0]
+            except IndexError:
+                continue  # They aren't
+
+            # Yo sick they're live
+            status_to_set = discord.Streaming(name=stream_data["title"], url=f"https://twitch.tv/{stream_data['user_name']}")
 
         # Update the bot's status
-        await self.bot.change_presence(
-            activity=discord.Streaming(name=stream_data["title"], url=f"https://twitch.tv/{stream_data['user_name']}")
-        )
-        self._user_is_live = True
+        if status_to_set is None and self._user_streaming_status is not None:
+            await self.bot.set_default_presence()
+            self._user_streaming_status = None
+        if (status_to_set.title, status_to_set.url) != (self._user_streaming_status.title, self._user_streaming_status.url):
+            await self.bot.change_presence(
+                activity=status_to_set
+            )
+            self._user_streaming_status = status_to_set
 
     @presence_auto_update_loop.before_loop
     async def presence_auto_update_loop_before_loop(self):

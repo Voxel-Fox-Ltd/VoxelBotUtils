@@ -97,7 +97,7 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
     status = "online"  # Should be one of 'online', 'invisible', 'idle', 'dnd'
     include_shard_id = true  # Whether or not to append "(shard N)" to the presence; only present if there's more than 1 shard
     [presence.streaming]  # This is used to automatically set the bot's status to your Twitch stream when you go live
-        twitch_username = ""  # The username of your Twitch.tv channel
+        twitch_usernames = []  # The username of your Twitch.tv channel
         twitch_client_id = ""  # Your client ID - https://dev.twitch.tv/console/apps
         twitch_client_secret = ""  # Your client secret
 
