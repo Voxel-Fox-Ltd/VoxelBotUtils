@@ -467,6 +467,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         pass
 
     @export.command(cls=utils.Command, name="commands")
+    @commands.bot_has_permissions(send_messages=True, attach_files=True)
     @commands.is_owner()
     async def export_commands(self, ctx):
         """
@@ -501,6 +502,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         await ctx.send(file=discord.File(io.StringIO('\n\n'.join(lines)), filename="commands.md"))
 
     @export.command(cls=utils.Command, name="guild")
+    @commands.bot_has_permissions(send_messages=True, attach_files=True)
     @commands.is_owner()
     async def export_guild(self, ctx, guild_id:int=None):
         """
@@ -587,6 +589,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         await ctx.send(file=file)
     
     @export.command(cls=utils.Command, name="table")
+    @commands.bot_has_permissions(send_messages=True, attach_files=True)
     @commands.is_owner()
     async def export_table(self, ctx, table_name:str):
         """
