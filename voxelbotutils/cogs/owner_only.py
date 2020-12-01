@@ -601,7 +601,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         # Get the data we want to save
         async with self.bot.database() as db:
             await db.conn.copy_from_query('SELECT * FROM {table_name}'.format(table_name=table_name), output=filename, format='csv')
-            column_descs = await db('DESCRIBE TABLE {table}'.format(table=table))
+            column_descs = await db('DESCRIBE TABLE {table_name}'.format(table_name=table_name))
 
         # See what was written to the file
         with open(filename, 'r') as f:
