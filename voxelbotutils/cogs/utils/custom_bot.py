@@ -7,6 +7,7 @@ import copy
 from datetime import datetime as dt
 from urllib.parse import urlencode
 import string
+import platform
 
 import aiohttp
 import discord
@@ -101,18 +102,18 @@ class CustomBot(commands.AutoShardedBot):
         }
 
         # Aiohttp session
-        self.session = aiohttp.ClientSession(loop=self.loop)
+        self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=self.loop)
 
         # Allow database connections like this
-        self.database = DatabaseConnection
+        self.database: DatabaseConnection = DatabaseConnection
         self.database.logger = self.logger.getChild('database')
 
         # Allow redis connections like this
-        self.redis = RedisConnection
+        self.redis: RedisConnection = RedisConnection
         self.redis.logger = self.logger.getChild('redis')
 
         # Allow Statsd connections like this
-        self.stats = StatsdConnection
+        self.stats: StatsdConnection = StatsdConnection
         self.stats.config = self.config.get('statsd', {})
         self.stats.logger = self.logger.getChild('statsd')
 
@@ -256,6 +257,13 @@ class CustomBot(commands.AutoShardedBot):
 
         # Return url
         return 'https://discord.com/oauth2/authorize?' + urlencode(data)
+
+    @property
+    def bot_user_agent(self):
+        return (
+            f"{self.user.name.replace(' ', '-')} (Discord.py discord bot https://github.com/Rapptz/discord.py) "
+            f"Python/{platform.python_version()} aiohttp/{aiohttp.__version__}"
+        )
 
     @property
     def event_webhook(self):
