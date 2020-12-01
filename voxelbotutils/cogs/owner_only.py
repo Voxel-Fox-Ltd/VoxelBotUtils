@@ -618,8 +618,8 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         await ctx.send(file=discord.File(filename))
         
         # And delete the file
-        if os.path.exists(f'./{filename}'):
-            os.remove(f'./{filename}')
+        if os.path.exists(filename):
+            os.remove(filename)
         else:
             return
 
