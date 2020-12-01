@@ -585,6 +585,43 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         # And donezo
         file = discord.File(io.StringIO(file_content), filename=f"_db_migrate_{guild_id or ctx.guild.id}.py")
         await ctx.send(file=file)
+    
+    @export.command(cls=utils.Command, name="table")
+    @commands.is_owner()
+    async def export_table(self, ctx, table_name:str):
+        """
+        Exports a given table from the database into a .csv file.
+        """
+        filename = f"./{table_name}_export.csv"
+
+        # Make our initial file
+        with open(filename, 'w') as f:
+            f.write("")
+
+        # Get the data we want to save
+        async with bot.database() as db:
+            await db.conn.copy_from_query('SELECT * FROM {table_name}'.format(table_name=table_name), output=filename, format='csv')
+            column_descs = await db('DESCRIBE TABLE {table}'.format(table=table))
+
+        # See what was written to the file
+        with open(filename, 'r') as f:
+            file_content = f.read()
+
+        # Add our headers
+        headers = ','.join([i['column_name'] for i in column_descs])
+
+        # Write the new content to the file
+        with open(filename, 'w') as f:
+            f.write(headers + "\n" + file_content)
+
+        # Send it to discord
+        await ctx.send(file=discord.File(filename))
+        
+        # And delete the file
+        if os.path.exists(f'./{filename}'):
+            os.remove(f'./{filename}')
+        else:
+            return
 
 
 def setup(bot:utils.Bot):
