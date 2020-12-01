@@ -14,7 +14,7 @@ class MiscCommands(utils.Cog):
         Gives the invite to the support server.
         """
 
-        await ctx.send(f"<{self.bot.config['command_data']['guild_invite']}>")
+        await ctx.send(f"<{self.bot.config['command_data']['guild_invite']}>", embeddify=False)
 
     @commands.command(aliases=['patreon'], cls=utils.Command)
     @utils.checks.is_config_set('command_data', 'donate_link')
@@ -24,7 +24,7 @@ class MiscCommands(utils.Cog):
         Gives you the bot's creator's donate link.
         """
 
-        await ctx.send(f"<{self.bot.config['command_data']['donate_link']}>")
+        await ctx.send(f"<{self.bot.config['command_data']['donate_link']}>", embeddify=False)
 
     @commands.command(cls=utils.Command)
     @commands.has_permissions(manage_messages=True)
@@ -35,7 +35,7 @@ class MiscCommands(utils.Cog):
         Echos the given content into the channel.
         """
 
-        await ctx.send(content, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+        await ctx.send(content, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False), embeddify=False)
 
 
 def setup(bot:utils.Bot):

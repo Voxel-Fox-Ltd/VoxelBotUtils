@@ -17,7 +17,7 @@ class BotStats(utils.Cog):
         Sends the GitHub Repository link.
         """
 
-        await ctx.send(f"<{self.bot.config['command_data']['github_link']}>")
+        await ctx.send(f"<{self.bot.config['command_data']['github_link']}>", embeddify=False)
 
     @commands.command(cls=utils.Command)
     @commands.bot_has_permissions(send_messages=True)
@@ -28,7 +28,7 @@ class BotStats(utils.Cog):
         """
 
         invite_permissions = {i: True for i in self.bot.config['command_data']['invite_command_permissions']}
-        await ctx.send(f"<{self.bot.get_invite_link(**invite_permissions)}>")
+        await ctx.send(f"<{self.bot.get_invite_link(**invite_permissions)}>", embeddify=False)
 
     @commands.command(cls=utils.Command)
     @commands.bot_has_permissions(send_messages=True)
@@ -46,7 +46,7 @@ class BotStats(utils.Cog):
             output_strings.append(f"<https://discordbotlist.com/bots/{bot_user_id}/upvote>")
         if not output_strings:
             return await ctx.send("Despite being enabled, the vote command has no vote links to provide :/")
-        return await ctx.send("\n".join(output_strings))
+        return await ctx.send("\n".join(output_strings), embeddify=False)
 
     @commands.command(aliases=['status', 'botinfo'])
     @commands.bot_has_permissions(send_messages=True, embed_links=True)

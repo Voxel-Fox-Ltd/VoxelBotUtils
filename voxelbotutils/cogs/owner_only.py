@@ -134,7 +134,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         try:
             exec(code, env)
         except Exception as e:
-            return await ctx.send(f'```py\n{e.__class__.__name__}: {e}\n```')
+            return await ctx.send(f'```py\n{e.__class__.__name__}: {e}\n```', embeddify=False)
 
         # Grab the function we just made and run it
         func = env['func']
@@ -145,14 +145,14 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         except Exception:
             # Oh no it caused an error
             stdout_value = stdout.getvalue() or None
-            return await ctx.send(f'```py\n{stdout_value}\n{traceback.format_exc()}\n```')
+            return await ctx.send(f'```py\n{stdout_value}\n{traceback.format_exc()}\n```', embeddify=False)
 
         # Oh no it didn't cause an error
         stdout_value = stdout.getvalue() or None
 
         # Give reaction just to show that it ran
         try:
-            await ctx.message.add_reaction("\N{OK HAND SIGN}")
+            await ctx.okay()
         except discord.HTTPException:
             pass
 
@@ -160,7 +160,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         if ret is None:
             # It might have printed something
             if stdout_value is not None:
-                await ctx.send(f'```py\n{stdout_value}\n```')
+                await ctx.send(f'```py\n{stdout_value}\n```', embeddify=False)
             return
 
         # If the function did return a value
@@ -182,9 +182,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
             try:
                 return await ctx.send(file=discord.File(io.StringIO(result), filename='ev.txt'))
             except discord.HTTPException:
-                return await ctx.send("I don't have permission to attach files here.")
+                return await ctx.send("I don't have permission to attach files here.", embeddify=False)
         else:
-            return await ctx.send(text)
+            return await ctx.send(text, embeddify=False)
 
     @commands.command(aliases=['rld'], cls=utils.Command)
     @commands.is_owner()
@@ -318,7 +318,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         # Send it out
         string_output = '\n'.join(lines)
         try:
-            await ctx.send(f"```\n{string_output}```")
+            await ctx.send(f"```\n{string_output}```", embeddify=False)
         except discord.HTTPException:
             file = discord.File(io.StringIO(string_output), filename="runsql.txt")
             await ctx.send(file=file)
@@ -428,7 +428,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
 
         # Send initial message
         current_data = f"$ {command}\n\n"
-        m = await ctx.send(f"```\n{current_data}```")
+        m = await ctx.send(f"```\n{current_data}```", embeddify=False)
 
         # Woah I do this a few times so let's put it in a function
         async def get_process_data(proc):
