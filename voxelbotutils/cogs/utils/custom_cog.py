@@ -30,12 +30,13 @@ class CustomCog(OriginalCog):
 
         return sep.join(['cog'] + list(prefixes) + [self.__cog_name__.replace(' ', '')])
 
-    def get_name(self) -> str:
+    @property
+    def qualified_name(self) -> str:
         """
         Gets the "human readable" name of the class.
         """
 
-        return regex.sub(r"(?:[A-Z])(?:(?:[a-z0-9])+|[A-Z]+$|[A-Z]+(?=[A-Z]))?", "\\g<0> ", self.__cog_name__.replace(' ', '')).strip()
+        return regex.sub(r"(?:[A-Z])(?:(?:[a-z0-9])+|[A-Z]+$|[A-Z]+(?=[A-Z]))?", "\\g<0> ", super().qualified_name.replace(' ', '')).strip()
 
     async def cache_setup(self, database:DatabaseConnection):
         """

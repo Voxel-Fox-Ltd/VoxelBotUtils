@@ -87,7 +87,7 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         for cog, cog_commands in runnable_commands.items():
             value = '\n'.join([self.get_help_line(command) for command in cog_commands])
             try:
-                cog_name = getattr(cog, 'get_name', lambda: cog.name)()
+                cog_name = cog.qualified_name
             except AttributeError:
                 cog_name = "Uncategorized"
             command_strings.append((cog_name, value))
