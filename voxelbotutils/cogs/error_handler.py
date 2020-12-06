@@ -248,20 +248,24 @@ class ErrorHandler(utils.Cog):
         error_text = f"Error `{error}` encountered.\nGuild `{ctx.guild.id}`, channel `{ctx.channel.id}`, user `{ctx.author.id}`\n```\n{ctx.message.content}\n```"
 
         # DM to owners
-        if getattr(self.bot, "config", {}).get("dm_uncaught_errors", False):
+        if self.bot.config.dm_uncaught_errors:
             for owner_id in self.bot.owner_ids:
                 owner = self.bot.get_user(owner_id) or await self.bot.fetch_user(owner_id)
                 file_handle.seek(0)
                 await owner.send(error_text, file=discord.File(file_handle, filename="error_log.py"))
 
         # Ping to the webook
-        if getattr(self.bot, "config", {}).get("event_webhook_url"):
+        event_webhook = self.bot.get_event_webhook("unhandled_error")
+        if event_webhook:
             file_handle.seek(0)
-            await self.bot.event_webhook.send(
-                error_text,
-                file=discord.File(file_handle, filename="error_log.py"),
-                username=f"{self.bot.user.name} - Error"
-            )
+            try:
+                await event_webhook.send(
+                    error_text,
+                    file=discord.File(file_handle, filename="error_log.py"),
+                    username=f"{self.bot.user.name} - Error"
+                )
+            except discord.HTTPException as e:
+                self.logger.error(f"Failed to send webhook for event unhandled_error - {e}")
 
         # And throw it into the console
         logger = getattr(getattr(ctx, 'cog', self), 'logger', self.logger)

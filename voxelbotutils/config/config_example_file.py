@@ -1,43 +1,54 @@
 config_file = """
 token = "bot_token"  # The token for the bot
-owners = [ ]  # List of owner IDs - these people override all permission checks
+owners = []  # List of owner IDs - these people override all permission checks
 dm_uncaught_errors = false  # Whether or not to DM the owners when unhandled errors are encountered
 default_prefix = "!"  # The prefix for the bot's commands
 support_guild_id = 0  # The ID for the support guild - used by `Bot.fetch_support_guild()`
 bot_support_role_id = 0  # The ID used to determine whether or not the user is part of the bot's support team - used for `.checks.is_bot_support()` check
-event_webhook_url = ""  # Some events will be posted via webhook to this url
+
+# Event webhook information - some of the events (noted) will be sent to the specified url
+[event_webhook]
+    event_webhook_url = ""
+    [event_webhook.events]  # If you use true then your `event_webhook_url` will be used. If it's a string it'll assume that's a different webhook
+        guild_add = false
+        guild_remove = false
+        shard_connect = false
+        shard_disconnect = false
+        shard_ready = false
+        bot_ready = false
+        unhandled_error = false
 
 # The intents that the bot should start with
 [intents]
-    # Guilds - recommended: true. Used for guild join/remove, channel create/delete/update, Bot.get_channel, Bot.guilds.
+    # Guilds - Used for guild join/remove, channel create/delete/update, Bot.get_channel, Bot.guilds, Bot.get_guild.
     guilds = true
-    # Members - recommended: false (privileged intent). Used for member join/remove/update, Member.roles, Member.nick, User.name, etc.
+    # Members (privileged intent) - Used for member join/remove/update, Member.roles, Member.nick, User.name, Bot.get_user, Guild.get_member etc.
     members = false
-    # Bans - recommended: false. Used for member ban/unban.
+    # Bans - Used for member ban/unban.
     bans = true
-    # Emojis - recommended: false. Used for guild emojis update, Bot.get_emoji, Guild.emojis.
+    # Emojis - Used for guild emojis update, Bot.get_emoji, Guild.emojis.
     emojis = true
-    # Integrations - recommended: false. Used for guild integrations update.
+    # Integrations - Used for guild integrations update.
     integrations = true
-    # Webhooks - recommended: false. Used for guild webhooks update.
+    # Webhooks - Used for guild webhooks update.
     webhooks = true
-    # Invites - recommended: false. Used for invite create/delete.
+    # Invites - Used for invite create/delete.
     invites = true
-    # Voice states - recommended: false. Used for voice state update, VoiceChannel.members, Member.voice.
+    # Voice states - Used for voice state update, VoiceChannel.members, Member.voice.
     voice_states = true
-    # Presences - recommended: false (privileged intent). Used for member update (for activities and status), Member.status.
+    # Presences (privileged intent) - Used for member update (for activities and status), Member.status.
     presences = false
-    # Guild messages - recommended: true. Used for message events in guilds.
+    # Guild messages - Used for message events in guilds.
     guild_messages = true
-    # DM messages - recommended: true. Used for message events in DMs.
+    # DM messages - Used for message events in DMs.
     dm_messages = true
-    # Guild reactions - recommended: false. Used for [raw] reaction add/remove/clear events in guilds.
+    # Guild reactions - Used for [raw] reaction add/remove/clear events in guilds.
     guild_reactions = true
-    # DM reactions - recommended: false. Used for [raw] reaction add/remove/clear events in DMs.
+    # DM reactions - Used for [raw] reaction add/remove/clear events in DMs.
     dm_reactions = true
-    # Guild typing - recommended: false. Used for the typing event in guilds.
+    # Guild typing - Used for the typing event in guilds.
     guild_typing = false
-    # DM typing - recommended: false. Used for the typing event in Dms.
+    # DM typing - Used for the typing event in Dms.
     dm_typing = false
 
 # Content to be included in the help command

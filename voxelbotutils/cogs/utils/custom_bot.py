@@ -121,9 +121,6 @@ class CustomBot(commands.AutoShardedBot):
         self.startup_time = dt.now()
         self.startup_method = None
 
-        # Store the event webhook so we don't need to generate it multiple times
-        self._event_webhook = None
-
         # Regardless of whether we start statsd or not, I want to add the log handler
         handler = AnalyticsLogHandler(self)
         handler.setLevel(logging.DEBUG)
@@ -265,18 +262,38 @@ class CustomBot(commands.AutoShardedBot):
             f"Python/{platform.python_version()} aiohttp/{aiohttp.__version__}"
         )
 
-    @property
-    def event_webhook(self):
+    def get_event_webhook(self, event_name:str) -> typing.Optional[discord.Webhook]:
         """
-        Get the event webhook from the config file.
+        Wowie it's time for webhooks
         """
 
-        if self._event_webhook is not None:
-            return self._event_webhook
-        if self.config['event_webhook_url'] in [None, 0, ""]:
+        # First we're gonna use the legacy way of event webhooking, which is to say: it's just in the config
+        url = self.config.get("event_webhook_url")
+        if url:
+            try:
+                return discord.Webhook.from_url(url, adapter=discord.AsyncWebhookAdapter(self.session))
+            except discord.InvalidArgument:
+                self.logger.error("The webhook set in your config is not a valid Discord webhook")
+                return None
+        if url is not None:
+            return
+
+        # Now we're gonna do with the new handler
+        webhook_picker = self.config.get("event_webhook")
+        if webhook_picker is None:
             return None
-        self._event_webhook = discord.Webhook.from_url(self.config['event_webhook_url'], adapter=discord.AsyncWebhookAdapter(self.session))
-        return self._event_webhook
+
+        # See if the event is enabled
+        new_url = webhook_picker.get("events", dict()).get(event_name)
+        if new_url in ["", None, False]:
+            return None
+        if isinstance(new_url, str):
+            url = new_url
+        try:
+            return discord.Webhook.from_url(url, adapter=discord.AsyncWebhookAdapter(self.session))
+        except discord.InvalidArgument:
+            self.logger.error(f"The webhook set in your config for the event {event_name} is not a valid Discord webhook")
+            return None
 
     async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, delete:typing.List[discord.Message]=None, timeout=60.0, wait:bool=True) -> None:
         """
