@@ -16,7 +16,7 @@ class ConnectEvent(utils.Cog):
         if not event_webhook:
             return False
         try:
-            await self.bot.event_webhook.send(text, username=username)
+            await event_webhook.send(text, username=username)
         except discord.HTTPException as e:
             self.logger.error(f"Failed to send webhook for event {event_name} - {e}")
             return False
