@@ -256,7 +256,7 @@ class CustomBot(commands.AutoShardedBot):
         return 'https://discord.com/oauth2/authorize?' + urlencode(data)
 
     @property
-    def bot_user_agent(self):
+    def user_agent(self):
         return (
             f"{self.user.name.replace(' ', '-')} (Discord.py discord bot https://github.com/Rapptz/discord.py) "
             f"Python/{platform.python_version()} aiohttp/{aiohttp.__version__}"
