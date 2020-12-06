@@ -99,7 +99,7 @@ class SettingsMenuOption(object):
         bot_message = await self.context.send(prompt)
         if reactions:
             for r in reactions:
-                await bot_message.add_reaction(r)
+                self.context.bot.loop.create_task(bot_message.add_reaction(r))
         try:
             if reactions:
                 user_message = None
@@ -442,7 +442,7 @@ class SettingsMenu(object):
                 await message.edit(**data)
             if sent_new_message or clear_reactions_on_loop:
                 for e in emoji_list:
-                    await message.add_reaction(e)
+                    ctx.bot.loop.create_task(message.add_reaction(e))
 
             # Get the reaction
             try:
