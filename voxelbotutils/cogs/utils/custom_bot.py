@@ -290,6 +290,8 @@ class CustomBot(commands.AutoShardedBot):
             return None
         if isinstance(new_url, str):
             url = new_url
+        else:
+            url = webhook_picker.get("event_webhook_url", "")
         try:
             self.logger.debug(f"Grabbed event webhook for event {event_name} from config")
             return discord.Webhook.from_url(url, adapter=discord.AsyncWebhookAdapter(self.session))
