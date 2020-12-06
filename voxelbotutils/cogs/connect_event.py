@@ -20,6 +20,9 @@ class ConnectEvent(utils.Cog):
         except discord.HTTPException as e:
             self.logger.error(f"Failed to send webhook for event {event_name} - {e}")
             return False
+        except Exception as e:
+            self.logger.error(e)
+            return False
         self.logger.info(logger)
         return True
 
