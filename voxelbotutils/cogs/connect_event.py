@@ -92,16 +92,16 @@ class ConnectEvent(utils.Cog):
         )
 
     @utils.Cog.listener()
-    async def on_guild_add(self, guild:discord.Guild):
+    async def on_guild_join(self, guild:discord.Guild):
         """
         Ping a given webhook when the bot is added to a guild.
         """
 
         await self.send_webhook(
-            "guild_add",
+            "guild_join",
             f"Added to new guild - ``{guild.name}`` (`{guild.member_count}` members)",
-            f"{self.bot.user.name} - Guild Add",
-            "Sent webhook for on_guild_add event",
+            f"{self.bot.user.name} - Guild Join",
+            "Sent webhook for on_guild_join event",
         )
 
     @utils.Cog.listener()

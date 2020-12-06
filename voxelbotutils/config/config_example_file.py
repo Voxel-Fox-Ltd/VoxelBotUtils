@@ -10,7 +10,7 @@ bot_support_role_id = 0  # The ID used to determine whether or not the user is p
 [event_webhook]
     event_webhook_url = ""
     [event_webhook.events]  # If you use true then your `event_webhook_url` will be used. If it's a string it'll assume that's a different webhook
-        guild_add = false
+        guild_join = false
         guild_remove = false
         shard_connect = false
         shard_disconnect = false
