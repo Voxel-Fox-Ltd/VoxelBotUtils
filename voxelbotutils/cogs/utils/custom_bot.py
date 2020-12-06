@@ -33,7 +33,7 @@ def get_prefix(bot, message:discord.Message):
 
     # Custom prefix or default prefix
     else:
-        prefix = bot.guild_settings[message.guild.id]['prefix'] or bot.config['default_prefix']
+        prefix = bot.guild_settings[message.guild.id][bot.config['guild_settings_prefix_column']] or bot.config['default_prefix']
 
     # Fuck iOS devices
     if type(prefix) is not list and prefix in ["'", "‘"]:
@@ -96,7 +96,7 @@ class CustomBot(commands.AutoShardedBot):
 
         # Set up our default guild settings
         self.DEFAULT_GUILD_SETTINGS = {
-            'prefix': self.config['default_prefix'],
+            self.config['guild_settings_prefix_column']: self.config['default_prefix'],
         }
         self.DEFAULT_USER_SETTINGS = {
         }
