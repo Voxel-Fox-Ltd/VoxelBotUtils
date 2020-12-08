@@ -21,36 +21,21 @@ guild_settings_prefix_column = "prefix"  # Used if multiple bots connect to the 
 
 # The intents that the bot should start with
 [intents]
-    # Guilds - Used for guild join/remove, channel create/delete/update, Bot.get_channel, Bot.guilds, Bot.get_guild.
-    guilds = true
-    # Members (privileged intent) - Used for member join/remove/update, Member.roles, Member.nick, User.name, Bot.get_user, Guild.get_member etc.
-    members = false
-    # Bans - Used for member ban/unban.
-    bans = true
-    # Emojis - Used for guild emojis update, Bot.get_emoji, Guild.emojis.
-    emojis = true
-    # Integrations - Used for guild integrations update.
-    integrations = true
-    # Webhooks - Used for guild webhooks update.
-    webhooks = true
-    # Invites - Used for invite create/delete.
-    invites = true
-    # Voice states - Used for voice state update, VoiceChannel.members, Member.voice.
-    voice_states = true
-    # Presences (privileged intent) - Used for member update (for activities and status), Member.status.
-    presences = false
-    # Guild messages - Used for message events in guilds.
-    guild_messages = true
-    # DM messages - Used for message events in DMs.
-    dm_messages = true
-    # Guild reactions - Used for [raw] reaction add/remove/clear events in guilds.
-    guild_reactions = true
-    # DM reactions - Used for [raw] reaction add/remove/clear events in DMs.
-    dm_reactions = true
-    # Guild typing - Used for the typing event in guilds.
-    guild_typing = false
-    # DM typing - Used for the typing event in Dms.
-    dm_typing = false
+    guilds = true  # Guilds - Used for guild join/remove, channel create/delete/update, Bot.get_channel, Bot.guilds, Bot.get_guild.
+    members = false  # Members (privileged intent) - Used for member join/remove/update, Member.roles, Member.nick, User.name, Bot.get_user, Guild.get_member etc.
+    bans = true  # Bans - Used for member ban/unban.
+    emojis = true  # Emojis - Used for guild emojis update, Bot.get_emoji, Guild.emojis.
+    integrations = true  # Integrations - Used for guild integrations update.
+    webhooks = true  # Webhooks - Used for guild webhooks update.
+    invites = true  # Invites - Used for invite create/delete.
+    voice_states = true  # Voice states - Used for voice state update, VoiceChannel.members, Member.voice.
+    presences = false  # Presences (privileged intent) - Used for member update (for activities and status), Member.status.
+    guild_messages = true  # Guild messages - Used for message events in guilds.
+    dm_messages = true  # DM messages - Used for message events in DMs.
+    guild_reactions = true  # Guild reactions - Used for [raw] reaction add/remove/clear events in guilds.
+    dm_reactions = true  # DM reactions - Used for [raw] reaction add/remove/clear events in DMs.
+    guild_typing = false  # Guild typing - Used for the typing event in guilds.
+    dm_typing = false  # DM typing - Used for the typing event in Dms.
 
 # Content to be included in the help command
 [help_command]
