@@ -13,7 +13,7 @@ class CommandEvent(utils.Cog):
 
         if ctx.command is None:
             return
-        logger = ctx.cog.logger if ctx.cog else self.logger
+        logger = getattr(getattr(ctx, 'cog', self), 'logger', self.logger)
         content = ctx.message.content.replace('\n', '\\n')[:self.CONTENT_LIMIT]
         if len(ctx.message.content) > self.CONTENT_LIMIT:
             content += '...'

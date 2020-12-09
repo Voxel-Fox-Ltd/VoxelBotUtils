@@ -1,6 +1,8 @@
+import re
 import setuptools
 
 
+# Grab the readme
 try:
     with open("README.md", "r") as a:
         long_description = a.read()
@@ -8,6 +10,7 @@ except Exception:
     long_description = ""
 
 
+# Here are the requirements
 requirements = [
     "discord.py>=1.5.0",
     "toml",
@@ -17,12 +20,17 @@ requirements = [
 ]
 
 
-__version__ = "0.0.7"
+# Let's get the version
+version = None
+regex = re.compile(r"""["']((?:[\d.]+)(?:a|b)?)["']""", re.MULTILINE)
+with open("voxelbotutils/__init__.py") as a:
+    text = a.read()
+version = regex.search(text).group(1)
 
 
 setuptools.setup(
     name="voxelbotutils",
-    version=__version__,
+    version=version,
     author="Caleb Bartlett",
     author_email="callum@voxelfox.co.uk",
     description="A set of bot utilities for Discord.py",

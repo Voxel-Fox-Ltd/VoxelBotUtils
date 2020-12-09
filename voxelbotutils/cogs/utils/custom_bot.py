@@ -7,6 +7,7 @@ import copy
 from datetime import datetime as dt
 from urllib.parse import urlencode
 import string
+import platform
 
 import aiohttp
 import discord
@@ -17,12 +18,14 @@ from .custom_context import CustomContext
 from .database import DatabaseConnection
 from .redis import RedisConnection
 from .statsd import StatsdConnection
-from .analytics_http_client import AnalyticsBaseConnector
+from .analytics_log_handler import AnalyticsLogHandler
 from .. import all_packages as all_vfl_package_names
 
 
 def get_prefix(bot, message:discord.Message):
-    """Gives the prefix for the bot - override this to make guild-specific prefixes"""
+    """
+    Gives the prefix for the bot - override this to make guild-specific prefixes.
+    """
 
     # Default prefix for DMs
     if message.guild is None:
@@ -30,10 +33,10 @@ def get_prefix(bot, message:discord.Message):
 
     # Custom prefix or default prefix
     else:
-        prefix = bot.guild_settings[message.guild.id]['prefix'] or bot.config['default_prefix']
+        prefix = bot.guild_settings[message.guild.id][bot.config['guild_settings_prefix_column']] or bot.config['default_prefix']
 
     # Fuck iOS devices
-    if prefix in ["'", "‘"]:
+    if type(prefix) is not list and prefix in ["'", "‘"]:
         prefix = ["'", "‘"]
 
     # Listify it
@@ -43,7 +46,8 @@ def get_prefix(bot, message:discord.Message):
     prefix.extend([i.title() for i in prefix])
 
     # Add spaces for words
-    prefix.extend([f"{i.strip()} " for i in prefix if not any([o in prefix for o in string.punctuation])])
+    possible_word_prefixes = [i for i in prefix if not any([o in i for o in string.punctuation])]
+    prefix.extend([f"{i.strip()} " for i in possible_word_prefixes])
 
     # And we're FINALLY done
     return commands.when_mentioned_or(*prefix)(bot, message)
@@ -87,35 +91,40 @@ class CustomBot(commands.AutoShardedBot):
         # Run original
         super().__init__(
             command_prefix=get_prefix, activity=activity, status=status, case_insensitive=case_insensitive, intents=intents,
-            allowed_mentions=allowed_mentions, connector=kwargs.pop("connector", AnalyticsBaseConnector(self)), *args, **kwargs,
+            allowed_mentions=allowed_mentions, *args, **kwargs,
         )
 
         # Set up our default guild settings
         self.DEFAULT_GUILD_SETTINGS = {
-            'prefix': self.config['default_prefix'],
+            self.config['guild_settings_prefix_column']: self.config['default_prefix'],
         }
         self.DEFAULT_USER_SETTINGS = {
         }
 
         # Aiohttp session
-        self.session = aiohttp.ClientSession(loop=self.loop)
+        self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=self.loop)
 
         # Allow database connections like this
-        self.database = DatabaseConnection
+        self.database: DatabaseConnection = DatabaseConnection
         self.database.logger = self.logger.getChild('database')
 
         # Allow redis connections like this
-        self.redis = RedisConnection
+        self.redis: RedisConnection = RedisConnection
         self.redis.logger = self.logger.getChild('redis')
 
         # Allow Statsd connections like this
-        self.stats = StatsdConnection
+        self.stats: StatsdConnection = StatsdConnection
         self.stats.config = self.config.get('statsd', {})
         self.stats.logger = self.logger.getChild('statsd')
 
         # Store the startup method so I can see if it completed successfully
         self.startup_time = dt.now()
         self.startup_method = None
+
+        # Regardless of whether we start statsd or not, I want to add the log handler
+        handler = AnalyticsLogHandler(self)
+        handler.setLevel(logging.DEBUG)
+        logging.getLogger('discord.http').addHandler(handler)
 
         # Here's the storage for cached stuff
         self.guild_settings = collections.defaultdict(lambda: copy.deepcopy(self.DEFAULT_GUILD_SETTINGS))
@@ -175,7 +184,7 @@ class CustomBot(commands.AutoShardedBot):
         async def fake_cache_setup_method(db):
             pass
         for cog_name, cog in self.cogs.items():
-            self.loop.create_task(getattr(cog, "cache_setup", fake_cache_setup_method)(db))
+            await getattr(cog, "cache_setup", fake_cache_setup_method)(db)
 
         # Wait for the bot to cache users before continuing
         self.logger.debug("Waiting until ready before completing startup method.")
@@ -202,6 +211,13 @@ class CustomBot(commands.AutoShardedBot):
         """Get all data from a table"""
 
         return await self._run_sql_exit_on_error(db, "SELECT * FROM {0} WHERE key=$1".format(table_name), key)
+
+    async def fetch_support_guild(self):
+        """
+        Fetch the support guild based on the config from the API.
+        """
+
+        return self.get_guild(self.config['support_guild_id']) or await self.fetch_guild(self.config['support_guild_id'])
 
     def get_invite_link(self, *, scope:str='bot', response_type:str=None, redirect_uri:str=None, guild_id:int=None, **kwargs) -> str:
         """
@@ -237,9 +253,53 @@ class CustomBot(commands.AutoShardedBot):
             data['response_type'] = response_type
 
         # Return url
-        return 'https://discordapp.com/oauth2/authorize?' + urlencode(data)
+        return 'https://discord.com/oauth2/authorize?' + urlencode(data)
 
-    async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, delete:typing.List[discord.Message]=None, timeout=60.0) -> None:
+    @property
+    def user_agent(self):
+        return (
+            f"{self.user.name.replace(' ', '-')} (Discord.py discord bot https://github.com/Rapptz/discord.py) "
+            f"Python/{platform.python_version()} aiohttp/{aiohttp.__version__}"
+        )
+
+    def get_event_webhook(self, event_name:str) -> typing.Optional[discord.Webhook]:
+        """
+        Wowie it's time for webhooks
+        """
+
+        # First we're gonna use the legacy way of event webhooking, which is to say: it's just in the config
+        url = self.config.get("event_webhook_url")
+        if url:
+            try:
+                self.logger.debug("Grabbed event webhook from config")
+                return discord.Webhook.from_url(url, adapter=discord.AsyncWebhookAdapter(self.session))
+            except discord.InvalidArgument:
+                self.logger.error("The webhook set in your config is not a valid Discord webhook")
+                return None
+        if url is not None:
+            return
+
+        # Now we're gonna do with the new handler
+        webhook_picker = self.config.get("event_webhook")
+        if webhook_picker is None:
+            return None
+
+        # See if the event is enabled
+        new_url = webhook_picker.get("events", dict()).get(event_name)
+        if new_url in ["", None, False]:
+            return None
+        if isinstance(new_url, str):
+            url = new_url
+        else:
+            url = webhook_picker.get("event_webhook_url", "")
+        try:
+            self.logger.debug(f"Grabbed event webhook for event {event_name} from config")
+            return discord.Webhook.from_url(url, adapter=discord.AsyncWebhookAdapter(self.session))
+        except discord.InvalidArgument:
+            self.logger.error(f"The webhook set in your config for the event {event_name} is not a valid Discord webhook")
+            return None
+
+    async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, delete:typing.List[discord.Message]=None, timeout=60.0, wait:bool=True) -> None:
         """
         Adds a delete button to the given message.
 
@@ -250,12 +310,20 @@ class CustomBot(commands.AutoShardedBot):
             timeout (float, optional): How long the delete button should persist for.
         """
 
+        # See if we want to make this as a task or not
+        if wait is False:
+            self.loop.create_task(self.add_delete_button(message=message, valid_users=valid_users, delete=delete, timeout=timeout))
+            return
+
         # Let's not add delete buttons to DMs
         if isinstance(message.channel, discord.DMChannel):
             return
 
         # Add reaction
-        await message.add_reaction("\N{WASTEBASKET}")
+        try:
+            await message.add_reaction("\N{WASTEBASKET}")
+        except discord.HTTPException as e:
+            raise e  # Maybe return none here - I'm not sure yet.
 
         # Fix up arguments
         if not isinstance(valid_users, list):
@@ -435,33 +503,28 @@ class CustomBot(commands.AutoShardedBot):
 
         # Update presence
         self.logger.info("Setting default bot presence")
-        presence = self.config['presence']  # Get text
+        presence = self.config["presence"]  # Get text
 
         # Update per shard
-        if self.shard_count > 1:
-
-            # Get shard IDs
-            if shard_id:
-                min, max = shard_id, shard_id + 1  # If we're only setting it for one shard
-            else:
-                min, max = self.shard_ids[0], self.shard_ids[-1]  # If we're setting for all shards
+        if self.shard_count > 1 and presence.get("include_shard_id", True):
 
             # Go through each shard ID
-            for i in range(min, max):
+            config_text = presence["text"].format(bot=self)
+            for i in self.shard_ids:
                 activity = discord.Activity(
-                    name=f"{presence['text']} (shard {i})",
+                    name=f"{config_text} (shard {i})",
                     type=getattr(discord.ActivityType, presence['activity_type'].lower())
                 )
-                status = getattr(discord.Status, presence['status'].lower())
+                status = getattr(discord.Status, presence["status"].lower())
                 await self.change_presence(activity=activity, status=status, shard_id=i)
 
         # Not sharded - just do everywhere
         else:
             activity = discord.Activity(
-                name=presence['text'],
-                type=getattr(discord.ActivityType, presence['activity_type'].lower())
+                name=presence["text"],
+                type=getattr(discord.ActivityType, presence["activity_type"].lower())
             )
-            status = getattr(discord.Status, presence['status'].lower())
+            status = getattr(discord.Status, presence["status"].lower())
             await self.change_presence(activity=activity, status=status)
 
     def reload_config(self) -> None:
@@ -473,6 +536,7 @@ class CustomBot(commands.AutoShardedBot):
         try:
             with open(self.config_file) as a:
                 self.config = toml.load(a)
+            self._event_webhook = None
         except Exception as e:
             self.logger.critical(f"Couldn't read config file - {e}")
             exit(1)

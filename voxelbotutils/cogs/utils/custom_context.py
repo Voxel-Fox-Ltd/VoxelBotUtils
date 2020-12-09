@@ -49,7 +49,7 @@ class CustomContext(commands.Context):
 
     async def send(
             self, content:str=None, *args, embed:discord.Embed=None, file:discord.File=None, ignore_error:bool=False, embeddify:bool=None,
-            embeddify_image:bool=True, **kwargs) -> discord.Message:
+            embeddify_file:bool=True, image_url:str=None, **kwargs) -> discord.Message:
         """
         The normal `discord.abc.Messageable.send` but with an optional arg to ignore errors, as well as automatically
         embedding the content based on the bot's config.
@@ -61,7 +61,7 @@ class CustomContext(commands.Context):
             file (discord.File, optional): The file object to be sent with the message.
             ignore_error (bool, optional): Whether or not to ignore `discord.HTTPException` errors on message send.
             embeddify (bool, optional): Whether or not to automatically embed the content of the message.
-            embeddify_image (bool, optional): Whether or not ot automatically embed the image of the message.
+            embeddify_file (bool, optional): Whether or not ot automatically embed the file of the message.
             **kwargs: The default args for `discord.abc.Messageable.send`.
 
         Returns:
@@ -72,6 +72,8 @@ class CustomContext(commands.Context):
         """
 
         # Set default embeddify
+        if embeddify is None and image_url is not None:
+            embeddify = True
         if embeddify is None:
             embeddify = self.bot.embeddify
 
@@ -104,7 +106,9 @@ class CustomContext(commands.Context):
         self._set_footer(embed)
 
         # Set image
-        if file and file.filename and embeddify_image:
+        if image_url is not None:
+            embed.set_image(url=image_url)
+        if file and file.filename and embeddify_file:
             file_is_image = any([
                 file.filename.casefold().endswith('.png'),
                 file.filename.casefold().endswith('.jpg'),

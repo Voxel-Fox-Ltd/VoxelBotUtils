@@ -11,6 +11,16 @@ voxelbotutils.converters.UserID
 
 .. autoclass:: voxelbotutils.cogs.utils.converters.user_id.UserID
 
+voxelbotutils.converters.ChannelID
+---------------------------------------------------
+
+.. autoclass:: voxelbotutils.cogs.utils.converters.channel_id.ChannelID
+
+voxelbotutils.converters.EnumConverter
+---------------------------------------------------
+
+.. autoclass:: voxelbotutils.cogs.utils.converters.enum_converter.EnumConverter
+
 voxelbotutils.converters.ColourConverter
 ---------------------------------------------------
 

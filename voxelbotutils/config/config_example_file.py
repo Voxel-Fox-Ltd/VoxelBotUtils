@@ -1,42 +1,46 @@
 config_file = """
 token = "bot_token"  # The token for the bot
-owners = [ 141231597155385344, ]  # List of owner IDs - these people override all permission checks
+owners = []  # List of owner IDs - these people override all permission checks
 dm_uncaught_errors = false  # Whether or not to DM the owners when unhandled errors are encountered
 default_prefix = "!"  # The prefix for the bot's commands
-event_webhook_url = ""  # Some events will be posted via webhook to this url
+support_guild_id = 0  # The ID for the support guild - used by `Bot.fetch_support_guild()`
+bot_support_role_id = 0  # The ID used to determine whether or not the user is part of the bot's support team - used for `.checks.is_bot_support()` check
+guild_settings_prefix_column = "prefix"  # Used if multiple bots connect to the same database and need to seperate their prefixes
+
+# Event webhook information - some of the events (noted) will be sent to the specified url
+[event_webhook]
+    event_webhook_url = ""
+    [event_webhook.events]  # If you use true then your `event_webhook_url` will be used. If it's a string it'll assume that's a different webhook
+        guild_join = false
+        guild_remove = false
+        shard_connect = false
+        shard_disconnect = false
+        shard_ready = false
+        bot_ready = false
+        unhandled_error = false
 
 # The intents that the bot should start with
 [intents]
-    # Guilds - recommended: true. Used for guild join/remove, channel create/delete/update, Bot.get_channel, Bot.guilds.
-    guilds = true
-    # Members - recommended: false (privileged intent). Used for member join/remove/update, Member.roles, Member.nick, User.name, etc.
-    members = false
-    # Bans - recommended: false. Used for member ban/unban.
-    bans = true
-    # Emojis - recommended: false. Used for guild emojis update, Bot.get_emoji, Guild.emojis.
-    emojis = true
-    # Integrations - recommended: false. Used for guild integrations update.
-    integrations = true
-    # Webhooks - recommended: false. Used for guild webhooks update.
-    webhooks = true
-    # Invites - recommended: false. Used for invite create/delete.
-    invites = true
-    # Voice states - recommended: false. Used for voice state update, VoiceChannel.members, Member.voice.
-    voice_states = true
-    # Presences - recommended: false (privileged intent). Used for member update (for activities and status), Member.status.
-    presences = false
-    # Guild messages - recommended: true. Used for message events in guilds.
-    guild_messages = true
-    # DM messages - recommended: true. Used for message events in DMs.
-    dm_messages = true
-    # Guild reactions - recommended: false. Used for [raw] reaction add/remove/clear events in guilds.
-    guild_reactions = true
-    # DM reactions - recommended: false. Used for [raw] reaction add/remove/clear events in DMs.
-    dm_reactions = true
-    # Guild typing - recommended: false. Used for the typing event in guilds.
-    guild_typing = false
-    # DM typing - recommended: false. Used for the typing event in Dms.
-    dm_typing = false
+    guilds = true  # Guilds - Used for guild join/remove, channel create/delete/update, Bot.get_channel, Bot.guilds, Bot.get_guild.
+    members = false  # Members (privileged intent) - Used for member join/remove/update, Member.roles, Member.nick, User.name, Bot.get_user, Guild.get_member etc.
+    bans = true  # Bans - Used for member ban/unban.
+    emojis = true  # Emojis - Used for guild emojis update, Bot.get_emoji, Guild.emojis.
+    integrations = true  # Integrations - Used for guild integrations update.
+    webhooks = true  # Webhooks - Used for guild webhooks update.
+    invites = true  # Invites - Used for invite create/delete.
+    voice_states = true  # Voice states - Used for voice state update, VoiceChannel.members, Member.voice.
+    presences = false  # Presences (privileged intent) - Used for member update (for activities and status), Member.status.
+    guild_messages = true  # Guild messages - Used for message events in guilds.
+    dm_messages = true  # DM messages - Used for message events in DMs.
+    guild_reactions = true  # Guild reactions - Used for [raw] reaction add/remove/clear events in guilds.
+    dm_reactions = true  # DM reactions - Used for [raw] reaction add/remove/clear events in DMs.
+    guild_typing = false  # Guild typing - Used for the typing event in guilds.
+    dm_typing = false  # DM typing - Used for the typing event in Dms.
+
+# Content to be included in the help command
+[help_command]
+    dm_help = true  # Whether or not the help embed should be DMd to the user
+    content = ""  # Additional content to be sent with the embed
 
 # Data used to send API requests to whatever service
 [bot_listing_api_keys]
@@ -88,16 +92,15 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
     activity_type = "watching"  # Should be one of 'playing', 'listening', 'watching', 'competing'
     text = "VoxelBotUtils"
     status = "online"  # Should be one of 'online', 'invisible', 'idle', 'dnd'
+    include_shard_id = true  # Whether or not to append "(shard N)" to the presence; only present if there's more than 1 shard
+    [presence.streaming]  # This is used to automatically set the bot's status to your Twitch stream when you go live
+        twitch_usernames = []  # The username of your Twitch.tv channel
+        twitch_client_id = ""  # Your client ID - https://dev.twitch.tv/console/apps
+        twitch_client_secret = ""  # Your client secret
 
 # Used to generate the invite link - if not set then will use the bot's ID, which is correct more often than not
 [oauth]
     client_id = ""
-
-# This is where you can set up all of your analytics to be sent to GA; automatically disabled if no data is provided
-[google_analytics]
-    tracking_id = ""  # Tracking ID for your GA instance
-    app_name = ""  # The name of your bot - what you want GA to name this traffic source
-    document_host = ""  # The (possibly fake) URL you want to tell GA this website is
 
 # It's time for better analytics! Let's give statsd a little try
 [statsd]

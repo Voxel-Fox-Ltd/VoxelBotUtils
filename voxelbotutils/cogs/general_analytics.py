@@ -60,6 +60,7 @@ class Analytics(utils.Cog):
         # Only post if there's actually a DBL token set
         if not self.bot.config.get('bot_listing_api_keys', {}).get('topgg_token'):
             self.logger.warning("No Top.gg token has been provided")
+            self.post_topgg_guild_count.stop()
             return
 
         url = f'https://top.gg/api/bots/{self.bot.user.id}/stats'
@@ -92,6 +93,7 @@ class Analytics(utils.Cog):
         # Only post if there's actually a DBL token set
         if not self.bot.config.get('bot_listing_api_keys', {}).get('discordbotlist_token'):
             self.logger.warning("No DiscordBotList.com token has been provided")
+            self.post_discordbotlist_guild_count.stop()
             return
 
         url = f'https://discordbotlist.com/api/v1/bots/{self.bot.user.id}/stats'
@@ -129,10 +131,13 @@ class Analytics(utils.Cog):
     async def on_socket_raw_send(self, payload:dict):
         """A raw socket response message send Discord"""
 
+        # Get the event opcode
         try:
             event_id = json.loads(payload)['op']
         except Exception:
-            return
+            return  # there isn't one somehow but okay
+
+        # Try and get a name from that opcode
         event_name = self.FOUND_GATEWAY_OPCODES.get(event_id)
         if event_name is None:
             for i in dir(discord.gateway.DiscordWebSocket):
@@ -144,6 +149,7 @@ class Analytics(utils.Cog):
                             event_name = i
                             break
 
+        # Post that to statsd
         async with self.bot.stats() as stats:
             try:
                 stats.increment("discord.gateway.send", tags={"event_name": event_name})
@@ -159,74 +165,6 @@ class Analytics(utils.Cog):
                 stats.increment("discord.gateway.receive", tags={"event_name": payload['t']})
             except KeyError:
                 pass
-
-    async def try_send_ga_data(self, data):
-        """
-        Post the cached data over to Google Analytics.
-        """
-
-        # See if we should bother doing it
-        ga_data = self.bot.config.get('google_analytics')
-        if not ga_data:
-            return
-        if '' in ga_data.values():
-            return
-
-        # Set up the params for us to use
-        base_ga_params = {
-            "v": "1",
-            "t": "pageview",
-            "aip": "1",
-            "tid": ga_data['tracking_id'],
-            "an": ga_data['app_name'],
-            "dh": ga_data['document_host'],
-            "dr": "discord.com",
-        }
-        data.update(base_ga_params)
-        async with self.bot.session.get(self.GOOGLE_ANALYTICS_URL, params=data):
-            pass
-
-    @utils.Cog.listener()
-    async def on_command(self, ctx:utils.Context):
-        """
-        Logs a command that's been sent.
-        """
-
-        params = {
-            "dp": f"/commands/{ctx.command.name}",
-            "cid": f"{ctx.author.id}",
-            "cs": f"{ctx.guild.id}" if ctx.guild is not None else "PRIVATE_MESSAGE",
-            "dt": ctx.command.name,
-        }
-        await self.try_send_ga_data(params)
-
-    @utils.Cog.listener()
-    async def on_guild_join(self, guild:discord.Guild):
-        """
-        Logs when added to a guild.
-        """
-
-        params = {
-            "dp": "/events/GUILD_ADD",
-            "cid": f"{guild.id}",
-            "cs": f"{guild.id}",
-            "dt": "GUILD_ADD",
-        }
-        await self.try_send_ga_data(params)
-
-    @utils.Cog.listener()
-    async def on_guild_remove(self, guild:discord.Guild):
-        """
-        Logs when a guild is removed from the client.
-        """
-
-        params = {
-            "dp": "/events/GUILD_REMOVE",
-            "cid": f"{guild.id}",
-            "cs": f"{guild.id}",
-            "dt": "GUILD_REMOVE",
-        }
-        await self.try_send_ga_data(params)
 
 
 def setup(bot:utils.Bot):

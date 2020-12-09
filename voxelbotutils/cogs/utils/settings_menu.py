@@ -99,7 +99,7 @@ class SettingsMenuOption(object):
         bot_message = await self.context.send(prompt)
         if reactions:
             for r in reactions:
-                await bot_message.add_reaction(r)
+                self.context.bot.loop.create_task(bot_message.add_reaction(r))
         try:
             if reactions:
                 user_message = None
@@ -251,7 +251,7 @@ class SettingsMenuOption(object):
             which is then put into the datbase and cache.
             """
 
-            if isinstance(data, (discord.Role, discord.TextChannel)):
+            if isinstance(data, (discord.Role, discord.TextChannel, discord.User, discord.Member, discord.Object, discord.CategoryChannel)):
                 data = data.id
             original_data, data = data, serialize_function(data)
 
@@ -286,7 +286,7 @@ class SettingsMenuOption(object):
             which is then put into the datbase and cache.
             """
 
-            if isinstance(data, (discord.Role, discord.TextChannel)):
+            if isinstance(data, (discord.Role, discord.TextChannel, discord.User, discord.Member, discord.Object, discord.CategoryChannel)):
                 data = data.id
             original_data, data = data, serialize_function(data)
 
@@ -442,7 +442,7 @@ class SettingsMenu(object):
                 await message.edit(**data)
             if sent_new_message or clear_reactions_on_loop:
                 for e in emoji_list:
-                    await message.add_reaction(e)
+                    ctx.bot.loop.create_task(message.add_reaction(e))
 
             # Get the reaction
             try:

@@ -4,6 +4,7 @@ from discord.ext import commands
 class FilteredUser(commands.UserConverter):
 
     def __init__(self, *, allow_author:bool=False, allow_bots:bool=False):
+        super().__init__()
         self.allow_author = allow_author
         self.allow_bots = allow_bots
 
@@ -19,6 +20,7 @@ class FilteredUser(commands.UserConverter):
 class FilteredMember(FilteredUser):
 
     def __init__(self, *, allow_author:bool=False, allow_bots:bool=False):
+        super().__init__()
         self.allow_author = allow_author
         self.allow_bots = allow_bots
 

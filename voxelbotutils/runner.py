@@ -18,29 +18,40 @@ __all__ = (
 
 
 # Set up the loggers
-def set_log_level(logger_to_change:logging.Logger, loglevel:str) -> None:
+def set_log_level(logger_to_change:logging.Logger, log_level:str, minimum_level:int=None) -> None:
     """
-    Set a logger to a default loglevel
+    Set a logger to a default log level
 
     Args:
         logger_to_change (logging.Logger): The logger you want to change
-        loglevel (str): Description
+        log_level (str): Description
 
     Returns:
         None
 
     Raises:
-        ValueError: An invalid loglevel was passed to the method
+        ValueError: An invalid log_level was passed to the method
     """
 
-    if loglevel is None:
+    # Make sure we're setting it to something
+    if log_level is None:
         return
+
+    # Get the logger we want to change
     if isinstance(logger_to_change, str):
         logger_to_change = logging.getLogger(logger_to_change)
-    level = getattr(logging, loglevel.upper(), None)
-    if level is None:
-        raise ValueError(f"The log level {loglevel.upper()} wasn't found in the logging module")
-    logger_to_change.setLevel(level)
+
+    # Get the log level
+    try:
+        level = getattr(logging, log_level.upper())
+    except AttributeError:
+        raise ValueError(f"The log level {log_level.upper()} wasn't found in the logging module")
+
+    # Set the level
+    if minimum_level is not None:
+        logger_to_change.setLevel(max([level, minimum_level]))
+    else:
+        logger_to_change.setLevel(level)
 
 
 # Parse arguments
@@ -56,42 +67,45 @@ def get_default_program_arguments(include_config_file:bool=True) -> argparse.Arg
     """
     parser = argparse.ArgumentParser()
     if include_config_file:
-        parser.add_argument("config_file", help="The configuration for the bot")
+        parser.add_argument(
+            "config_file", nargs="?", default="config/config.toml",
+            help="The configuration for the bot."
+        )
     parser.add_argument(
         "--min", type=int, default=None,
-        help="The minimum shard ID that this instance will run with (inclusive)"
+        help="The minimum shard ID that this instance will run with (inclusive)."
     )
     parser.add_argument(
         "--max", type=int, default=None,
-        help="The maximum shard ID that this instance will run with (inclusive)"
+        help="The maximum shard ID that this instance will run with (inclusive)."
     )
     parser.add_argument(
         "--shardcount", type=int, default=None,
-        help="The amount of shards that the bot should be using"
+        help="The amount of shards that the bot should be using."
     )
     parser.add_argument(
         "--loglevel", default="INFO",
-        help="Global logging level - probably most useful is INFO and DEBUG"
+        help="Global logging level - probably most useful is INFO and DEBUG."
     )
     parser.add_argument(
         "--loglevel-bot", default=None,
-        help="Logging level for the bot - probably most useful is INFO and DEBUG"
+        help="Logging level for the bot - probably most useful is INFO and DEBUG."
     )
     parser.add_argument(
         "--loglevel-discord", default=None,
-        help="Logging level for discord - probably most useful is INFO and DEBUG"
+        help="Logging level for discord - probably most useful is INFO and DEBUG."
     )
     parser.add_argument(
         "--loglevel-database", default=None,
-        help="Logging level for database - probably most useful is INFO and DEBUG"
+        help="Logging level for database - probably most useful is INFO and DEBUG."
     )
     parser.add_argument(
         "--loglevel-redis", default=None,
-        help="Logging level for redis - probably most useful is INFO and DEBUG"
+        help="Logging level for redis - probably most useful is INFO and DEBUG."
     )
     parser.add_argument(
         "--loglevel-statsd", default=None,
-        help="Logging level for statsd - probably most useful is INFO and DEBUG"
+        help="Logging level for statsd - probably most useful is INFO and DEBUG."
     )
     return parser
 
@@ -116,6 +130,15 @@ def validate_sharding_information(args:argparse.Namespace) -> typing.List[int]:
         args.shardcount = 1
         args.min = 0
         args.max = 0
+    else:
+        if args.min is None and args.max is None:
+            args.min = 0
+            args.max = args.shardcount - 1
+        elif type(args.min) == int and type(args.max) == int:
+            pass
+        else:
+            logger.critical("You set a shardcount but not min/max shards")
+            exit(1)
     shard_ids = list(range(args.min, args.max + 1))
     if args.shardcount is None and (args.min or args.max):
         logger.critical("You set a min/max shard handler but no shard count")
@@ -124,6 +147,26 @@ def validate_sharding_information(args:argparse.Namespace) -> typing.List[int]:
         logger.critical("You set a shardcount but not min/max shards")
         exit(1)
     return shard_ids
+
+
+# To make our log levels work properly, we need to set up a new filter for our stream handlers
+# We're going to send most things to stdout, but a fair few sent over to stderr
+class LogFilter(logging.Filter):
+    """
+    Filters (lets through) all messages with level < LEVEL.
+    """
+
+    # Props to these folks who I stole all this from
+    # https://stackoverflow.com/a/28743317/2224197
+    # http://stackoverflow.com/a/24956305/408556
+
+    def __init__(self, filter_level:int):
+        self.filter_level = filter_level
+
+    def filter(self, record):
+        # "<" instead of "<=": since logger.setLevel is inclusive, this should
+        # be exclusive
+        return record.levelno < self.filter_level
 
 
 def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
@@ -135,22 +178,89 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
         args (argparse.Namespace): The argparse namespace saying what levels to set each logger to
     """
 
-    logging.basicConfig(format='%(asctime)s:%(name)s:%(levelname)s: %(message)s', stream=sys.stdout)
+    formatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s: %(message)s')
     bot.logger = logger
 
-    # Set loglevel defaults
-    set_log_level(logger, args.loglevel)
-    set_log_level(bot.database.logger, args.loglevel)
-    set_log_level(bot.redis.logger, args.loglevel)
-    set_log_level(bot.stats.logger, args.loglevel)
-    set_log_level('discord', args.loglevel)
+    # Let's make a filter here so we can add that to the stdout handlers
+    log_filter = LogFilter(logging.WARNING)
 
-    # Set loglevels by config
-    set_log_level(logger, args.loglevel_bot)
-    set_log_level(bot.database.logger, args.loglevel_database)
-    set_log_level(bot.redis.logger, args.loglevel_redis)
-    set_log_level(bot.stats.logger, args.loglevel_statsd)
-    set_log_level('discord', args.loglevel_discord)
+    # Make our stream handlers
+    bot_stdout_logger = logging.StreamHandler(sys.stdout)
+    bot_stderr_logger = logging.StreamHandler(sys.stderr)
+    database_stdout_logger = logging.StreamHandler(sys.stdout)
+    database_stderr_logger = logging.StreamHandler(sys.stderr)
+    redis_stdout_logger = logging.StreamHandler(sys.stdout)
+    redis_stderr_logger = logging.StreamHandler(sys.stderr)
+    stats_stdout_logger = logging.StreamHandler(sys.stdout)
+    stats_stderr_logger = logging.StreamHandler(sys.stderr)
+    discord_stdout_logger = logging.StreamHandler(sys.stdout)
+    discord_stderr_logger = logging.StreamHandler(sys.stderr)
+
+    # Add the filters for the stdout handlers
+    bot_stdout_logger.addFilter(log_filter)
+    database_stdout_logger.addFilter(log_filter)
+    redis_stdout_logger.addFilter(log_filter)
+    stats_stdout_logger.addFilter(log_filter)
+    discord_stdout_logger.addFilter(log_filter)
+
+    # Add our formatters
+    bot_stdout_logger.setFormatter(formatter)
+    bot_stderr_logger.setFormatter(formatter)
+    database_stdout_logger.setFormatter(formatter)
+    database_stderr_logger.setFormatter(formatter)
+    redis_stdout_logger.setFormatter(formatter)
+    redis_stderr_logger.setFormatter(formatter)
+    stats_stdout_logger.setFormatter(formatter)
+    stats_stderr_logger.setFormatter(formatter)
+    discord_stdout_logger.setFormatter(formatter)
+    discord_stderr_logger.setFormatter(formatter)
+
+    # Set all the loggers to debug
+    set_log_level(bot.logger, 'DEBUG')
+    set_log_level(bot.database.logger, 'DEBUG')
+    set_log_level(bot.redis.logger, 'DEBUG')
+    set_log_level(bot.stats.logger, 'DEBUG')
+    set_log_level('discord', 'DEBUG')
+
+    # Set loglevel defaults for the stdout handlers
+    set_log_level(bot_stdout_logger, args.loglevel)
+    set_log_level(database_stdout_logger, args.loglevel)
+    set_log_level(redis_stdout_logger, args.loglevel)
+    set_log_level(stats_stdout_logger, args.loglevel)
+    set_log_level(discord_stdout_logger, args.loglevel)
+
+    # Set loglevel default for the stderr handlers
+    set_log_level(bot_stderr_logger, args.loglevel, logging.WARNING)
+    set_log_level(database_stderr_logger, args.loglevel, logging.WARNING)
+    set_log_level(redis_stderr_logger, args.loglevel, logging.WARNING)
+    set_log_level(stats_stderr_logger, args.loglevel, logging.WARNING)
+    set_log_level(discord_stderr_logger, args.loglevel, logging.WARNING)
+
+    # Set loglevels for the stdouts via the commandline args
+    set_log_level(bot_stdout_logger, args.loglevel_bot)
+    set_log_level(database_stdout_logger, args.loglevel_database)
+    set_log_level(redis_stdout_logger, args.loglevel_redis)
+    set_log_level(stats_stdout_logger, args.loglevel_statsd)
+    set_log_level(discord_stdout_logger, args.loglevel_discord)
+
+    # Set loglevels for the stderrs via the commandline args
+    set_log_level(bot_stderr_logger, args.loglevel_bot, logging.WARNING)
+    set_log_level(database_stderr_logger, args.loglevel_database, logging.WARNING)
+    set_log_level(redis_stderr_logger, args.loglevel_redis, logging.WARNING)
+    set_log_level(stats_stderr_logger, args.loglevel_statsd, logging.WARNING)
+    set_log_level(discord_stderr_logger, args.loglevel_discord, logging.WARNING)
+
+    # Add the stream handlers to the loggers
+    bot.logger.addHandler(bot_stdout_logger)
+    bot.logger.addHandler(bot_stderr_logger)
+    bot.database.logger.addHandler(database_stdout_logger)
+    bot.database.logger.addHandler(database_stderr_logger)
+    bot.redis.logger.addHandler(redis_stdout_logger)
+    bot.redis.logger.addHandler(redis_stderr_logger)
+    bot.stats.logger.addHandler(stats_stdout_logger)
+    bot.stats.logger.addHandler(stats_stderr_logger)
+    logging.getLogger('discord').addHandler(discord_stdout_logger)
+    logging.getLogger('discord').addHandler(discord_stderr_logger)
 
 
 async def create_initial_database(bot:Bot) -> None:
@@ -239,6 +349,11 @@ def run_bot(bot:Bot) -> None:
     """
 
     # Use right event loop
+    try:
+        import uvloop
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    except ImportError:
+        pass
     if sys.platform == 'win32':
         loop = asyncio.ProactorEventLoop()
         asyncio.set_event_loop(loop)

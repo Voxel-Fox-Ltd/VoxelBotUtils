@@ -9,18 +9,33 @@ from . import utils
 
 class CustomHelpCommand(commands.MinimalHelpCommand):
 
-    def __init__(self, **options):
-        self.include_invite = options.pop("include_invite", False)
-        super().__init__(**options)
+    HELP_COMMAND_HIDDEN_ERRORS = (commands.DisabledCommand, commands.NotOwner, utils.errors.NotBotSupport, utils.errors.InvokedMetaCommand,)
 
-    async def filter_commands(self, commands:typing.List[utils.Command]) -> typing.List[utils.Command]:
+    @classmethod
+    async def filter_commands_classmethod(cls, ctx, commands_to_filter:typing.List[utils.Command]) -> typing.List[utils.Command]:
         """
         Filter the command list down into a list of runnable commands.
         """
 
-        if self.context.author.id in self.context.bot.owner_ids:
-            return commands
-        return [i for i in commands if i.hidden is False and i.enabled is True]
+        if ctx.author.id in ctx.bot.owner_ids:
+            return [i for i in commands_to_filter if i.name != "help"]
+        valid_commands = [i for i in commands_to_filter if i.hidden is False and i.enabled is True and i.name != "help"]
+        returned_commands = []
+        for comm in valid_commands:
+            try:
+                await comm.can_run(ctx)
+            except commands.CommandError as e:
+                if isinstance(e, cls.HELP_COMMAND_HIDDEN_ERRORS):
+                    continue
+            returned_commands.append(comm)
+        return returned_commands
+
+    async def filter_commands(self, commands_to_filter:typing.List[utils.Command]) -> typing.List[utils.Command]:
+        """
+        Filter the command list down into a list of runnable commands.
+        """
+
+        return await self.filter_commands_classmethod(self.context, commands_to_filter)
 
     def get_command_signature(self, command:commands.Command):
         return '{0.clean_prefix}{1.qualified_name} {1.signature}'.format(self, command)
@@ -61,7 +76,7 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         runnable_commands = {}
         for cog, cog_commands in mapping.items():
             available_commands = await self.filter_commands(cog_commands)
-            if len(available_commands) > 0:
+            if len(available_commands) > 0 or isinstance(cog, (commands.Command, commands.Group,)):
                 runnable_commands[cog] = available_commands
 
         # Make an embed
@@ -71,11 +86,17 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         command_strings = []
         for cog, cog_commands in runnable_commands.items():
             value = '\n'.join([self.get_help_line(command) for command in cog_commands])
-            command_strings.append((getattr(cog, 'get_name', lambda: cog.name)(), value))
+            try:
+                cog_name = cog.qualified_name
+            except AttributeError:
+                cog_name = "Uncategorized"
+            command_strings.append((cog_name, value))
 
             # See if it's a command with subcommands
+            if isinstance(cog, commands.Group):
+                help_embed.description = self.get_help_line(cog, with_signature=cog.invoke_without_command)
             if isinstance(cog, commands.Command):
-                help_embed.description = self.get_help_line(cog)
+                help_embed.description = self.get_help_line(cog, with_signature=True)
 
         # Order embed by length before embedding
         command_strings.sort(key=lambda x: len(x[1]), reverse=True)
@@ -88,8 +109,9 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
 
         # Send it to the destination
         data = {"embed": help_embed}
-        if self.include_invite:
-            data.update({"content": self.context.bot.config['command_data']['guild_invite']})
+        content = self.context.bot.config.get("help_command", {}).get("content", None)
+        if content:
+            data.update({"content": content.format(bot=self.context.bot, prefix=self.clean_prefix)})
         await self.send_to_destination(**data)
 
     async def send_to_destination(self, *args, **kwargs):
@@ -113,6 +135,8 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
                     await self.context.send("I couldn't send you a DM :c")
                 except discord.Forbidden:
                     pass  # Oh no now they won't know anything
+            except discord.HTTPException as e:
+                await self.context.send(f"I couldn't send you the help DM - {e}")  # We couldn't send the embed for some other reason
             return
 
         # If the destination is a channel
@@ -120,6 +144,8 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
             await dest.send(*args, **kwargs)
         except discord.Forbidden:
             pass  # Can't talk in the channel? Shame
+        except discord.HTTPException as e:
+            await self.context.send(f"I couldn't send you the help DM - {e}")  # We couldn't send the embed for some other reason
 
     async def send_error_message(self, error):
         """
@@ -141,14 +167,27 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         embed.colour = random.randint(1, 0xffffff)
         return embed
 
-    def get_help_line(self, command:utils.Command):
+    def get_help_line(self, command:utils.Command, with_signature:bool=False):
         """
         Gets a doc line of help for a given command.
         """
 
         if command.short_doc:
-            return f"**{self.clean_prefix}{command.qualified_name}** - {command.short_doc}"
-        return f"**{self.clean_prefix}{command.qualified_name}**"
+            v = f"**{self.clean_prefix}{command.qualified_name}** - {command.short_doc}"
+        else:
+            v = f"**{self.clean_prefix}{command.qualified_name}**"
+        if with_signature:
+            v += f"\n`{self.clean_prefix}{command.qualified_name} {command.signature}`"
+        return v
+
+    def get_destination(self):
+        """
+        Return where we want the bot to send the embed to
+        """
+
+        if self.context.bot.config.get("help_command", {}).get("dm_help", True):
+            return self.context.author
+        return self.context.channel
 
 
 class Help(utils.Cog):
