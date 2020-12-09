@@ -40,12 +40,12 @@ Rapptz's cooldown handling is not great if you want to do anything more complica
 
 ```py
 @voxelbotutils.command()
-@utils.cooldown.cooldown(1, 60, commands.BucketType.user, cls=utils.cooldown.RoleBasedCooldown())
+@voxelbotutils.cooldown.cooldown(1, 60, commands.BucketType.user, cls=voxelbotutils.cooldown.RoleBasedCooldown())
 async def commandname(self, ctx):
     ...
 
 @voxelbotutils.command()
-@utils.cooldown.cooldown(1, 60, commands.BucketType.user, cls=utils.cooldown.CooldownWithChannelExemptions(cooldown_in=["general"]))
+@voxelbotutils.cooldown.cooldown(1, 60, commands.BucketType.user, cls=voxelbotutils.cooldown.CooldownWithChannelExemptions(cooldown_in=["general"]))
 async def commandname(self, ctx):
     ...
 ```
@@ -57,7 +57,7 @@ The current cooldowns I've got built into this right now aren't really wonderful
 Setting up embeds always looked a bit messy to me, so I just added support for the `with` syntax so I could clean it up a lil. Apart from that they work pretty much identically to normal embeds.
 
 ```py
-with utils.Embed() as embed:
+with voxelbotutils.Embed() as embed:
     embed.set_author_to_user(user=self.bot.get_user(user_id))
     embed.description = "Lorem ipsum"
     embed.use_random_colour()
