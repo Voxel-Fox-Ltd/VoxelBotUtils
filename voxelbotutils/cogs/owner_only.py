@@ -223,7 +223,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
             await ctx.send("Reloaded:\n`" + "`\n`".join(cog_list) + "`")
         return
 
-    @commands.command(cls=utils.Command, aliases=['downloadcog', 'dlcog', 'download', 'dl'])
+    @commands.command(cls=utils.Command, aliases=['downloadcog', 'dlcog', 'download', 'dl', 'stealcog'])
     @commands.is_owner()
     async def downloadfile(self, ctx:utils.Context, url:str, file_folder:str=None):
         """Download a cog from github"""
