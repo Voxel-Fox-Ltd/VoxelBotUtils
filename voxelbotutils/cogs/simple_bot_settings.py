@@ -23,7 +23,7 @@ class BotSettings(utils.Cog):
             return await ctx.send("The maximum length a prefix can be is 30 characters.")
 
         # Store setting
-        prefix_column = self.bot.config['guild_settings_prefix_column']
+        prefix_column = self.bot.config.get('guild_settings_prefix_column', 'prefix')
         self.bot.guild_settings[ctx.guild.id][prefix_column] = new_prefix
         async with self.bot.database() as db:
             await db(

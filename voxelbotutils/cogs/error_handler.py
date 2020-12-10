@@ -248,7 +248,7 @@ class ErrorHandler(utils.Cog):
         error_text = f"Error `{error}` encountered.\nGuild `{ctx.guild.id}`, channel `{ctx.channel.id}`, user `{ctx.author.id}`\n```\n{ctx.message.content}\n```"
 
         # DM to owners
-        if self.bot.config['dm_uncaught_errors']:
+        if self.bot.config.get('dm_uncaught_errors', False):
             for owner_id in self.bot.owner_ids:
                 owner = self.bot.get_user(owner_id) or await self.bot.fetch_user(owner_id)
                 file_handle.seek(0)

@@ -478,7 +478,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         lines = [f"# {self.bot.user.name} Commands"]
 
         # Work out prefix
-        prefix = self.bot.config['default_prefix']
+        prefix = self.bot.config.get('default_prefix', ctx.clean_prefix)
         if isinstance(prefix, (list, tuple,)):
             prefix = prefix[0]
 
@@ -503,6 +503,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
 
     @export.command(cls=utils.Command, name="guild")
     @commands.bot_has_permissions(send_messages=True, attach_files=True)
+    @utils.checks.is_config_set('database', 'enabled')
     @commands.is_owner()
     async def export_guild(self, ctx, guild_id:int=None):
         """
@@ -587,9 +588,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         # And donezo
         file = discord.File(io.StringIO(file_content), filename=f"_db_migrate_{guild_id or ctx.guild.id}.py")
         await ctx.send(file=file)
-    
+
     @export.command(cls=utils.Command, name="table")
     @commands.bot_has_permissions(send_messages=True, attach_files=True)
+    @utils.checks.is_config_set('database', 'enabled')
     @commands.is_owner()
     async def export_table(self, ctx, table_name:str):
         """
@@ -619,7 +621,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
 
         # Send it to discord
         await ctx.send(file=discord.File(filename))
-        
+
         # And delete the file
         if os.path.exists(filename):
             os.remove(filename)

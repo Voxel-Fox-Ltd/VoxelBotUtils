@@ -33,7 +33,7 @@ def get_prefix(bot, message:discord.Message):
 
     # Custom prefix or default prefix
     else:
-        prefix = bot.guild_settings[message.guild.id][bot.config['guild_settings_prefix_column']] or bot.config['default_prefix']
+        prefix = bot.guild_settings[message.guild.id][bot.config.get('guild_settings_prefix_column', 'prefix')] or bot.config['default_prefix']
 
     # Fuck iOS devices
     if type(prefix) is not list and prefix in ["'", "‘"]:
@@ -96,7 +96,7 @@ class CustomBot(commands.AutoShardedBot):
 
         # Set up our default guild settings
         self.DEFAULT_GUILD_SETTINGS = {
-            self.config['guild_settings_prefix_column']: self.config['default_prefix'],
+            self.config.get('guild_settings_prefix_column', 'prefix'): self.config['default_prefix'],
         }
         self.DEFAULT_USER_SETTINGS = {
         }
@@ -212,7 +212,7 @@ class CustomBot(commands.AutoShardedBot):
 
         return await self._run_sql_exit_on_error(db, "SELECT * FROM {0} WHERE key=$1".format(table_name), key)
 
-    async def fetch_support_guild(self):
+    async def fetch_support_guild(self) -> typing.Optional[discord.Guild]:
         """
         Fetch the support guild based on the config from the API.
         """
@@ -545,7 +545,7 @@ class CustomBot(commands.AutoShardedBot):
         await super().login(token or self.config['token'], *args, **kwargs)
 
     async def start(self, token:str=None, *args, **kwargs):
-        if self.config['database']['enabled']:
+        if self.config.get('database', {}).get('enabled', False):
             self.logger.info("Running startup method")
             self.startup_method = self.loop.create_task(self.startup())
         else:
@@ -569,12 +569,7 @@ class CustomBot(commands.AutoShardedBot):
         if ctx.command is None:
             return await super().invoke(ctx)
         command_stats_name = ctx.command.qualified_name.replace(' ', ':')
-        command_stats_tags = {
-            "command_name": command_stats_name,
-            # "guild_id": "DMs" if ctx.guild is None else ctx.guild.id,
-            # "user_id": ctx.author.id,
-            # "channel_id": "DMs" if ctx.guild is None else ctx.channel.id,
-        }
+        command_stats_tags = {"command_name": command_stats_name}
         async with self.stats() as stats:
             stats.increment("discord.bot.commands", tags=command_stats_tags)
         return await super().invoke(ctx)

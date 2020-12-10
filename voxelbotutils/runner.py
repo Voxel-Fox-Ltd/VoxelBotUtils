@@ -302,7 +302,7 @@ async def start_database_pool(bot:Bot) -> None:
     """
 
     # Connect the database pool
-    if bot.config['database']['enabled']:
+    if bot.config.get('database', {}).get('enabled', False):
         logger.info("Creating database pool")
         try:
             await DatabaseConnection.create_pool(bot.config['database'])
@@ -325,7 +325,7 @@ async def start_redis_pool(bot:Bot) -> None:
     """
 
     # Connect the redis pool
-    if bot.config['redis']['enabled']:
+    if bot.config.get('redis', {}).get('enabled', False):
         logger.info("Creating redis pool")
         try:
             await RedisConnection.create_pool(bot.config['redis'])
@@ -379,13 +379,13 @@ def run_bot(bot:Bot) -> None:
         loop.run_until_complete(bot.start())
     except KeyboardInterrupt:
         logger.info("Logging out bot")
-        loop.run_until_complete(bot.logout())
+        loop.run_until_complete(bot.close())
 
     # We're now done running the bot, time to clean up and close
-    if bot.config['database']['enabled']:
+    if bot.config.get('database', {}).get('enabled', False):
         logger.info("Closing database pool")
         loop.run_until_complete(DatabaseConnection.pool.close())
-    if bot.config['redis']['enabled']:
+    if bot.config.get('redis', {}).get('enabled', False):
         logger.info("Closing redis pool")
         RedisConnection.pool.close()
 
