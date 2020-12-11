@@ -4,11 +4,10 @@ import typing
 from discord.ext import commands
 from discord.ext.commands.core import wrap_callback
 
-from .checks.meta_command import InvokedMetaCommand
-from .custom_cog import CustomCog
+from .custom_cog import Cog
 
 
-class CustomCommand(commands.Command):
+class Command(commands.Command):
     """
     A custom command object for wrapping our commands with.
     """
@@ -98,7 +97,7 @@ class CustomCommand(commands.Command):
         # Ping the cog error handler
         try:
             if self.cog is not None:
-                local = CustomCog._get_overridden_method(self.cog.cog_command_error)
+                local = Cog._get_overridden_method(self.cog.cog_command_error)
                 if local is not None:
                     wrapped = wrap_callback(local)
                     await wrapped(ctx, error)
@@ -108,7 +107,7 @@ class CustomCommand(commands.Command):
             ctx.bot.dispatch('command_error', ctx, error)
 
 
-class CustomGroup(commands.Group):
+class Group(commands.Group):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, cooldown_after_parsing=kwargs.get('cooldown_after_parsing', True), **kwargs)
@@ -139,7 +138,7 @@ class CustomGroup(commands.Group):
         """
 
         if 'cls' not in kwargs:
-            kwargs['cls'] = CustomCommand
+            kwargs['cls'] = Command
         return super().command(*args, **kwargs)
 
     def group(self, *args, **kwargs):
@@ -148,7 +147,7 @@ class CustomGroup(commands.Group):
         """
 
         if 'cls' not in kwargs:
-            kwargs['cls'] = CustomGroup
+            kwargs['cls'] = Group
         return super().group(*args, **kwargs)
 
     async def dispatch_error(self, ctx, error):
@@ -183,7 +182,7 @@ class CustomGroup(commands.Group):
         # Ping the cog error handler
         try:
             if self.cog is not None:
-                local = CustomCog._get_overridden_method(self.cog.cog_command_error)
+                local = Cog._get_overridden_method(self.cog.cog_command_error)
                 if local is not None:
                     wrapped = wrap_callback(local)
                     await wrapped(ctx, error)

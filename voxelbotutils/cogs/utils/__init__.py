@@ -1,14 +1,15 @@
 # flake8: noqa
 from . import checks, converters, errors
 from .checks import cooldown
-from .context_embed import ContextEmbed as Embed
-from .custom_bot import CustomBot as Bot
-from .custom_cog import CustomCog as Cog
-from .custom_command import CustomCommand as Command
-from .custom_command import CustomGroup as Group
-from .custom_context import CustomContext as Context
+from .context_embed import Embed
+from .custom_bot import Bot
+from .custom_cog import Cog
+from .custom_command import Command
+from .custom_command import Group
+from .custom_context import Context
 from .database import DatabaseConnection
 from .redis import RedisConnection
+from .statsd import StatsdConnection
 from .time_value import TimeValue
 from .settings_menu import SettingsMenu, SettingsMenuOption, SettingsMenuIterable, SettingsMenuIterableBase
 

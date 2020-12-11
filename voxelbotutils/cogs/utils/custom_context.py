@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 
 
-class CustomContext(commands.Context):
+class Context(commands.Context):
 
     DESIRED_PERMISSIONS = discord.Permissions(embed_links=True)
 

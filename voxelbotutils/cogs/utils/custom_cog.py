@@ -3,11 +3,11 @@ import re as regex
 
 from discord.ext.commands import Cog as OriginalCog
 
-from .custom_bot import CustomBot
+from .custom_bot import Bot
 from .database import DatabaseConnection
 
 
-class CustomCog(OriginalCog):
+class Cog(OriginalCog):
     """
     A simple lil wrapper around the original discord Cog class that just adds a logger for me to use.
 
@@ -15,7 +15,7 @@ class CustomCog(OriginalCog):
         logger (logging.Logger): The logger that's assigned to the cog instance.
     """
 
-    def __init__(self, bot:CustomBot, logger_name:str=None):
+    def __init__(self, bot:Bot, logger_name:str=None):
         self.bot = bot
         bot_logger = getattr(bot, "logger", logging.getLogger("bot"))
         if logger_name:

@@ -18,8 +18,8 @@ sys.path.insert(0, os.path.abspath('./../'))
 # -- Project information -----------------------------------------------------
 
 project = 'VoxelBotUtils'
-copyright = '2020, Caleb Bartlett'
-author = 'Caleb Bartlett'
+copyright = '2020 Callum Bartlett'
+author = 'Callum Bartlett'
 
 
 # -- General configuration ---------------------------------------------------
@@ -32,7 +32,18 @@ extensions = [
     # "sphinxcontrib.napoleon",
     "sphinx.ext.napoleon",
     "sphinx_rtd_theme",
+    "sphinx.ext.intersphinx",
 ]
+
+# autodoc_default_options = {
+#     "member_order": "bysource",
+#     "imported-members": True,
+# }
+
+intersphinx_mapping = {
+    # 'py': ('https://docs.python.org/3', None),
+    'discord': ('https://discordpy.readthedocs.io/en/latest', None),
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

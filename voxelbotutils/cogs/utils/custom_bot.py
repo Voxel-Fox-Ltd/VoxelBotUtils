@@ -14,7 +14,7 @@ import discord
 import toml
 from discord.ext import commands
 
-from .custom_context import CustomContext
+from .custom_context import Context
 from .database import DatabaseConnection
 from .redis import RedisConnection
 from .statsd import StatsdConnection
@@ -53,7 +53,7 @@ def get_prefix(bot, message:discord.Message):
     return commands.when_mentioned_or(*prefix)(bot, message)
 
 
-class CustomBot(commands.AutoShardedBot):
+class Bot(commands.AutoShardedBot):
     """
     A child of discord.ext.commands.AutoShardedBot to make things a little easier when
     doing my own stuff.
@@ -448,8 +448,8 @@ class CustomBot(commands.AutoShardedBot):
 
         return (dt.now() - self.startup_time).total_seconds()
 
-    async def get_context(self, message, *, cls=CustomContext) -> 'discord.ext.commands.Context':
-        """Create a new context object using the utils' CustomContext"""
+    async def get_context(self, message, *, cls=Context) -> 'discord.ext.commands.Context':
+        """Create a new context object using the utils' Context"""
 
         return await super().get_context(message, cls=cls)
 

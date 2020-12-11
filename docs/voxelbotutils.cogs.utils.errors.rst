@@ -4,31 +4,31 @@ Errors
 voxelbotutils.errors.ConfigNotSet
 -------------------------------------------
 
-.. autoclass:: voxelbotutils.cogs.utils.errors.ConfigNotSet
+.. autoclass:: voxelbotutils.errors.ConfigNotSet
     :members:
 
-    This is a subclass of `discord.ext.commands.DiabledCommand` raised exclusively by the `voxelbotutils.cogs.utils.checks.is_config_set.is_config_set` check. For normal users, this should just say that the command is disabled.
+    This is a subclass of :ref:`dpy:DisabledCommand` raised exclusively by the :ref:`voxelbotutils.checks.is\_config\_set` check. For normal users, this should just say that the command is disabled.
 
 voxelbotutils.errors.InvokedMetaCommand
 -------------------------------------------
 
-.. autoclass:: voxelbotutils.cogs.utils.errors.InvokedMetaCommand
+.. autoclass:: voxelbotutils.errors.InvokedMetaCommand
     :members:
 
-    This is to be invoked by `voxelbotutils.cogs.utils.checks.meta_command.meta_command`, and should just result in a silent failure.
+    This is to be invoked by :ref:`voxelbotutils.checks.meta\_command`, and should just result in a silent failure.
 
 voxelbotutils.errors.MissingRequiredArgumentString
 ---------------------------------------------------------
 
-.. autoclass:: voxelbotutils.cogs.utils.errors.MissingRequiredArgumentString
+.. autoclass:: voxelbotutils.errors.MissingRequiredArgumentString
     :members:
 
-    This is a version of `discord.ext.commands.MissingRequiredArgument` that just takes a string as a parameter so you can manually raise it inside commands.
+    This is a version of :ref:`discord.ext.commands.MissingRequiredArgument` that just takes a string as a parameter so you can manually raise it inside commands.
 
 voxelbotutils.errors.InvalidTimeDuration
 -------------------------------------------
 
-.. autoclass:: voxelbotutils.cogs.utils.errors.InvalidTimeDuration
+.. autoclass:: voxelbotutils.errors.InvalidTimeDuration
     :members:
 
-    A subclass of `discord.ext.commands.BadArgument` that's thrown when a user passes an invalid input to a `voxelbotutils.cogs.utils.time_value.TimeValue` converter in a command.
+    A subclass of :ref:`discord.ext.commands.BadArgument` that's thrown when a user passes an invalid input to a :ref:`voxelbotutils.TimeValue` converter in a command.

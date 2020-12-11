@@ -4,7 +4,7 @@ Settings Menu
 Howto
 --------------------------------
 
-Running one of these menus can be a _just a tad_ unintuitive, so I'm putting an example on how to use it here.
+Running one of these menus can be a *just a tad* unintuitive, so I'm putting an example on how to use it here.
 
 .. code-block::python
 
@@ -100,6 +100,12 @@ Here's an in-use example from one of my projects:
 API Reference
 --------------------------------
 
-.. automodule:: voxelbotutils.cogs.utils.settings_menu
+.. autoclass:: voxelbotutils.SettingsMenu
    :members:
    :show-inheritance:
+
+.. autoclass:: voxelbotutils.SettingsMenuIterable
+   :members:
+
+.. autoclass:: voxelbotutils.SettingsMenuOption
+   :members:

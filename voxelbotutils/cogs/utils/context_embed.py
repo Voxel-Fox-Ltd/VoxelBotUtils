@@ -3,7 +3,7 @@ import random
 import discord
 
 
-class ContextEmbed(discord.Embed):
+class Embed(discord.Embed):
     """
     A small mod for discord.Embed that allows for some of the more common things
     that I tend to do with them.
@@ -21,24 +21,24 @@ class ContextEmbed(discord.Embed):
         if use_random_colour:
             self.use_random_colour()
 
-    def __enter__(self) -> 'ContextEmbed':
+    def __enter__(self) -> 'Embed':
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-    def use_random_colour(self) -> 'ContextEmbed':
+    def use_random_colour(self) -> 'Embed':
         """
         Sets the colour for the embed to a random one.
 
         Returns:
-            ContextEmbed: The embed instance.
+            Embed: The embed instance.
         """
 
         self.colour = random.randint(0, 0xffffff)
         return self
 
-    def set_footer(self, text:str, *args, **kwargs) -> 'ContextEmbed':
+    def set_footer(self, text:str, *args, **kwargs) -> 'Embed':
         """
         Sets the footer of the embed.
 
@@ -48,13 +48,13 @@ class ContextEmbed(discord.Embed):
             **kwargs: Default args that go do `discord.Embed.set_footer`.
 
         Returns:
-            ContextEmbed: The embed instance.
+            Embed: The embed instance.
         """
 
         super().set_footer(*args, text=text, **kwargs)
         return self
 
-    def set_image(self, url:str) -> 'ContextEmbed':
+    def set_image(self, url:str) -> 'Embed':
         """
         Sets the image of the embed.
 
@@ -62,13 +62,13 @@ class ContextEmbed(discord.Embed):
             url (str): The URL to set the image to.
 
         Returns:
-            ContextEmbed: The embed instance.
+            Embed: The embed instance.
         """
 
         super().set_image(url=url)
         return self
 
-    def set_thumbnail(self, url:str) -> 'ContextEmbed':
+    def set_thumbnail(self, url:str) -> 'Embed':
         """
         Sets the thumbnail of the embed.
 
@@ -76,13 +76,13 @@ class ContextEmbed(discord.Embed):
             url (str): The URL to set the thumbnail to.
 
         Returns:
-            ContextEmbed: The embed instance.
+            Embed: The embed instance.
         """
 
         super().set_thumbnail(url=url)
         return self
 
-    def set_author_to_user(self, user:discord.User) -> 'ContextEmbed':
+    def set_author_to_user(self, user:discord.User) -> 'Embed':
         """
         Sets the author of the embed to a given Discord user.
 
@@ -90,13 +90,13 @@ class ContextEmbed(discord.Embed):
             user (discord.User): The user you want to set the author to.
 
         Returns:
-            ContextEmbed: The embed instance.
+            Embed: The embed instance.
         """
 
         super().set_author(name=str(user), icon_url=user.avatar_url)
         return self
 
-    def add_field(self, name:str, value:str, inline:bool=True) -> 'ContextEmbed':
+    def add_field(self, name:str, value:str, inline:bool=True) -> 'Embed':
         """
         Adds a field to the embed without using kwargs.
 
@@ -106,7 +106,7 @@ class ContextEmbed(discord.Embed):
             inline (bool, optional): Whether or not to set the field as inline.
 
         Returns:
-            ContextEmbed: The embed instance.
+            Embed: The embed instance.
         """
 
         super().add_field(name=name, value=value, inline=inline)
@@ -131,7 +131,7 @@ class ContextEmbed(discord.Embed):
                 return {'name': field.name, 'value': field.value, 'inline': field.inline}
         raise KeyError("Key not found in embed")
 
-    def edit_field_by_index(self, index:int, *, name:str=None, value:str=None, inline:bool=None) -> 'ContextEmbed':
+    def edit_field_by_index(self, index:int, *, name:str=None, value:str=None, inline:bool=None) -> 'Embed':
         """
         Edit a field in the embed using its index.
 
@@ -142,7 +142,7 @@ class ContextEmbed(discord.Embed):
             inline (bool, optional): Whether or not the field should be inline.
 
         Returns:
-            ContextEmbed: The embed instance.
+            Embed: The embed instance.
         """
 
         field = self.fields[index]
@@ -152,7 +152,7 @@ class ContextEmbed(discord.Embed):
         super().set_field_at(index, name=new_name, value=new_value, inline=new_inline)
         return self
 
-    def edit_field_by_key(self, key:str, *, name:str=None, value:str=None, inline:bool=None) -> 'ContextEmbed':
+    def edit_field_by_key(self, key:str, *, name:str=None, value:str=None, inline:bool=None) -> 'Embed':
         """
         Edit a field in the embed using its name as a key.
 
@@ -163,7 +163,7 @@ class ContextEmbed(discord.Embed):
             inline (bool, optional): Whether or not the field should be inline.
 
         Returns:
-            ContextEmbed: The embed instance.
+            Embed: The embed instance.
 
         Raises:
             KeyError: If the given key isn't present in the embed.

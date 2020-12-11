@@ -4,24 +4,24 @@ Cooldowns
 voxelbotutils.cooldown.cooldown
 --------------------------------------------------------
 
-.. autofunction:: voxelbotutils.cogs.utils.checks.cooldown.cooldown
+.. autofunction:: voxelbotutils.cooldown.cooldown
 
 voxelbotutils.cooldown.Cooldown
 --------------------------------------------------------
 
-.. autoclass:: voxelbotutils.cogs.utils.checks.cooldown.Cooldown
+.. autoclass:: voxelbotutils.cooldown.Cooldown
 
 voxelbotutils.cooldown.GroupedCooldownMapping
 --------------------------------------------------------
 
-.. autoclass:: voxelbotutils.cogs.utils.checks.cooldown.GroupedCooldownMapping
+.. autoclass:: voxelbotutils.cooldown.GroupedCooldownMapping
 
 voxelbotutils.cooldown.CooldownWithChannelExemptions
 --------------------------------------------------------------------------
 
-.. autoclass:: voxelbotutils.cogs.utils.checks.cooldown.cooldown_with_exemptions.CooldownWithChannelExemptions
+.. autoclass:: voxelbotutils.cooldown.CooldownWithChannelExemptions
 
 voxelbotutils.cooldown.RoleBasedCooldown
 ---------------------------------------------------------------------
 
-.. autoclass:: voxelbotutils.cogs.utils.checks.cooldown.role_based_cooldown.RoleBasedCooldown
+.. autoclass:: voxelbotutils.cooldown.RoleBasedCooldown
