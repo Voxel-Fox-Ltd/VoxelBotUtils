@@ -1,7 +1,7 @@
 Utils
 ================================
 
-voxelbotutils.Embed
+Embed
 ----------------------------------------------
 
 .. autoclass:: voxelbotutils.Embed
@@ -30,7 +30,7 @@ voxelbotutils.Embed
       # And of course you still send it as it was
       await channel.send(embed=e)
 
-voxelbotutils.Bot
+Bot
 -------------------------------------------
 
 .. autoclass:: voxelbotutils.Bot
@@ -38,7 +38,7 @@ voxelbotutils.Bot
    :no-inherited-members:
    :no-members: close, invoke, login, start
 
-voxelbotutils.Cog
+Cog
 -------------------------------------------
 
 .. autoclass:: voxelbotutils.Cog
@@ -46,7 +46,7 @@ voxelbotutils.Cog
 
    Almost everything is still the same as the defaul discord.py cog. Notable changes: `Cog.logger` is a thing - that's a deafult logger that follows the same loglevel as `Bot.logger`; `Cog.cache_setup` is a new awaitable method that's run at bot startup - use it to set up your cache values should you need them, but otherwise you should just pull from your database tbh.
 
-voxelbotutils.Command
+Command
 -----------------------------------------------
 
 .. autoclass:: voxelbotutils.Command
@@ -61,7 +61,7 @@ voxelbotutils.Context
 .. autoclass:: voxelbotutils.Context
    :members:
 
-voxelbotutils.DatabaseConnection
+DatabaseConnection
 ----------------------------------------
 
 .. autoclass:: voxelbotutils.DatabaseConnection
@@ -83,7 +83,7 @@ voxelbotutils.DatabaseConnection
       await db("DELETE FROM user_settings")
       await db.disconnect()
 
-voxelbotutils.RedisConnection
+RedisConnection
 -------------------------------------
 
 .. autoclass:: voxelbotutils.RedisConnection
@@ -92,13 +92,13 @@ voxelbotutils.RedisConnection
    .. note::
       This is only enabled if redis is enabled in the config.
 
-voxelbotutils.StatsdConnection
+StatsdConnection
 -------------------------------------
 
 .. autoclass:: voxelbotutils.StatsdConnection
    :members:
 
-voxelbotutils.TimeValue
+TimeValue
 -------------------------------------------
 
 .. autoclass:: voxelbotutils.TimeValue

@@ -1,7 +1,7 @@
 Errors
 ================================
 
-voxelbotutils.errors.ConfigNotSet
+errors.ConfigNotSet
 -------------------------------------------
 
 .. autoclass:: voxelbotutils.errors.ConfigNotSet
@@ -9,7 +9,7 @@ voxelbotutils.errors.ConfigNotSet
 
     This is a subclass of :ref:`dpy:DisabledCommand` raised exclusively by the :ref:`voxelbotutils.checks.is\_config\_set` check. For normal users, this should just say that the command is disabled.
 
-voxelbotutils.errors.InvokedMetaCommand
+errors.InvokedMetaCommand
 -------------------------------------------
 
 .. autoclass:: voxelbotutils.errors.InvokedMetaCommand
@@ -17,7 +17,7 @@ voxelbotutils.errors.InvokedMetaCommand
 
     This is to be invoked by :ref:`voxelbotutils.checks.meta\_command`, and should just result in a silent failure.
 
-voxelbotutils.errors.MissingRequiredArgumentString
+errors.MissingRequiredArgumentString
 ---------------------------------------------------------
 
 .. autoclass:: voxelbotutils.errors.MissingRequiredArgumentString
@@ -25,7 +25,7 @@ voxelbotutils.errors.MissingRequiredArgumentString
 
     This is a version of :ref:`discord.ext.commands.MissingRequiredArgument` that just takes a string as a parameter so you can manually raise it inside commands.
 
-voxelbotutils.errors.InvalidTimeDuration
+errors.InvalidTimeDuration
 -------------------------------------------
 
 .. autoclass:: voxelbotutils.errors.InvalidTimeDuration

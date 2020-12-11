@@ -1,7 +1,7 @@
 Settings Menu
 ================================
 
-Howto
+How to
 --------------------------------
 
 Running one of these menus can be a *just a tad* unintuitive, so I'm putting an example on how to use it here.
