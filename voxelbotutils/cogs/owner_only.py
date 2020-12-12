@@ -475,7 +475,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         """
 
         # Set up output
-        lines = [f"# {self.bot.user.name} Commands"]
+        lines = [f"# {self.bot.user.name} Commands\n"]
 
         # Work out prefix
         prefix = self.bot.config.get('default_prefix', ctx.clean_prefix)
@@ -493,13 +493,13 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
                 continue
 
             # Add lines
-            lines.append(f"## {cog_name}")
+            lines.append(f"## {cog_name}\n")
             for command in visible_commands:
                 lines.append(f"* `{prefix}{command.name} {command.signature}".rstrip() + '`')
                 lines.append(f"\t* {command.help}")
 
         # Output file
-        await ctx.send(file=discord.File(io.StringIO('\n\n'.join(lines)), filename="commands.md"))
+        await ctx.send(file=discord.File(io.StringIO('\n'.join(lines)), filename="commands.md"))
 
     @export.command(cls=utils.Command, name="guild")
     @commands.bot_has_permissions(send_messages=True, attach_files=True)
