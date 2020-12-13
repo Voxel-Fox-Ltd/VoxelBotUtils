@@ -58,6 +58,11 @@ class InteractionContext(commands.Context):
         return await self._interaction_webhook.send(*args, wait=True, **kwargs)
 
 
+class V8AsyncWebhookAdapter(discord.AsyncWebhookAdapter):
+
+    BASE = "https://discord.com/api/v8"
+
+
 class SlashCommandHandler(utils.Cog):
 
     async def get_context_from_interaction(self, payload, *, cls=InteractionContext):
@@ -79,7 +84,7 @@ class SlashCommandHandler(utils.Cog):
         ctx.invoked_with = invoker
         ctx.prefix = f"<@{self.bot.user.id}> "
         # ctx._interaction_data = {"token": payload["token"], "interaction_id": payload["id"], "command_id": payload["data"]["id"]}
-        ctx._interaction_webhook = discord.Webhook.partial(payload["id"], payload["token"], adapter=discord.AsyncWebhookAdapter(self.bot.session))
+        ctx._interaction_webhook = discord.Webhook.partial(payload["id"], payload["token"], adapter=V8AsyncWebhookAdapter(self.bot.session))
         ctx.command = self.bot.all_commands.get(invoker)
         # ctx.total_interaction_sends = 0
 
