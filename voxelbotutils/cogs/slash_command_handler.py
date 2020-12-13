@@ -85,7 +85,7 @@ class SlashCommandHandler(utils.Cog):
         ctx.prefix = f"<@{self.bot.user.id}> "
         # ctx._interaction_data = {"token": payload["token"], "interaction_id": payload["id"], "command_id": payload["data"]["id"]}
         ctx._interaction_webhook = discord.Webhook.partial(payload["id"], payload["token"], adapter=V8AsyncWebhookAdapter(self.bot.session))
-        self.logger.info(f"Set response url to {ctx._interaction_webhook._request_url}")
+        self.logger.info(f"Set response url to {ctx._interaction_webhook._adapter._request_url}")
         ctx.command = self.bot.all_commands.get(invoker)
         ctx.total_interaction_sends = 0
 
