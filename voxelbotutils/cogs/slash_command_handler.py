@@ -55,7 +55,7 @@ class InteractionContext(commands.Context):
     #     self.bot.logger.info(await v.json())
 
     async def send(self, *args, **kwargs):
-        return await self._interaction_webhook.send(*args, **kwargs, wait=True)
+        return await self._interaction_webhook.send(*args, wait=True, **kwargs)
 
 
 class SlashCommandHandler(utils.Cog):
@@ -93,7 +93,9 @@ class SlashCommandHandler(utils.Cog):
         headers = {
             "Authorization": f"Bot {self.bot.config['token']}",
         }
+        self.logger.info("Sending type 5 statement")
         await self.bot.session.post(url, json=json, headers=headers)
+        self.logger.info("Sent - returning context")
 
         # Return context
         return ctx
