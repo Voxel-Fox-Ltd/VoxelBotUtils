@@ -85,7 +85,7 @@ class SlashCommandHandler(utils.Cog):
 
         # Send async data response
         url = "https://discord.com/api/v8/interactions/{id}/{token}/callback".format(
-            id=ctx._interaction_data["interaction_id"], token=ctx._interaction_data["token"],
+            id=payload["id"], token=payload["token"],
         )
         json = {
             "type": 5,
