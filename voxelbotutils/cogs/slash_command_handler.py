@@ -79,7 +79,7 @@ class SlashCommandHandler(utils.Cog):
         ctx.invoked_with = invoker
         ctx.prefix = f"<@{self.bot.user.id}> "
         # ctx._interaction_data = {"token": payload["token"], "interaction_id": payload["id"], "command_id": payload["data"]["id"]}
-        ctx._interaction_webhook = discord.Webhook.partial(payload["token"], payload["id"], adapter=discord.AsyncWebhookAdapter(self.bot.session))
+        ctx._interaction_webhook = discord.Webhook.partial(payload["id"], payload["token"], adapter=discord.AsyncWebhookAdapter(self.bot.session))
         ctx.command = self.bot.all_commands.get(invoker)
         # ctx.total_interaction_sends = 0
 
