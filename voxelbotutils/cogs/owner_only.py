@@ -6,6 +6,7 @@ import os
 import json
 import textwrap
 import traceback
+import typing
 
 import discord
 from discord.ext import commands
@@ -205,7 +206,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
 
     @commands.command(cls=utils.Command, aliases=['downloadcog', 'dlcog', 'download', 'dl', 'stealcog'])
     @commands.is_owner()
-    async def downloadfile(self, ctx:utils.Context, url:str, file_folder:str=None):
+    async def downloadfile(self, ctx:utils.Context, url:str, file_folder:typing.Optional[str]):
         """Download a cog from github"""
 
         # Convert github link to a raw link and grab contents
@@ -329,7 +330,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @botuser.command(aliases=['photo', 'image', 'avatar'], cls=utils.Command)
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def picture(self, ctx:utils.Context, *, image_url:str=None):
+    async def picture(self, ctx:utils.Context, *, image_url:typing.Optional[str]):
         """
         Lets you set the profile picture of the bot.
         """
@@ -348,7 +349,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @botuser.command(aliases=['game'], cls=utils.Command)
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def activity(self, ctx:utils.Context, activity_type:str, *, name:str=None):
+    async def activity(self, ctx:utils.Context, activity_type:str, *, name:typing.Optional[str]):
         """
         Changes the activity of the bot.
         """
@@ -439,7 +440,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
 
     @commands.group(cls=utils.Group)
     @commands.is_owner()
-    async def export(self, ctx):
+    async def export(self, ctx:utils.Context):
         """
         The parent group for the export commands.
         """
@@ -449,7 +450,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @export.command(cls=utils.Command, name="commands")
     @commands.bot_has_permissions(send_messages=True, attach_files=True)
     @commands.is_owner()
-    async def export_commands(self, ctx):
+    async def export_commands(self, ctx:utils.Context):
         """
         Exports the commands for the bot as a markdown file.
         """
@@ -485,7 +486,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @commands.bot_has_permissions(send_messages=True, attach_files=True)
     @utils.checks.is_config_set('database', 'enabled')
     @commands.is_owner()
-    async def export_guild(self, ctx, guild_id:int=None):
+    async def export_guild(self, ctx:utils.Context, guild_id:typing.Optional[int]):
         """
         Exports data for a given guild from the database.
 
@@ -573,7 +574,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @commands.bot_has_permissions(send_messages=True, attach_files=True)
     @utils.checks.is_config_set('database', 'enabled')
     @commands.is_owner()
-    async def export_table(self, ctx, table_name:str):
+    async def export_table(self, ctx:utils.Context, table_name:str):
         """
         Exports a given table from the database into a .csv file.
         """
