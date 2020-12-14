@@ -24,46 +24,24 @@ class InteractionMessage(object):
 
 
 class InteractionContext(commands.Context):
-
-    # async def send(self, content, **kwargs):
-    #     # if self.total_interaction_sends == 0:
-    #     #     url = "https://discord.com/api/v8/interactions/{id}/{token}/callback".format(
-    #     #         id=self._interaction_data["interaction_id"], token=self._interaction_data["token"],
-    #     #     )
-    #     # else:
-    #     url = "https://discord.com/api/v8/webhooks/{id}/{token}".format(
-    #         id=self._interaction_data["interaction_id"], token=self._interaction_data["token"],
-    #     )
-    #     headers = {
-    #         "Authorization": f"Bot {self.bot.config['token']}",
-    #     }
-    #     # json = {
-    #     #     "type": 4,
-    #     #     "data": {
-    #     #         "content": content,
-    #     #     },
-    #     # }
-    #     json = {
-    #         "content": content,
-    #     }
-    #     # json.update(kwargs)
-    #     try:
-    #         v = await self.bot.session.post(url, json=json, headers=headers)
-    #     except Exception as e:
-    #         self.bot.logger.info(e)
-    #     self.total_interaction_sends += 1
-    #     self.bot.logger.info(await v.json())
-
     async def send(self, *args, **kwargs):
         return await self._interaction_webhook.send(*args, wait=True, **kwargs)
 
 
 class V8AsyncWebhookAdapter(discord.AsyncWebhookAdapter):
-
     BASE = "https://discord.com/api/v8"
 
 
 class SlashCommandHandler(utils.Cog):
+
+    COMMAND_TYPE_MAPPER = {
+        discord.User: 6,
+        discord.Member: 6,
+        discord.TextChannel: 7,
+        discord.Role: 8,
+        str: 3,
+        int: 4,
+    }
 
     async def get_context_from_interaction(self, payload, *, cls=InteractionContext):
         # Make a context
@@ -83,22 +61,14 @@ class SlashCommandHandler(utils.Cog):
         # Make it work
         ctx.invoked_with = invoker
         ctx.prefix = f"<@{self.bot.user.id}> "
-        # ctx._interaction_data = {"token": payload["token"], "interaction_id": payload["id"], "command_id": payload["data"]["id"]}
         ctx._interaction_webhook = discord.Webhook.partial(ctx.bot.user.id, payload["token"], adapter=V8AsyncWebhookAdapter(self.bot.session))
         self.logger.info(f"Set response url to {ctx._interaction_webhook._adapter._request_url}")
         ctx.command = self.bot.all_commands.get(invoker)
-        ctx.total_interaction_sends = 0
 
         # Send async data response
-        url = "https://discord.com/api/v8/interactions/{id}/{token}/callback".format(
-            id=payload["id"], token=payload["token"],
-        )
-        json = {
-            "type": 5,
-        }
-        headers = {
-            "Authorization": f"Bot {self.bot.config['token']}",
-        }
+        url = "https://discord.com/api/v8/interactions/{id}/{token}/callback".format(id=payload["id"], token=payload["token"])
+        json = {"type": 5}
+        headers = {"Authorization": f"Bot {self.bot.config['token']}"}
         self.logger.info("Sending type 5 statement")
         await self.bot.session.post(url, json=json, headers=headers)
         self.logger.info("Sent - returning context")
@@ -123,9 +93,17 @@ class SlashCommandHandler(utils.Cog):
         Adds all of the bot's slash commands to the global interaction handler.
         """
 
+        commands_we_cant_deal_with = []
         commands = list(self.bot.walk_commands())
         filtered_commands = self.bot.help_command.filter_commands_classmethod(ctx, commands)
-        # make post request here idc
+        for command in filtered_commands:
+            for arg in command.clean_params.values():
+                if arg not in self.COMMAND_TYPE_MAPPER:
+                    commands_we_cant_deal_with.append(command.name)
+                    break
+        if commands_we_cant_deal_with:
+            return await ctx.send(", ".join(commands_we_cant_deal_with))
+        return await ctx.send("I can deal with all of these.")
 
 
 def setup(bot):
