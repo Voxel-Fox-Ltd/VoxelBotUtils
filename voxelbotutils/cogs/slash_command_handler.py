@@ -99,10 +99,10 @@ class SlashCommandHandler(utils.Cog):
         for command in filtered_commands:
             for arg in command.clean_params.values():
                 if arg not in self.COMMAND_TYPE_MAPPER:
-                    commands_we_cant_deal_with.append(command.name)
+                    commands_we_cant_deal_with.append(command.name + " " + str(command.clean_params.values()))
                     break
         if commands_we_cant_deal_with:
-            return await ctx.send(", ".join(commands_we_cant_deal_with))
+            return await ctx.send("\n".join(commands_we_cant_deal_with))
         return await ctx.send("I can deal with all of these.")
 
 
