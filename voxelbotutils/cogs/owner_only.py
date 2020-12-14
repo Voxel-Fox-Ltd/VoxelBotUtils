@@ -6,7 +6,6 @@ import os
 import json
 import textwrap
 import traceback
-import typing
 
 import discord
 from discord.ext import commands
@@ -22,37 +21,18 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
     @commands.command(aliases=['pm', 'dm', 'send'], cls=utils.Command)
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True)
-    async def message(
-            self, ctx:utils.Context,  # channel_type:typing.Optional[utils.converters.EnumConverter("channel", "user", "c", "u", case_insensitive=True)],
-            snowflake:typing.Optional[typing.Union[utils.converters.UserID, utils.converters.ChannelID]],
-            *, content:str=None):
+    async def message(self, ctx:utils.Context, snowflake:int, *, content:str=None):
         """
         DMs a user the given content.
         """
 
         # Work out what we're going to use to convert the snowflake
-        channel_type = None  # This is a later issue
-        if channel_type is None:
-            converters = [
-                self.bot.get_user,
-                self.bot.get_channel,
-                self.bot.fetch_user,
-                self.bot.fetch_channel,
-            ]
-        elif channel_type[0] == "u":
-            converters = [
-                self.bot.get_user,
-                self.bot.fetch_user,
-            ]
-        elif channel_type[0] == "c":
-            converters = [
-                self.bot.get_channel,
-                self.bot.fetch_channel,
-            ]
-
-        # Make sure we gave a snowflake
-        if snowflake is None:
-            snowflake = ctx.channel.id
+        converters = [
+            self.bot.get_user,
+            self.bot.get_channel,
+            self.bot.fetch_user,
+            self.bot.fetch_channel,
+        ]
 
         # Let's run our converters baybee
         sendable = None
