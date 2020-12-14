@@ -95,7 +95,7 @@ class SlashCommandHandler(utils.Cog):
 
         commands_we_cant_deal_with = []
         commands = list(self.bot.walk_commands())
-        filtered_commands = self.bot.help_command.filter_commands_classmethod(ctx, commands)
+        filtered_commands = await self.bot.help_command.filter_commands_classmethod(ctx, commands)
         for command in filtered_commands:
             for arg in command.clean_params.values():
                 if arg not in self.COMMAND_TYPE_MAPPER:
