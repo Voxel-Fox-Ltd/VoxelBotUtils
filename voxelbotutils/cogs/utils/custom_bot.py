@@ -299,21 +299,32 @@ class Bot(commands.AutoShardedBot):
             self.logger.error(f"The webhook set in your config for the event {event_name} is not a valid Discord webhook")
             return None
 
-    async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, delete:typing.List[discord.Message]=None, timeout=60.0, wait:bool=True) -> None:
+    async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User]=None, *, delete:typing.List[discord.Message]=None, timeout=60.0, wait:bool=False) -> None:
         """
         Adds a delete button to the given message.
 
         Args:
             message (discord.Message): The message you want to add a delete button to.
-            valid_users (typing.List[discord.User]): The users who have permission to use the message's delete button.
+            valid_users (typing.List[discord.User], optional): The users who have permission to use the message's delete button.
             delete (typing.List[discord.Message], optional): The messages that should be deleted on clicking the delete button.
             timeout (float, optional): How long the delete button should persist for.
+            wait (bool, optional): Whether or not to block (via async) until the delete button is pressed.
+
+        Raises:
+            discord.HTTPException: The bot was unable to add a delete button to the message.
         """
 
         # See if we want to make this as a task or not
         if wait is False:
-            self.loop.create_task(self.add_delete_button(message=message, valid_users=valid_users, delete=delete, timeout=timeout))
+            self.loop.create_task(self.add_delete_button(message=message, valid_users=valid_users, delete=delete, timeout=timeout, wait=True))
             return
+
+        # See if we were given a list of authors
+        # This is an explicit check for None rather than just a falsy value;
+        # this way users can still provide an empty list for only manage_messages users to be
+        # able to delete the message.
+        if valid_users is None:
+            valid_users = [message.author]
 
         # Let's not add delete buttons to DMs
         if isinstance(message.channel, discord.DMChannel):
