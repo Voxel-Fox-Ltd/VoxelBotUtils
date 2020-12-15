@@ -41,7 +41,7 @@ class SlashCommandHandler(utils.Cog):
         str: utils.interactions.ApplicationCommandOptionType.STRING,
         int: utils.interactions.ApplicationCommandOptionType.INTEGER,
         utils.converters.UserID: utils.interactions.ApplicationCommandOptionType.USER,
-        utils.converers.ChannelID: utils.interactions.ApplicationCommandOptionType.CHANNEL,
+        utils.converters.ChannelID: utils.interactions.ApplicationCommandOptionType.CHANNEL,
         utils.converters.EnumConverter: utils.interactions.ApplicationCommandOptionType.STRING,
         utils.converters.BooleanConverter: utils.interactions.ApplicationCommandOptionType.BOOLEAN,
         utils.converters.ColourConverter: utils.interactions.ApplicationCommandOptionType.STRING,
