@@ -452,7 +452,7 @@ class Bot(commands.AutoShardedBot):
         application_id = await self.get_application_id()
         url = f"https://discord.com/api/applications/{application_id}/commands"
         headers = {"Authorization": f"Bot {self.config['token']}"}
-        await self.session.post(url, json=command.to_dict(), headers=headers)
+        await self.session.post(url, json=command.to_json(), headers=headers)
 
     @property
     def owner_ids(self) -> list:
