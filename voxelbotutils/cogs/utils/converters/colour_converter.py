@@ -919,7 +919,7 @@ COLOURS_BY_NAME = {
 COLOURS_BY_VALUE = {o:i for i, o in COLOURS_BY_NAME.items()}
 
 
-class CustomColourConverter(commands.ColourConverter):
+class ColourConverter(commands.ColourConverter):
 
     COLOURS_BY_NAME = COLOURS_BY_NAME
     COLOURS_BY_VALUE = COLOURS_BY_VALUE

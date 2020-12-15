@@ -40,6 +40,13 @@ class SlashCommandHandler(utils.Cog):
         discord.Role: utils.interactions.ApplicationCommandOptionType.ROLE,
         str: utils.interactions.ApplicationCommandOptionType.STRING,
         int: utils.interactions.ApplicationCommandOptionType.INTEGER,
+        utils.converters.UserID: utils.interactions.ApplicationCommandOptionType.USER,
+        utils.converers.ChannelID: utils.interactions.ApplicationCommandOptionType.CHANNEL,
+        utils.converters.EnumConverter: utils.interactions.ApplicationCommandOptionType.STRING,
+        utils.converters.BooleanConverter: utils.interactions.ApplicationCommandOptionType.BOOLEAN,
+        utils.converters.ColourConverter: utils.interactions.ApplicationCommandOptionType.STRING,
+        utils.converters.FilteredUser: utils.interactions.ApplicationCommandOptionType.USER,
+        utils.converters.FilteredMember: utils.interactions.ApplicationCommandOptionType.USER,
     }
 
     def __init__(self, bot:utils.Bot):
