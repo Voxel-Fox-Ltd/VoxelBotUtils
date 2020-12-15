@@ -19,6 +19,7 @@ from .database import DatabaseConnection
 from .redis import RedisConnection
 from .statsd import StatsdConnection
 from .analytics_log_handler import AnalyticsLogHandler
+from . import interactions
 from .. import all_packages as all_vfl_package_names
 
 
@@ -103,6 +104,9 @@ class Bot(commands.AutoShardedBot):
 
         # Aiohttp session
         self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=self.loop)
+
+        # Application ID (may not be bot ID)
+        self._application_id = None
 
         # Allow database connections like this
         self.database: DatabaseConnection = DatabaseConnection
@@ -299,6 +303,13 @@ class Bot(commands.AutoShardedBot):
             self.logger.error(f"The webhook set in your config for the event {event_name} is not a valid Discord webhook")
             return None
 
+    async def get_application_id(self):
+        if self._application_id:
+            return self._application_id
+        app = await self.application_info()
+        self._application_id = app.id
+        return self._application_id
+
     async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User]=None, *, delete:typing.List[discord.Message]=None, timeout=60.0, wait:bool=False) -> None:
         """
         Adds a delete button to the given message.
@@ -433,6 +444,16 @@ class Bot(commands.AutoShardedBot):
         async with self.session.post("https://voxelfox.co.uk/discord/chatlog", json=data) as r:
             return await r.text()
 
+    async def add_global_slash_command(self, command:interactions.ApplicationCommand) -> None:
+        """
+        Add a global slash command for the bot.
+        """
+
+        application_id = await self.get_application_id()
+        url = f"https://discord.com/api/applications/{application_id}/commands"
+        headers = {"Authorization": f"Bot {self.config['token']}"}
+        await self.session.post(url, json=command.to_dict(), headers=headers)
+
     @property
     def owner_ids(self) -> list:
         return self.config['owners']
@@ -460,7 +481,9 @@ class Bot(commands.AutoShardedBot):
         return (dt.now() - self.startup_time).total_seconds()
 
     async def get_context(self, message, *, cls=Context) -> 'discord.ext.commands.Context':
-        """Create a new context object using the utils' Context"""
+        """
+        Create a new context object using the utils' Context.
+        """
 
         return await super().get_context(message, cls=cls)
 

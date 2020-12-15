@@ -7,98 +7,6 @@ from discord.ext import commands
 from . import utils
 
 
-class ApplicationCommandOptionType(enum.IntEnum):
-    SUBCOMMAND = 1
-    SUBCOMMAND_GROUP = 2
-    STRING = 3
-    INTEGER = 4
-    BOOLEAN = 5
-    USER = 6
-    CHANNEL = 7
-    ROLE = 8
-
-
-class ApplicationCommandOptionChoice(object):
-
-    def __init__(self, name:str, value:typing.Any):
-        self.name: str = name
-        self.value: typing.Any = value
-
-    @classmethod
-    def from_data(cls, data:dict):
-        return cls(data['name'], data['value'])
-
-    def to_json(self) -> dict:
-        return {"name": self.name, "value": self.value}
-
-
-class ApplicationCommandOption(object):
-
-    def __init__(self, name:str, type:ApplicationCommandOptionType, description:str, default:typing.Optional[str]=None, required:bool=True):
-        self.name: str = name
-        self.type: ApplicationCommandOptionType = type
-        self.description: str = description
-        self.default: typing.Any = default
-        self.required: bool = required
-        self.choices: typing.List[ApplicationCommandOptionChoice] = list()
-        self.options: typing.List['ApplicationCommandOption'] = list()
-
-    def add_choice(self, choice:ApplicationCommandOptionChoice) -> None:
-        self.choices.append(choice)
-
-    def add_option(self, option:'ApplicationCommandOption') -> None:
-        self.options.append(option)
-
-    @classmethod
-    def from_data(cls, data:dict):
-        base_option = cls(data['name'], ApplicationCommandOptionType(data['type']), data['description'], data.get('required', False))
-        for choice in data['choices']:
-            base_option.add_choice(ApplicationCommandOptionChoice.from_data(choice))
-        for option in data['options']:
-            base_option.add_option(cls.from_data(option))
-        return base_option
-
-    def to_json(self) -> dict:
-        return {
-            "name": self.name,
-            "type": self.type.value,
-            "description": self.description,
-            "default": self.default,
-            "required": self.required,
-            "choices": [i.to_json() for i in self.choices],
-            "options": [i.to_json() for i in self.options],
-        }
-
-
-class ApplicationCommand(object):
-
-    def __init__(self, name:str, description:str):
-        self.name: str = name
-        self.description: str = description
-        self.options: typing.List[ApplicationCommandOption] = list()
-        self.id: int = None
-        self.application_id: int = None
-
-    def add_option(self, option:ApplicationCommandOption):
-        self.options.append(option)
-
-    @classmethod
-    def from_data(cls, data:dict):
-        command = cls(data['name'], data['description'])
-        command.id = int(data['id'])
-        command.application_id = int(data['application_id'])
-        for option in data['options']:
-            command.add_option(ApplicationCommandOption.from_data(option))
-        return command
-
-    def to_json(self):
-        return {
-            "name": self.name,
-            "description": self.description,
-            "options": [i.to_json() for i in self.options],
-        }
-
-
 class InteractionMessage(object):
 
     def __init__(self, guild, channel, author, content, state, data):
@@ -126,12 +34,12 @@ class InteractionContext(commands.Context):
 class SlashCommandHandler(utils.Cog):
 
     COMMAND_TYPE_MAPPER = {
-        discord.User: ApplicationCommandOptionType.USER,
-        discord.Member: ApplicationCommandOptionType.USER,
-        discord.TextChannel: ApplicationCommandOptionType.CHANNEL,
-        discord.Role: ApplicationCommandOptionType.ROLE,
-        str: ApplicationCommandOptionType.STRING,
-        int: ApplicationCommandOptionType.INTEGER,
+        discord.User: utils.interactions.ApplicationCommandOptionType.USER,
+        discord.Member: utils.interactions.ApplicationCommandOptionType.USER,
+        discord.TextChannel: utils.interactions.ApplicationCommandOptionType.CHANNEL,
+        discord.Role: utils.interactions.ApplicationCommandOptionType.ROLE,
+        str: utils.interactions.ApplicationCommandOptionType.STRING,
+        int: utils.interactions.ApplicationCommandOptionType.INTEGER,
     }
 
     def __init__(self, bot:utils.Bot):
@@ -199,12 +107,6 @@ class SlashCommandHandler(utils.Cog):
     def get_non_optional_type(annotation):
         return annotation.__args__[0]
 
-    async def get_application_id(self):
-        if self.application_id:
-            return self.application_id
-        app = await self.bot.application_info()
-        self.application_id = app.id
-
     async def get_slash_commands(self):
         """
         Get the application's global command objects.
@@ -212,7 +114,7 @@ class SlashCommandHandler(utils.Cog):
 
         if self.commands is not None:
             return self.commands
-        url = "https://discord.com/api/applications/{application_id}/commands".format(application_id=await self.get_application_id())
+        url = "https://discord.com/api/applications/{application_id}/commands".format(application_id=await self.bot.get_application_id())
         headers = {"Authorization": f"Bot {self.bot.config['token']}"}
         site = await self.bot.session.get(url, headers=headers)
         data = await site.json()

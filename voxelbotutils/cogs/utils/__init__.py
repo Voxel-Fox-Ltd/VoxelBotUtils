@@ -1,5 +1,5 @@
 # flake8: noqa
-from . import checks, converters, errors
+from . import checks, converters, errors, interactions
 from .checks import cooldown
 from .context_embed import Embed
 from .custom_bot import Bot
