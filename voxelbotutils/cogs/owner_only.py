@@ -314,10 +314,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
 
         pass
 
-    @botuser.command(aliases=['username'], cls=utils.Command)
+    @botuser.command(name='name', aliases=['username'], cls=utils.Command)
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def name(self, ctx:utils.Context, *, username:str):
+    async def botuser_name(self, ctx:utils.Context, *, username:str):
         """
         Lets you set the username for the bot account.
         """
@@ -327,10 +327,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         await self.bot.user.edit(username=username)
         await ctx.send('Done.')
 
-    @botuser.command(aliases=['photo', 'image', 'avatar'], cls=utils.Command)
+    @botuser.command(name='avatar', aliases=['photo', 'image', 'picture'], cls=utils.Command)
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def picture(self, ctx:utils.Context, *, image_url:typing.Optional[str]):
+    async def botuser_avatar(self, ctx:utils.Context, *, image_url:typing.Optional[str]):
         """
         Lets you set the profile picture of the bot.
         """
@@ -346,10 +346,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         await self.bot.user.edit(avatar=image_content)
         await ctx.send('Done.')
 
-    @botuser.command(aliases=['game'], cls=utils.Command)
+    @botuser.command(name='activity', aliases=['game'], cls=utils.Command)
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def activity(self, ctx:utils.Context, activity_type:str, *, name:typing.Optional[str]):
+    async def botuser_activity(self, ctx:utils.Context, activity_type:str, *, name:typing.Optional[str]):
         """
         Changes the activity of the bot.
         """
@@ -360,10 +360,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
             return await self.bot.set_default_presence()
         await self.bot.change_presence(activity=activity, status=self.bot.guilds[0].me.status)
 
-    @botuser.command(cls=utils.Command)
+    @botuser.command(name='status', cls=utils.Command)
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def status(self, ctx:utils.Context, status:str):
+    async def botuser_status(self, ctx:utils.Context, status:str):
         """
         Changes the online status of the bot.
         """
