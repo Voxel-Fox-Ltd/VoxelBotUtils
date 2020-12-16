@@ -140,7 +140,7 @@ class SlashCommandHandler(utils.Cog):
             if arg_type is None:
                 raise Exception(f"Couldn't add a convert {command.qualified_name} into a slash command")
             safe_arg_type = self.COMMAND_TYPE_MAPPER[arg_type]
-            default = getattr(arg, 'default', None)
+            default = getattr(arg, 'default', inspect._empty)
             if default is not inspect._empty:
                 required = False
             if default == inspect._empty:
