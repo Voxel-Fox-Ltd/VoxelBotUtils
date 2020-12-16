@@ -444,13 +444,23 @@ class Bot(commands.AutoShardedBot):
         async with self.session.post("https://voxelfox.co.uk/discord/chatlog", json=data) as r:
             return await r.text()
 
-    async def add_global_slash_command(self, command:interactions.ApplicationCommand) -> None:
+    async def add_global_application_command(self, command:interactions.ApplicationCommand) -> None:
         """
         Add a global slash command for the bot.
         """
 
         application_id = await self.get_application_id()
-        url = f"https://discord.com/api/applications/{application_id}/commands"
+        url = f"https://discord.com/api/v8/applications/{application_id}/commands"
+        headers = {"Authorization": f"Bot {self.config['token']}"}
+        await self.session.post(url, json=command.to_json(), headers=headers)
+
+    async def add_guild_application_command(self, guild:discord.Guild, command:interactions.ApplicationCommand) -> None:
+        """
+        Add a guild-level slash command for the bot.
+        """
+
+        application_id = await self.get_application_id()
+        url = f"https://discord.com/api/v8//applications/{application_id}/guilds/{guild.id}/commands"
         headers = {"Authorization": f"Bot {self.config['token']}"}
         await self.session.post(url, json=command.to_json(), headers=headers)
 

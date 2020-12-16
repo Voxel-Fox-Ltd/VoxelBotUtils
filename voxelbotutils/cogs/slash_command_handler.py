@@ -186,14 +186,20 @@ class SlashCommandHandler(utils.Cog):
 
     @commands.command(cls=utils.Command)
     @commands.is_owner()
-    async def addslashcommands(self, ctx):
+    async def addslashcommands(self, ctx, guild:bool):
         """
         Adds all of the bot's slash commands to the global interaction handler.
         """
 
         ctx.author = ctx.guild.me
-        x = await self.convert_all_into_application_command(ctx)
-        await ctx.send(file=discord.File(io.StringIO(json.dumps([i.to_json() for i in x], indent=4)), filename="pain.json"))
+        application_command_list = await self.convert_all_into_application_command(ctx)
+        async with ctx.typing():
+            for command in application_command_list:
+                if guild:
+                    await self.bot.add_guild_application_command(command)
+                else:
+                    await self.bot.add_global_application_command(command)
+        await ctx.okay()
 
 
 def setup(bot):
