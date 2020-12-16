@@ -54,7 +54,7 @@ class ApplicationCommandOption(object):
         return base_option
 
     def to_json(self) -> dict:
-        return {
+        payload = {
             "name": self.name,
             "type": self.type.value,
             "description": self.description,
@@ -63,6 +63,11 @@ class ApplicationCommandOption(object):
             "choices": [i.to_json() for i in self.choices],
             "options": [i.to_json() for i in self.options],
         }
+        if self.type in [ApplicationCommandOptionType.SUBCOMMAND, ApplicationCommandOptionType.SUBCOMMAND_GROUP]:
+            payload.pop("required")
+            payload.pop("default")
+            payload.pop("choices")
+        return payload
 
 
 class ApplicationCommand(object):
