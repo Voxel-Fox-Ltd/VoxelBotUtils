@@ -9,30 +9,6 @@ from discord.ext import commands
 from . import utils
 
 
-class InteractionMessage(object):
-
-    def __init__(self, guild, channel, author, content, state, data):
-        self.guild = guild
-        self.channel = channel
-        self.author = author
-        self._state = state
-        self.content = content
-        self.mentions = []
-        self._handle_author(data['member']['user'])
-
-    def _handle_author(self, author):
-        self.author = self._state.store_user(author)
-        if isinstance(self.guild, discord.Guild):
-            found = self.guild.get_member(self.author.id)
-            if found is not None:
-                self.author = found
-
-
-class InteractionContext(commands.Context):
-    async def send(self, *args, **kwargs):
-        return await self._interaction_webhook.send(*args, wait=True, **kwargs)
-
-
 class SlashCommandHandler(utils.Cog):
 
     COMMAND_TYPE_MAPPER = {
@@ -58,10 +34,10 @@ class SlashCommandHandler(utils.Cog):
         self.commands: typing.List[ApplicationCommand] = None
         self.application_id = None
 
-    async def get_context_from_interaction(self, payload, *, cls=InteractionContext):
+    async def get_context_from_interaction(self, payload, *, cls=utils.interactions.InteractionContext):
         # Make a context
         view = commands.view.StringView(f"<@{self.bot.user.id}> {payload['data']['name']} {' '.join([i['value'] for i in payload['data']['options']])}")
-        fake_message = InteractionMessage(
+        fake_message = utils.interactions.InteractionMessage(
             guild=self.bot.get_guild(int(payload['guild_id'])),
             channel=self.bot.get_channel(int(payload['channel_id'])),
             author=self.bot.get_guild(int(payload['guild_id'])).get_member(int(payload['member']['user']['id'])),

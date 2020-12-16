@@ -37,6 +37,14 @@ class ErrorHandler(utils.Cog):
             lambda ctx, error: "This command can't be run in a non-NSFW channel."
         ),
         (
+            utils.errors.IsSlashCommand,
+            lambda ctx, error: "This command cannot be run as a slash command."
+        ),
+        (
+            utils.errors.IsNotSlashComamnd,
+            lambda ctx, error: "This command can only be run as a slash command."
+        ),
+        (
             commands.DisabledCommand,
             lambda ctx, error: "This command has been disabled."
         ),

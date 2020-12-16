@@ -1,6 +1,9 @@
 import enum
 import typing
 
+import discord
+from discord.ext import commands
+
 
 class ApplicationCommandOptionType(enum.IntEnum):
     SUBCOMMAND = 1
@@ -97,3 +100,36 @@ class ApplicationCommand(object):
             "description": self.description,
             "options": [i.to_json() for i in self.options],
         }
+
+
+class InteractionMessage(discord.Object):
+
+    def __init__(self, guild, channel, author, content, state, data):
+        super().__init__(data['id'])
+        self.guild = guild
+        self.channel = channel
+        self.author = author
+        self._state = state
+        self.content = content
+        self.mentions = []
+        self._handle_author(data['member']['user'])
+
+    def _handle_author(self, author):
+        self.author = self._state.store_user(author)
+        if isinstance(self.guild, discord.Guild):
+            found = self.guild.get_member(self.author.id)
+            if found is not None:
+                self.author = found
+
+
+class InteractionContext(commands.Context):
+
+    async def send(self, *args, **kwargs):
+        return await self._interaction_webhook.send(*args, wait=True, **kwargs)
+
+    @property
+    def typing(self):
+        return self.channel.typing
+
+    async def trigger_typing(self):
+        return await self.channel.trigger_typing()
