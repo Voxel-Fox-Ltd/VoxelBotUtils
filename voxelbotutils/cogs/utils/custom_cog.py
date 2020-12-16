@@ -9,7 +9,7 @@ from .database import DatabaseConnection
 
 class Cog(OriginalCog):
     """
-    A simple lil wrapper around the original discord Cog class that just adds a logger for me to use.
+    A slightly modified cog class to allow for cache_setup and for the logger instance.
 
     Attributes:
         logger (logging.Logger): The logger that's assigned to the cog instance.

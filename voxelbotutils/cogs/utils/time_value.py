@@ -8,6 +8,12 @@ from discord.ext import commands
 class InvalidTimeDuration(commands.BadArgument):
     """
     A conversion error for time durations.
+
+    Args:
+        value (str): Description
+
+    Attributes:
+        value (str): The value that was given that failed to parse.
     """
 
     def __init__(self, value:str):
@@ -20,6 +26,18 @@ class InvalidTimeDuration(commands.BadArgument):
 class TimeValue(object):
     """
     An object that nicely converts an integer value into an easily readable string.
+
+    Attributes:
+        duration (int): The entire duration, in seconds, of the timevalue object.
+        years (int): The number of years that the timevalue object represents.
+        days (int): The number of days that the timevalue object represents.
+        hours (int): The number of hours that the timevalue object represents.
+        minutes (int): The number of minutes that the timevalue object represents.
+        seconds (int): The number of seconds that the timevalue object represents.
+        clean_spaced (str): A string form of the timevalue object in form "10 hours 3 minutes".
+        clean_full (str): A string form of the timevalue object in form "10h 3m".
+        clean (str): A string form of the timevalue object in form "10h3m".
+        delta (datetime.timedelta): A timedelta for the entire timevalue object.
     """
 
     TIME_VALUE_REGEX = re.compile(r"^(?:(?P<years>\d+)y)? *(?:(?P<weeks>\d+)w)? *(?:(?P<days>\d+)d)? *(?:(?P<hours>\d+)h)? *(?:(?P<minutes>\d+)m)? *(?:(?P<seconds>\d+)s)?$")
@@ -89,6 +107,16 @@ class TimeValue(object):
     async def convert(cls, ctx:commands.Context, value:str) -> 'TimeValue':
         """
         Takes a value (1h/30m/10s/2d etc) and returns a TimeValue instance with the duration. Provided for use of the Discord.py module.
+
+        Args:
+            ctx (commands.Context): The current context object that we want to convert under.
+            value (str): The value string to be converted.
+
+        Returns:
+            TimeValue: A time value instance.
+
+        No Longer Raises:
+            InvalidTimeDuration: If the time could not be successfully converted.
         """
 
         return cls.parse(value)
@@ -96,13 +124,13 @@ class TimeValue(object):
     @classmethod
     def parse(cls, value:str) -> 'TimeValue':
         """
-        Takes a value (1h/30m/10s/2d etc) and returns a TimeValue instance with the duration
+        Takes a value (1h/30m/10s/2d etc) and returns a TimeValue instance with the duration.
 
         Args:
-            value (str): The value string to be converted
+            value (str): The value string to be converted.
 
         Returns:
-            TimeValue: A time value instance
+            TimeValue: A time value instance.
 
         Raises:
             InvalidTimeDuration: If the time could not be successfully converted.
