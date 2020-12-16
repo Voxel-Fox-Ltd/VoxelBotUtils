@@ -188,7 +188,7 @@ class SlashCommandHandler(utils.Cog):
         Adds all of the bot's slash commands to the global interaction handler.
         """
 
-        x = await convert_all_into_application_command(ctx)
+        x = await self.convert_all_into_application_command(ctx)
         await ctx.send(file=discord.File(io.StringIO(json.dumps([i.to_json() for i in x], indent=4)), filename="pain.json"))
 
 
