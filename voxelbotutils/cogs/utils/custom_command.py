@@ -16,6 +16,7 @@ class Command(commands.Command):
         super().__init__(*args, cooldown_after_parsing=kwargs.pop('cooldown_after_parsing', True), **kwargs)
         self.ignore_checks_in_help: bool = kwargs.get('ignore_checks_in_help', False)
         self.locally_handled_errors: list = kwargs.get('locally_handled_errors', None)
+        self.add_slash_command: bool = kwargs.get('add_slash_command', True)
 
         # Fix cooldown to be our custom type
         cooldown = self._buckets._cooldown
