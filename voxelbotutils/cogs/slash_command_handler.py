@@ -103,8 +103,11 @@ class SlashCommandHandler(utils.Cog):
         Stolen from Rapptz - https://github.com/Rapptz/discord.py/blob/60f804c63298d5f46a5ae4352b049d91b16d1b8c/discord/ext/commands/core.py#L975-L984
         """
 
-        if annotation.default is None:
-            return True
+        try:
+            if annotation.default is None:
+                return True
+        except AttributeError:
+            pass
         try:
             origin = annotation.__origin__
         except AttributeError:
