@@ -125,6 +125,7 @@ class InteractionMessage(discord.Object):
 class InteractionContext(commands.Context):
 
     async def send(self, *args, **kwargs):
+        kwargs.pop("embeddify", False)
         return await self._interaction_webhook.send(*args, wait=True, **kwargs)
 
     @property
