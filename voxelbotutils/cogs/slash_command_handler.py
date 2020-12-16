@@ -164,7 +164,7 @@ class SlashCommandHandler(utils.Cog):
             safe_arg_type = self.COMMAND_TYPE_MAPPER[arg_type]
             application_command.add_option(utils.interactions.ApplicationCommandOption(
                 name=arg.name,
-                description=None,
+                description=f"The {arg.name} that you want to use for the {command.qualified_name} command.",
                 type=safe_arg_type,
                 required=required
             ))
