@@ -147,7 +147,7 @@ class SlashCommandHandler(utils.Cog):
         # Make command
         application_command = utils.interactions.ApplicationCommand(
             name=command.name,
-            description=command.brief,
+            description=command.short_doc or f"Allows you to run the {command.qualified_name} command",
         )
 
         # Go through its args
