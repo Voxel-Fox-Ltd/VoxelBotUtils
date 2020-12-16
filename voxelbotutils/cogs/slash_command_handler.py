@@ -64,14 +64,14 @@ class SlashCommandHandler(utils.Cog):
         fake_message = InteractionMessage(
             guild=self.bot.get_guild(int(payload['guild_id'])),
             channel=self.bot.get_channel(int(payload['channel_id'])),
-            author=self.bot.get_guild(int(payload['guild_id'])).get_member(int(payload['member']['author_id'])),
+            author=self.bot.get_guild(int(payload['guild_id'])).get_member(int(payload['member']['user']['author_id'])),
             state=self.bot._get_state(),
             data=payload,
             content=view.buffer,
         )
         ctx = cls(prefix=f"<@{self.bot.user.id}> ", view=view, bot=self.bot, message=fake_message)
         ctx.is_slash_command = True
-        ctx.original_author_id = int(payload['member']['id'])
+        ctx.original_author_id = int(payload['member']['user']['id'])
         view.skip_string(f"<@{self.bot.user.id}> ")
         invoker = view.get_word()
 
