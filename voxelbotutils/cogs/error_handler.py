@@ -41,7 +41,7 @@ class ErrorHandler(utils.Cog):
             lambda ctx, error: "This command cannot be run as a slash command."
         ),
         (
-            utils.errors.IsNotSlashComamnd,
+            utils.errors.IsNotSlashCommand,
             lambda ctx, error: "This command can only be run as a slash command."
         ),
         (
