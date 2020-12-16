@@ -186,7 +186,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
         else:
             return await ctx.send(text, embeddify=False)
 
-    @commands.command(aliases=['rld'], cls=utils.Command)
+    @commands.command(aliases=['rld', 'rl'], cls=utils.Command)
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
     async def reload(self, ctx:utils.Context, *cog_name:str):
