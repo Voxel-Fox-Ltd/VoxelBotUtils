@@ -150,7 +150,7 @@ class SlashCommandHandler(utils.Cog):
             required = True
             if arg.annotation in self.COMMAND_TYPE_MAPPER:
                 arg_type = arg.annotation
-            if self.is_typing_optional(arg.annotation) and self.get_non_optional_type(arg.annotation) in self.COMMAND_TYPE_MAPPER:
+            elif self.is_typing_optional(arg.annotation) and self.get_non_optional_type(arg.annotation) in self.COMMAND_TYPE_MAPPER:
                 arg_type = self.get_non_optional_type(arg.annotation)
                 required = False
             if arg_type is None:
