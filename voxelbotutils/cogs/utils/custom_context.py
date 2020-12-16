@@ -11,6 +11,7 @@ class Context(commands.Context):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.original_author_id = self.author.id
+        self.is_slash_command = False
 
     async def okay(self) -> None:
         """

@@ -1,5 +1,7 @@
 import typing
 import enum
+import io
+import json
 
 import discord
 from discord.ext import commands
@@ -37,6 +39,8 @@ class SlashCommandHandler(utils.Cog):
         discord.User: utils.interactions.ApplicationCommandOptionType.USER,
         discord.Member: utils.interactions.ApplicationCommandOptionType.USER,
         discord.TextChannel: utils.interactions.ApplicationCommandOptionType.CHANNEL,
+        discord.VoiceChannel: utils.interactions.ApplicationCommandOptionType.CHANNEL,
+        discord.CategoryChannel: utils.interactions.ApplicationCommandOptionType.CHANNEL,
         discord.Role: utils.interactions.ApplicationCommandOptionType.ROLE,
         str: utils.interactions.ApplicationCommandOptionType.STRING,
         int: utils.interactions.ApplicationCommandOptionType.INTEGER,
@@ -66,6 +70,7 @@ class SlashCommandHandler(utils.Cog):
             content=view.buffer,
         )
         ctx = cls(prefix=f"<@{self.bot.user.id}> ", view=view, bot=self.bot, message=fake_message)
+        ctx.is_slash_command = True
         view.skip_string(f"<@{self.bot.user.id}> ")
         invoker = view.get_word()
 
@@ -128,6 +133,54 @@ class SlashCommandHandler(utils.Cog):
         self.commands = [ApplicationCommand.from_data(i) for i in data]
         return self.commands
 
+    async def convert_into_application_command(self, ctx, command:typing.Union[utils.Command, utils.Group]) -> utils.interactions.ApplicationCommand:
+        """
+        Convert a given Discord command into an application command.
+        """
+
+        # Make command
+        application_command = utils.interactions.ApplicationCommand(
+            name=command.name,
+            description=command.brief,
+        )
+
+        # Go through its args
+        for arg in command.clean_params.values():
+            arg_type = None
+            required = True
+            if arg.annotation in self.COMMAND_TYPE_MAPPER:
+                arg_type = arg.annotation
+            if self.is_typing_optional(arg.annotation) and self.get_non_optional_type(arg.annotation) in self.COMMAND_TYPE_MAPPER:
+                arg_type = self.get_non_optional_type(arg.annotation)
+                required = False
+            if arg_type is None:
+                raise Exception("Couldn't add a convert into a slash command wew")
+            safe_arg_type = self.COMMAND_TYPE_MAPPER[arg_type]
+            application_command.add_option(utils.interactions.ApplicationCommandOption(
+                name=arg.name,
+                description=None,
+                type=safe_arg_type,
+                required=required
+            ))
+
+        # Go through its subcommands
+        if isinstance(command, utils.Group):
+            subcommands = list(command.walk_commands())
+            valid_subcommands = await self.bot.help_command.filter_commands_classmethod(ctx, valid_subcommands)
+            for subcommand in valid_subcommands:
+                application_command.add_option(self.convert_into_application_command(subcommand))
+
+        # Return command
+        return application_command
+
+    async def convert_all_into_application_command(self, ctx):
+        slash_commands = []
+        commands = list(ctx.bot.walk_commands())
+        filtered_commands = await self.bot.help_command.filter_commands_classmethod(ctx, commands)
+        for command in filtered_commands:
+            slash_commands.append(await self.convert_into_application_command(command))
+        return slash_commands
+
     @commands.command(cls=utils.Command)
     @commands.is_owner()
     async def addslashcommands(self, ctx):
@@ -135,20 +188,8 @@ class SlashCommandHandler(utils.Cog):
         Adds all of the bot's slash commands to the global interaction handler.
         """
 
-        commands_we_cant_deal_with = []
-        commands = list(self.bot.walk_commands())
-        filtered_commands = await self.bot.help_command.filter_commands_classmethod(ctx, commands)
-        for command in filtered_commands:
-            for arg in command.clean_params.values():
-                if arg.annotation in self.COMMAND_TYPE_MAPPER:
-                    continue
-                if self.is_typing_optional(arg.annotation) and self.get_non_optional_type(arg.annotation) in self.COMMAND_TYPE_MAPPER:
-                    continue
-                commands_we_cant_deal_with.append(command.name + " " + str(command.clean_params.values()))
-                break
-        if commands_we_cant_deal_with:
-            return await ctx.send("\n".join(commands_we_cant_deal_with))
-        return await ctx.send("I can deal with all of these.")
+        x = await convert_all_into_application_command(ctx)
+        await ctx.send(file=discord.File(io.StringIO(json.dumps([i.to_json() for i in x], indent=4)), filename="pain.json"))
 
 
 def setup(bot):
