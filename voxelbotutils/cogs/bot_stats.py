@@ -9,7 +9,7 @@ from .. import __version__
 
 class BotStats(utils.Cog):
 
-    @commands.command(aliases=['git', 'code'], cls=utils.Command)
+    @commands.command(aliases=['git', 'code'], cls=utils.Command, add_slash_command=False)
     @utils.checks.is_config_set('command_data', 'github_link')
     @commands.bot_has_permissions(send_messages=True)
     async def github(self, ctx:utils.Context):
@@ -48,7 +48,7 @@ class BotStats(utils.Cog):
             return await ctx.send("Despite being enabled, the vote command has no vote links to provide :/")
         return await ctx.send("\n".join(output_strings), embeddify=False)
 
-    @commands.command(aliases=['status', 'botinfo'])
+    @commands.command(aliases=['status', 'botinfo'], add_slash_command=False)
     @commands.bot_has_permissions(send_messages=True, embed_links=True)
     @utils.checks.is_config_set('command_data', 'stats_command_enabled')
     async def stats(self, ctx:utils.Context):

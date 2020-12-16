@@ -6,7 +6,7 @@ from . import utils
 
 class MiscCommands(utils.Cog):
 
-    @commands.command(aliases=['support', 'guild'], cls=utils.Command)
+    @commands.command(aliases=['support', 'guild'], cls=utils.Command, add_slash_command=False)
     @utils.checks.is_config_set('command_data', 'guild_invite')
     @commands.bot_has_permissions(send_messages=True)
     async def server(self, ctx:utils.Context):
@@ -16,7 +16,7 @@ class MiscCommands(utils.Cog):
 
         await ctx.send(f"<{self.bot.config['command_data']['guild_invite']}>", embeddify=False)
 
-    @commands.command(aliases=['patreon'], cls=utils.Command)
+    @commands.command(aliases=['patreon'], cls=utils.Command, add_slash_command=False)
     @utils.checks.is_config_set('command_data', 'donate_link')
     @commands.bot_has_permissions(send_messages=True)
     async def donate(self, ctx:utils.Context):
@@ -26,7 +26,7 @@ class MiscCommands(utils.Cog):
 
         await ctx.send(f"<{self.bot.config['command_data']['donate_link']}>", embeddify=False)
 
-    @commands.command(cls=utils.Command, hidden=True)
+    @commands.command(cls=utils.Command, hidden=True, add_slash_command=False)
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(send_messages=True)
     @utils.checks.is_config_set('command_data', 'echo_command_enabled')

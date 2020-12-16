@@ -14,7 +14,7 @@ from discord.ext import commands
 from . import utils
 
 
-class OwnerOnly(utils.Cog, command_attrs={'hidden': True}):
+class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': False}):
     """
     Handles commands that only the owner should be able to run.
     """

@@ -2,6 +2,7 @@ import typing
 import enum
 import io
 import json
+import inspect
 
 import discord
 from discord.ext import commands
@@ -139,11 +140,17 @@ class SlashCommandHandler(utils.Cog):
             if arg_type is None:
                 raise Exception(f"Couldn't add a convert {command.qualified_name} into a slash command")
             safe_arg_type = self.COMMAND_TYPE_MAPPER[arg_type]
+            default = getattr(arg.default, None)
+            if default is not inspect._empty:
+                required = False
+            if default == inspect._empty:
+                default = None
             application_command.add_option(utils.interactions.ApplicationCommandOption(
                 name=arg.name,
                 description=f"The {arg.name} that you want to use for the {command.qualified_name} command.",
                 type=safe_arg_type,
-                required=required
+                required=required,
+                default=default,
             ))
 
         # Go through its subcommands
