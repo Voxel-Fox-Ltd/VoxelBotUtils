@@ -28,6 +28,7 @@ class SlashCommandHandler(utils.Cog):
         utils.converters.ColourConverter: utils.interactions.ApplicationCommandOptionType.STRING,
         utils.converters.FilteredUser: utils.interactions.ApplicationCommandOptionType.USER,
         utils.converters.FilteredMember: utils.interactions.ApplicationCommandOptionType.USER,
+        utils.TimeValue: utils.interactions.ApplicationCommandOptionType.STRING,
     }
 
     def __init__(self, bot:utils.Bot):
