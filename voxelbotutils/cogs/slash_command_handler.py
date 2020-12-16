@@ -64,7 +64,7 @@ class SlashCommandHandler(utils.Cog):
         fake_message = InteractionMessage(
             guild=self.bot.get_guild(int(payload['guild_id'])),
             channel=self.bot.get_channel(int(payload['channel_id'])),
-            author=self.bot.get_guild(int(payload['guild_id'])).get_member(int(payload['member']['user']['author_id'])),
+            author=self.bot.get_guild(int(payload['guild_id'])).get_member(int(payload['member']['user']['id'])),
             state=self.bot._get_state(),
             data=payload,
             content=view.buffer,
