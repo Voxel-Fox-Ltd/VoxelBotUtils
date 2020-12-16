@@ -472,7 +472,7 @@ class Bot(commands.AutoShardedBot):
         application_id = await self.get_application_id()
         url = f"https://discord.com/api/v8/applications/{application_id}/commands"
         headers = {"Authorization": f"Bot {self.config['token']}"}
-        site = await self.session.get(url, json=command.to_json(), headers=headers)
+        site = await self.session.get(url, headers=headers)
         data = await site.json()
         return [interactions.ApplicationCommand.from_data(i) for i in data]
 
@@ -484,7 +484,7 @@ class Bot(commands.AutoShardedBot):
         application_id = await self.get_application_id()
         url = f"https://discord.com/api/v8//applications/{application_id}/guilds/{guild.id}/commands"
         headers = {"Authorization": f"Bot {self.config['token']}"}
-        site = await self.session.get(url, json=command.to_json(), headers=headers)
+        site = await self.session.get(url, headers=headers)
         data = await site.json()
         return [interactions.ApplicationCommand.from_data(i) for i in data]
 
@@ -496,7 +496,7 @@ class Bot(commands.AutoShardedBot):
         application_id = await self.get_application_id()
         url = f"https://discord.com/api/v8/applications/{application_id}/commands/{command.id}"
         headers = {"Authorization": f"Bot {self.config['token']}"}
-        site = await self.session.delete(url, json=command.to_json(), headers=headers)
+        site = await self.session.delete(url, headers=headers)
 
     async def delete_guild_application_command(self, guild:discord.Guild, command:interactions.ApplicationCommand) -> None:
         """
@@ -506,7 +506,7 @@ class Bot(commands.AutoShardedBot):
         application_id = await self.get_application_id()
         url = f"https://discord.com/api/v8//applications/{application_id}/guilds/{guild.id}/commands/{command.id}"
         headers = {"Authorization": f"Bot {self.config['token']}"}
-        site = await self.session.delete(url, json=command.to_json(), headers=headers)
+        site = await self.session.delete(url, headers=headers)
 
     @property
     def owner_ids(self) -> list:
