@@ -501,7 +501,7 @@ class Bot(commands.AutoShardedBot):
         """
 
         application_id = await self.get_application_id()
-        r = RouteV8('GET', '/applications/{application_id}/guilds/{guild_id}/commands/{command_id}', application_id=application_id, guild_id=guild.id, command_id=command.id)
+        r = RouteV8('DELETE', '/applications/{application_id}/guilds/{guild_id}/commands/{command_id}', application_id=application_id, guild_id=guild.id, command_id=command.id)
         return await self.http.request(r)
 
     @property

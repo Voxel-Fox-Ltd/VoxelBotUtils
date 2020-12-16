@@ -83,6 +83,7 @@ class SlashCommandHandler(utils.Cog):
         ctx.command = self.bot.all_commands.get(invoker)
 
         # Send async data response
+        self.logger.debug("Posting type 5 response for interaction command %s." % (str(payload)))
         url = "https://discord.com/api/v8/interactions/{id}/{token}/callback".format(id=payload["id"], token=payload["token"])
         await self.bot.session.post(url, json={"type": 5}, headers={"Authorization": f"Bot {self.bot.config['token']}"})
 
@@ -93,8 +94,10 @@ class SlashCommandHandler(utils.Cog):
     async def on_socket_response(self, payload):
         if payload['t'] != 'INTERACTION_CREATE':
             return
-        self.logger.info("Received interaction payload %s" % (str(payload)))
+        self.logger.debug("Received interaction payload %s" % (str(payload)))
         ctx = await self.get_context_from_interaction(payload['d'])
+        if ctx.command:
+            self.logger.debug("Invoking interaction context for command %s" % (ctx.command.name))
         await self.bot.invoke(ctx)
 
     @staticmethod
