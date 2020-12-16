@@ -157,7 +157,7 @@ class SlashCommandHandler(utils.Cog):
                 arg_type = self.get_non_optional_type(arg.annotation)
                 required = False
             if arg_type is None:
-                raise Exception("Couldn't add a convert into a slash command wew")
+                raise Exception(f"Couldn't add a convert {command.qualified_name} into a slash command")
             safe_arg_type = self.COMMAND_TYPE_MAPPER[arg_type]
             application_command.add_option(utils.interactions.ApplicationCommandOption(
                 name=arg.name,
