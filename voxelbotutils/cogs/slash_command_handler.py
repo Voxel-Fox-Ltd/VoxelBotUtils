@@ -77,7 +77,7 @@ class SlashCommandHandler(utils.Cog):
         # Make it work
         ctx.invoked_with = invoker
         ctx._interaction_webhook = discord.Webhook.partial(
-            await self.get_application_id(), payload["token"],
+            await self.bot.get_application_id(), payload["token"],
             adapter=discord.AsyncWebhookAdapter(self.bot.session)
         )
         ctx.command = self.bot.all_commands.get(invoker)
