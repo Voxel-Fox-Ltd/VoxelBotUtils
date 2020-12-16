@@ -36,7 +36,7 @@ class SlashCommandHandler(utils.Cog):
 
     async def get_context_from_interaction(self, payload, *, cls=utils.interactions.InteractionContext):
         # Make a context
-        view = commands.view.StringView(f"<@{self.bot.user.id}> {payload['data']['name']} {' '.join([i['value'] for i in payload['data']['options']])}")
+        view = commands.view.StringView(f"<@{self.bot.user.id}> {payload['data']['name']} {' '.join([i['value'] for i in payload['data'].get('options', list())])}")
         fake_message = utils.interactions.InteractionMessage(
             guild=self.bot.get_guild(int(payload['guild_id'])),
             channel=self.bot.get_channel(int(payload['channel_id'])),
