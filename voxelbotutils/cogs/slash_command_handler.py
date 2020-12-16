@@ -166,7 +166,7 @@ class SlashCommandHandler(utils.Cog):
         # Go through its subcommands
         if isinstance(command, utils.Group):
             subcommands = list(command.walk_commands())
-            valid_subcommands = await self.bot.help_command.filter_commands_classmethod(ctx, valid_subcommands)
+            valid_subcommands = await self.bot.help_command.filter_commands_classmethod(ctx, subcommands)
             for subcommand in valid_subcommands:
                 application_command.add_option(self.convert_into_application_command(ctx, subcommand))
 
