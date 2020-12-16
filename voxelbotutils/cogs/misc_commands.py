@@ -26,7 +26,7 @@ class MiscCommands(utils.Cog):
 
         await ctx.send(f"<{self.bot.config['command_data']['donate_link']}>", embeddify=False)
 
-    @commands.command(cls=utils.Command)
+    @commands.command(cls=utils.Command, hidden=True)
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(send_messages=True)
     @utils.checks.is_config_set('command_data', 'echo_command_enabled')

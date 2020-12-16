@@ -189,9 +189,9 @@ class SlashCommandHandler(utils.Cog):
 
     @commands.command(cls=utils.Command)
     @commands.is_owner()
-    async def addslashcommands(self, ctx, guild:bool):
+    async def addinteractioncommands(self, ctx, guild:bool):
         """
-        Adds all of the bot's slash commands to the global interaction handler.
+        Adds all of the bot's interaction commands to the global interaction handler.
         """
 
         # Get the commands we want to add
