@@ -464,6 +464,50 @@ class Bot(commands.AutoShardedBot):
         headers = {"Authorization": f"Bot {self.config['token']}"}
         await self.session.post(url, json=command.to_json(), headers=headers)
 
+    async def get_global_application_command(self) -> typing.List[interactions.ApplicationCommand]:
+        """
+        Add a global slash command for the bot.
+        """
+
+        application_id = await self.get_application_id()
+        url = f"https://discord.com/api/v8/applications/{application_id}/commands"
+        headers = {"Authorization": f"Bot {self.config['token']}"}
+        site = await self.session.get(url, json=command.to_json(), headers=headers)
+        data = await site.json()
+        return [interactions.ApplicationCommand.from_data(i) for i in data]
+
+    async def get_guild_application_command(self, guild:discord.Guild) -> typing.List[interactions.ApplicationCommand]:
+        """
+        Add a guild-level slash command for the bot.
+        """
+
+        application_id = await self.get_application_id()
+        url = f"https://discord.com/api/v8//applications/{application_id}/guilds/{guild.id}/commands"
+        headers = {"Authorization": f"Bot {self.config['token']}"}
+        site = await self.session.get(url, json=command.to_json(), headers=headers)
+        data = await site.json()
+        return [interactions.ApplicationCommand.from_data(i) for i in data]
+
+    async def delete_global_application_command(self, command:interactions.ApplicationCommand) -> None:
+        """
+        Remove a global slash command for the bot.
+        """
+
+        application_id = await self.get_application_id()
+        url = f"https://discord.com/api/v8/applications/{application_id}/commands/{command.id}"
+        headers = {"Authorization": f"Bot {self.config['token']}"}
+        site = await self.session.delete(url, json=command.to_json(), headers=headers)
+
+    async def delete_guild_application_command(self, guild:discord.Guild, command:interactions.ApplicationCommand) -> None:
+        """
+        Remove a guild-level slash command for the bot.
+        """
+
+        application_id = await self.get_application_id()
+        url = f"https://discord.com/api/v8//applications/{application_id}/guilds/{guild.id}/commands/{command.id}"
+        headers = {"Authorization": f"Bot {self.config['token']}"}
+        site = await self.session.delete(url, json=command.to_json(), headers=headers)
+
     @property
     def owner_ids(self) -> list:
         return self.config['owners']

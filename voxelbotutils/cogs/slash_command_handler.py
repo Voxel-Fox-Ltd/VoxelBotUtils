@@ -191,14 +191,34 @@ class SlashCommandHandler(utils.Cog):
         Adds all of the bot's slash commands to the global interaction handler.
         """
 
+        # Get the commands we want to add
         ctx.author = ctx.guild.me
         application_command_list = await self.convert_all_into_application_command(ctx)
+        current_commands = None
+
+        # Get the commands that currently exist
+        if guild:
+            current_commands = await self.bot.get_guild_application_command(ctx.guild)
+        else:
+            current_commands = await self.bot.get_global_application_command()
+
+        # See which commands we need to delete
+        to_remove_commands = [i for i in current_commands if i.name not in [o.name for o in application_command_list]]
+        for command in to_remove_commands:
+            if guild:
+                await self.bot.delete_guild_application_command(ctx.guild, command)
+            else:
+                await self.bot.delete_global_application_command(command)
+
+        # Add the new commands
         async with ctx.typing():
             for command in application_command_list:
                 if guild:
-                    await self.bot.add_guild_application_command(command)
+                    await self.bot.add_guild_application_command(ctx.guild, command)
                 else:
                     await self.bot.add_global_application_command(command)
+
+        # And we done
         await ctx.okay()
 
 
