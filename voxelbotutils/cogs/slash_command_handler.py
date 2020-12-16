@@ -168,7 +168,7 @@ class SlashCommandHandler(utils.Cog):
             subcommands = list(command.walk_commands())
             valid_subcommands = await self.bot.help_command.filter_commands_classmethod(ctx, valid_subcommands)
             for subcommand in valid_subcommands:
-                application_command.add_option(self.convert_into_application_command(subcommand))
+                application_command.add_option(self.convert_into_application_command(ctx, subcommand))
 
         # Return command
         return application_command
@@ -178,7 +178,7 @@ class SlashCommandHandler(utils.Cog):
         commands = list(ctx.bot.walk_commands())
         filtered_commands = await self.bot.help_command.filter_commands_classmethod(ctx, commands)
         for command in filtered_commands:
-            slash_commands.append(await self.convert_into_application_command(command))
+            slash_commands.append(await self.convert_into_application_command(ctx, command))
         return slash_commands
 
     @commands.command(cls=utils.Command)
