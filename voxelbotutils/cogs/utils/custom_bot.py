@@ -54,6 +54,10 @@ def get_prefix(bot, message:discord.Message):
     return commands.when_mentioned_or(*prefix)(bot, message)
 
 
+class RouteV8(discord.http.Route):
+    BASE = 'https://discord.com/api/v8'
+
+
 class Bot(commands.AutoShardedBot):
     """
     A child of discord.ext.commands.AutoShardedBot to make things a little easier when
@@ -450,9 +454,8 @@ class Bot(commands.AutoShardedBot):
         """
 
         application_id = await self.get_application_id()
-        url = f"https://discord.com/api/v8/applications/{application_id}/commands"
-        headers = {"Authorization": f"Bot {self.config['token']}"}
-        await self.session.post(url, json=command.to_json(), headers=headers)
+        r = RouteV8('POST', '/applications/{application_id}/commands', application_id=application_id)
+        return await self.http.request(r, json=command.to_json())
 
     async def add_guild_application_command(self, guild:discord.Guild, command:interactions.ApplicationCommand) -> None:
         """
@@ -460,9 +463,8 @@ class Bot(commands.AutoShardedBot):
         """
 
         application_id = await self.get_application_id()
-        url = f"https://discord.com/api/v8//applications/{application_id}/guilds/{guild.id}/commands"
-        headers = {"Authorization": f"Bot {self.config['token']}"}
-        await self.session.post(url, json=command.to_json(), headers=headers)
+        r = RouteV8('POST', '/applications/{application_id}/guilds/{guild_id}/commands', application_id=application_id, guild_id=guild.id)
+        return await self.http.request(r, json=command.to_json())
 
     async def get_global_application_command(self) -> typing.List[interactions.ApplicationCommand]:
         """
@@ -470,10 +472,8 @@ class Bot(commands.AutoShardedBot):
         """
 
         application_id = await self.get_application_id()
-        url = f"https://discord.com/api/v8/applications/{application_id}/commands"
-        headers = {"Authorization": f"Bot {self.config['token']}"}
-        site = await self.session.get(url, headers=headers)
-        data = await site.json()
+        r = RouteV8('GET', '/applications/{application_id}/commands', application_id=application_id)
+        data = await self.http.request(r)
         return [interactions.ApplicationCommand.from_data(i) for i in data]
 
     async def get_guild_application_command(self, guild:discord.Guild) -> typing.List[interactions.ApplicationCommand]:
@@ -482,10 +482,8 @@ class Bot(commands.AutoShardedBot):
         """
 
         application_id = await self.get_application_id()
-        url = f"https://discord.com/api/v8//applications/{application_id}/guilds/{guild.id}/commands"
-        headers = {"Authorization": f"Bot {self.config['token']}"}
-        site = await self.session.get(url, headers=headers)
-        data = await site.json()
+        r = RouteV8('GET', '/applications/{application_id}/guilds/{guild_id}/commands', application_id=application_id, guild_id=guild.id)
+        data = await self.http.request(r)
         return [interactions.ApplicationCommand.from_data(i) for i in data]
 
     async def delete_global_application_command(self, command:interactions.ApplicationCommand) -> None:
@@ -494,9 +492,8 @@ class Bot(commands.AutoShardedBot):
         """
 
         application_id = await self.get_application_id()
-        url = f"https://discord.com/api/v8/applications/{application_id}/commands/{command.id}"
-        headers = {"Authorization": f"Bot {self.config['token']}"}
-        site = await self.session.delete(url, headers=headers)
+        r = RouteV8('DELETE', '/applications/{application_id}/commands/{command_id}', application_id=application_id, command_id=command.id)
+        return await self.http.request(r)
 
     async def delete_guild_application_command(self, guild:discord.Guild, command:interactions.ApplicationCommand) -> None:
         """
@@ -504,9 +501,8 @@ class Bot(commands.AutoShardedBot):
         """
 
         application_id = await self.get_application_id()
-        url = f"https://discord.com/api/v8//applications/{application_id}/guilds/{guild.id}/commands/{command.id}"
-        headers = {"Authorization": f"Bot {self.config['token']}"}
-        site = await self.session.delete(url, headers=headers)
+        r = RouteV8('GET', '/applications/{application_id}/guilds/{guild_id}/commands/{command_id}', application_id=application_id, guild_id=guild.id, command_id=command.id)
+        return await self.http.request(r)
 
     @property
     def owner_ids(self) -> list:
