@@ -47,9 +47,9 @@ class ApplicationCommandOption(object):
     @classmethod
     def from_data(cls, data:dict):
         base_option = cls(data['name'], ApplicationCommandOptionType(data['type']), data['description'], data.get('required', False))
-        for choice in data['choices']:
+        for choice in data.get('choices', list()):
             base_option.add_choice(ApplicationCommandOptionChoice.from_data(choice))
-        for option in data['options']:
+        for option in data.get('options', list()):
             base_option.add_option(cls.from_data(option))
         return base_option
 
@@ -87,7 +87,7 @@ class ApplicationCommand(object):
         command = cls(data['name'], data['description'])
         command.id = int(data['id'])
         command.application_id = int(data['application_id'])
-        for option in data['options']:
+        for option in data.get('options', list()):
             command.add_option(ApplicationCommandOption.from_data(option))
         return command
 
