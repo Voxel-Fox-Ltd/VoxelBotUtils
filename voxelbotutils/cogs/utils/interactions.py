@@ -2,7 +2,6 @@ import enum
 import typing
 
 import discord
-from discord.ext import commands
 
 from .custom_context import Context
 
