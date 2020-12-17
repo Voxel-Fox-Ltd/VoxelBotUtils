@@ -22,7 +22,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
 
     @commands.command(aliases=['src'], cls=utils.Command)
     @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True, attach_files=True)
+    @commands.bot_has_permissions(send_messages=True, attach_files=True, add_reactions=True)
     async def source(self, ctx:utils.Context, *, command_name:str):
         """
         Shows you the source for a given command.
@@ -44,14 +44,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         if last:
             pages.append(f"```py\n{last}\n```")
             
-            
-        index = 0
         message = await ctx.send(pages[index])
-        
-        # Reacts to the initial message with left arrow, right arrow, and check mark
-        await message.add_reaction("\N{BLACK LEFT-POINTING TRIANGLE}")
-        await message.add_reaction("\N{BLACK RIGHT-POINTING TRIANGLE}")
-        await message.add_reaction("\N{WHITE HEAVY CHECK MARK}")
 
         # List of valid emojis the user can react with
         validEmoji = [
@@ -59,8 +52,16 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
             "\N{BLACK RIGHT-POINTING TRIANGLE}",
             "\N{WHITE HEAVY CHECK MARK}"
         ]
+        
+        # Reacts to the initial message with left arrow, right arrow, and check mark
+        for i in valid_emoji:
+            try:
+                await message.add_reaction(i)
+            except discord.HTTPException:
+                pass
 
         # Loops until checkmark is reacted
+        index = 0
         while True:
 
             # Checks that author is who typed the command and that the emoji reacted by the user is in validEmoji
@@ -71,14 +72,14 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
             try:
                 reaction, _ = await self.bot.wait_for('reaction_add', timeout=300.0, check=check)
             except asyncio.TimeoutError:
-                reaction.emoji = validEmoji[2]
+                reaction.emoji = valid_emoji[2]
 
             # Checks which emoji was reacted and add to the index
-            if reaction.emoji == validEmoji[0]:
+            if reaction.emoji == valid_emoji[0]:
                 index += 1
-            if reaction.emoji == validEmoji[1]:
+            if reaction.emoji == valid_emoji[1]:
                 index -= 1
-            if reaction.emoji == validEmoji[2]:
+            if reaction.emoji == valid_emoji[2]:
                 break
                 
             # Fix the index if it's too big or too small
@@ -93,12 +94,17 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
                 index = new_index
                 
             # Update the message
-            await message.edit(content=pages[index])
+            try:
+                await message.edit(content=pages[index])
+            except discord.HTTPException:
+                pass
         
-        # Unreacts to the initial message with left arrow, right, and check mark
-        await message.remove_reaction("\N{BLACK LEFT-POINTING TRIANGLE}")
-        await message.remove_reaction("\N{BLACK RIGHT-POINTING TRIANGLE}")
-        await message.remove_reaction("\N{WHITE HEAVY CHECK MARK}")
+        # Removes the reactions from the initial message
+        for i in valid_emoji:
+            try:
+                await message.remove_reaction(i)
+            except discord.HTTPException:
+                pass
             
          
 
