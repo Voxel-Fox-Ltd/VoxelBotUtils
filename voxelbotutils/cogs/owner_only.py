@@ -22,7 +22,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
 
     @commands.command(aliases=['src'], cls=utils.Command)
     @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True, attach_files=True)
+    @commands.bot_has_permissions(send_messages=True, attach_files=True, add_reactions=True)
     async def source(self, ctx:utils.Context, *, command_name:str):
         """
         Shows you the source for a given command.
@@ -34,14 +34,79 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         data = textwrap.dedent(inspect.getsource(command.callback))
         lines = data.strip().split("\n")
         current, last = "", ""
+        pages = []
         for line in lines:
             current += f"{line}\n"
             if len(current) >= 1950:
-                await ctx.send(f"```py\n{last}\n```")
+                pages.append(f"```py\n{last}\n```") # We just add the lines to the pages list instead of sending
                 current = line
             last = current
         if last:
-            await ctx.send(f"```py\n{last}\n```")
+            pages.append(f"```py\n{last}\n```")
+            
+        message = await ctx.send(pages[0])
+
+        # List of valid emojis the user can react with
+        validEmoji = [
+            "\N{BLACK LEFT-POINTING TRIANGLE}",
+            "\N{BLACK RIGHT-POINTING TRIANGLE}",
+            "\N{WHITE HEAVY CHECK MARK}"
+        ]
+        
+        # Reacts to the initial message with left arrow, right arrow, and check mark
+        for i in valid_emoji:
+            try:
+                await message.add_reaction(i)
+            except discord.HTTPException:
+                pass
+
+        # Loops until checkmark is reacted
+        index = 0
+        while True:
+
+            # Checks that author is who typed the command and that the emoji reacted by the user is in validEmoji
+            def check(reaction, user):
+                return user == ctx.author and str(reaction.emoji) in validEmoji
+
+            # Waits for the reaction from the user
+            try:
+                reaction, _ = await self.bot.wait_for('reaction_add', timeout=300.0, check=check)
+            except asyncio.TimeoutError:
+                reaction.emoji = valid_emoji[2]
+
+            # Checks which emoji was reacted and add to the index
+            if reaction.emoji == valid_emoji[0]:
+                index += 1
+            if reaction.emoji == valid_emoji[1]:
+                index -= 1
+            if reaction.emoji == valid_emoji[2]:
+                break
+                
+            # Fix the index if it's too big or too small
+            if index > len(pages):
+                new_index = len(pages) - 1
+            if index < 0:
+                new_index = 0
+            # Then check if the index even changed
+            if new_index = index:
+                continue
+            else:
+                index = new_index
+                
+            # Update the message
+            try:
+                await message.edit(content=pages[index])
+            except discord.HTTPException:
+                pass
+        
+        # Removes the reactions from the initial message
+        for i in valid_emoji:
+            try:
+                await message.remove_reaction(i)
+            except discord.HTTPException:
+                pass
+            
+         
 
     @commands.command(aliases=['pm', 'dm', 'send'], cls=utils.Command)
     @commands.is_owner()
