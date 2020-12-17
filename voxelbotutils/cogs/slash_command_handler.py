@@ -118,16 +118,21 @@ class SlashCommandHandler(utils.Cog):
         self.commands = [ApplicationCommand.from_data(i) for i in data]
         return self.commands
 
-    async def convert_into_application_command(self, ctx, command:typing.Union[utils.Command, utils.Group]) -> utils.interactions.ApplicationCommand:
+    async def convert_into_application_command(self, ctx, command:typing.Union[utils.Command, utils.Group], *, is_option:bool=False) -> utils.interactions.ApplicationCommand:
         """
         Convert a given Discord command into an application command.
         """
 
         # Make command
-        application_command = utils.interactions.ApplicationCommand(
-            name=command.name,
-            description=command.short_doc or f"Allows you to run the {command.qualified_name} command",
-        )
+        kwargs = {
+            'name': command.name,
+            'description': command.short_doc or f"Allows you to run the {command.qualified_name} command",
+        }
+        if is_option:
+            kwargs.update({'type': utils.interactions.ApplicationCommandOptionType.SUBCOMMAND})
+            application_command = utils.interactions.ApplicationCommandOption(**kwargs)
+        else:
+            application_command = utils.interactions.ApplicationCommand(**kwargs)
 
         # Go through its args
         for arg in command.clean_params.values():
@@ -153,7 +158,7 @@ class SlashCommandHandler(utils.Cog):
             subcommands = list(command.walk_commands())
             valid_subcommands = [i for i in await self.bot.help_command.filter_commands_classmethod(ctx, subcommands) if getattr(i, 'add_slash_command', True)]
             for subcommand in valid_subcommands:
-                application_command.add_option(await self.convert_into_application_command(ctx, subcommand))
+                application_command.add_option(await self.convert_into_application_command(ctx, subcommand), is_option=True)
 
         # Return command
         return application_command
@@ -169,6 +174,7 @@ class SlashCommandHandler(utils.Cog):
     @commands.command(cls=utils.Command)
     @commands.guild_only()
     @commands.is_owner()
+    @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
     async def addinteractioncommands(self, ctx, guild:bool):
         """
         Adds all of the bot's interaction commands to the global interaction handler.
@@ -196,10 +202,15 @@ class SlashCommandHandler(utils.Cog):
         # Add the new commands
         async with ctx.typing():
             for command in application_command_list:
-                if guild:
-                    await self.bot.add_guild_application_command(ctx.guild, command)
-                else:
-                    await self.bot.add_global_application_command(command)
+                try:
+                    if guild:
+                        await self.bot.add_guild_application_command(ctx.guild, command)
+                    else:
+                        await self.bot.add_global_application_command(command)
+                except discord.HTTPException as e:
+                    file_handle = io.StringIO(json.dumps(await self.convert_into_application_command(ctx, command), indent=4))
+                    file = discord.File(file_handle, filename="command.json")
+                    await ctx.send(f"Failed to add `{command.qualified_name}` as a command - {e}", file=file)
 
         # And we done
         await ctx.okay()
