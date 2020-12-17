@@ -4,6 +4,8 @@ import typing
 import discord
 from discord.ext import commands
 
+from . import Context
+
 
 class ApplicationCommandOptionType(enum.IntEnum):
     SUBCOMMAND = 1
@@ -122,7 +124,7 @@ class InteractionMessage(discord.Object):
                 self.author = found
 
 
-class InteractionContext(commands.Context):
+class InteractionContext(Context):
 
     async def send(self, *args, **kwargs):
         kwargs.pop("embeddify", False)

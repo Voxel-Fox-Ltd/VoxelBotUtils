@@ -33,7 +33,7 @@ class SlashCommandHandler(utils.Cog):
 
     def __init__(self, bot:utils.Bot):
         super().__init__(bot)
-        self.commands: typing.List[ApplicationCommand] = None
+        self.commands: typing.List[utils.interactions.ApplicationCommand] = None
         self.application_id = None
 
     async def get_context_from_interaction(self, payload, *, cls=utils.interactions.InteractionContext):
@@ -115,7 +115,7 @@ class SlashCommandHandler(utils.Cog):
         headers = {"Authorization": f"Bot {self.bot.config['token']}"}
         site = await self.bot.session.get(url, headers=headers)
         data = await site.json()
-        self.commands = [ApplicationCommand.from_data(i) for i in data]
+        self.commands = [utils.interactions.ApplicationCommand.from_data(i) for i in data]
         return self.commands
 
     async def convert_into_application_command(self, ctx, command:typing.Union[utils.Command, utils.Group], *, is_option:bool=False) -> utils.interactions.ApplicationCommand:
