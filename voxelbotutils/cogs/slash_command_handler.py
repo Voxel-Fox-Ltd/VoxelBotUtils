@@ -159,7 +159,7 @@ class SlashCommandHandler(utils.Cog):
 
         # Go through its subcommands
         if isinstance(command, utils.Group):
-            subcommands = list(command.walk_commands())
+            subcommands = list(command.commands)
             valid_subcommands = [i for i in await self.bot.help_command.filter_commands_classmethod(ctx, subcommands) if getattr(i, 'add_slash_command', True)]
             for subcommand in valid_subcommands:
                 application_command.add_option(await self.convert_into_application_command(ctx, subcommand, is_option=True))
@@ -169,7 +169,7 @@ class SlashCommandHandler(utils.Cog):
 
     async def convert_all_into_application_command(self, ctx):
         slash_commands = []
-        commands = list(ctx.bot.walk_commands())
+        commands = list(ctx.bot.commands)
         filtered_commands = [i for i in await self.bot.help_command.filter_commands_classmethod(ctx, commands) if getattr(i, 'add_slash_command', True)]
         for command in filtered_commands:
             slash_commands.append(await self.convert_into_application_command(ctx, command))
