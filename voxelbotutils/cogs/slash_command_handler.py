@@ -210,7 +210,7 @@ class SlashCommandHandler(utils.Cog):
                 except discord.HTTPException as e:
                     file_handle = io.StringIO(json.dumps(await self.convert_into_application_command(ctx, command), indent=4))
                     file = discord.File(file_handle, filename="command.json")
-                    await ctx.send(f"Failed to add `{command.qualified_name}` as a command - {e}", file=file)
+                    await ctx.send(f"Failed to add `{command.name}` as a command - {e}", file=file)
 
         # And we done
         await ctx.okay()
