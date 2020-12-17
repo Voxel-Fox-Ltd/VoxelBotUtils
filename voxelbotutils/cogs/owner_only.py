@@ -47,9 +47,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         message = await ctx.send(pages[0])
 
         # List of valid emojis the user can react with
-        validEmoji = [
-            "\N{BLACK LEFT POINTING TRIANGLE}",
-            "\N{BLACK RIGHT POINTING TRIANGLE}",
+        valid_emoji = [
+            "\N{BLACK LEFT-POINTING TRIANGLE}",
+            "\N{BLACK RIGHT-POINTING TRIANGLE}",
             "\N{WHITE HEAVY CHECK MARK}"
         ]
 
@@ -66,7 +66,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
 
             # Checks that author is who typed the command and that the emoji reacted by the user is in validEmoji
             def check(reaction, user):
-                return user == ctx.author and str(reaction.emoji) in validEmoji
+                return user == ctx.author and str(reaction.emoji) in valid_emoji
 
             # Waits for the reaction from the user
             try:
@@ -76,19 +76,18 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
 
             # Checks which emoji was reacted and add to the index
             if reaction.emoji == valid_emoji[0]:
-                index += 1
+                new_index = index + 1
             if reaction.emoji == valid_emoji[1]:
-                index -= 1
+                new_index = index - 1
             if reaction.emoji == valid_emoji[2]:
                 break
 
             # See if our index has changed
-            index = max(0, index)
-            index = min(len(pages), index)
+            new_index = max(0, new_index)
+            new_index = min(len(pages), new_index)
             if new_index == index:
                 continue
-            else:
-                index = new_index
+            index = new_index
 
             # Update the message
             try:
