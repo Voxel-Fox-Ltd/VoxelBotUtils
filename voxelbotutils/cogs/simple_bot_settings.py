@@ -33,7 +33,7 @@ class BotSettings(utils.Cog):
             )
         await ctx.send(f"My prefix has been updated to `{new_prefix}`.")
 
-    @commands.command(cls=utils.Command, aloases=['follow'])
+    @commands.command(cls=utils.Command, aliases=['follow'], add_slash_command=False)
     @commands.has_permissions(manage_guild=True, manage_channels=True)
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, manage_channels=True)
     @commands.guild_only()
