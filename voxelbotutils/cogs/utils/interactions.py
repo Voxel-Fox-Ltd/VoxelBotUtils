@@ -4,7 +4,7 @@ import typing
 import discord
 from discord.ext import commands
 
-from . import Context
+from .custom_context import Context
 
 
 class ApplicationCommandOptionType(enum.IntEnum):
