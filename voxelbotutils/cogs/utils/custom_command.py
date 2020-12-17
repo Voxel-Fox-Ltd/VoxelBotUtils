@@ -191,3 +191,11 @@ class Group(commands.Group):
         # Ping the global error handler
         except Exception:
             ctx.bot.dispatch('command_error', ctx, error)
+
+
+class SubcommandGroup(Group):
+    """
+    A subcommand group specifically made so that slash commands can be just a little sexier.
+    """
+
+    pass

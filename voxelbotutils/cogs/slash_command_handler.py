@@ -130,7 +130,8 @@ class SlashCommandHandler(utils.Cog):
             'description': command.short_doc or f"Allows you to run the {command.qualified_name} command",
         }
         if is_option:
-            kwargs.update({'type': utils.interactions.ApplicationCommandOptionType.SUBCOMMAND})
+            application_command_type = utils.interactions.ApplicationCommandOptionType.SUBCOMMAND_GROUP if isinstance(command, utils.SubcommandGroup) else utils.interactions.ApplicationCommandOptionType.SUBCOMMAND
+            kwargs.update({'type': application_command_type})
             application_command = utils.interactions.ApplicationCommandOption(**kwargs)
         else:
             application_command = utils.interactions.ApplicationCommand(**kwargs)
