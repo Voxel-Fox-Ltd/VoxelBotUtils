@@ -28,7 +28,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         Shows you the source for a given command.
         """
 
-        command = self.bot.get_comamnd(command_name)
+        command = self.bot.get_command(command_name)
         if command is None:
             return await ctx.send(f"I couldn't find a command named `{command_name}`.", allowed_mentions=discord.AllowedMentions.none())
         data = textwrap.dedent(inspect.getsource(command.callback))
