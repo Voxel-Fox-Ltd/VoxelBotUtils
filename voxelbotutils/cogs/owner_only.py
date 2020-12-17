@@ -38,7 +38,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
             current += f"{line}\n"
             if len(current) >= 1950:
                 await ctx.send(f"```py\n{last}\n```")
-                last = line
+                current = line
             last = current
         if last:
             await ctx.send(f"```py\n{last}\n```")
