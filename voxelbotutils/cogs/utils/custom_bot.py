@@ -466,7 +466,7 @@ class Bot(commands.AutoShardedBot):
         r = RouteV8('POST', '/applications/{application_id}/guilds/{guild_id}/commands', application_id=application_id, guild_id=guild.id)
         return await self.http.request(r, json=command.to_json())
 
-    async def get_global_application_command(self) -> typing.List[interactions.ApplicationCommand]:
+    async def get_global_application_commands(self) -> typing.List[interactions.ApplicationCommand]:
         """
         Add a global slash command for the bot.
         """
@@ -476,7 +476,7 @@ class Bot(commands.AutoShardedBot):
         data = await self.http.request(r)
         return [interactions.ApplicationCommand.from_data(i) for i in data]
 
-    async def get_guild_application_command(self, guild:discord.Guild) -> typing.List[interactions.ApplicationCommand]:
+    async def get_guild_application_commands(self, guild:discord.Guild) -> typing.List[interactions.ApplicationCommand]:
         """
         Add a guild-level slash command for the bot.
         """

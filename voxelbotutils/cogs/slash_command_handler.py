@@ -187,9 +187,9 @@ class SlashCommandHandler(utils.Cog):
 
         # Get the commands that currently exist
         if guild:
-            current_commands = await self.bot.get_guild_application_command(ctx.guild)
+            current_commands = await self.bot.get_guild_application_commands(ctx.guild)
         else:
-            current_commands = await self.bot.get_global_application_command()
+            current_commands = await self.bot.get_global_application_commands()
 
         # See which commands we need to delete
         to_remove_commands = [i for i in current_commands if i.name not in [o.name for o in application_command_list]]
