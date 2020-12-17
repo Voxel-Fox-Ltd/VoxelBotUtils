@@ -151,6 +151,15 @@ class Group(commands.Group):
             kwargs['cls'] = Group
         return super().group(*args, **kwargs)
 
+    def subcommand_group(self, *args, **kwargs):
+        """
+        Add the usual utils.Group to the mix.
+        """
+
+        if 'cls' not in kwargs:
+            kwargs['cls'] = SubcommandGroup
+        return super().group(*args, **kwargs)
+
     async def dispatch_error(self, ctx, error):
         """
         Like how we'd normally dispatch an error, but we deal with local lads
