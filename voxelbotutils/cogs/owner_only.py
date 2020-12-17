@@ -38,27 +38,27 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         for line in lines:
             current += f"{line}\n"
             if len(current) >= 1950:
-                pages.append(f"```py\n{last}\n```") # We just add the lines to the pages list instead of sending
+                pages.append(f"```py\n{last}\n```")
                 current = line
             last = current
         if last:
             pages.append(f"```py\n{last}\n```")
-            
+
         message = await ctx.send(pages[0])
 
         # List of valid emojis the user can react with
         validEmoji = [
-            "\N{BLACK LEFT-POINTING TRIANGLE}",
-            "\N{BLACK RIGHT-POINTING TRIANGLE}",
+            "\N{BLACK LEFT POINTING TRIANGLE}",
+            "\N{BLACK RIGHT POINTING TRIANGLE}",
             "\N{WHITE HEAVY CHECK MARK}"
         ]
-        
+
         # Reacts to the initial message with left arrow, right arrow, and check mark
         for i in valid_emoji:
             try:
                 await message.add_reaction(i)
             except discord.HTTPException:
-                pass
+                return
 
         # Loops until checkmark is reacted
         index = 0
@@ -81,32 +81,27 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
                 index -= 1
             if reaction.emoji == valid_emoji[2]:
                 break
-                
-            # Fix the index if it's too big or too small
-            if index > len(pages):
-                new_index = len(pages) - 1
-            if index < 0:
-                new_index = 0
-            # Then check if the index even changed
-            if new_index = index:
+
+            # See if our index has changed
+            index = max(0, index)
+            index = min(len(pages), index)
+            if new_index == index:
                 continue
             else:
                 index = new_index
-                
+
             # Update the message
             try:
                 await message.edit(content=pages[index])
             except discord.HTTPException:
-                pass
-        
+                return
+
         # Removes the reactions from the initial message
         for i in valid_emoji:
             try:
                 await message.remove_reaction(i)
             except discord.HTTPException:
                 pass
-            
-         
 
     @commands.command(aliases=['pm', 'dm', 'send'], cls=utils.Command)
     @commands.is_owner()
