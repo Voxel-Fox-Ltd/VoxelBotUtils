@@ -44,7 +44,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         if last:
             pages.append(f"```py\n{last}\n```")
             
-        message = await ctx.send(pages[index])
+        message = await ctx.send(pages[0])
 
         # List of valid emojis the user can react with
         validEmoji = [
