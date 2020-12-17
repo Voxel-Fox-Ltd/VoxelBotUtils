@@ -146,6 +146,8 @@ class SlashCommandHandler(utils.Cog):
             if arg_type is None:
                 raise Exception(f"Couldn't add a convert {command.qualified_name} into a slash command")
             safe_arg_type = self.COMMAND_TYPE_MAPPER[arg_type]
+            if arg.default is not inspect._empty:
+                required = False
             application_command.add_option(utils.interactions.ApplicationCommandOption(
                 name=arg.name,
                 description=f"The {arg.name} that you want to use for the {command.qualified_name} command.",
