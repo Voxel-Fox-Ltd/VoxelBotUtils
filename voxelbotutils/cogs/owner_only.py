@@ -7,6 +7,7 @@ import json
 import textwrap
 import traceback
 import typing
+import inspect
 
 import discord
 from discord.ext import commands
@@ -18,6 +19,29 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
     """
     Handles commands that only the owner should be able to run.
     """
+
+    @commands.command(aliases=['src'], cls=utils.Command)
+    @commands.is_owner()
+    @commands.bot_has_permissions(send_messages=True, attach_files=True)
+    async def source(self, ctx:utils.Context, *, command_name:str):
+        """
+        Shows you the source for a given command.
+        """
+
+        command = self.bot.get_comamnd(command_name)
+        if command is None:
+            return await ctx.send(f"I couldn't find a command named `{command_name}`.", allowed_mentions=discord.AllowedMentions.none())
+        data = textwrap.dedent(inspect.getsource(command.callback))
+        lines = data.strip().split("\n")
+        current, last = "", ""
+        for line in lines:
+            current += f"{line}\n"
+            if len(current) >= 1950:
+                await ctx.send(f"```py\n{last}\n```")
+                last = line
+            last = current
+        if last:
+            await ctx.send(f"```py\n{last}\n```")
 
     @commands.command(aliases=['pm', 'dm', 'send'], cls=utils.Command)
     @commands.is_owner()
