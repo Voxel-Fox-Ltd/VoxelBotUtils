@@ -14,7 +14,7 @@ https://github.com/bahamas10/css-color-names/blob/master/css-color-names.json
 
 COLOURS_BY_NAME = {
     "kae blue": 0x5dadec,
-    "ollie yellow": 0xf5e59d,
+    "ollie yellow": 0xFFEA83,
     "poop brown": 0x7a5901,
     "stegosans": 0xf1e6a9,
     "teddy purple": 0xb19cd9,
