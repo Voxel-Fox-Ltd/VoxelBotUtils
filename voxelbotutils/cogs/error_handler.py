@@ -130,7 +130,7 @@ class ErrorHandler(utils.Cog):
         ),
         (
             commands.BadUnionArgument,
-            lambda ctx, error: f"I couldn't convert your provided `{error.param.name}` into any type of {', '.join([str(i) for i in error.converters])}."
+            lambda ctx, error: f"I couldn't convert your provided `{error.param.name}` into any type of {', '.join([i.__name__.lower() for i in error.converters])}."
         ),
         (
             commands.BadArgument,
