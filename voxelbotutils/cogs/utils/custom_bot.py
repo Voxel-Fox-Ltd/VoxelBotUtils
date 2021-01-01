@@ -58,6 +58,69 @@ class RouteV8(discord.http.Route):
     BASE = 'https://discord.com/api/v8'
 
 
+class SlimBot(commands.AutoShardedBot):
+    """
+    A child of discord.ext.commands.AutoShardedBot for the website to use.
+    """
+
+    def __init__(self, token:str, logger:logging.Logger=None):
+        super().__init__(command_prefix=commands.when_mentioned(), intents=discord.Intents.none())
+        self._bot_token = token
+        self.logger = logger or logging.getLogger('bot')
+
+        # Regardless of whether we start statsd or not, I want to add the log handler
+        handler = AnalyticsLogHandler(self)
+        handler.setLevel(logging.DEBUG)
+        logging.getLogger('discord.http').addHandler(handler)
+
+    async def login(self, token:str=None, *args, **kwargs):
+        await super().login(token or self._bot_token, *args, **kwargs)
+
+    async def start(self, token:str=None, *args, **kwargs):
+        await super().start(token or self._bot_token, *args, **kwargs)
+
+    def get_extensions(self) -> typing.List[str]:
+        """
+        Gets a list of filenames of all the loadable cogs.
+
+        Returns:
+            typing.List[str]: A list of the extensions found in the cogs/ folder, as well as the cogs included with the library.
+        """
+
+        ext = glob.glob('cogs/[!_]*.py')
+        extensions = []
+        extensions.extend([f'voxelbotutils.cogs.{i}' for i in all_vfl_package_names])
+        extensions.extend([i.replace('\\', '.').replace('/', '.')[:-3] for i in ext])
+        self.logger.debug("Getting all extensions: " + str(extensions))
+        return extensions
+
+    def load_all_extensions(self) -> None:
+        """
+        Loads all the given extensions from self.get_extensions().
+        """
+
+        # Unload all the given extensions
+        self.logger.info('Unloading extensions... ')
+        for i in self.get_extensions():
+            try:
+                self.unload_extension(i)
+            except Exception as e:
+                self.logger.debug(f' * {i}... failed - {e!s}')
+            else:
+                self.logger.info(f' * {i}... success')
+
+        # Now load em up again
+        self.logger.info('Loading extensions... ')
+        for i in self.get_extensions():
+            try:
+                self.load_extension(i)
+            except Exception as e:
+                self.logger.critical(f' * {i}... failed - {e!s}')
+                raise e
+            else:
+                self.logger.info(f' * {i}... success')
+
+
 class Bot(commands.AutoShardedBot):
     """
     A child of discord.ext.commands.AutoShardedBot to make things a little easier when

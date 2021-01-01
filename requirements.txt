@@ -6,3 +6,12 @@ toml
 asyncpg
 aioredis
 aiodogstatsd
+
+# Website stuff
+aiohttp
+cryptography
+aiohttp
+aiohttp_jinja2
+aiohttp_session
+jinja2
+

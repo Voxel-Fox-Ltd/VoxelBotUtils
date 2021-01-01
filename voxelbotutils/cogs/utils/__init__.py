@@ -2,7 +2,7 @@
 from . import checks, converters, errors, interactions
 from .checks import cooldown
 from .context_embed import Embed
-from .custom_bot import Bot
+from .custom_bot import Bot, SlimBot
 from .custom_cog import Cog
 from .custom_command import Command, Group, SubcommandGroup
 from .custom_context import Context

@@ -3,14 +3,21 @@ import asyncio
 import logging
 import sys
 import typing
+import os
+
+from aiohttp.web import Application, AppRunner, TCPSite
+from aiohttp_jinja2 import setup as jinja_setup
+from aiohttp_session import setup as session_setup
+from aiohttp_session.cookie_storage import EncryptedCookieStorage as ECS, SimpleCookieStorage
+from jinja2 import FileSystemLoader
+import toml
 
 from .cogs.utils.database import DatabaseConnection
 from .cogs.utils.redis import RedisConnection
-from .cogs.utils.custom_bot import Bot
+from .cogs.utils.custom_bot import Bot, SlimBot
 
 
 __all__ = (
-    'get_default_program_arguments',
     'validate_sharding_information',
     'set_default_log_levels',
     'run_bot',
@@ -54,64 +61,8 @@ def set_log_level(logger_to_change:logging.Logger, log_level:str, minimum_level:
         logger_to_change.setLevel(level)
 
 
-# Parse arguments
-def get_default_program_arguments(include_config_file:bool=True) -> argparse.ArgumentParser:
-    """
-    Get the default commandline args for the file
-
-    Args:
-        include_config_file (bool, optional): Whether or not to include the config file arugment
-
-    Returns:
-        argparse.ArgumentParser: The arguments that were parsed
-    """
-    parser = argparse.ArgumentParser()
-    if include_config_file:
-        parser.add_argument(
-            "config_file", nargs="?", default="config/config.toml",
-            help="The configuration for the bot."
-        )
-    parser.add_argument(
-        "--min", type=int, default=None,
-        help="The minimum shard ID that this instance will run with (inclusive)."
-    )
-    parser.add_argument(
-        "--max", type=int, default=None,
-        help="The maximum shard ID that this instance will run with (inclusive)."
-    )
-    parser.add_argument(
-        "--shardcount", type=int, default=None,
-        help="The amount of shards that the bot should be using."
-    )
-    parser.add_argument(
-        "--loglevel", default="INFO",
-        help="Global logging level - probably most useful is INFO and DEBUG."
-    )
-    parser.add_argument(
-        "--loglevel-bot", default=None,
-        help="Logging level for the bot - probably most useful is INFO and DEBUG."
-    )
-    parser.add_argument(
-        "--loglevel-discord", default=None,
-        help="Logging level for discord - probably most useful is INFO and DEBUG."
-    )
-    parser.add_argument(
-        "--loglevel-database", default=None,
-        help="Logging level for database - probably most useful is INFO and DEBUG."
-    )
-    parser.add_argument(
-        "--loglevel-redis", default=None,
-        help="Logging level for redis - probably most useful is INFO and DEBUG."
-    )
-    parser.add_argument(
-        "--loglevel-statsd", default=None,
-        help="Logging level for statsd - probably most useful is INFO and DEBUG."
-    )
-    return parser
-
-
 # Set up loggers
-logger = logging.getLogger('vflbotutils')
+logger = logging.getLogger('voxelbotutils')
 
 
 # Make sure the sharding info provided is correctish
@@ -263,7 +214,7 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     logging.getLogger('discord').addHandler(discord_stderr_logger)
 
 
-async def create_initial_database(bot:Bot) -> None:
+async def create_initial_database(db) -> None:
     """
     Create the initial database using the internal database.psql file
     """
@@ -287,66 +238,62 @@ async def create_initial_database(bot:Bot) -> None:
             current_line = ''
 
     # Let's do it baybeee
-    async with bot.database() as db:
-        for i in create_table_statements:
-            if i and i.strip():
-                await db(i.strip())
+    for i in create_table_statements:
+        if i and i.strip():
+            await db(i.strip())
 
     # Sick we're done
     return True
 
 
-async def start_database_pool(bot:Bot) -> None:
+async def start_database_pool(config:dict) -> None:
     """
     Start the database pool connection
     """
 
     # Connect the database pool
-    if bot.config.get('database', {}).get('enabled', False):
-        logger.info("Creating database pool")
-        try:
-            await DatabaseConnection.create_pool(bot.config['database'])
-        except KeyError:
-            raise Exception("KeyError creating database pool - is there a 'database' object in the config?")
-        except ConnectionRefusedError:
-            raise Exception("ConnectionRefusedError creating database pool - did you set the right information in the config, and is the database running?")
-        except Exception:
-            raise Exception("Error creating database pool")
-        logger.info("Created database pool successfully")
-        logger.info("Creating initial database tables")
-        await create_initial_database(bot)
-    else:
-        logger.info("Database connection has been disabled")
+    logger.info("Creating database pool")
+    try:
+        await DatabaseConnection.create_pool(config['database'])
+    except KeyError:
+        raise Exception("KeyError creating database pool - is there a 'database' object in the config?")
+    except ConnectionRefusedError:
+        raise Exception("ConnectionRefusedError creating database pool - did you set the right information in the config, and is the database running?")
+    except Exception:
+        raise Exception("Error creating database pool")
+    logger.info("Created database pool successfully")
+    logger.info("Creating initial database tables")
+    async with DatabaseConnection() as db:
+        await create_initial_database(db)
 
 
-async def start_redis_pool(bot:Bot) -> None:
+async def start_redis_pool(config:dict) -> None:
     """
     Start the redis pool conneciton
     """
 
     # Connect the redis pool
-    if bot.config.get('redis', {}).get('enabled', False):
-        logger.info("Creating redis pool")
-        try:
-            await RedisConnection.create_pool(bot.config['redis'])
-        except KeyError:
-            raise KeyError("KeyError creating redis pool - is there a 'redis' object in the config?")
-        except ConnectionRefusedError:
-            raise ConnectionRefusedError("ConnectionRefusedError creating redis pool - did you set the right information in the config, and is the database running?")
-        except Exception:
-            raise Exception("Error creating redis pool")
-        logger.info("Created redis pool successfully")
-    else:
-        logger.info("Redis connection has been disabled")
+    logger.info("Creating redis pool")
+    try:
+        await RedisConnection.create_pool(config['redis'])
+    except KeyError:
+        raise KeyError("KeyError creating redis pool - is there a 'redis' object in the config?")
+    except ConnectionRefusedError:
+        raise ConnectionRefusedError("ConnectionRefusedError creating redis pool - did you set the right information in the config, and is the database running?")
+    except Exception:
+        raise Exception("Error creating redis pool")
+    logger.info("Created redis pool successfully")
 
 
-def run_bot(bot:Bot) -> None:
+def run_bot(args:argparse.Namespace) -> None:
     """
     Starts the bot, connects the database, runs the async loop forever
 
     Args:
-        bot (Bot): The bot you want to run
+        args (argparse.Namespace): The arguments namespace that wants to be run
     """
+
+    os.chdir(args.bot_directory)
 
     # Use right event loop
     try:
@@ -358,16 +305,20 @@ def run_bot(bot:Bot) -> None:
         loop = asyncio.ProactorEventLoop()
         asyncio.set_event_loop(loop)
 
-    # Grab the event loop
-    loop = bot.loop
+    # And run file
+    shard_ids = validate_sharding_information(args)
+    bot = Bot(shard_count=args.shardcount, shard_ids=shard_ids, config_file=args.config_file)
+    set_default_log_levels(bot, args)
 
     # Connect the database pool
-    db_connect_task = start_database_pool(bot)
-    loop.run_until_complete(db_connect_task)
+    if bot.config.get('database', {}).get('enabled', False):
+        db_connect_task = start_database_pool(bot.config)
+        loop.run_until_complete(db_connect_task)
 
     # Connect the redis pool
-    re_connect = start_redis_pool(bot)
-    loop.run_until_complete(re_connect)
+    if bot.config.get('redis', {}).get('enabled', False):
+        re_connect = start_redis_pool(bot.config)
+        loop.run_until_complete(re_connect)
 
     # Load the bot's extensions
     logger.info('Loading extensions... ')
@@ -382,6 +333,111 @@ def run_bot(bot:Bot) -> None:
         loop.run_until_complete(bot.close())
 
     # We're now done running the bot, time to clean up and close
+    if bot.config.get('database', {}).get('enabled', False):
+        logger.info("Closing database pool")
+        loop.run_until_complete(DatabaseConnection.pool.close())
+    if bot.config.get('redis', {}).get('enabled', False):
+        logger.info("Closing redis pool")
+        RedisConnection.pool.close()
+
+    logger.info("Closing asyncio loop")
+    loop.stop()
+    loop.close()
+
+
+def run_website(args:argparse.Namespace) -> None:
+    """
+    Starts the website, connects the database, logs in the specified bots, runs the async loop forever
+
+    Args:
+        args (argparse.Namespace): The arguments namespace that wants to be run
+    """
+
+    os.chdir(args.website_directory)
+
+    # Use right event loop
+    try:
+        import uvloop
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    except ImportError:
+        pass
+    if sys.platform == 'win32':
+        loop = asyncio.ProactorEventLoop()
+        asyncio.set_event_loop(loop)
+
+    # Read config
+    with open(args.config_file) as a:
+        config = toml.load(a)
+
+    # Create website object - don't start based on argv
+    app = Application(loop=asyncio.get_event_loop(), debug=args.debug)
+    app['static_root_url'] = '/static'
+    from website.frontend import routes as frontend_routes
+    app.router.add_routes(frontend_routes)
+    from website.backend import routes as backend_routes
+    app.router.add_routes(backend_routes)
+    app.router.add_static('/static', os.getcwd() + '/website/static', append_version=True)
+
+    # Add middlewares
+    if args.debug:
+        session_setup(app, SimpleCookieStorage(max_age=1_000_000))
+    else:
+        session_setup(app, ECS(os.urandom(32), max_age=1_000_000))
+    jinja_setup(app, loader=FileSystemLoader(os.getcwd() + '/website/templates'))
+
+    # Add our connections and their loggers
+    app['database'] = DatabaseConnection
+    DatabaseConnection.logger = logger.getChild("db")
+    app['redis'] = RedisConnection
+    RedisConnection.logger = logger.getChild("redis")
+    app['logger'] = logger.getChild("route")
+
+    # Add our config
+    app['config'] = config
+
+    # Add our bots
+    app['bots'] = {}
+    for index, (bot_name, token) in enumerate(config['discord_bots']):
+        app['bots'][bot_name] = SlimBot(token)
+        if index == 0:
+            set_default_log_levels(app['bots'][bot_name], args)
+
+    loop = app.loop
+
+    # Connect the database pool
+    if app['config'].get('database', {}).get('enabled', False):
+        db_connect_task = start_database_pool(app['config'])
+        loop.run_until_complete(db_connect_task)
+
+    # Connect the redis pool
+    if app['config'].get('redis', {}).get('enabled', False):
+        re_connect = start_redis_pool(app['config'])
+        loop.run_until_complete(re_connect)
+
+    # Load the bot's extensions
+    logger.info('Loading extensions... ')
+    for bot in app['bots'].values():
+        bot.load_all_extensions()
+
+    # Start the HTTP server
+    logger.info("Creating webserver...")
+    application = AppRunner(app)
+    loop.run_until_complete(application.setup())
+    webserver = TCPSite(application, host=args.host, port=args.port)
+
+    # Start the webserver
+    loop.run_until_complete(webserver.start())
+    logger.info(f"Server started - http://{args.host}:{args.port}/")
+
+    # This is the forever loop
+    try:
+        logger.info("Running webserver")
+        loop.run_forever()
+    except KeyboardInterrupt:
+        pass
+
+    # We're now done running the bot, time to clean up and close
+    loop.run_until_complete(application.cleanup())
     if bot.config.get('database', {}).get('enabled', False):
         logger.info("Closing database pool")
         loop.run_until_complete(DatabaseConnection.pool.close())

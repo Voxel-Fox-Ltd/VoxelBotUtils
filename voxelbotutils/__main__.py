@@ -1,6 +1,7 @@
+import argparse
 import os
 
-from .runner import get_default_program_arguments, validate_sharding_information, set_default_log_levels, run_bot
+from .runner import validate_sharding_information, set_default_log_levels, run_bot
 from . import Bot
 
 
@@ -18,46 +19,96 @@ def create_file(*path, content:str=None, throw_error:bool=False):
             raise e
 
 
+# Parse arguments
+def get_default_program_arguments() -> argparse.ArgumentParser:
+    """
+    Set up the program arguments for the module. These include the following (all are proceeded by "python -m voxelbotutils"):
+    "run bot config.toml --min 0 --max 10 --shardcount 10"
+    "run bot config/config.toml"
+    "run website config.toml"
+    "run website config/config.toml"
+    "create-config bot"
+    "create-config website"
+
+    Returns:
+        argparse.ArgumentParser: The arguments that were parsed
+    """
+
+    LOGLEVEL_CHOICES = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    # LOGLEVEL_CHOICES.extend([i.lower() for i in LOGLEVEL_CHOICES])
+
+    # Set up our parsers and subparsers
+    parser = argparse.ArgumentParser()
+    runner_subparser = parser.add_subparsers(dest="subcommand", required=True)
+    bot_subparser = runner_subparser.add_parser("run-bot")
+    website_subparser = runner_subparser.add_parser("run-website")
+    create_config_subparser = runner_subparser.add_parser("create-config")
+
+    # Set up the bot arguments
+    bot_subparser.add_argument("bot_directory", nargs="?", default=".", help="The directory containing a config and a cogs folder for the bot to run.")
+    bot_subparser.add_argument("config_file", nargs="?", default="config/config.toml", help="The configuration for the bot.")
+    bot_subparser.add_argument("--min", nargs="?", type=int, default=None, help="The minimum shard ID that this instance will run with (inclusive).")
+    bot_subparser.add_argument("--max", nargs="?", type=int, default=None, help="The maximum shard ID that this instance will run with (inclusive).")
+    bot_subparser.add_argument("--shardcount", nargs="?", type=int, default=None, help="The amount of shards that the bot should be using.")
+    bot_subparser.add_argument("--loglevel", nargs="?", default="INFO", help="Global logging level - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+    bot_subparser.add_argument("--loglevel-bot", nargs="?", default=None, help="Logging level for the bot - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+    bot_subparser.add_argument("--loglevel-discord", nargs="?", default=None, help="Logging level for discord - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+    bot_subparser.add_argument("--loglevel-database", default=None, help="Logging level for database - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+    bot_subparser.add_argument("--loglevel-redis", nargs="?", default=None, help="Logging level for redis - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+    bot_subparser.add_argument("--loglevel-statsd", nargs="?", default=None, help="Logging level for statsd - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+
+    # Set up the website arguments
+    bot_subparser.add_argument("website_directory", nargs="?", default=".", help="The directory containing a static and templates folder for the website to run.")
+    website_subparser.add_argument("config_file", nargs="?", default="config/website.toml", help="The configuration for the website.")
+    website_subparser.add_argument("--host", nargs="?", default="0.0.0.0", help="The host IP to run the website on.")
+    website_subparser.add_argument("--port", nargs="?", type=int, default="8080", help="The port to run the website with.")
+    website_subparser.add_argument("--debug", type=bool, default=False, help="Whether or not to run the website in debug mode")
+    website_subparser.add_argument("--loglevel", nargs="?", default="INFO", help="Global logging level - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+    website_subparser.add_argument("--loglevel-web", nargs="?", default=None, help="Logging level for the website - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+    website_subparser.add_argument("--loglevel-bot", nargs="?", default=None, help="Logging level for the bot - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+    website_subparser.add_argument("--loglevel-discord", nargs="?", default=None, help="Logging level for discord - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+    website_subparser.add_argument("--loglevel-database", nargs="?", default=None, help="Logging level for database - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+    website_subparser.add_argument("--loglevel-redis", nargs="?", default=None, help="Logging level for redis - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+    website_subparser.add_argument("--loglevel-statsd", nargs="?", default=None, help="Logging level for statsd - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+
+    # See what we want to make a config file for
+    create_config_subparser.add_argument("config_type", nargs=1, help="The type of config file that we want to create.", choices=["bot", "website"])
+
+    # Wew that's a lot of things
+    return parser
+
+
 if __name__ == '__main__':
 
     # Wew let's see if we want to run a bot
-    parser = get_default_program_arguments(include_config_file=False)
-    parser.add_argument(
-        "bot_directory", nargs="?", default=".",
-        help="The directory containing a config and a cogs folder for the bot to run."
-    )
-    parser.add_argument(
-        "config_file", nargs="?", default="config/config.toml",
-        help="The configuration for the bot"
-    )
-    parser.add_argument(
-        "--create-config-file", action="store_true", default=False,
-        help="The module will ignore running the bot and all relevant args, and instead create a config file as 'config/config.toml'."
-    )
+    parser = get_default_program_arguments()
     args = parser.parse_args()
 
     # Let's see if we copyin bois
-    if args.create_config_file:
+    if args.subcommand == "create-config":
+        config_type = args.config_type[0]
         from . import config
-        create_file("config", "config.toml", content=config.config_file.lstrip(), throw_error=True)
-        create_file("config", "config.example.toml", content=config.config_file.lstrip())
-        create_file("config", "database.pgsql", content=config.database_file.lstrip())
-        create_file("cogs", "ping_command.py", content=config.cog_example.lstrip())
-        create_file("run.bat", content="py -m voxelbotutils .\n")
-        create_file("run.sh", content="python3 -m voxelbotutils .\n")
-        create_file(".gitignore", content="__pycache__/\nconfig/config.toml\n")
-        create_file("requirements.txt", content="voxelbotutils\n")
-        print("Created config file.")
+        if config_type == "bot":
+            create_file("config", "config.toml", content=config.config_file.lstrip(), throw_error=True)
+            create_file("config", "config.example.toml", content=config.config_file.lstrip())
+            create_file("config", "database.pgsql", content=config.database_file.lstrip())
+            create_file("cogs", "ping_command.py", content=config.cog_example.lstrip())
+            create_file("run_bot.bat", content="py -m voxelbotutils run-bot .\n")
+            create_file("run_bot.sh", content="python3 -m voxelbotutils run-bot .\n")
+            create_file(".gitignore", content="__pycache__/\nconfig/config.toml\nconfig/website.toml\n")
+            create_file("requirements.txt", content="voxelbotutils\n")
+            print("Created bot config file.")
+        elif config_type == "website":
+            create_file("config", "website.toml", content=config.web_config_file.lstrip(), throw_error=True)
+            create_file("config", "website.example.toml", content=config.web_config_file.lstrip())
+            create_file("config", "database.pgsql", content=config.database_file.lstrip())
+            create_file("run_website.bat", content="py -m voxelbotutils run-website .\n")
+            create_file("run_website.sh", content="python3 -m voxelbotutils run-website .\n")
+            create_file(".gitignore", content="__pycache__/\nconfig/config.toml\nconfig/website.toml\n")
+            create_file("requirements.txt", content="voxelbotutils[web]\n")
+            create_file("website", "frontend.py", content="from aiohttp.web import HTTPFound, Request, RouteTableDef\n\nroutes = RouteTableDef()\n")
+            create_file("website", "backend.py", content="from aiohttp.web import HTTPFound, Request, RouteTableDef\n\nroutes = RouteTableDef()\n")
+            print("Created website config file.")
         exit(1)
 
-    # Change bot's cwd to where the user specified -
-    # specifically not doing this before the lines above so that they can provide a direct path
-    # from where _they_ are when they run the command, before telling the bot like
-    # "hey yeah this is where we live"
-    os.chdir(args.bot_directory)
-
-    # And run file
-    shard_ids = validate_sharding_information(args)
-    bot = Bot(shard_count=args.shardcount, shard_ids=shard_ids, config_file=args.config_file)
-    set_default_log_levels(bot, args)
-    run_bot(bot)
+    run_bot(args)

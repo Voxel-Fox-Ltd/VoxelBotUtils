@@ -17,7 +17,19 @@ requirements = [
     "asyncpg",
     "aioredis",
     "aiodogstatsd",
+    "aiohttp",
 ]
+
+
+# Here are some MORE requirements
+extras = {
+    "web": [
+        "cryptography",
+        "aiohttp_jinja2",
+        "aiohttp_session",
+        "jinja2",
+    ]
+}
 
 
 # Let's get the version
@@ -31,7 +43,7 @@ version = regex.search(text).group(1)
 setuptools.setup(
     name="voxelbotutils",
     version=version,
-    author="Caleb Bartlett",
+    author="Callum Bartlett",
     author_email="callum@voxelfox.co.uk",
     description="A set of bot utilities for Discord.py",
     long_description=long_description,
@@ -45,4 +57,5 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     install_requires=requirements,
+    extras_require=extras,
 )
