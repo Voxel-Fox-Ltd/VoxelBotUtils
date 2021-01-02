@@ -1,9 +1,13 @@
 web_config_file = """
+# These routes `/website/<filename>` will have their `routes` variable imported,
+# which will be loaded into the bot's route table
+routes = [ "frontend", "backend", ]
+
 # These are a few different tokens for Discord bots that you can use at once
-# These will all be loaded into the bot as dictionary arguments
+# Config files are loaded as `config/<filename>`
 # This is fully welcome to be entirely empty
-[discord_bots]
-    bot_name = "token here"
+[discord_bot_configs]
+    bot = "config.toml"
 
 # Used for the bot's invite and login links
 [oauth]

@@ -4,24 +4,12 @@ import logging
 import sys
 import typing
 import os
-
-from aiohttp.web import Application, AppRunner, TCPSite
-from aiohttp_jinja2 import setup as jinja_setup
-from aiohttp_session import setup as session_setup
-from aiohttp_session.cookie_storage import EncryptedCookieStorage as ECS, SimpleCookieStorage
-from jinja2 import FileSystemLoader
-import toml
+import importlib
 
 from .cogs.utils.database import DatabaseConnection
 from .cogs.utils.redis import RedisConnection
-from .cogs.utils.custom_bot import Bot, SlimBot
-
-
-__all__ = (
-    'validate_sharding_information',
-    'set_default_log_levels',
-    'run_bot',
-)
+from .cogs.utils.statsd import StatsdConnection
+from .cogs.utils.custom_bot import Bot
 
 
 # Set up the loggers
@@ -353,6 +341,14 @@ def run_website(args:argparse.Namespace) -> None:
         args (argparse.Namespace): The arguments namespace that wants to be run
     """
 
+    # Load our imports here so we don't need to require them all the time
+    from aiohttp.web import Application, AppRunner, TCPSite
+    from aiohttp_jinja2 import setup as jinja_setup
+    from aiohttp_session import setup as session_setup, SimpleCookieStorage
+    from aiohttp_session.cookie_storage import EncryptedCookieStorage as ECS
+    from jinja2 import FileSystemLoader
+    import toml
+
     os.chdir(args.website_directory)
 
     # Use right event loop
@@ -372,10 +368,9 @@ def run_website(args:argparse.Namespace) -> None:
     # Create website object - don't start based on argv
     app = Application(loop=asyncio.get_event_loop(), debug=args.debug)
     app['static_root_url'] = '/static'
-    from website.frontend import routes as frontend_routes
-    app.router.add_routes(frontend_routes)
-    from website.backend import routes as backend_routes
-    app.router.add_routes(backend_routes)
+    for route in config['routes']:
+        module = importlib.import_module(f"website.{route}", "temp")
+        app.router.add_routes(module.routes)
     app.router.add_static('/static', os.getcwd() + '/website/static', append_version=True)
 
     # Add middlewares
@@ -387,20 +382,15 @@ def run_website(args:argparse.Namespace) -> None:
 
     # Add our connections and their loggers
     app['database'] = DatabaseConnection
-    DatabaseConnection.logger = logger.getChild("db")
+    DatabaseConnection.logger = logger.getChild("database")
     app['redis'] = RedisConnection
     RedisConnection.logger = logger.getChild("redis")
     app['logger'] = logger.getChild("route")
+    StatsdConnection.logger = logger.getChild("statsd")
+    app['stats'] = StatsdConnection
 
     # Add our config
     app['config'] = config
-
-    # Add our bots
-    app['bots'] = {}
-    for index, (bot_name, token) in enumerate(config['discord_bots']):
-        app['bots'][bot_name] = SlimBot(token)
-        if index == 0:
-            set_default_log_levels(app['bots'][bot_name], args)
 
     loop = app.loop
 
@@ -414,10 +404,20 @@ def run_website(args:argparse.Namespace) -> None:
         re_connect = start_redis_pool(app['config'])
         loop.run_until_complete(re_connect)
 
-    # Load the bot's extensions
-    logger.info('Loading extensions... ')
-    for bot in app['bots'].values():
-        bot.load_all_extensions()
+    # Add our bots
+    app['bots'] = {}
+    for index, (bot_name, bot_config_location) in enumerate(config['discord_bot_configs'].items()):
+        bot = Bot(f"./config/{bot_config_location}")
+        app['bots'][bot_name] = bot
+        if index == 0:
+            set_default_log_levels(bot, args)
+        try:
+            loop.run_until_complete(bot.login())
+            bot.load_all_extensions()
+        except Exception as e:
+            logger.error(f"Failed to start bot {bot_name}")
+            logger.error(e)
+            exit(1)
 
     # Start the HTTP server
     logger.info("Creating webserver...")
