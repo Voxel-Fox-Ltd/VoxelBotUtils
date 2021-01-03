@@ -16,7 +16,7 @@ routes = [ "frontend", "backend", ]
 
 # Here's some URLs that the bot will use internally to redirect to
 [static_urls]
-    login_url = ""  # The url for the bot's login - can be internal (/login) or a real URL
+    login_url = "/login_redirect"  # The url for the bot's login - can be internal (/login) or a real URL
 
 # This data is passed directly over to asyncpg.connect()
 [database]

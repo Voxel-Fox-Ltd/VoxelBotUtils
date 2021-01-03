@@ -66,6 +66,7 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     website_subparser.add_argument("--loglevel", nargs="?", default="INFO", help="Global logging level - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
     website_subparser.add_argument("--loglevel-web", nargs="?", default=None, help="Logging level for the website - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
     website_subparser.add_argument("--loglevel-bot", nargs="?", default=None, help="Logging level for the bot - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+    website_subparser.add_argument("--loglevel-aiohttp", nargs="?", default=None, help="Logging level for aiohttp - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
     website_subparser.add_argument("--loglevel-discord", nargs="?", default=None, help="Logging level for discord - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
     website_subparser.add_argument("--loglevel-database", nargs="?", default=None, help="Logging level for database - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
     website_subparser.add_argument("--loglevel-redis", nargs="?", default=None, help="Logging level for redis - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
@@ -89,13 +90,24 @@ if __name__ == '__main__':
         config_type = args.config_type[0]
         from . import config
         if config_type in ["website", "all"]:
-            website_file_content = (
+            website_frontend_file_content = (
                 "from aiohttp.web import HTTPFound, Request, RouteTableDef\n"
-                "# import aiohttp_session\n"
-                "# import discord\n"
-                "# from aiohttp_jinja2 import template\n\n\n"
+                "from voxelbotutils import web as webutils\n"
+                "import aiohttp_session\n"
+                "import discord\n"
+                "from aiohttp_jinja2 import template\n\n\n"
                 "routes = RouteTableDef()\n"
             )
+            website_backend_file_content = website_frontend_file_content + (
+                "\n\n@routes.get('/login_redirect')\n"
+                "async def login(request:Request):\n"
+                '    """\n'
+                '    Page the discord login redirects the user to when successfully logged in with Discord.\n'
+                '    """\n\n'
+                "    await webutils.process_discord_login(request, ['identify', 'guilds'])\n"
+                "    session = await aiohttp_session.get_session(request)\n"
+                "    return HTTPFound(location=session.pop('redirect_on_login', '/'))\n"
+            ).replace("from aiohttp_jinja2 import template\n", "")
             create_file("config", "website.toml", content=config.web_config_file.lstrip(), throw_error=True)
             create_file("config", "website.example.toml", content=config.web_config_file.lstrip())
             create_file("config", "database.pgsql", content=config.database_file.lstrip())
@@ -103,8 +115,8 @@ if __name__ == '__main__':
             create_file("run_website.sh", content="python3 -m voxelbotutils run-website .\n")
             create_file(".gitignore", content="__pycache__/\nconfig/config.toml\nconfig/website.toml\n")
             create_file("requirements.txt", content="voxelbotutils[web]\n")
-            create_file("website", "frontend.py", content=website_file_content)
-            create_file("website", "backend.py", content=website_file_content)
+            create_file("website", "frontend.py", content=website_frontend_file_content)
+            create_file("website", "backend.py", content=website_backend_file_content)
             create_file("website", "static", ".gitkeep", content="\n")
             create_file("website", "templates", ".gitkeep", content="\n")
             print("Created website config file.")
