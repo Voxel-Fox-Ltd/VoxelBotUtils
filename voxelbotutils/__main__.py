@@ -104,9 +104,23 @@ if __name__ == '__main__':
                 '    """\n'
                 '    Page the discord login redirects the user to when successfully logged in with Discord.\n'
                 '    """\n\n'
-                "    await webutils.process_discord_login(request, ['identify', 'guilds'])\n"
+                "    await webutils.process_discord_login(request)\n"
                 "    session = await aiohttp_session.get_session(request)\n"
-                "    return HTTPFound(location=session.pop('redirect_on_login', '/'))\n"
+                "    return HTTPFound(location=session.pop('redirect_on_login', '/'))\n\n\n"
+                "\n\n@routes.get('/logout')\n"
+                "async def logout(request:Request):\n"
+                '    """\n'
+                "    Destroy the user's login session.\n"
+                '    """\n\n'
+                "    session = await aiohttp_session.get_session(request)\n"
+                "    session.invalidate()\n"
+                "    return HTTPFound(location='/')\n"
+                "\n\n@routes.get('/login')\n"
+                "async def login(request:Request):\n"
+                '    """\n'
+                "    Direct the user to the bot's Oauth login page.\n"
+                '    """\n\n'
+                '    return HTTPFound(location=webutils.get_discord_login_url(request, "/login_processor"))\n'
             ).replace("from aiohttp_jinja2 import template\n", "")
             create_file("config", "website.toml", content=config.web_config_file.lstrip(), throw_error=True)
             create_file("config", "website.example.toml", content=config.web_config_file.lstrip())
