@@ -263,15 +263,16 @@ class ErrorHandler(utils.Cog):
                 await owner.send(error_text, file=discord.File(file_handle, filename="error_log.py"))
 
         # Ping to the webook
-        event_webhook = self.bot.get_event_webhook("unhandled_error")
+        event_webhook: discord.Webhook = self.bot.get_event_webhook("unhandled_error")
+        try:
+            avatar_url = str(self.bot.user.avatar_url)
+        except Exception:
+            avatar_url = None
         if event_webhook:
             file_handle.seek(0)
             try:
-                await event_webhook.send(
-                    error_text,
-                    file=discord.File(file_handle, filename="error_log.py"),
-                    username=f"{self.bot.user.name} - Error"
-                )
+                file = discord.File(file_handle, filename="error_log.py")
+                await event_webhook.send(error_text, file=file, username=f"{self.bot.user.name} - Error", avatar_url=avatar_url)
             except discord.HTTPException as e:
                 self.logger.error(f"Failed to send webhook for event unhandled_error - {e}")
 

@@ -12,11 +12,15 @@ class ConnectEvent(utils.Cog):
         Send a webhook to the bot specified event webhook url.
         """
 
-        event_webhook = self.bot.get_event_webhook(event_name)
+        event_webhook: discord.Webhook = self.bot.get_event_webhook(event_name)
         if not event_webhook:
             return False
         try:
-            await event_webhook.send(discord.utils.escape_mentions(text), username=username)
+            avatar_url = str(self.bot.user.avatar_url)
+        except Exception:
+            avatar_url = None
+        try:
+            await event_webhook.send(discord.utils.escape_mentions(text), username=username, avatar_url=avatar_url)
         except discord.HTTPException as e:
             self.logger.error(f"Failed to send webhook for event {event_name} - {e}")
             return False
