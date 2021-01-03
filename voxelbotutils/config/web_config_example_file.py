@@ -1,7 +1,8 @@
 web_config_file = """
-# These routes `/website/<filename>` will have their `routes` variable imported,
-# which will be loaded into the bot's route table
-routes = [ "frontend", "backend", ]
+website_base_url = "http://localhost:8080"  # This will be used to dynamically make the redirect url internally
+login_url = "/login"  # The url or route used to prompt the user to login
+routes = [ "frontend", "backend", ]  # These routes `/website/<filename>` will have their `routes` variable imported which will be loaded into the bot's route table
+oauth_scopes = [ "identify", "guilds", ]  # The scopes that should be added to the automatic login url
 
 # These are a few different tokens for Discord bots that you can use at once
 # Config files are loaded as `config/<filename>`
@@ -13,10 +14,6 @@ routes = [ "frontend", "backend", ]
 [oauth]
     client_id = ""
     client_secret = ""
-
-# Here's some URLs that the bot will use internally to redirect to
-[static_urls]
-    login_url = "/login_redirect"  # The url for the bot's login - can be internal (/login) or a real URL
 
 # This data is passed directly over to asyncpg.connect()
 [database]

@@ -9,7 +9,7 @@ from aiohttp.web import HTTPFound, Request
 from .get_avatar_url import get_avatar_url
 
 
-def get_discord_login_url(request:Request, redirect_uri:str=None, oauth_scopes:list=None) -> str:
+def get_discord_login_url(request:Request, redirect_uri:str=None) -> str:
     """
     Get a valid URL for a user to use to login to the website.
 
@@ -24,18 +24,21 @@ def get_discord_login_url(request:Request, redirect_uri:str=None, oauth_scopes:l
 
     config = request.app['config']
     oauth_data = config['oauth']
+    oauth_scopes = config['oauth_scopes']
     parameters = {
         'response_type': 'code',
         'client_id': oauth_data['client_id'],
     }
     if redirect_uri:
+        if 'http' not in redirect_uri:
+            redirect_uri = config['website_base_url'].rstrip('/') + '/' + redirect_uri.lstrip('/')
         parameters['redirect_uri'] = redirect_uri
     if oauth_scopes:
         parameters['scope'] = ' '.join(oauth_scopes)
     return 'https://discordapp.com/api/oauth2/authorize?' + urlencode(parameters)
 
 
-async def process_discord_login(request:Request, oauth_scopes:list) -> None:
+async def process_discord_login(request:Request) -> None:
     """
     Process the login from Discord and store relevant data in the session.
 
@@ -52,6 +55,7 @@ async def process_discord_login(request:Request, oauth_scopes:list) -> None:
     # Get the bot
     config = request.app['config']
     oauth_data = config['oauth']
+    oauth_scopes = config['oauth_scopes']
 
     # Generate the post data
     data = {
@@ -118,7 +122,7 @@ async def get_user_info_from_session(request:Request, *, refresh:bool=False):
     return user_info
 
 
-async def get_access_token_from_session(request:Request, oauth_scopes:list=None, *, refresh_if_expired:bool=True, refresh:bool=False) -> str:
+async def get_access_token_from_session(request:Request, *, refresh_if_expired:bool=True, refresh:bool=False) -> str:
     """
     Get the access token for a given user.
     """
@@ -127,6 +131,7 @@ async def get_access_token_from_session(request:Request, oauth_scopes:list=None,
     session_storage = await aiohttp_session.get_session(request)
     config = request.app['config']
     oauth_data = config['oauth']
+    oauth_scopes = config['oauth_scopes']
 
     # See if we even need to make a new request
     if refresh:

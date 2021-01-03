@@ -33,7 +33,7 @@ def add_discord_arguments(*, redirect_if_logged_out:str=None, redirect_if_logged
             if isinstance(data, HTTPFound):
 
                 # If we're telling them to login
-                if data.location == request.app['config']['static_urls']['login_url']:
+                if data.location == request.app['config']['login_url']:
                     session = await aiohttp_session.get_session(request)
 
                     # We can send them back to where they tried to go initially

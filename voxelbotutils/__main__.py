@@ -99,8 +99,8 @@ if __name__ == '__main__':
                 "routes = RouteTableDef()\n"
             )
             website_backend_file_content = website_frontend_file_content + (
-                "\n\n@routes.get('/login_redirect')\n"
-                "async def login(request:Request):\n"
+                "\n\n@routes.get('/login_processor')\n"
+                "async def login_processor(request:Request):\n"
                 '    """\n'
                 '    Page the discord login redirects the user to when successfully logged in with Discord.\n'
                 '    """\n\n'
