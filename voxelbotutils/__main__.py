@@ -53,6 +53,7 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     bot_subparser.add_argument("--shardcount", nargs="?", type=int, default=None, help="The amount of shards that the bot should be using.")
     bot_subparser.add_argument("--loglevel", nargs="?", default="INFO", help="Global logging level - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
     bot_subparser.add_argument("--loglevel-bot", nargs="?", default=None, help="Logging level for the bot - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+    bot_subparser.add_argument("--loglevel-aiohttp", nargs="?", default=None, help="Logging level for aiohttp - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
     bot_subparser.add_argument("--loglevel-discord", nargs="?", default=None, help="Logging level for discord - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
     bot_subparser.add_argument("--loglevel-database", default=None, help="Logging level for database - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
     bot_subparser.add_argument("--loglevel-redis", nargs="?", default=None, help="Logging level for redis - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
