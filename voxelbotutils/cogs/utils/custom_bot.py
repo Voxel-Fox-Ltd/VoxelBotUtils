@@ -227,7 +227,7 @@ class Bot(commands.AutoShardedBot):
 
         return self.get_guild(self.config['support_guild_id']) or await self.fetch_guild(self.config['support_guild_id'])
 
-    def get_invite_link(self, *, scope:str='bot applications.commands', response_type:str=None, redirect_uri:str=None, guild_id:int=None, **kwargs) -> str:
+    def get_invite_link(self, *, scope:str='bot', response_type:str=None, redirect_uri:str=None, guild_id:int=None, **kwargs) -> str:
         """
         Gets the invite link for the bot, with permissions all set properly.
 
