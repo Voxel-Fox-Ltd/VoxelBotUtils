@@ -308,6 +308,7 @@ def run_bot(args:argparse.Namespace) -> None:
     # And run file
     shard_ids = validate_sharding_information(args)
     bot = Bot(shard_count=args.shardcount, shard_ids=shard_ids, config_file=args.config_file)
+    loop = bot.loop
     set_default_log_levels(bot, args)
 
     # Connect the database pool
