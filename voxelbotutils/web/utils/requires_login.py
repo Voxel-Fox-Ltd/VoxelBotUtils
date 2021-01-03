@@ -19,7 +19,8 @@ def requires_login():
             # See if we have token info
             session = await aiohttp_session.get_session(request)
             if session.new or session.get('logged_in', False) is False:
-                return HTTPFound(location=request.app['config']['static_urls']['login_url'])
+                session['redirect_on_login'] = str(request.url)
+                return HTTPFound(location=request.app['config']['login_url'])
 
             # We're already logged in
             return await func(request)
