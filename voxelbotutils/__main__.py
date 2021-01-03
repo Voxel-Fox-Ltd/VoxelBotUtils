@@ -39,7 +39,8 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
 
     # Set up our parsers and subparsers
     parser = argparse.ArgumentParser()
-    runner_subparser = parser.add_subparsers(dest="subcommand", required=True)
+    runner_subparser = parser.add_subparsers(dest="subcommand")
+    runner_subparser.required = True
     bot_subparser = runner_subparser.add_parser("run-bot")
     website_subparser = runner_subparser.add_parser("run-website")
     create_config_subparser = runner_subparser.add_parser("create-config")
