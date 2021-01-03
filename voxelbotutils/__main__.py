@@ -89,6 +89,13 @@ if __name__ == '__main__':
         config_type = args.config_type[0]
         from . import config
         if config_type in ["website", "all"]:
+            website_file_content = (
+                "from aiohttp.web import HTTPFound, Request, RouteTableDef\n"
+                "# import aiohttp_session\n"
+                "# import discord\n"
+                "# from aiohttp_jinja2 import template\n\n\n"
+                "routes = RouteTableDef()\n"
+            )
             create_file("config", "website.toml", content=config.web_config_file.lstrip(), throw_error=True)
             create_file("config", "website.example.toml", content=config.web_config_file.lstrip())
             create_file("config", "database.pgsql", content=config.database_file.lstrip())
@@ -96,9 +103,10 @@ if __name__ == '__main__':
             create_file("run_website.sh", content="python3 -m voxelbotutils run-website .\n")
             create_file(".gitignore", content="__pycache__/\nconfig/config.toml\nconfig/website.toml\n")
             create_file("requirements.txt", content="voxelbotutils[web]\n")
-            create_file("website", "frontend.py", content="from aiohttp.web import HTTPFound, Request, RouteTableDef\n\n\nroutes = RouteTableDef()\n")
-            create_file("website", "backend.py", content="from aiohttp.web import HTTPFound, Request, RouteTableDef\n\n\nroutes = RouteTableDef()\n")
+            create_file("website", "frontend.py", content=website_file_content)
+            create_file("website", "backend.py", content=website_file_content)
             create_file("website", "static", ".gitkeep", content="\n")
+            create_file("website", "templates", ".gitkeep", content="\n")
             print("Created website config file.")
         if config_type in ["bot", "all"]:
             create_file("config", "config.toml", content=config.config_file.lstrip(), throw_error=True)
