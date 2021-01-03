@@ -26,7 +26,7 @@ To get started, you'll need to make a configuration file that VBU can use. The l
 
 .. code-block:: bash
 
-    python -m voxelbotutils --create-config-file
+    python -m voxelbotutils create-config-file bot
 
 Doing this will make a few files and folders:
 
@@ -61,7 +61,7 @@ At this point you're able to run your bot - there's several built-in commands th
 
 .. code-block:: bash
 
-    python -m voxelbotutils .
+    python -m voxelbotutils run-bot .
 
 The information in the bot's `config/config.toml` file will be used to run it, as well as automatically loading any files found in the `cogs/` folder, should they not start with an underscore (eg the file `cogs/test.py` would be loaded, but `cogs/_test.py` would not).
 
