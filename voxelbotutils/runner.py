@@ -166,6 +166,7 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     set_log_level(bot.stats.logger, 'DEBUG')
     set_log_level('discord', 'DEBUG')
     set_log_level('aiohttp', 'DEBUG')
+    set_log_level('aiohttp.access', 'DEBUG')
 
     # Set loglevel defaults for the stdout handlers
     set_log_level(bot_stdout_logger, args.loglevel)
@@ -212,6 +213,8 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     logging.getLogger('discord').addHandler(discord_stderr_logger)
     logging.getLogger('aiohttp').addHandler(aiohttp_stdout_logger)
     logging.getLogger('aiohttp').addHandler(aiohttp_stderr_logger)
+    logging.getLogger('aiohttp.access').addHandler(aiohttp_stdout_logger)
+    logging.getLogger('aiohttp.access').addHandler(aiohttp_stderr_logger)
 
 
 async def create_initial_database(db) -> None:
