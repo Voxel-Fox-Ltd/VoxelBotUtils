@@ -19,8 +19,9 @@ def requires_login():
             # See if we have token info
             session = await aiohttp_session.get_session(request)
             if session.new or session.get('logged_in', False) is False:
-                session['redirect_on_login'] = str(request.url)
-                root_url = request.app['config']['login_url'].rstrip('/')
+                before = session.get('redirect_on_login')
+                session['redirect_on_login'] = before or str(request.url)
+                root_url = request.app['config']['login_url'].rstrip('/').split('//')[-1]
                 if any([i in session['redirect_on_login'] for i in [f"{root_url}/login", f"{root_url}/login_processor"]]):
                     session['redirect_on_login'] = '/'
                 return HTTPFound(location=request.app['config']['login_url'])
