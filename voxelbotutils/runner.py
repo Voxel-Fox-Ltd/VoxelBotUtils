@@ -456,7 +456,7 @@ def run_website(args:argparse.Namespace) -> None:
 
     # Add our bots
     app['bots'] = {}
-    for index, (bot_name, bot_config_location) in enumerate(config['discord_bot_configs'].items()):
+    for index, (bot_name, bot_config_location) in enumerate(config.get('discord_bot_configs', dict()).items()):
         bot = Bot(f"./config/{bot_config_location}")
         app['bots'][bot_name] = bot
         if index == 0:
