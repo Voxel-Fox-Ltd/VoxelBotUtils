@@ -117,6 +117,11 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
         args (argparse.Namespace): The argparse namespace saying what levels to set each logger to
     """
 
+    try:
+        level = getattr(logging, args.loglevel.upper())
+        logging.basicConfig(level=level, format='%(asctime)s:%(name)s:%(levelname)s: %(message)s')
+    except AttributeError:
+        raise ValueError(f"The log level {args.loglevel.upper()} wasn't found in the logging module")
     formatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s: %(message)s')
     bot.logger = logger
 
