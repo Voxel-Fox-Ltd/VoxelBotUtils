@@ -134,8 +134,8 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     stats_stderr_logger = logging.StreamHandler(sys.stderr)
     discord_stdout_logger = logging.StreamHandler(sys.stdout)
     discord_stderr_logger = logging.StreamHandler(sys.stderr)
-    aiohttp_stdout_logger = logging.StreamHandler(sys.stdout)
-    aiohttp_stderr_logger = logging.StreamHandler(sys.stderr)
+    # aiohttp_stdout_logger = logging.StreamHandler(sys.stdout)
+    # aiohttp_stderr_logger = logging.StreamHandler(sys.stderr)
 
     # Add the filters for the stdout handlers
     bot_stdout_logger.addFilter(log_filter)
@@ -143,7 +143,7 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     redis_stdout_logger.addFilter(log_filter)
     stats_stdout_logger.addFilter(log_filter)
     discord_stdout_logger.addFilter(log_filter)
-    aiohttp_stdout_logger.addFilter(log_filter)
+    # aiohttp_stdout_logger.addFilter(log_filter)
 
     # Add our formatters
     bot_stdout_logger.setFormatter(formatter)
@@ -156,8 +156,8 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     stats_stderr_logger.setFormatter(formatter)
     discord_stdout_logger.setFormatter(formatter)
     discord_stderr_logger.setFormatter(formatter)
-    aiohttp_stdout_logger.setFormatter(formatter)
-    aiohttp_stderr_logger.setFormatter(formatter)
+    # aiohttp_stdout_logger.setFormatter(formatter)
+    # aiohttp_stderr_logger.setFormatter(formatter)
 
     # Set all the loggers to debug
     set_log_level(bot.logger, 'DEBUG')
@@ -165,8 +165,8 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     set_log_level(bot.redis.logger, 'DEBUG')
     set_log_level(bot.stats.logger, 'DEBUG')
     set_log_level('discord', 'DEBUG')
-    set_log_level('aiohttp', 'DEBUG')
-    set_log_level('aiohttp.access', 'DEBUG')
+    # set_log_level('aiohttp', 'DEBUG')
+    # set_log_level('aiohttp.access', 'DEBUG')
 
     # Set loglevel defaults for the stdout handlers
     set_log_level(bot_stdout_logger, args.loglevel)
@@ -174,7 +174,7 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     set_log_level(redis_stdout_logger, args.loglevel)
     set_log_level(stats_stdout_logger, args.loglevel)
     set_log_level(discord_stdout_logger, args.loglevel)
-    set_log_level(aiohttp_stdout_logger, args.loglevel)
+    # set_log_level(aiohttp_stdout_logger, args.loglevel)
 
     # Set loglevel default for the stderr handlers
     set_log_level(bot_stderr_logger, args.loglevel, logging.WARNING)
@@ -182,7 +182,7 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     set_log_level(redis_stderr_logger, args.loglevel, logging.WARNING)
     set_log_level(stats_stderr_logger, args.loglevel, logging.WARNING)
     set_log_level(discord_stderr_logger, args.loglevel, logging.WARNING)
-    set_log_level(aiohttp_stdout_logger, args.loglevel, logging.WARNING)
+    # set_log_level(aiohttp_stdout_logger, args.loglevel, logging.WARNING)
 
     # Set loglevels for the stdouts via the commandline args
     set_log_level(bot_stdout_logger, args.loglevel_bot)
@@ -190,7 +190,7 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     set_log_level(redis_stdout_logger, args.loglevel_redis)
     set_log_level(stats_stdout_logger, args.loglevel_statsd)
     set_log_level(discord_stdout_logger, args.loglevel_discord)
-    set_log_level(aiohttp_stdout_logger, args.loglevel_aiohttp)
+    # set_log_level(aiohttp_stdout_logger, args.loglevel_aiohttp)
 
     # Set loglevels for the stderrs via the commandline args
     set_log_level(bot_stderr_logger, args.loglevel_bot, logging.WARNING)
@@ -198,7 +198,7 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     set_log_level(redis_stderr_logger, args.loglevel_redis, logging.WARNING)
     set_log_level(stats_stderr_logger, args.loglevel_statsd, logging.WARNING)
     set_log_level(discord_stderr_logger, args.loglevel_discord, logging.WARNING)
-    set_log_level(aiohttp_stderr_logger, args.loglevel_aiohttp, logging.WARNING)
+    # set_log_level(aiohttp_stderr_logger, args.loglevel_aiohttp, logging.WARNING)
 
     # Add the stream handlers to the loggers
     bot.logger.addHandler(bot_stdout_logger)
@@ -211,10 +211,10 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     bot.stats.logger.addHandler(stats_stderr_logger)
     logging.getLogger('discord').addHandler(discord_stdout_logger)
     logging.getLogger('discord').addHandler(discord_stderr_logger)
-    logging.getLogger('aiohttp').addHandler(aiohttp_stdout_logger)
-    logging.getLogger('aiohttp').addHandler(aiohttp_stderr_logger)
-    logging.getLogger('aiohttp.access').addHandler(aiohttp_stdout_logger)
-    logging.getLogger('aiohttp.access').addHandler(aiohttp_stderr_logger)
+    # logging.getLogger('aiohttp').addHandler(aiohttp_stdout_logger)
+    # logging.getLogger('aiohttp').addHandler(aiohttp_stderr_logger)
+    # logging.getLogger('aiohttp.access').addHandler(aiohttp_stdout_logger)
+    # logging.getLogger('aiohttp.access').addHandler(aiohttp_stderr_logger)
 
 
 async def create_initial_database(db) -> None:
