@@ -5,6 +5,7 @@ from datetime import datetime as dt, timedelta
 import aiohttp
 import aiohttp_session
 from aiohttp.web import HTTPFound, Request, json_response
+import yarl
 
 from .get_avatar_url import get_avatar_url
 
@@ -64,10 +65,12 @@ async def process_discord_login(request:Request) -> None:
         'scope': ' '.join(oauth_scopes),
         **oauth_data,
     }
-    if request.url.explicit_port:
-        data['redirect_uri'] = "{0.scheme}://{0.host}:{0.port}{0.path}".format(request.url)
+
+    base_url = yarl.URL(config['website_base_url'])
+    if base_url.explicit_port:
+        data['redirect_uri'] = "{0.scheme}://{0.host}:{0.port}{1.path}".format(base_url, request.url)
     else:
-        data['redirect_uri'] = "{0.scheme}://{0.host}{0.path}".format(request.url)
+        data['redirect_uri'] = "{0.scheme}://{0.host}{1.path}".format(base_url, request.url)
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
     }
