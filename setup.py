@@ -28,6 +28,8 @@ extras = {
         "aiohttp_jinja2",
         "aiohttp_session",
         "jinja2",
+        "markdown",
+        "htmlmin",
     ]
 }
 

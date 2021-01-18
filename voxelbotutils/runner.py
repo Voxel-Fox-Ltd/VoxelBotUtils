@@ -364,6 +364,10 @@ def run_website(args:argparse.Namespace) -> None:
     from aiohttp_session.cookie_storage import EncryptedCookieStorage as ECS
     from jinja2 import FileSystemLoader
     import toml
+    import re
+    import html
+    from datetime import datetime as dt
+    import markdown
 
     os.chdir(args.website_directory)
 
@@ -394,7 +398,37 @@ def run_website(args:argparse.Namespace) -> None:
         session_setup(app, SimpleCookieStorage(max_age=1_000_000))
     else:
         session_setup(app, ECS(os.urandom(32), max_age=1_000_000))
-    jinja_setup(app, loader=FileSystemLoader(os.getcwd() + '/website/templates'))
+    jinja_env = jinja_setup(app, loader=FileSystemLoader(os.getcwd() + '/website/templates'))
+
+    # Add our jinja env filters
+    def regex_replace(string, find, replace):
+        return re.sub(find, replace, string, re.IGNORECASE | re.MULTILINE)
+    def escape_text(string):
+        return html.escape(string)
+    def timestamp(string):
+        return dt.fromtimestamp(float(string))
+    def int_to_hex(string):
+        return format(hex(int(string))[2:], "0>6")
+    def to_markdown(string):
+        return markdown.markdown(string, extensions=['extra'])
+    def display_mentions(string, users):
+        def get_display_name(group):
+            user = users.get(group.group('userid'))
+            if not user:
+                return 'unknown-user'
+            return user.get('display_name') or user.get('username')
+        return re.sub(
+            '(?:<|(?:&lt;))@!?(?P<userid>\\d{16,23})(?:>|(?:&gt;))',
+            lambda g: f'<span class="chatlog__mention">@{get_display_name(g)}</span>',
+            string,
+            re.IGNORECASE | re.MULTILINE
+        )
+    jinja_env.filters['regex_replace'] = regex_replace
+    jinja_env.filters['escape_text'] = escape_text
+    jinja_env.filters['timestamp'] = timestamp
+    jinja_env.filters['int_to_hex'] = int_to_hex
+    jinja_env.filters['markdown'] = to_markdown
+    jinja_env.filters['display_mentions'] = display_mentions
 
     # Add our connections and their loggers
     app['database'] = DatabaseConnection
