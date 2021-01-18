@@ -83,7 +83,7 @@ async def process_discord_login(request:Request) -> None:
         async with session.post(token_url, data=data, headers=headers) as r:
             token_info = await r.json()
         if token_info.get('error'):
-            session['login_error'] = token_info
+            session_storage['login_error'] = token_info
             return json_response(token_info)  # Error getting the token, just ignore it
 
         # Update headers
