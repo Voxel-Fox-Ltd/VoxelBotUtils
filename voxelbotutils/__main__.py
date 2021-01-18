@@ -108,7 +108,7 @@ if __name__ == '__main__':
                 '    """\n\n'
                 "    await webutils.process_discord_login(request)\n"
                 "    session = await aiohttp_session.get_session(request)\n"
-                "    return HTTPFound(location=session.pop('redirect_on_login', '/'))\n\n\n"
+                "    return HTTPFound(location=session.pop('redirect_on_login', '/'))\n"
                 "\n\n@routes.get('/logout')\n"
                 "async def logout(request:Request):\n"
                 '    """\n'
