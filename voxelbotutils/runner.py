@@ -488,10 +488,10 @@ def run_website(args:argparse.Namespace) -> None:
 
     # We're now done running the bot, time to clean up and close
     loop.run_until_complete(application.cleanup())
-    if bot.config.get('database', {}).get('enabled', False):
+    if config.get('database', {}).get('enabled', False):
         logger.info("Closing database pool")
         loop.run_until_complete(DatabaseConnection.pool.close())
-    if bot.config.get('redis', {}).get('enabled', False):
+    if config.get('redis', {}).get('enabled', False):
         logger.info("Closing redis pool")
         RedisConnection.pool.close()
 
