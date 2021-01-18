@@ -4,7 +4,7 @@ from datetime import datetime as dt, timedelta
 
 import aiohttp
 import aiohttp_session
-from aiohttp.web import HTTPFound, Request
+from aiohttp.web import HTTPFound, Request, json_response
 
 from .get_avatar_url import get_avatar_url
 
@@ -83,7 +83,7 @@ async def process_discord_login(request:Request) -> None:
         async with session.post(token_url, data=data, headers=headers) as r:
             token_info = await r.json()
         if token_info.get('error'):
-            return  # Error getting the token, just ignore it
+            return json_response(token_info)  # Error getting the token, just ignore it
 
         # Update headers
         headers.update({

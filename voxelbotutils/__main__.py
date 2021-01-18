@@ -93,7 +93,7 @@ if __name__ == '__main__':
         from . import config
         if config_type in ["website", "all"]:
             website_frontend_file_content = (
-                "from aiohttp.web import HTTPFound, Request, RouteTableDef\n"
+                "from aiohttp.web import HTTPFound, Request, Response, RouteTableDef\n"
                 "from voxelbotutils import web as webutils\n"
                 "import aiohttp_session\n"
                 "import discord\n"
@@ -106,7 +106,10 @@ if __name__ == '__main__':
                 '    """\n'
                 '    Page the discord login redirects the user to when successfully logged in with Discord.\n'
                 '    """\n\n'
-                "    await webutils.process_discord_login(request)\n"
+                "    v = await webutils.process_discord_login(request)\n"
+                "    if isinstance(v, Response):\n"
+                "        # return v\n"
+                "        return HTTPFound('/')\n"
                 "    session = await aiohttp_session.get_session(request)\n"
                 "    return HTTPFound(location=session.pop('redirect_on_login', '/'))\n"
                 "\n\n@routes.get('/logout')\n"
