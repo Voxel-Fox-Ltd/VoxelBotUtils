@@ -20,7 +20,8 @@ def requires_login():
             session = await aiohttp_session.get_session(request)
             if session.new or session.get('logged_in', False) is False:
                 session['redirect_on_login'] = str(request.url)
-                if session['redirect_on_login'] == request.app['config']['login_url'] or '/login_processor' in str(request.url):
+                root_url = request.app['config']['login_url'].rstrip('/')
+                if any([i in session['redirect_on_login'] for i in [f"{root_url}/login", f"{root_url}/login_processor"]]):
                     session['redirect_on_login'] = '/'
                 return HTTPFound(location=request.app['config']['login_url'])
 
