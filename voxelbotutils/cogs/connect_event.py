@@ -96,6 +96,32 @@ class ConnectEvent(utils.Cog):
         )
 
     @utils.Cog.listener()
+    async def on_shard_resumed(self, shard_id:int):
+        """
+        Ping a given webhook when the shard ID is resumed.
+        """
+
+        await self.send_webhook(
+            "shard_connect",
+            f"Shard resumed event just pinged for shard ID `{shard_id}` - {dt.utcnow().strftime('%X.%f')}",
+            f"{self.bot.user.name} - Shard Resumed",
+            f"Sent webhook for on_shard_resumed event in shard `{shard_id}`",
+        )
+
+    @utils.Cog.listener()
+    async def on_resumed(self):
+        """
+        Ping a given webhook when the bot is resumed.
+        """
+
+        await self.send_webhook(
+            "bot_connect",
+            f"Bot resumed event just pinged for instance with shards `{self.bot.shard_ids}` - {dt.utcnow().strftime('%X.%f')}",
+            f"{self.bot.user.name} - Resumed",
+            "Sent webhook for on_resumed event",
+        )
+
+    @utils.Cog.listener()
     async def on_guild_join(self, guild:discord.Guild):
         """
         Ping a given webhook when the bot is added to a guild.
