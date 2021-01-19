@@ -13,10 +13,11 @@ Because I have a hard time selling people on VoxelBotUtils, I'm gonna give you a
 * Builtin Redis connection
 * Automatic guild count posting to Top.gg and DiscordBotList.org
 * DataDog stats posting
+* Website handling
 
 There's more than that but that should be enough to either sell you on it or have you decide it's worthless.
 
-Getting Started
+Getting Started With Bots
 ===========================================
 
 Configuration File
@@ -37,7 +38,7 @@ Doing this will make a few files and folders:
 * `.gitignore` - a default Gitignore file to ignore your configuration file
 * `cogs/ping_command.py` - explained below
 
-The only file that's _guarenteed_ to be created by this process is `config/config.toml` - the other files will silently fail if they already exist in your directory.
+The only file that's *guarenteed* to be created by this process is `config/config.toml` - the other files will silently fail if they already exist in your directory.
 
 Here's what your directory should look like after running this command:
 
@@ -53,6 +54,7 @@ Here's what your directory should look like after running this command:
         run.bat
         run.sh
         .gitignore
+        requirements.txt
 
 Running the Bot
 ---------------------------------------
@@ -157,3 +159,56 @@ Migrating
 If you're reading this, you _probably_ already have a bot that you want to get using with VoxelBotUtils. Fortunately, migrating is pretty easy. Most base Discord.py classes work by default without alteration, and as such you can just run your existing bot with a VBU config file, and that can be that.
 
 If you really want to get things going, you can change all of your `@commands.command()` lines to `@voxelbotutils.command()`, and any `class Whatever(commands.Cog)` to `class Whatever(voxelbotutils.Cog)`, and that's pretty much all your basic requirements out of the way.
+
+Getting Started With Websites
+===========================================
+
+Configuration File
+-------------------------------------
+
+To get started, you'll need to make a configuration file that VBU can use. The library is nice enough to do this for you if you run the module via the commandline:
+
+.. code-block:: bash
+
+    python -m voxelbotutils create-config-file website
+
+Doing this will make a few files and folders:
+
+* `config/website.toml` - this is your bot's configuration file
+* `config/website.example.toml` - this is a git-safe version of your configuration file; you can commit this as you please
+* `config/database.pgsql` - this file should contain your database schema
+* `run_website.bat` and `run_website.sh` - these are just shortcuts to running your bot; you may need to edit them depending on how you have Python installed to your system
+* `.gitignore` - a default Gitignore file to ignore your configuration file
+* `cogs/ping_command.py` - explained below
+
+The only file that's *guarenteed* to be created by this process is `config/config.toml` - the other files will silently fail if they already exist in your directory.
+
+Here's what your directory should look like after running this command:
+
+.. code-block:: none
+
+    Root
+        |--- config
+            |--- website.toml
+            |--- website.example.toml
+            |--- database.pgsql
+        |--- website
+            |--- static
+                |--- .gitkeep
+            |--- templates
+                |--- .gitkeep
+            |--- frontend.py
+            |--- backend.py
+        run_webste.bat
+        run_webste.sh
+        .gitignore
+        requirements.txt
+
+Running the Website
+---------------------------------------
+
+You can write your website routes in the `frontend.py` and `backend.py` files (as well as any other files you specify in your config) and run your website like so:
+
+.. code-block:: bash
+
+    python -m voxelbotutils run-website .

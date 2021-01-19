@@ -10,3 +10,4 @@ API Reference
    voxelbotutils.cogs.utils.converters
    voxelbotutils.cogs.utils.settings_menu
    voxelbotutils.cogs.utils.errors
+   voxelbotutils.web
