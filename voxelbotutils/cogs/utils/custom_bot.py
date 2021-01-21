@@ -8,6 +8,7 @@ from datetime import datetime as dt
 from urllib.parse import urlencode
 import string
 import platform
+import random
 
 import aiohttp
 import discord
@@ -391,6 +392,26 @@ class Bot(commands.AutoShardedBot):
             await message.channel.purge(check=lambda m: m.id in [i.id for i in delete], bulk=bulk)
         except Exception:
             return  # Ah well
+
+    def set_footer_from_config(self, embed:discord.Embed) -> None:
+        """
+        Sets a footer on the embed from the config
+        """
+
+        pool = []
+        for data in self.config.get('embed', dict()).get('footer', list()):
+            safe_data = data.copy()
+            amount = safe_data.pop('amount')
+            if amount <= 0:
+                continue
+            text = safe_data.pop('text')
+            text = text.format(ctx=self)
+            safe_data['text'] = text
+            for _ in range(amount):
+                pool.append(safe_data.copy())
+        if not pool:
+            return
+        embed.set_footer(**random.choice(pool), icon_url=self.user.avatar_url)
 
     async def create_message_log(self, messages:typing.List[discord.Message]) -> str:
         """

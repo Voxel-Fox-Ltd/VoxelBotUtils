@@ -33,20 +33,7 @@ class Context(commands.Context):
         Sets a footer on the embed from the config
         """
 
-        pool = []
-        for data in self.bot.config.get('embed', dict()).get('footer', list()):
-            safe_data = data.copy()
-            amount = safe_data.pop('amount')
-            if amount <= 0:
-                continue
-            text = safe_data.pop('text')
-            text = text.format(ctx=self)
-            safe_data['text'] = text
-            for _ in range(amount):
-                pool.append(safe_data.copy())
-        if not pool:
-            return
-        embed.set_footer(**random.choice(pool), icon_url=self.bot.user.avatar_url)
+        return self.bot.set_footer_from_embed(embed)
 
     async def send(
             self, content:str=None, *args, embed:discord.Embed=None, file:discord.File=None, ignore_error:bool=False, embeddify:bool=None,
@@ -104,7 +91,7 @@ class Context(commands.Context):
 
         # No current embed, and we _want_ to embed it? Alright!
         embed = discord.Embed(description=content, colour=random.randint(1, 0xffffff) or self.bot.config.get('embed', dict()).get('colour', 0))
-        self._set_footer(embed)
+        self.bot.set_footer_from_embed(embed)
 
         # Set image
         if image_url is not None:
