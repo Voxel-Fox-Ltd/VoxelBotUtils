@@ -58,6 +58,7 @@ guild_settings_prefix_column = "prefix"  # Used if multiple bots connect to the 
     stats_command_enabled = true  # Whether or not the stats command is enabled
     vote_command_enabled = false  # Whether or not the top.gg vote command is enabled
     updates_channel_id = 0  # The ID of the news channel for the bot
+    info = ""  # The text passed out with the !info command
 
 # This data is passed directly over to asyncpg.connect()
 [database]
