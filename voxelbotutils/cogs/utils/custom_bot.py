@@ -413,6 +413,13 @@ class Bot(commands.AutoShardedBot):
             return
         embed.set_footer(**random.choice(pool), icon_url=self.user.avatar_url)
 
+    @property
+    def clean_prefix(self):
+        v = self.config.deafult_prefix
+        if isinstance(v, str):
+            return v
+        return v[0]
+
     async def create_message_log(self, messages:typing.List[discord.Message]) -> str:
         """
         Args:
