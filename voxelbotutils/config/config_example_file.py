@@ -49,6 +49,7 @@ guild_settings_prefix_column = "prefix"  # Used if multiple bots connect to the 
 
 # Data that's copied directly over to a command
 [command_data]
+    website_link = ""  # A link to be used on !website
     guild_invite = ""  # A link to be used on !support
     github_link = ""  # A link to be used on !git
     donate_link = ""  # A link to be used on !donate
