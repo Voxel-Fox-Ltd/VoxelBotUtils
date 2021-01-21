@@ -415,7 +415,7 @@ class Bot(commands.AutoShardedBot):
 
     @property
     def clean_prefix(self):
-        v = self.config.deafult_prefix
+        v = self.config['deafult_prefix']
         if isinstance(v, str):
             return v
         return v[0]
