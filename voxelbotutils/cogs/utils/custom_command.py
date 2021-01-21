@@ -149,6 +149,8 @@ class Group(commands.Group):
 
         if 'cls' not in kwargs:
             kwargs['cls'] = Group
+        if 'case_insensitive' not in kwargs:
+            kwargs['case_insensitive'] = True
         return super().group(*args, **kwargs)
 
     def subcommand_group(self, *args, **kwargs):
@@ -158,6 +160,8 @@ class Group(commands.Group):
 
         if 'cls' not in kwargs:
             kwargs['cls'] = SubcommandGroup
+        if 'case_insensitive' not in kwargs:
+            kwargs['case_insensitive'] = True
         return super().group(*args, **kwargs)
 
     async def dispatch_error(self, ctx, error):

@@ -21,8 +21,12 @@ def command(*args, **kwargs):
 
 
 def group(*args, **kwargs):
+    if 'case_insensitive' not in kwargs:
+        kwargs['case_insensitive'] = True
     return _dpy_commands.group(*args, cls=Group, **kwargs)
 
 
 def subcommand_group(*args, **kwargs):
+    if 'case_insensitive' not in kwargs:
+        kwargs['case_insensitive'] = True
     return _dpy_commands.group(*args, cls=SubcommandGroup, **kwargs)
