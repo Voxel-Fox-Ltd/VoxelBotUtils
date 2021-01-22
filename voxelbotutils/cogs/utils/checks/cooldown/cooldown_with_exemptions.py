@@ -5,7 +5,7 @@ from .cooldown import Cooldown
 
 class CooldownWithChannelExemptions(Cooldown):
     """
-    A custom cooldown which allows for channel white/blacklisting by name.
+    A custom cooldown which allows for channel allow/deny listing by name.
 
     Params:
         cooldown_in : typing.List[str]
