@@ -109,8 +109,11 @@ TimeValue
 
    .. code-block:: python
 
-      value = voxelbotutils.TimeValue(606)
-      value.clean  # '10m6s'
-      value.clean_spaced  # '10m 6s'
-      value = voxelbotutils.TimeValue.parse('10m6s')
-      value.duration  # 606
+      >>> value = voxelbotutils.TimeValue(606)
+      >>> value.clean
+      '10m6s'
+      >>> value.clean_spaced
+      '10m 6s'
+      >>> value = voxelbotutils.TimeValue.parse('10m6s')
+      >>> value.duration
+      606
