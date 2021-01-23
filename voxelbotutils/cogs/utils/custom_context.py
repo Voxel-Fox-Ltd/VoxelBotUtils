@@ -33,7 +33,7 @@ class Context(commands.Context):
         Sets a footer on the embed from the config
         """
 
-        return self.bot.set_footer_from_embed(embed)
+        return self.bot.set_footer_from_config(embed)
 
     async def send(
             self, content:str=None, *args, embed:discord.Embed=None, file:discord.File=None, ignore_error:bool=False, embeddify:bool=None,
