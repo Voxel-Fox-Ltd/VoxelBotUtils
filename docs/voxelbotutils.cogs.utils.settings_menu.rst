@@ -41,7 +41,7 @@ Running one of these menus can be a *just a tad* unintuitive, so I'm putting an 
 
 Here's an in-use example from one of my projects:
 
-.. code-block::python
+.. code-block:: python
 
    @commands.group(cls=utils.Group)
    @commands.has_permissions(manage_guild=True)

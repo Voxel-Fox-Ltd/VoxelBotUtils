@@ -193,7 +193,7 @@ def cooldown(rate:int, per:int, type:commands.BucketType=commands.BucketType.def
     Args:
         rate (int): How many times this command can be run.
         per (int): The time before which the cooldown for this command is reset.
-        type (commands.BucketType, optional): The bucked that the cooldown should be applied for.
+        type (commands.BucketType, optional): The bucket that the cooldown should be applied for.
         cls (commands.Cooldown, optional): The cooldown class instance.
 
     Returns:
