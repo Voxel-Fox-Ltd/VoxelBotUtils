@@ -6,7 +6,7 @@ from discord.ext import commands
 class ChannelID(int):
     """
     A conveter that takes the given value and tries to grab the ID from it.
-    When used, this would provide the ID of the user.
+    When used, this would provide the ID of the channel.
     """
 
     @classmethod
