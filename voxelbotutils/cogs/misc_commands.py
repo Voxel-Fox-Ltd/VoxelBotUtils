@@ -27,7 +27,6 @@ class MiscCommands(utils.Cog):
         await ctx.send(f"<{self.bot.config['command_data']['donate_link']}>", embeddify=False)
 
     @commands.command(cls=utils.Command, add_slash_command=False)
-    @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(send_messages=True)
     @utils.checks.is_config_set('command_data', 'website_link')
     async def website(self, ctx:utils.Context):
@@ -38,7 +37,6 @@ class MiscCommands(utils.Cog):
         await ctx.send(f"<{self.bot.config['command_data']['website_link']}>", embeddify=False)
 
     @commands.command(cls=utils.Command, aliases=['information'], add_slash_command=False)
-    @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(send_messages=True)
     @utils.checks.is_config_set('command_data', 'info')
     async def info(self, ctx:utils.Context):
