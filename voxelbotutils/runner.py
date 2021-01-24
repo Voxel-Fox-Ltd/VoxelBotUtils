@@ -184,14 +184,6 @@ def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
     set_log_level(discord_stderr_logger, args.loglevel, logging.WARNING)
     set_log_level(aiohttp_stdout_logger, args.loglevel, logging.WARNING)
 
-    # Set loglevels for the stdouts via the commandline args
-    set_log_level(bot_stdout_logger, args.loglevel_bot)
-    set_log_level(database_stdout_logger, args.loglevel_database)
-    set_log_level(redis_stdout_logger, args.loglevel_redis)
-    set_log_level(stats_stdout_logger, args.loglevel_statsd)
-    set_log_level(discord_stdout_logger, args.loglevel_discord)
-    set_log_level(aiohttp_stdout_logger, args.loglevel_aiohttp)
-
     # Add the stream handlers to the loggers
     bot.logger.addHandler(bot_stdout_logger)
     bot.logger.addHandler(bot_stderr_logger)
