@@ -52,12 +52,6 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     bot_subparser.add_argument("--max", nargs="?", type=int, default=None, help="The maximum shard ID that this instance will run with (inclusive).")
     bot_subparser.add_argument("--shardcount", nargs="?", type=int, default=None, help="The amount of shards that the bot should be using.")
     bot_subparser.add_argument("--loglevel", nargs="?", default="INFO", help="Global logging level - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
-    bot_subparser.add_argument("--loglevel-bot", nargs="?", default="INFO", help="Logging level for the bot - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
-    bot_subparser.add_argument("--loglevel-aiohttp", nargs="?", default="INFO", help="Logging level for aiohttp - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
-    bot_subparser.add_argument("--loglevel-discord", nargs="?", default="INFO", help="Logging level for discord - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
-    bot_subparser.add_argument("--loglevel-database", default="INFO", help="Logging level for database - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
-    bot_subparser.add_argument("--loglevel-redis", nargs="?", default="INFO", help="Logging level for redis - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
-    bot_subparser.add_argument("--loglevel-statsd", nargs="?", default="INFO", help="Logging level for statsd - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
 
     # Set up the website arguments
     website_subparser.add_argument("website_directory", nargs="?", default=".", help="The directory containing a static and templates folder for the website to run.")
@@ -66,13 +60,6 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     website_subparser.add_argument("--port", nargs="?", type=int, default="8080", help="The port to run the website with.")
     website_subparser.add_argument("--debug", action="store_true", default=False, help="Whether or not to run the website in debug mode")
     website_subparser.add_argument("--loglevel", nargs="?", default="INFO", help="Global logging level - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
-    website_subparser.add_argument("--loglevel-web", nargs="?", default="INFO", help="Logging level for the website - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
-    website_subparser.add_argument("--loglevel-bot", nargs="?", default="INFO", help="Logging level for the bot - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
-    website_subparser.add_argument("--loglevel-aiohttp", nargs="?", default="INFO", help="Logging level for aiohttp - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
-    website_subparser.add_argument("--loglevel-discord", nargs="?", default="INFO", help="Logging level for discord - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
-    website_subparser.add_argument("--loglevel-database", nargs="?", default="INFO", help="Logging level for database - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
-    website_subparser.add_argument("--loglevel-redis", nargs="?", default="INFO", help="Logging level for redis - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
-    website_subparser.add_argument("--loglevel-statsd", nargs="?", default="INFO", help="Logging level for statsd - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
 
     # See what we want to make a config file for
     create_config_subparser.add_argument("config_type", nargs=1, help="The type of config file that we want to create.", choices=["bot", "website", "all"])
