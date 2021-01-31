@@ -1,5 +1,6 @@
 import argparse
 import os
+import typing
 
 from .runner import run_bot, run_website
 
@@ -44,6 +45,7 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     bot_subparser = runner_subparser.add_parser("run-bot")
     website_subparser = runner_subparser.add_parser("run-website")
     create_config_subparser = runner_subparser.add_parser("create-config")
+    check_config_subparser = runner_subparser.add_parser("check-config")
 
     # Set up the bot arguments
     bot_subparser.add_argument("bot_directory", nargs="?", default=".", help="The directory containing a config and a cogs folder for the bot to run.")
@@ -63,9 +65,39 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
 
     # See what we want to make a config file for
     create_config_subparser.add_argument("config_type", nargs=1, help="The type of config file that we want to create.", choices=["bot", "website", "all"])
+    check_config_subparser.add_argument("config_type", nargs=1, help="The type of config file that we want to create.", choices=["bot", "website"])
+    check_config_subparser.add_argument("config_file", nargs="?", default="config/config.toml", help="The configuration file that you want to check.")
 
     # Wew that's a lot of things
     return parser
+
+
+def check_config_value(base_config_key:typing.List[str], base_config_value:typing.Any, compare_config_value:typing.Any) -> None:
+    """
+    Recursively checks a config item to see if it's valid against a base config item
+    """
+
+    # See if the item was omitted
+    if isinstance(compare_config_value, type(None)):
+        print(f"No value {base_config_key} was provided in your config file - should be type {type(base_config_value).__name__}.")
+        if isinstance(base_config_value, dict):
+            for i, o in base_config_value.items():
+                check_config_value(base_config_key + [i], o, None)
+        return
+
+    # See if the item was a str when it should be something else
+    if not isinstance(base_config_value, type(compare_config_value)):
+        print(f"Wrong value {base_config_key} type was provided in your config file - should be type {type(base_config_value).__name__}.")
+        if isinstance(base_config_value, dict):
+            for i, o in base_config_value.items():
+                check_config_value(base_config_key + [i], o, None)
+        return
+
+    # Correct value type - see if it was dict and recurse
+    if isinstance(base_config_value, dict):
+        for i, o in base_config_value.items():
+            check_config_value(base_config_key + [i], o, compare_config_value.get(i))
+    return
 
 
 if __name__ == '__main__':
@@ -137,6 +169,28 @@ if __name__ == '__main__':
             create_file("requirements.txt", content="voxelbotutils\n")
             print("Created bot config file.")
         exit(1)
+
+    # See if we want to check the config file
+    elif args.subcommand == "check-config":
+        config_type = args.config_type[0]
+        from . import config
+        import toml
+        if config_type == "web":
+            base_config_file_text = config.web_config_file.lstrip()
+        elif config_type == "bot":
+            base_config_file_text = config.config_file.lstrip()
+        base_config_file = toml.loads(base_config_file_text)
+        try:
+            with open(args.config_file) as a:
+                compare_config_file = toml.load(a)
+        except Exception:
+            print(f"Couldn't open config file {args.config_file}")
+            exit(0)
+        for key, value in base_config_file.items():
+            check_config_value([key], value, compare_config_file.get(key))
+        exit(1)
+
+    # Run things
     elif args.subcommand == "run-bot":
         run_bot(args)
     elif args.subcommand == "run-website":
