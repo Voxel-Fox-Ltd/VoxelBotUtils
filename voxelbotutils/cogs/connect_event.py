@@ -140,12 +140,20 @@ class ConnectEvent(utils.Cog):
         Ping a given webhook when the bot is removed from a guild.
         """
 
-        await self.send_webhook(
-            "guild_remove",
-            f"Removed from guild - ``{guild.name}`` (`{guild.member_count}` members)",
-            f"{self.bot.user.name} - Guild Remove",
-            "Sent webhook for on_guild_remove event",
-        )
+        if guild.me:
+            await self.send_webhook(
+                "guild_remove",
+                f"Removed from guild - ``{guild.name}`` (`{guild.member_count}` members; {utils.TimeValue((dt.utcnow() - guild.me.joined_at).total_seconds()).clean} guild duration)",
+                f"{self.bot.user.name} - Guild Remove",
+                "Sent webhook for on_guild_remove event",
+            )
+        else:
+            await self.send_webhook(
+                "guild_remove",
+                f"Removed from guild - ``{guild.name}`` (`{guild.member_count}` members)",
+                f"{self.bot.user.name} - Guild Remove",
+                "Sent webhook for on_guild_remove event",
+            )
 
 
 def setup(bot:utils.Bot):
