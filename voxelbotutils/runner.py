@@ -328,7 +328,10 @@ def run_bot(args:argparse.Namespace) -> None:
     # We're now done running the bot, time to clean up and close
     if bot.config.get('database', {}).get('enabled', False):
         logger.info("Closing database pool")
-        loop.run_until_complete(DatabaseConnection.pool.close())
+        try:
+            loop.run_until_complete(asyncio.wait_for(DatabaseConnection.pool.close(), timeout=30.0))
+        except asyncio.TimeoutError:
+            logger.error("Couldn't gracefully close the database connection pool within 30 seconds")
     if bot.config.get('redis', {}).get('enabled', False):
         logger.info("Closing redis pool")
         RedisConnection.pool.close()
@@ -479,7 +482,10 @@ def run_website(args:argparse.Namespace) -> None:
     loop.run_until_complete(application.cleanup())
     if config.get('database', {}).get('enabled', False):
         logger.info("Closing database pool")
-        loop.run_until_complete(DatabaseConnection.pool.close())
+        try:
+            loop.run_until_complete(asyncio.wait_for(DatabaseConnection.pool.close(), timeout=30.0))
+        except asyncio.TimeoutError:
+            logger.error("Couldn't gracefully close the database connection pool within 30 seconds")
     if config.get('redis', {}).get('enabled', False):
         logger.info("Closing redis pool")
         RedisConnection.pool.close()
