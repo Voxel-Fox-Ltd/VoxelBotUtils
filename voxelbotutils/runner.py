@@ -54,7 +54,7 @@ logger = logging.getLogger('voxelbotutils')
 
 
 # Make sure the sharding info provided is correctish
-def validate_sharding_information(args:argparse.Namespace) -> typing.List[int]:
+def validate_sharding_information(args:argparse.Namespace) -> typing.Optional[typing.List[int]]:
     """
     Validate the given shard information and make sure that what's passed in is accurate
 
@@ -66,9 +66,7 @@ def validate_sharding_information(args:argparse.Namespace) -> typing.List[int]:
     """
 
     if args.shardcount is None:
-        args.shardcount = 1
-        args.min = 0
-        args.max = 0
+        return None
     else:
         if args.min is None and args.max is None:
             args.min = 0
