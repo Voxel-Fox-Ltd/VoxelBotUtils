@@ -18,6 +18,7 @@ COLOURS_BY_NAME = {
     "poop brown": 0x7a5901,
     "stegosans": 0xf1e6a9,
     "teddy purple": 0xb19cd9,
+    "medusa green": 0x173b0b,
 
     # Below this point is directly copied from the Github link,
     # minus a bunch that were repeated colours later
