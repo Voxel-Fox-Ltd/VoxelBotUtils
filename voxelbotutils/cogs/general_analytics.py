@@ -122,6 +122,7 @@ class Analytics(utils.Cog):
             return
         async with self.bot.stats() as stats:
             stats.gauge("discord.stats.guild_count", value=self.get_effective_guild_count())
+            stats.gauge("discord.stats.shard_count", value=self.bot.shard_count or 1)
 
     @post_statsd_guild_count.before_loop
     async def before_post_statsd_guild_count(self):
