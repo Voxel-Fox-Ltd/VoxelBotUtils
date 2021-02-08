@@ -83,25 +83,20 @@ class Embed(discord.Embed):
         super().set_thumbnail(url=url)
         return self
 
-    def set_author_to_user(self, user:discord.User, use_server_nick:discord.Guild = None) -> 'Embed':
+    def set_author_to_user(self, user:discord.User, use_nick:bool = False) -> 'Embed':
         """
         Sets the author of the embed to a given Discord user.
 
         Args:
             user (discord.User): The user you want to set the author to.
-            use_server_nick (discord.Guild): If given, the user's nickname in this server will be used instead of their
-            discord name. Defaults back to discord name if user is not in the server.
+            use_nick (bool): Whether to use the guild nickname or regular username.
 
         Returns:
             Embed: The embed instance.
         """
 
-        if use_server_nick is not None:
-            member = use_server_nick.get_member(user.id)
-            if member is not None:
-                name = use_server_nick.get_member(user.id).display_name
-            else:
-                name = str(user)
+        if use_nick:
+            name = user.display_name
         else:
             name = str(user)
         super().set_author(name=name, icon_url=user.avatar_url)
