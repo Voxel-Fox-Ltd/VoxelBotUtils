@@ -332,15 +332,14 @@ class Bot(commands.AutoShardedBot):
 
         # See if we want to make this as a task or not
         if wait is False:
-            self.loop.create_task(self.add_delete_button(message=message, valid_users=valid_users, delete=delete, timeout=timeout, wait=True))
-            return
+            return self.loop.create_task(self.add_delete_button(message=message, valid_users=valid_users, delete=delete, timeout=timeout, wait=True))
 
         # See if we were given a list of authors
         # This is an explicit check for None rather than just a falsy value;
         # this way users can still provide an empty list for only manage_messages users to be
         # able to delete the message.
         if valid_users is None:
-            valid_users = [message.author]
+            valid_users = (message.author,)
 
         # Let's not add delete buttons to DMs
         if isinstance(message.channel, discord.DMChannel):
@@ -353,8 +352,8 @@ class Bot(commands.AutoShardedBot):
             raise e  # Maybe return none here - I'm not sure yet.
 
         # Fix up arguments
-        if not isinstance(valid_users, list):
-            valid_users = [valid_users]
+        if not isinstance(valid_users, (list, tuple, set)):
+            valid_users = (valid_users,)
 
         # Wait for response
         def check(r, u) -> bool:
@@ -381,7 +380,7 @@ class Bot(commands.AutoShardedBot):
 
         # We got a response
         if delete is None:
-            delete = [message]
+            delete = (message,)
 
         # Try and bulk delete
         bulk = False
