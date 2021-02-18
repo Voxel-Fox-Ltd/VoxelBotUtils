@@ -25,6 +25,7 @@ def is_slash_command():
         if v:
             return True
         raise IsNotSlashCommand()
+    return commands.check(predicate)
 
 
 def is_not_slash_command():
@@ -33,3 +34,4 @@ def is_not_slash_command():
         if not v:
             return True
         raise IsSlashCommand()
+    return commands.check(predicate)
