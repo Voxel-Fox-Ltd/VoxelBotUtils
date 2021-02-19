@@ -105,7 +105,7 @@ guild_settings_prefix_column = "prefix"  # Used if multiple bots connect to the 
     client_id = ""
 
 # UpgradeChat API key data - https://upgrade.chat/developers
-[upgrade_chat_api_key]
+[upgrade_chat]
     client_id = ""
     client_secret = ""
 

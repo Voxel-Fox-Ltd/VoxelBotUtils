@@ -280,7 +280,7 @@ class Bot(commands.AutoShardedBot):
     def upgrade_chat(self):
         if self._upgrade_chat:
             return self._upgrade_chat
-        self._upgrade_chat = UpgradeChat(self.config["upgrade_chat_api_key"]["client_id"], self.config["upgrade_chat_api_key"]["client_secret"])
+        self._upgrade_chat = UpgradeChat(self.config["upgrade_chat"]["client_id"], self.config["upgrade_chat"]["client_secret"])
         return self._upgrade_chat
 
     def get_event_webhook(self, event_name:str) -> typing.Optional[discord.Webhook]:
