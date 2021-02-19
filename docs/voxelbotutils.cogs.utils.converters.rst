@@ -1,11 +1,6 @@
 Converters
 ===========================================
 
-converters.BooleanConverter
--------------------------------------------------------------
-
-.. autoclass:: voxelbotutils.converters.BooleanConverter
-
 converters.UserID
 ---------------------------------------------------
 
@@ -20,6 +15,11 @@ converters.EnumConverter
 ---------------------------------------------------
 
 .. autoclass:: voxelbotutils.converters.EnumConverter
+
+converters.BooleanConverter
+-------------------------------------------------------------
+
+.. autoclass:: voxelbotutils.converters.BooleanConverter
 
 converters.ColourConverter
 ---------------------------------------------------

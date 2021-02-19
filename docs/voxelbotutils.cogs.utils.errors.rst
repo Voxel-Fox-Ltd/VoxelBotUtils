@@ -17,6 +17,31 @@ errors.InvokedMetaCommand
 
     This is to be invoked by :ref:`voxelbotutils.checks.meta\_command`, and should just result in a silent failure.
 
+errors.BotNotReady
+-------------------------------------------
+
+.. autoclass:: voxelbotutils.errors.BotNotReady
+
+errors.IsNotVoter
+-------------------------------------------
+
+.. autoclass:: voxelbotutils.errors.IsNotVoter
+
+errors.NotBotSupport
+-------------------------------------------
+
+.. autoclass:: voxelbotutils.errors.NotBotSupport
+
+errors.IsSlashCommand
+-------------------------------------------
+
+.. autoclass:: voxelbotutils.errors.IsSlashCommand
+
+errors.IsNotSlashCommand
+-------------------------------------------
+
+.. autoclass:: voxelbotutils.errors.IsNotSlashCommand
+
 errors.MissingRequiredArgumentString
 ---------------------------------------------------------
 

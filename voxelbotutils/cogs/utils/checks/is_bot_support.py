@@ -10,9 +10,9 @@ class NotBotSupport(commands.MissingRole):
 
 def is_bot_support():
     """
-    Checks whether or not the calling user has the bot support role.
-    Comes in two flavours: it works as a decorator/check for commands, or you can call it
-    as is with a ctx and Member object.
+    Checks whether or not the calling user has the bot support role, as defined in the bot's configuration
+    file (bot_support_role_id). As it checks a role ID, this will only work it the command in quesiton is called
+    in a guild where the calling user _has_ the given role.
     """
 
     async def predicate(ctx:commands.Context):

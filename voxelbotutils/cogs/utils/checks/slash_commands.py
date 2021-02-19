@@ -20,6 +20,10 @@ class IsNotSlashCommand(commands.DisabledCommand):
 
 
 def is_slash_command():
+    """
+    Checks that the command has been invoked from a slash command.
+    """
+
     async def predicate(ctx):
         v = isinstance(ctx, InteractionContext)
         if v:
@@ -29,6 +33,10 @@ def is_slash_command():
 
 
 def is_not_slash_command():
+    """
+    Checks that the command has not been invoked from a slash command.
+    """
+
     async def predicate(ctx):
         v = isinstance(ctx, InteractionContext)
         if not v:

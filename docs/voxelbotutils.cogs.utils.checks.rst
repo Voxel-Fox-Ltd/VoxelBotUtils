@@ -18,3 +18,18 @@ checks.meta\_command
 ----------------------------------------------------
 
 .. autofunction:: voxelbotutils.checks.meta_command
+
+checks.bot\_is\_ready
+----------------------------------------------------
+
+.. autofunction:: voxelbotutils.checks.bot_is_ready
+
+checks.is\_bot\_support
+----------------------------------------------------
+
+.. autofunction:: voxelbotutils.checks.is_bot_support
+
+checks.is\_voter
+----------------------------------------------------
+
+.. autofunction:: voxelbotutils.checks.is_voter
