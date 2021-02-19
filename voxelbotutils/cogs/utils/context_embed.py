@@ -25,7 +25,6 @@ class Embed(discord.Embed):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        # :(
         pass
 
     def use_random_colour(self) -> 'Embed':

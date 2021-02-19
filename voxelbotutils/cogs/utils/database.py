@@ -17,6 +17,7 @@ class DatabaseConnection(object):
     def __init__(self, connection:asyncpg.Connection=None, transaction:asyncpg.transaction.Transaction=None):
         self.conn = connection
         self.transaction = transaction
+        self.is_active = False
 
     @classmethod
     async def create_pool(cls, config:dict) -> None:
@@ -44,7 +45,9 @@ class DatabaseConnection(object):
         """
 
         conn = await cls.pool.acquire()
-        return cls(conn)
+        v = cls(conn)
+        v.is_active = True
+        return v
 
     async def disconnect(self) -> None:
         """
@@ -53,6 +56,7 @@ class DatabaseConnection(object):
 
         await self.pool.release(self.conn)
         self.conn = None
+        self.is_active = False
         del self
 
     async def start_transaction(self):
@@ -72,8 +76,11 @@ class DatabaseConnection(object):
         self.transaction = None
 
     async def __aenter__(self):
+        if self.is_active:
+            raise Exception("Can't open a new database connection while currently connected.")
         v = await self.get_connection()
         self.conn = v.conn
+        self.is_active = True
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
