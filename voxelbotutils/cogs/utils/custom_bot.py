@@ -20,6 +20,7 @@ from .database import DatabaseConnection
 from .redis import RedisConnection
 from .statsd import StatsdConnection
 from .analytics_log_handler import AnalyticsLogHandler
+from .upgrade_chat import UpgradeChat
 from . import interactions
 from .. import all_packages as all_vfl_package_names
 
@@ -125,6 +126,10 @@ class Bot(commands.AutoShardedBot):
         self.stats: StatsdConnection = StatsdConnection
         self.stats.config = self.config.get('statsd', {})
         self.stats.logger = self.logger.getChild('statsd')
+
+        # Gently add an UpgradeChat wrapper here - added as a property method so we can create a new instance if
+        # the config is reloaded
+        self._upgrade_chat = None
 
         # Store the startup method so I can see if it completed successfully
         self.startup_time = dt.now()
@@ -270,6 +275,13 @@ class Bot(commands.AutoShardedBot):
             f"{self.user.name.replace(' ', '-')} (Discord.py discord bot https://github.com/Rapptz/discord.py) "
             f"Python/{platform.python_version()} aiohttp/{aiohttp.__version__}"
         )
+
+    @property
+    def upgrade_chat(self):
+        if self._upgrade_chat:
+            return self._upgrade_chat
+        self._upgrade_chat = UpgradeChat(self.config["upgrade_chat_api_key"]["client_id"], self.config["upgrade_chat_api_key"]["client_secret"])
+        return self._upgrade_chat
 
     def get_event_webhook(self, event_name:str) -> typing.Optional[discord.Webhook]:
         """
@@ -652,6 +664,9 @@ class Bot(commands.AutoShardedBot):
         except Exception as e:
             self.logger.critical(f"Couldn't read config file - {e}")
             exit(1)
+
+        # Reset cache items
+        self._upgrade_chat = None
 
     async def login(self, token:str=None, *args, **kwargs):
         await super().login(token or self.config['token'], *args, **kwargs)

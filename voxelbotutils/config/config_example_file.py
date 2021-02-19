@@ -104,7 +104,12 @@ guild_settings_prefix_column = "prefix"  # Used if multiple bots connect to the 
 [oauth]
     client_id = ""
 
-# It's time for better analytics! Let's give statsd a little try
+# UpgradeChat API key data - https://upgrade.chat/developers
+[upgrade_chat_api_key]
+    client_id = ""
+    client_secret = ""
+
+# Statsd analytics port using the aiodogstatsd package
 [statsd]
     host = "127.0.0.1"
     port = 8125  # This is the DataDog default, 9125 is the general statsd default

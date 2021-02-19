@@ -11,6 +11,7 @@ from .redis import RedisConnection
 from .statsd import StatsdConnection
 from .time_value import TimeValue
 from .settings_menu import SettingsMenu, SettingsMenuOption, SettingsMenuIterable, SettingsMenuIterableBase
+from .upgrade_chat import UpgradeChat, UpgradeChatOrder, UpgradeChatUser, UpgradeChatOrderItem
 
 
 from discord.ext import commands as _dpy_commands
