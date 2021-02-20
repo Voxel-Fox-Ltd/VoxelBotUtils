@@ -7,3 +7,4 @@ from .checks.is_bot_support import NotBotSupport
 from .checks.slash_commands import IsSlashCommand, IsNotSlashCommand
 from .missing_required_argument import MissingRequiredArgumentString
 from .time_value import InvalidTimeDuration
+from .checks.is_upgrade_chat_subscriber import IsNotUpgradeChatSubscriber

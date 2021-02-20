@@ -138,9 +138,17 @@ class UpgradeChat(object):
         self._access_token = (data['access_token'], data['refresh_token'], dt.fromtimestamp(int(data['access_token_expires_in']) / 1_000))
         return self._access_token[0]
 
-    async def get_orders(self, limit:int=100, offset:int=0, discord_id:int=None) -> typing.Optional[typing.List[UpgradeChatOrder]]:
+    async def get_orders(self, limit:int=100, offset:int=0, discord_id:int=None) -> typing.List[UpgradeChatOrder]:
         """
         Get a list of order objects that adhere to the request parameters given.
+
+        Args:
+            limit (int, optional): The number of responses to get.
+            offset (int, optional): The offset that you want to get.
+            discord_id (int, optional): The ID of the Discord user that you want to look up
+
+        Returns:
+            typing.List[UpgradeChatOrder]: A list of purchases that the user has made.
         """
 
         # Sort out our params
@@ -165,4 +173,4 @@ class UpgradeChat(object):
         # Deal with our response
         if data.get("data"):
             return [UpgradeChatOrder.from_api(i) for i in data.get("data")]
-        return None
+        return []
