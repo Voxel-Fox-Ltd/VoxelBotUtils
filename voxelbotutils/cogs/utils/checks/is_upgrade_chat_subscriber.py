@@ -21,6 +21,7 @@ def is_upgrade_chat_subscriber(*role_tiers):
 
         # See if we're even requesting anything
         if not role_tiers:
+            ctx.bot.logger.warning(f"No role tiers input for is_upgrade_chat_subscriber for command {ctx.command.name}")
             return True
 
         # Grab all the roles that are valid

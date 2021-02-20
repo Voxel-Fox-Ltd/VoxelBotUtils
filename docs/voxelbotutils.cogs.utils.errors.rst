@@ -57,3 +57,8 @@ errors.InvalidTimeDuration
     :members:
 
     A subclass of :ref:`discord.ext.commands.BadArgument` that's thrown when a user passes an invalid input to a :ref:`voxelbotutils.TimeValue` converter in a command.
+
+errors.IsNotUpgradeChatSupporter
+-------------------------------------------
+
+.. autoclass:: voxelbotutils.errors.IsNotUpgradeChatSupporter
