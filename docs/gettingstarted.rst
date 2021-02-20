@@ -27,7 +27,7 @@ To get started, you'll need to make a configuration file that VBU can use. The l
 
 .. code-block:: bash
 
-    python -m voxelbotutils create-config-file bot
+    python -m voxelbotutils create-config bot
 
 Doing this will make a few files and folders:
 
@@ -170,7 +170,7 @@ To get started, you'll need to make a configuration file that VBU can use. The l
 
 .. code-block:: bash
 
-    python -m voxelbotutils create-config-file website
+    python -m voxelbotutils create-config website
 
 Doing this will make a few files and folders:
 
