@@ -91,7 +91,7 @@ class Context(commands.Context):
 
         # No current embed, and we _want_ to embed it? Alright!
         embed = discord.Embed(description=content, colour=random.randint(1, 0xffffff) or self.bot.config.get('embed', dict()).get('colour', 0))
-        self.bot.set_footer_from_embed(embed)
+        self.bot.set_footer_from_config(embed)
 
         # Set image
         if image_url is not None:
