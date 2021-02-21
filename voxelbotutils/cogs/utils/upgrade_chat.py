@@ -160,8 +160,9 @@ class UpgradeChat(object):
             params.update({"userDiscordId": discord_id})
 
         # And our headers
+        access_token = await self.get_access_token()
         headers = {
-            "Authorization": f"Bearer {await self.get_access_token()}",
+            "Authorization": f"Bearer {access_token}",
             "Accept": "application/json",
         }
 
