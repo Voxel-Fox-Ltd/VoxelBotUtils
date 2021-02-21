@@ -12,6 +12,74 @@ class Context(commands.Context):
         super().__init__(*args, **kwargs)
         self.original_author_id = self.author.id
         self.is_slash_command = False
+        
+    def get_context_message(
+            self, content:str, embed:discord.Embed=None, image_url:str=None, file:discord.File=None, embeddify:bool=None,
+            embeddify_file:bool=True, ignore_error:bool=False):
+        
+        if embeddify is None and image_url is not None:
+            embeddify = True
+        if embeddify is None:
+            embeddify = self.bot.embeddify
+
+        # See if we need to check channel permissions at all
+        if embeddify is False or embed is not None:
+            should_not_embed = True
+        else:
+            try:
+                channel_permissions: discord.Permissions = self.channel.permissions_for(self.guild.me)
+                missing_embed_permission = not self.DESIRED_PERMISSIONS.is_subset(channel_permissions)
+            except AttributeError:
+                missing_embed_permission = False
+            should_not_embed = any([
+                missing_embed_permission,
+                embeddify is False,
+                embed is not None,
+            ])
+
+        # Can't embed? Just send it normally
+        if should_not_embed:
+            try:
+                return content
+            except Exception as e:
+                if ignore_error:
+                    return None
+                raise e
+
+        # No current embed, and we _want_ to embed it? Alright!
+        embed = discord.Embed(description=content, colour=random.randint(1, 0xffffff) or self.bot.config.get('embed', dict()).get('colour', 0))
+        self.bot.set_footer_from_config(embed)
+
+        # Set image
+        if image_url is not None:
+            embed.set_image(url=image_url)
+        if file and file.filename and embeddify_file:
+            file_is_image = any([
+                file.filename.casefold().endswith('.png'),
+                file.filename.casefold().endswith('.jpg'),
+                file.filename.casefold().endswith('.jpeg'),
+                file.filename.casefold().endswith('.gif'),
+                file.filename.casefold().endswith('.webm')
+            ])
+            if file_is_image:
+                embed.set_image(url=f'attachment://{file.filename}')
+
+        # Reset content
+        content = self.bot.config.get('embed', dict()).get('content', '').format(ctx=self) or None
+
+        # Set author
+        author_data = self.bot.config.get('embed', dict()).get('author')
+        if author_data.get('enabled', False):
+            name = author_data.get('name', '').format(ctx=self) or discord.Embed.Empty
+            url = author_data.get('url', '').format(ctx=self) or discord.Embed.Empty
+            author_data = {
+                'name': name,
+                'url': url,
+                'icon_url': self.bot.user.avatar_url,
+            }
+            embed.set_author(**author_data)
+
+        return embed
 
     async def okay(self) -> None:
         """
@@ -59,68 +127,11 @@ class Context(commands.Context):
             discord.HTTPException: If the message send should fail, this is the erorr that was raised.
         """
 
-        # Set default embeddify
-        if embeddify is None and image_url is not None:
-            embeddify = True
-        if embeddify is None:
-            embeddify = self.bot.embeddify
-
-        # See if we need to check channel permissions at all
-        if embeddify is False or embed is not None:
-            should_not_embed = True
+        stuff = self.get_context_message(content, embed=embed, image_url=image_url, file=file, embeddify=embeddify, embeddify_file=embeddify_file, ignore_error=ignore_error)
+        
+        if isinstance(stuff, str):
+            return await self.send(content, *args, embed=embed, file=file, embeddify=embeddify, embeddify_file=embeddify_file, ignore_error=ignore_error)
+        elif isinstance(stuff, discord.Embed):
+            return await self.send(None, *args, embed=embed, file=file, ignore_error=ignore_error, **kwargs)
         else:
-            try:
-                channel_permissions: discord.Permissions = self.channel.permissions_for(self.guild.me)
-                missing_embed_permission = not self.DESIRED_PERMISSIONS.is_subset(channel_permissions)
-            except AttributeError:
-                missing_embed_permission = False
-            should_not_embed = any([
-                missing_embed_permission,
-                embeddify is False,
-                embed is not None,
-            ])
-
-        # Can't embed? Just send it normally
-        if should_not_embed:
-            try:
-                return await super().send(content, *args, embed=embed, file=file, **kwargs)
-            except Exception as e:
-                if ignore_error:
-                    return None
-                raise e
-
-        # No current embed, and we _want_ to embed it? Alright!
-        embed = discord.Embed(description=content, colour=random.randint(1, 0xffffff) or self.bot.config.get('embed', dict()).get('colour', 0))
-        self.bot.set_footer_from_config(embed)
-
-        # Set image
-        if image_url is not None:
-            embed.set_image(url=image_url)
-        if file and file.filename and embeddify_file:
-            file_is_image = any([
-                file.filename.casefold().endswith('.png'),
-                file.filename.casefold().endswith('.jpg'),
-                file.filename.casefold().endswith('.jpeg'),
-                file.filename.casefold().endswith('.gif'),
-                file.filename.casefold().endswith('.webm')
-            ])
-            if file_is_image:
-                embed.set_image(url=f'attachment://{file.filename}')
-
-        # Reset content
-        content = self.bot.config.get('embed', dict()).get('content', '').format(ctx=self) or None
-
-        # Set author
-        author_data = self.bot.config.get('embed', dict()).get('author')
-        if author_data.get('enabled', False):
-            name = author_data.get('name', '').format(ctx=self) or discord.Embed.Empty
-            url = author_data.get('url', '').format(ctx=self) or discord.Embed.Empty
-            author_data = {
-                'name': name,
-                'url': url,
-                'icon_url': self.bot.user.avatar_url,
-            }
-            embed.set_author(**author_data)
-
-        # Sick now let's send the data
-        return await self.send(content, *args, embed=embed, file=file, ignore_error=ignore_error, **kwargs)
+            return await self.send(content, *args, embed=embed, file=file, ignore_error=ignore_error, **kwargs)
