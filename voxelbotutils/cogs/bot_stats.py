@@ -65,7 +65,7 @@ class BotStats(utils.Cog):
         embed.set_footer(f"{self.bot.user} - VoxelBotUtils v{__version__}", icon_url=self.bot.user.avatar_url)
         embed.add_field("Creator", f"{creator!s}\n{creator_id}")
         embed.add_field("Library", f"Discord.py {discord.__version__}")
-        if self.bot.shard_count != len(self.bot.shard_ids):
+        if self.bot.shard_count != len((self.bot.shard_ids or [0])):
             embed.add_field("Approximate Guild Count", int((len(self.bot.guilds) / len(self.bot.shard_ids)) * self.bot.shard_count))
         else:
             embed.add_field("Guild Count", len(self.bot.guilds))
