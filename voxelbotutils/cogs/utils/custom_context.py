@@ -1,3 +1,4 @@
+import typing
 import random
 
 import discord
@@ -14,8 +15,8 @@ class Context(commands.Context):
         self.is_slash_command = False
         
     def get_context_message(
-            self, content:str, embed:discord.Embed=None, image_url:str=None, file:discord.File=None, embeddify:bool=None,
-            embeddify_file:bool=True, ignore_error:bool=False):
+            self, content:str, embed:discord.Embed=None, file:discord.File=None, embeddify:bool=None, image_url:str=None, 
+            embeddify_file:bool=True) -> typing.Tuple[str, discord.Embed]:
         
         if embeddify is None and image_url is not None:
             embeddify = True
@@ -39,12 +40,7 @@ class Context(commands.Context):
 
         # Can't embed? Just send it normally
         if should_not_embed:
-            try:
-                return content
-            except Exception as e:
-                if ignore_error:
-                    return None
-                raise e
+            return content, embed
 
         # No current embed, and we _want_ to embed it? Alright!
         embed = discord.Embed(description=content, colour=random.randint(1, 0xffffff) or self.bot.config.get('embed', dict()).get('colour', 0))
@@ -79,7 +75,8 @@ class Context(commands.Context):
             }
             embed.set_author(**author_data)
 
-        return embed
+        # Return information
+        return content, embed
 
     async def okay(self) -> None:
         """
@@ -105,7 +102,7 @@ class Context(commands.Context):
 
     async def send(
             self, content:str=None, *args, embed:discord.Embed=None, file:discord.File=None, ignore_error:bool=False, embeddify:bool=None,
-            embeddify_file:bool=True, image_url:str=None, **kwargs) -> discord.Message:
+            embeddify_file:bool=True, image_url:str=None, **kwargs) -> typing.Optional[discord.Message]:
         """
         The normal `discord.abc.Messageable.send` but with an optional arg to ignore errors, as well as automatically
         embedding the content based on the bot's config.
@@ -127,11 +124,13 @@ class Context(commands.Context):
             discord.HTTPException: If the message send should fail, this is the erorr that was raised.
         """
 
-        stuff = self.get_context_message(content, embed=embed, image_url=image_url, file=file, embeddify=embeddify, embeddify_file=embeddify_file, ignore_error=ignore_error)
-        
-        if isinstance(stuff, str):
-            return await self.send(content, *args, embed=embed, file=file, embeddify=embeddify, embeddify_file=embeddify_file, ignore_error=ignore_error)
-        elif isinstance(stuff, discord.Embed):
-            return await self.send(None, *args, embed=embed, file=file, ignore_error=ignore_error, **kwargs)
-        else:
-            return await self.send(content, *args, embed=embed, file=file, ignore_error=ignore_error, **kwargs)
+        content, embed = self.get_context_message(
+            content=content, embed=embed, image_url=image_url, file=file, embeddify=embeddify, 
+            embeddify_file=embeddify_file, ignore_error=ignore_error,
+        )
+        try:
+            return await super().send(content=content, *args, embed=embed, file=file, **kwargs)
+        except Exception as e:
+            if ignore_error:
+                return None
+            raise e
