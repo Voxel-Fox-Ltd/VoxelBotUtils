@@ -13,11 +13,11 @@ class Context(commands.Context):
         super().__init__(*args, **kwargs)
         self.original_author_id = self.author.id
         self.is_slash_command = False
-        
+
     def get_context_message(
-            self, content:str, embed:discord.Embed=None, file:discord.File=None, embeddify:bool=None, image_url:str=None, 
+            self, content:str, embed:discord.Embed=None, file:discord.File=None, embeddify:bool=None, image_url:str=None,
             embeddify_file:bool=True) -> typing.Tuple[str, discord.Embed]:
-        
+
         if embeddify is None and image_url is not None:
             embeddify = True
         if embeddify is None:
@@ -125,8 +125,8 @@ class Context(commands.Context):
         """
 
         content, embed = self.get_context_message(
-            content=content, embed=embed, image_url=image_url, file=file, embeddify=embeddify, 
-            embeddify_file=embeddify_file, ignore_error=ignore_error,
+            content=content, embed=embed, image_url=image_url, file=file, embeddify=embeddify,
+            embeddify_file=embeddify_file,
         )
         try:
             return await super().send(content=content, *args, embed=embed, file=file, **kwargs)
