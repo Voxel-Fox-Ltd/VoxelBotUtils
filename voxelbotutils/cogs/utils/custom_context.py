@@ -1,3 +1,4 @@
+import typing
 import random
 
 import discord
@@ -12,54 +13,11 @@ class Context(commands.Context):
         super().__init__(*args, **kwargs)
         self.original_author_id = self.author.id
         self.is_slash_command = False
-
-    async def okay(self) -> None:
-        """
-        Adds the okay hand reaction to a message.
-        """
-
-        return await self.message.add_reaction("\N{OK HAND SIGN}")
-
-    @property
-    def clean_prefix(self):
-        """
-        Gives the prefix used to run the command but cleans up the bot mention.
-        """
-
-        return self.prefix.replace(f"<@{self.bot.user.id}>", f"@{self.bot.user.name}").replace(f"<@!{self.bot.user.id}>", f"@{self.bot.user.name}")
-
-    def _set_footer(self, embed:discord.Embed) -> None:
-        """
-        Sets a footer on the embed from the config
-        """
-
-        return self.bot.set_footer_from_config(embed)
-
-    async def send(
-            self, content:str=None, *args, embed:discord.Embed=None, file:discord.File=None, ignore_error:bool=False, embeddify:bool=None,
-            embeddify_file:bool=True, image_url:str=None, **kwargs) -> discord.Message:
-        """
-        The normal `discord.abc.Messageable.send` but with an optional arg to ignore errors, as well as automatically
-        embedding the content based on the bot's config.
-
-        Args:
-            content (str, optional): The content to be sent.
-            *args: The default args for `discord.abc.Messageable.send`.
-            embed (discord.Embed, optional): The embed object to be sent with the message.
-            file (discord.File, optional): The file object to be sent with the message.
-            ignore_error (bool, optional): Whether or not to ignore `discord.HTTPException` errors on message send.
-            embeddify (bool, optional): Whether or not to automatically embed the content of the message.
-            embeddify_file (bool, optional): Whether or not ot automatically embed the file of the message.
-            **kwargs: The default args for `discord.abc.Messageable.send`.
-
-        Returns:
-            discord.Message: The message that was returned to Discord.
-
-        Raises:
-            discord.HTTPException: If the message send should fail, this is the erorr that was raised.
-        """
-
-        # Set default embeddify
+        
+    def get_context_message(
+            self, content:str, embed:discord.Embed=None, file:discord.File=None, embeddify:bool=None, image_url:str=None, 
+            embeddify_file:bool=True) -> typing.Tuple[str, discord.Embed]:
+        
         if embeddify is None and image_url is not None:
             embeddify = True
         if embeddify is None:
@@ -82,12 +40,7 @@ class Context(commands.Context):
 
         # Can't embed? Just send it normally
         if should_not_embed:
-            try:
-                return await super().send(content, *args, embed=embed, file=file, **kwargs)
-            except Exception as e:
-                if ignore_error:
-                    return None
-                raise e
+            return content, embed
 
         # No current embed, and we _want_ to embed it? Alright!
         embed = discord.Embed(description=content, colour=random.randint(1, 0xffffff) or self.bot.config.get('embed', dict()).get('colour', 0))
@@ -122,5 +75,62 @@ class Context(commands.Context):
             }
             embed.set_author(**author_data)
 
-        # Sick now let's send the data
-        return await self.send(content, *args, embed=embed, file=file, ignore_error=ignore_error, **kwargs)
+        # Return information
+        return content, embed
+
+    async def okay(self) -> None:
+        """
+        Adds the okay hand reaction to a message.
+        """
+
+        return await self.message.add_reaction("\N{OK HAND SIGN}")
+
+    @property
+    def clean_prefix(self):
+        """
+        Gives the prefix used to run the command but cleans up the bot mention.
+        """
+
+        return self.prefix.replace(f"<@{self.bot.user.id}>", f"@{self.bot.user.name}").replace(f"<@!{self.bot.user.id}>", f"@{self.bot.user.name}")
+
+    def _set_footer(self, embed:discord.Embed) -> None:
+        """
+        Sets a footer on the embed from the config
+        """
+
+        return self.bot.set_footer_from_config(embed)
+
+    async def send(
+            self, content:str=None, *args, embed:discord.Embed=None, file:discord.File=None, ignore_error:bool=False, embeddify:bool=None,
+            embeddify_file:bool=True, image_url:str=None, **kwargs) -> typing.Optional[discord.Message]:
+        """
+        The normal `discord.abc.Messageable.send` but with an optional arg to ignore errors, as well as automatically
+        embedding the content based on the bot's config.
+
+        Args:
+            content (str, optional): The content to be sent.
+            *args: The default args for `discord.abc.Messageable.send`.
+            embed (discord.Embed, optional): The embed object to be sent with the message.
+            file (discord.File, optional): The file object to be sent with the message.
+            ignore_error (bool, optional): Whether or not to ignore `discord.HTTPException` errors on message send.
+            embeddify (bool, optional): Whether or not to automatically embed the content of the message.
+            embeddify_file (bool, optional): Whether or not ot automatically embed the file of the message.
+            **kwargs: The default args for `discord.abc.Messageable.send`.
+
+        Returns:
+            discord.Message: The message that was returned to Discord.
+
+        Raises:
+            discord.HTTPException: If the message send should fail, this is the erorr that was raised.
+        """
+
+        content, embed = self.get_context_message(
+            content=content, embed=embed, image_url=image_url, file=file, embeddify=embeddify, 
+            embeddify_file=embeddify_file, ignore_error=ignore_error,
+        )
+        try:
+            return await super().send(content=content, *args, embed=embed, file=file, **kwargs)
+        except Exception as e:
+            if ignore_error:
+                return None
+            raise e
