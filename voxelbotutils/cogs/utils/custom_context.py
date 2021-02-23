@@ -135,7 +135,7 @@ class Context(commands.Context):
                 return None
             raise e
             
-    async def reply(content:str, *args, embed:discord.Embed, ignore_error:bool=False, **kwargs):
+    async def reply(content:str, *args, embed:discord.Embed=None, ignore_error:bool=False, **kwargs):
         content, embed = self.get_context_message(
             content=content, embed=embed, *args, **kwargs
         )
