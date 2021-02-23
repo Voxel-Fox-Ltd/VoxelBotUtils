@@ -2,6 +2,7 @@ config_file = """
 token = "bot_token"  # The token for the bot
 owners = []  # List of owner IDs - these people override all permission checks
 dm_uncaught_errors = false  # Whether or not to DM the owners when unhandled errors are encountered
+user_agent = ""  # A custom string to populate Bot.user_agent with
 default_prefix = "!"  # The prefix for the bot's commands
 support_guild_id = 0  # The ID for the support guild - used by `Bot.fetch_support_guild()`
 bot_support_role_id = 0  # The ID used to determine whether or not the user is part of the bot's support team - used for `.checks.is_bot_support()` check
