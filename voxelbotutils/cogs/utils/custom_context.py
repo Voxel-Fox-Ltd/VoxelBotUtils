@@ -134,3 +134,14 @@ class Context(commands.Context):
             if ignore_error:
                 return None
             raise e
+            
+    async def reply(self, content:str=None, *args, embed:discord.Embed=None, ignore_error:bool=False, **kwargs):
+        content, embed = self.get_context_message(
+            content=content, embed=embed, *args, **kwargs
+        )
+        try:
+            return super().reply(content=content, *args, embed=embed, **kwargs)
+        except Exception as e:
+            if ignore_error:
+                return None
+            raise e
