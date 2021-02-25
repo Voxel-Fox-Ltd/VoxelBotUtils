@@ -92,6 +92,22 @@ RedisConnection
    .. note::
       This is only enabled if redis is enabled in the config.
 
+   Redis channels can be subscribed to via the use of the `redis_channel_handler` method;
+
+   .. codeblock:: python
+
+      @redis_channel_handler("channel_name")
+      async def handler(self, payload):
+         self.logger.info(payload)
+
+   You can publish data to them with the `publish` method:
+
+   .. codeblock:: python
+
+      async with RedisConnection() as re:
+         await re.publish("channel_name", {"foo": "bar"})
+         await re.publish_str("channel_two", "baz")
+
 StatsdConnection
 -------------------------------------
 

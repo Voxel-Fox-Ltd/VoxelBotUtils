@@ -7,7 +7,7 @@ from .custom_cog import Cog
 from .custom_command import Command, Group, SubcommandGroup
 from .custom_context import Context
 from .database import DatabaseConnection
-from .redis import RedisConnection
+from .redis import RedisConnection, RedisChannelHandler, redis_channel_handler
 from .statsd import StatsdConnection
 from .time_value import TimeValue
 from .settings_menu import SettingsMenu, SettingsMenuOption, SettingsMenuIterable, SettingsMenuIterableBase

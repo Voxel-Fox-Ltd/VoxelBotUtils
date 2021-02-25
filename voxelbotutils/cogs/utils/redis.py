@@ -1,5 +1,7 @@
 import logging
 import typing
+import asyncio
+import json
 
 import aioredis
 
@@ -56,7 +58,7 @@ class RedisConnection(object):
     async def __aexit__(self, exc_type, exc, tb):
         await self.disconnect()
 
-    async def publish_json(self, channel:str, json:dict) -> None:
+    async def publish(self, channel:str, json:dict) -> None:
         """
         Publishes some JSON to a given redis channel.
 
@@ -68,7 +70,7 @@ class RedisConnection(object):
         self.logger.debug(f"Publishing JSON to channel {channel}: {json!s}")
         return await self.conn.publish_json(channel, json)
 
-    async def publish(self, channel:str, message:str) -> None:
+    async def publish_str(self, channel:str, message:str) -> None:
         """
         Publishes a message to a given redis channel.
 
@@ -127,3 +129,49 @@ class RedisConnection(object):
         if v:
             return [i.decode() for i in v]
         return v
+
+
+class RedisChannelHandler(object):
+
+    connection = RedisConnection
+
+    def __init__(self, channel_name, callback):
+        self.channel_name = channel_name
+        self.channels = None
+        self.callback = callback
+        self.cog = None
+        self.task = asyncio.get_event_loop().create_task(self.channel_handler())
+
+    async def channel_handler(self):
+        """
+        General handler for creating a channel, waiting for an input, and then plugging the
+        data into a function.
+        """
+
+        # Subscribe to the given channel
+        async with self.connection() as re:
+            self.connection.logger.info(f"Subscribing to Redis channel {self.channel_name}")
+            channel_list = await re.conn.subscribe(self.channel_name)
+
+        # Get the channel from the list, loop it forever
+        channel = channel_list[0]
+        self.connection.logger.info(f"Looping to wait for messages to channel {self.channel_name}")
+        while (await channel.wait_message()):
+            data = await channel.get_json()
+            self.connection.logger.debug(f"Received JSON at channel {self.channel_name}:{json.dumps(data)}")
+            try:
+                if asyncio.iscoroutine(self.callback) or asyncio.iscoroutinefunction(self.callback):
+                    asyncio.create_task(self.callback(self.cog, data))
+                else:
+                    self.callback(data)
+            except Exception as e:
+                self.logger.error(e)
+
+    async def unsubscribe(self):
+        await self.connection.pool.unsubscribe(self.channel_name)
+
+
+def redis_channel_handler(channel_name):
+    def wrapper(func):
+        return RedisChannelHandler(channel_name, func)
+    return wrapper

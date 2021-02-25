@@ -1,3 +1,4 @@
+import typing
 import logging
 import re as regex
 
@@ -5,6 +6,7 @@ from discord.ext.commands import Cog as OriginalCog
 
 from .custom_bot import Bot
 from .database import DatabaseConnection
+from .redis import RedisChannelHandler
 
 
 class Cog(OriginalCog):
@@ -12,7 +14,9 @@ class Cog(OriginalCog):
     A slightly modified cog class to allow for cache_setup and for the logger instance.
 
     Attributes:
+        bot (discord.ext.commands.Bot): The bot instance that will be added to the cog.
         logger (logging.Logger): The logger that's assigned to the cog instance.
+        redis_channels (typing.Set[RedisChannelHandler]): The redis channels that this cog handles.
     """
 
     def __init__(self, bot:Bot, logger_name:str=None):
@@ -22,6 +26,17 @@ class Cog(OriginalCog):
             self.logger = bot_logger.getChild(logger_name)
         else:
             self.logger = bot_logger.getChild(self.get_logger_name())
+
+        self.redis_channels: typing.Set[RedisChannelHandler] = set()
+        for attr in dir(self):
+            item = getattr(self, attr)
+            if isinstance(item, RedisChannelHandler):
+                item.cog = self
+                self.redis_channels.add(item)
+
+    def unload(self):
+        for i in self.redis_channels:
+            self.bot.loop.run_until_complete(i.unsubscribe())
 
     def get_logger_name(self, *prefixes, sep:str='.') -> str:
         """

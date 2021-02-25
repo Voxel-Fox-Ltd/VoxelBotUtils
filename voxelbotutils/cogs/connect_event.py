@@ -90,7 +90,7 @@ class ConnectEvent(utils.Cog):
 
         await self.send_webhook(
             "bot_disconnect",
-            f"Bot disconnect event just pinged for instance with shards `{self.bot.shard_ids}` - {dt.utcnow().strftime('%X.%f')}",
+            f"Bot disconnect event just pinged for instance with shards `{self.bot.shard_ids or [0]}` - {dt.utcnow().strftime('%X.%f')}",
             f"{self.bot.user.name} - Disconnect",
             "Sent webhook for on_disconnect event",
         )
@@ -116,7 +116,7 @@ class ConnectEvent(utils.Cog):
 
         await self.send_webhook(
             "bot_connect",
-            f"Bot resumed event just pinged for instance with shards `{self.bot.shard_ids}` - {dt.utcnow().strftime('%X.%f')}",
+            f"Bot resumed event just pinged for instance with shards `{self.bot.shard_ids or [0]}` - {dt.utcnow().strftime('%X.%f')}",
             f"{self.bot.user.name} - Resumed",
             "Sent webhook for on_resumed event",
         )

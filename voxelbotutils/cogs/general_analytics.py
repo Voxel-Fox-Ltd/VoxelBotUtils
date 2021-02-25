@@ -45,7 +45,7 @@ class Analytics(utils.Cog):
         self.post_discordbotlist_guild_count.cancel()
 
     def get_effective_guild_count(self) -> int:
-        return int((len(self.bot.guilds) / len(self.bot.shard_ids)) * self.bot.shard_count)
+        return int((len(self.bot.guilds) / len(self.bot.shard_ids or [0])) * (self.bot.shard_count or 1))
 
     @tasks.loop(minutes=5)
     async def post_topgg_guild_count(self):
@@ -54,7 +54,7 @@ class Analytics(utils.Cog):
         """
 
         # Only shard 0 can post
-        if self.bot.shard_count and self.bot.shard_count > 1 and 0 not in self.bot.shard_ids:
+        if 0 not in (self.bot.shard_ids or [0]):
             return
 
         # Only post if there's actually a DBL token set
@@ -66,7 +66,7 @@ class Analytics(utils.Cog):
         url = f'https://top.gg/api/bots/{self.bot.user.id}/stats'
         data = {
             'server_count': self.get_effective_guild_count(),
-            'shard_count': self.bot.shard_count,
+            'shard_count': self.bot.shard_count or 1,
             'shard_id': 0,
         }
         headers = {
