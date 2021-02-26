@@ -140,7 +140,28 @@ class RedisChannelHandler(object):
         self.channels = None
         self.callback = callback
         self.cog = None
+        self.task = None
+
+    def start(self):
+        """
+        Start the Redis channel handler.
+        """
+
         self.task = asyncio.get_event_loop().create_task(self.channel_handler())
+
+    def cancel(self):
+        """
+        Cancel the running task.
+        """
+
+        self.task.cancel()
+
+    def stop(self):
+        """
+        Stop the running task.
+        """
+
+        asyncio.get_event_loop().run_until_complete(self.unsubscribe())
 
     async def channel_handler(self):
         """
@@ -155,7 +176,7 @@ class RedisChannelHandler(object):
 
         # Get the channel from the list, loop it forever
         channel = channel_list[0]
-        self.connection.logger.info(f"Looping to wait for messages to channel {self.channel_name}")
+        self.connection.logger.info(f"Looping to wait for messages to Redis channel {self.channel_name}")
         while (await channel.wait_message()):
             data = await channel.get_json()
             self.connection.logger.debug(f"Received JSON at channel {self.channel_name}:{json.dumps(data)}")
@@ -168,6 +189,7 @@ class RedisChannelHandler(object):
                 self.logger.error(e)
 
     async def unsubscribe(self):
+        self.connection.logger.info(f"Unsubscribing from Redis channel {self.channel_name}")
         await self.connection.pool.unsubscribe(self.channel_name)
 
 
