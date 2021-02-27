@@ -271,6 +271,11 @@ class Bot(commands.AutoShardedBot):
 
     @property
     def user_agent(self):
+        if self.user is None:
+            return self.config.get("user_agent", (
+                f"DiscordBot (Discord.py discord bot https://github.com/Rapptz/discord.py) "
+                f"Python/{platform.python_version()} aiohttp/{aiohttp.__version__}"
+            ))
         return self.config.get("user_agent", (
             f"{self.user.name.replace(' ', '-')} (Discord.py discord bot https://github.com/Rapptz/discord.py) "
             f"Python/{platform.python_version()} aiohttp/{aiohttp.__version__}"
