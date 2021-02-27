@@ -10,7 +10,7 @@ from .database import DatabaseConnection
 from .redis import RedisConnection, RedisChannelHandler, redis_channel_handler
 from .statsd import StatsdConnection
 from .time_value import TimeValue
-from .settings_menu import SettingsMenu, SettingsMenuOption, SettingsMenuIterable, SettingsMenuIterableBase
+from .settings_menu import SettingsMenu, SettingsMenuOption, SettingsMenuIterable
 from .upgrade_chat import UpgradeChat, UpgradeChatOrder, UpgradeChatUser, UpgradeChatOrderItem
 
 

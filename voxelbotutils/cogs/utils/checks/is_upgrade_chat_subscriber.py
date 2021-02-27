@@ -7,16 +7,15 @@ from discord.ext import commands
 class IsNotUpgradeChatSubscriber(commands.CheckFailure):
     """The error raised when the user is missing an UpradeChat subscription."""
 
+    def __init__(self):
+        super().__init__("You need to be subscribed via Upgrade.Chat to run this command - see `{ctx.clean_prefix}donate` for more information.")
+
 
 def is_upgrade_chat_subscriber(*any_item_names):
     """
     A check to see whether a given user is an UpgradeChat subscriber for _any_ of the given item names,
     returning a list of things that they've purchased.
     """
-
-    error = IsNotUpgradeChatSubscriber(
-        "You need to be subscribed via Upgrade.Chat to run this command - see `{ctx.clean_prefix}donate` for more information."
-    )
 
     async def predicate(ctx):
 
@@ -44,6 +43,6 @@ def is_upgrade_chat_subscriber(*any_item_names):
             return output_items
 
         # They didn't purchase anything [valid]
-        raise error
+        raise IsNotUpgradeChatSubscriber()
 
     return commands.check(predicate)

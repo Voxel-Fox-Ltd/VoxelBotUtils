@@ -20,15 +20,19 @@ class SettingsMenuOption(object):
 
     def __init__(
             self, ctx:commands.Context, display:typing.Union[str, typing.Callable[[commands.Context], str]],
-            converter_args:typing.List[typing.Tuple]=list(),
+            converter_args:typing.List[typing.Tuple[str, str, commands.Converter, typing.Optional[typing.List[discord.Emoji]]]]=list(),
             callback:typing.Callable[['SettingsMenuOption', typing.List[typing.Any]], None]=lambda x: None,
             emoji:str=None, allow_nullable:bool=True):
         """
         Args:
             ctx (commands.Context): The context for which the menu is being invoked.
-            display (typing.Union[str, typing.Callable[[commands.Context], str]]): A string (or callable that returns string) that gives the display prompt for the option.
-            converter_args (typing.List[typing.Tuple], optional): A list of tuples that should be used to convert the user-provided arguments. Tuples are passed directly into `convert_prompted_information`.
-            callback (typing.Callable[['SettingsMenuOption', typing.List[typing.Any]], None], optional): A callable that's passed the information from the converter for you do to whatever with.
+            display (typing.Union[str, typing.Callable[[commands.Context], str]]): A string (or callable that returns string) that gives the
+                display prompt for the option.
+            converter_args (typing.List[typing.Tuple[str, str, commands.Converter, typing.Optional[typing.List[discord.Emoji]]]], optional):
+                A list of tuples that should be used to convert the user-provided arguments. Tuples are passed directly
+                into `convert_prompted_information`.
+            callback (typing.Callable[['SettingsMenuOption', typing.List[typing.Any]], None], optional): A callable that's passed the
+                information from the converter for you do to whatever with.
             emoji (str, optional): The emoji that this option refers to.
             allow_nullable (bool, optional): Whether or not this option is allowed to return None.
         """
@@ -77,7 +81,8 @@ class SettingsMenuOption(object):
             if asyncio.iscoroutine(called_data):
                 await called_data
 
-    async def convert_prompted_information(self, prompt:str, asking_for:str, converter:commands.Converter, reactions:typing.List[discord.Emoji]=list()) -> typing.Any:
+    async def convert_prompted_information(
+            self, prompt:str, asking_for:str, converter:commands.Converter, reactions:typing.List[discord.Emoji]=list()) -> typing.Any:
         """
         Ask the user for some information, convert it, and return that converted value to the user.
 
@@ -85,7 +90,8 @@ class SettingsMenuOption(object):
             prompt (str): The text that we sent to the user -- something along the lines of "what channel do you want to use" etc.
             asking_for (str): Say what we're looking for them to send - doesn't need to be anything important, it just goes to the timeout message.
             converter (commands.Converter): The converter used to work out what to change the given user value to.
-            reactions (typing.List[discord.Emoji], optional): The reactions that should be added to the prompt message.
+            reactions (typing.List[discord.Emoji], optional): The reactions that should be added to the prompt message. If provided then the content
+                of the added reaction is thrown into the converter instead.
 
         Returns:
             typing.Any: The converted information.
@@ -103,8 +109,8 @@ class SettingsMenuOption(object):
         try:
             if reactions:
                 user_message = None
-                check = lambda r, u: r.message.id == bot_message.id and u.id == self.context.author.id and str(r.emoji) in reactions
-                reaction, _ = await self.context.bot.wait_for("reaction_add", timeout=120, check=check)
+                check = lambda p: p.message_id == bot_message.id and p.user_id == self.context.author.id and str(r.emoji) in reactions
+                reaction, _ = await self.context.bot.wait_for("raw_reaction_add", timeout=120, check=check)
                 content = str(reaction.emoji)
             else:
                 check = lambda m: m.channel.id == self.context.channel.id and m.author.id == self.context.author.id
@@ -524,109 +530,6 @@ class SettingsMenu(object):
         return {'embed': embed}, emoji_list
 
 
-class SettingsMenuIterableBase(SettingsMenu):
-    """
-    This is the base for the settings menu iterable.
-    """
-
-    def __init__(
-            self, cache_key:str, key_display_function:typing.Callable[[typing.Any], str]=None, value_display_function:typing.Callable[[typing.Any], str]=str,
-            default_type:type=list, *, iterable_add_callback:typing.Callable=None, iterable_delete_callback:typing.Callable=None, max_iterable_count:int=10):
-        """
-        Args:
-            cache_key (str): The key used to grab the cached data from the `bot.guild_settings`.
-            key_display_function (typing.Callable[[typing.Any], str], optional): The function used to display the data provided from the cache. Something like `guild.get_role(key).name`.
-            value_display_function (typing.Callable[[typing.Any], str], optional): The function used to display the data provided from the cache. Something like `guild.get_role(key).name`. Not necessary if the cached item is a _list_ rather than a dict.
-            iterable_add_callback (typing.Callable, optional): A callable used to cache and store the given converted item. The provided arguments to this function are the settings menu intstance, and the command context. It should return another callable that takes a list of the converted items.
-            iterable_delete_callback (typing.Callable, optional): A callable used to uncache and delete the given item. The provided arguments to this function are the settings menu intstance, the command context, and the item that the iterable should refer to. It should return a callable with no arguments that performs the action.
-            max_iterable_count (int, optional): The maximum amount of items that are allowed on the iterables menu.
-        """
-
-        super().__init__()
-
-        self.cache_key = cache_key
-        self.key_display_function = key_display_function or (lambda x: x)
-        self.value_display_function = value_display_function or (lambda x: x)
-        self.default_type = default_type
-
-        self.iterable_add_callback = iterable_add_callback
-        self.iterable_delete_callback = iterable_delete_callback
-
-        self.max_iterable_count = max_iterable_count
-
-        self.convertable_values = []
-
-    def add_convertable_value(self, prompt:str=None, converter:commands.Converter=str) -> None:
-        """
-        Add a convertable value to the convertable value list.
-
-        Args:
-            prompt (str, optional): The text sent to the user when the bot asks them to input some data.
-            converter (commands.Converter, optional): The converter object used to convert the provided user value into something usable.
-        """
-
-        self.convertable_values.append((prompt, "value", converter))
-
-    def bulk_add_convertable_value(self, ctx:commands.Context, *args):
-        """
-        Add MULTIPLE options to the settings list.
-        Each option is simply thrown into a SettingsMenuOption item and then added to the options list.
-        """
-
-        for data in args:
-            self.add_convertable_value(*data)
-
-    def get_sendable_data(self, ctx:commands.Context):
-
-        # Get the current data
-        data_points = ctx.bot.guild_settings[ctx.guild.id].setdefault(self.cache_key, self.default_type())
-
-        # Current data is a key-value pair
-        if isinstance(data_points, dict):
-            self.options = [
-                SettingsMenuOption(
-                    ctx, f"{self.key_display_function(i)!s} - {self.value_display_function(o)!s}", (),
-                    self.iterable_delete_callback(self, ctx, i), allow_nullable=False,
-                )
-                for i, o in data_points.items()
-            ]
-            if len(self.options) < self.max_iterable_count:
-                self.options.append(
-                    SettingsMenuOption(
-                        ctx, "", self.convertable_values,
-                        self.iterable_add_callback(self, ctx),
-                        emoji=self.PLUS_EMOJI,
-                        allow_nullable=False,
-                    )
-                )
-
-        # Current data is a key list
-        elif isinstance(data_points, list):
-            self.options = [
-                SettingsMenuOption(
-                    ctx, f"{self.key_display_function(i)!s}", (),
-                    self.iterable_delete_callback(self, ctx, i),
-                    allow_nullable=False,
-                )
-                for i in data_points
-            ]
-            if len(self.options) < self.max_iterable_count:
-                self.options.append(
-                    SettingsMenuOption(
-                        ctx, "", self.convertable_values,
-                        self.iterable_add_callback(self, ctx),
-                        emoji=self.PLUS_EMOJI,
-                        allow_nullable=False,
-                    )
-                )
-
-        # Generate the data as normal
-        return super().get_sendable_data(ctx)
-
-    async def start(self, *args, clear_reactions_on_loop:bool=True, **kwargs):
-        return await super().start(*args, clear_reactions_on_loop=clear_reactions_on_loop, **kwargs)
-
-
 class SettingsMenuIterable(SettingsMenu):
     """
     A version of the settings menu for dealing with things like lists and dictionaries
@@ -637,21 +540,31 @@ class SettingsMenuIterable(SettingsMenu):
             self, table_name:str, column_name:str, cache_key:str, database_key:str,
             key_converter:commands.Converter, key_prompt:str, key_display_function:typing.Callable[[typing.Any], str],
             value_converter:commands.Converter=str, value_prompt:str=None, value_serialize_function:typing.Callable=None,
-            *, iterable_add_callback:typing.Callable=None, iterable_delete_callback:typing.Callable=None):
+            *, iterable_add_callback:typing.Callable[['SettingsMenu', commands.Context], None]=None,
+            iterable_delete_callback:typing.Callable[['SettingsMenu', commands.Context, int], None]=None):
         """
         Args:
             table_name (str): The name of the table that the data should be inserted into.
-            column_name (str): The column name for the table where teh key should be inserted to.
+            column_name (str): The column name for the table where the key should be inserted to.
             cache_key (str): The key that goes into `bot.guild_settings` to get to the cached iterable.
-            database_key (str): The key that would be inserted into the default `role_list` or `channel_list` tables.
-            key_converter (commands.Converter): The converter that's used to take the user's input and convert it into a given object. Usually this will be a `discord.ext.commands.RoleConverter` or `discord.ext.commands.TextChannelConverter`.
+            database_key (str): The key that would be inserted into the default `role_list` or `channel_list` tables. If you're not using this field
+                then this will probably be pretty useless to you.
+            key_converter (commands.Converter): The converter that's used to take the user's input and convert it into a given object.
+                Usually this will be a `discord.ext.commands.RoleConverter` or `discord.ext.commands.TextChannelConverter`.
             key_prompt (str): The string send to the user when asking for the key.
-            key_display_function (typing.Callable[[typing.Any], str]): A function used to take the raw data from the key and change it into a display value.
-            value_converter (commands.Converter, optional): The converter that's used to take the user's input and change it into something of value.
+            key_display_function (typing.Callable[[typing.Any], str]): A function used to take the raw data from the key and
+                change it into a display value.
+            value_converter (commands.Converter, optional): The converter that's used to take the user's input and change it into
+                something of value.
             value_prompt (str, optional): The string send to the user when asking for the value.
-            value_serialize_function (typing.Callable, optional): A function used to take the converted value and change it into something database-friendly.
-            iterable_add_callback (typing.Callable, optional): A function that's run with the params of the database name, the column name, the cache key, the database key, and the value serialize function. If left blank then it defaults to making a new callback for you that just adds to the `role_list` or `channel_list` table as specified.
-            iterable_delete_callback (typing.Callable, optional): A function that's run with the params of the database name, the column name, the item to be deleted, the cache key, and the database key. If left blank then it defaults to making a new callback for you that just deletes from the `role_list` or `channel_list` table as specified.
+            value_serialize_function (typing.Callable, optional): A function used to take the converted value and change it into
+                something database-friendly.
+            iterable_add_callback (typing.Callable, optional): A function that's run with the params of the database name,
+                the column name, the cache key, the database key, and the value serialize function. If left blank then it defaults
+                to making a new callback for you that just adds to the `role_list` or `channel_list` table as specified.
+            iterable_delete_callback (typing.Callable, optional): A function that's run with the params of the database name,
+                the column name, the item to be deleted, the cache key, and the database key. If left blank then it defaults
+                to making a new callback for you that just deletes from the `role_list` or `channel_list` table as specified.
         """
         super().__init__()
 
@@ -686,7 +599,7 @@ class SettingsMenuIterable(SettingsMenu):
             self.options = [
                 SettingsMenuOption(
                     ctx, f"{self.key_display_function(i)} - {self.value_converter(o)!s}", (),
-                    self.iterable_delete_callback(self.table_name, self.column_name, i, self.cache_key, self.database_key),
+                    self.iterable_delete_callback(self, ctx, i),
                     allow_nullable=False,
                 )
                 for i, o in data_points.items()
@@ -697,7 +610,7 @@ class SettingsMenuIterable(SettingsMenu):
                         ctx, "", [
                             (self.key_prompt, "value", self.key_converter),
                             (self.value_prompt, "value", self.value_converter)
-                        ], self.iterable_add_callback(self.table_name, self.column_name, self.cache_key, self.database_key, self.value_serialize_function),
+                        ], self.iterable_add_callback(self, ctx),
                         emoji=self.PLUS_EMOJI,
                         allow_nullable=False,
                     )
