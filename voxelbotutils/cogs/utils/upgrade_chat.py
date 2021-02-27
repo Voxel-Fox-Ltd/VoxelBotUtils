@@ -34,10 +34,11 @@ class UpgradeChatOrderItem(object):
         self.is_time_limited = is_time_limited
         self.discord_roles = discord_roles
         self.product_types = product_types
-        self.product_name = product['name']
-        self.product_uuid = product['uuid']
         self.payment_processor_record_id = payment_processor_record_id
         self.payment_processor = payment_processor
+
+        self.product_name = product['name']
+        self.product_uuid = product['uuid']
 
     def __repr__(self):
         return f"<{self.__class__.__name__} ${self.price:.2f} purchase>"
@@ -64,9 +65,12 @@ class UpgradeChatOrder(object):
         self.is_subscription = is_subscription
         self.cancelled_at = cancelled_at
         self.deleted = deleted
-        self.order_items = order_items
         self.created = created
         self.updated = updated
+
+        self.order_items = order_items
+        self.order_item_names = [i.product_name for i in self.order_items]
+        self.order_item_uuids = [i.product_uuid for i in self.order_items]
 
     def __repr__(self):
         return f"<{self.__class__.__name__} {self.uuid}>"
