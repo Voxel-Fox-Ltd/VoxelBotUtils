@@ -16,6 +16,7 @@ requirements = [
     "toml",
     "asyncpg",
     "aioredis",
+    "aioredlock",
     "aiodogstatsd",
     "aiohttp",
 ]
