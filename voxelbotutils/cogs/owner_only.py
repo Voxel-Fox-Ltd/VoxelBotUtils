@@ -96,13 +96,6 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
             except discord.HTTPException:
                 return
 
-        # Removes the reactions from the initial message
-        for i in valid_emoji:
-            try:
-                await message.remove_reaction(i)
-            except discord.HTTPException:
-                pass
-
     @commands.command(aliases=['pm', 'dm', 'send'], cls=utils.Command)
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True)
