@@ -71,15 +71,16 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
             # Waits for the reaction from the user
             try:
                 reaction, _ = await self.bot.wait_for('reaction_add', timeout=300.0, check=check)
+                emoji = str(reaction.emoji)
             except asyncio.TimeoutError:
-                reaction.emoji = valid_emoji[2]
+                emoji = valid_emoji[2]
 
             # Checks which emoji was reacted and add to the index
-            if reaction.emoji == valid_emoji[0]:
+            if emoji == valid_emoji[0]:
                 new_index = index + 1
-            if reaction.emoji == valid_emoji[1]:
+            if emoji == valid_emoji[1]:
                 new_index = index - 1
-            if reaction.emoji == valid_emoji[2]:
+            if emoji == valid_emoji[2]:
                 break
 
             # See if our index has changed
