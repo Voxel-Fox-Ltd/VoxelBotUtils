@@ -83,6 +83,34 @@ DatabaseConnection
       await db("DELETE FROM user_settings")
       await db.disconnect()
 
+Paginator
+-------------------------------------------
+
+.. autoclass:: voxelbotutils.Paginator
+   :members:
+
+   An automatic paginator util that takes a list and listens for reactions on a message to change the content.
+
+   .. codeblock:: python
+
+      # Items will automatically be cast to strings and joined
+      my_list = list(range(30))
+      p = Paginator(my_list, per_page=5)
+      await p.start(ctx, timeout=15)
+
+      # Alternatively you can give a function, which can return a string, an embed, or a dict that gets unpacked directly
+      # into the message's edit method
+      def my_formatter(menu, items):
+         output = []
+         for i in items:
+            output.append(f"The {i}th item")
+         output_string = "\n".join(output)
+         embed = voxelbotutils.Embed(description=output_string)
+         embed.set_footer(f"Page {menu.current_page + 1}/{menu.max_pages}")
+
+      p = Paginator(my_list, formatter=my_formatter)
+      await p.start(ctx)
+
 RedisConnection
 -------------------------------------
 
