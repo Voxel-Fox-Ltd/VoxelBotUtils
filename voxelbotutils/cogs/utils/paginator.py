@@ -4,6 +4,8 @@ import asyncio
 import discord
 from discord.ext import commands
 
+from .context_embed import Embed
+
 
 class Paginator(object):
     """
@@ -12,7 +14,7 @@ class Paginator(object):
 
     def __init__(
             self, data:typing.List[typing.Any], *, per_page:int=10,
-            formatter:typing.Callable[['Paginator', typing.List[typing.Any]], dict]=None):
+            formatter:typing.Callable[['Paginator', typing.List[typing.Any]], typing.Union[str, discord.Embed, dict]]=None):
         """
         Args:
             data (typing.List[typing.Any]): The data that you want to paginate.
@@ -23,7 +25,9 @@ class Paginator(object):
         """
         self.data = data
         self.per_page = per_page
-        self.formatter = formatter or (lambda paginator, data: {"content": "\n".join(str(i) for i in data)})
+        self.formatter = formatter
+        if self.formatter is None:
+            self.formatter = lambda m, d: Embed(use_random_colour=True, description="\n".join(d)).set_footer(f"Page {m.current_page + 1}/{m.max_pages}")
         self.current_page = None
 
         pages, left_over = divmod(len(data), self.per_page)
