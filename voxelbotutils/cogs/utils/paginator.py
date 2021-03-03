@@ -1,5 +1,6 @@
 import typing
 import asyncio
+import random
 
 import discord
 from discord.ext import commands
@@ -27,7 +28,8 @@ class Paginator(object):
         self.per_page = per_page
         self.formatter = formatter
         if self.formatter is None:
-            self.formatter = lambda m, d: Embed(use_random_colour=True, description="\n".join(d)).set_footer(f"Page {m.current_page + 1}/{m.max_pages}")
+            colour = random.randint(1, 0xffffff)
+            self.formatter = lambda m, d: Embed(colour=colour, description="\n".join(d)).set_footer(f"Page {m.current_page + 1}/{m.max_pages}")
         self.current_page = None
 
         pages, left_over = divmod(len(data), self.per_page)
