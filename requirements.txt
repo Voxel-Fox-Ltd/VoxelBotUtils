@@ -5,6 +5,7 @@ toml
 # Storage handling
 asyncpg
 aioredis
+aioredlock
 aiodogstatsd
 
 # Website stuff
