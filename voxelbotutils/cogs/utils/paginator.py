@@ -55,6 +55,7 @@ class Paginator(object):
             valid_emojis = [
                 "\N{BLACK LEFT-POINTING DOUBLE TRIANGLE}",
                 "\N{LEFTWARDS BLACK ARROW}",
+                "\N{BLACK SQUARE FOR STOP}",
                 "\N{BLACK RIGHTWARDS ARROW}",
                 "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}",
             ]
@@ -90,14 +91,8 @@ class Paginator(object):
                 ], return_when=asyncio.FIRST_COMPLETED, timeout=timeout)
             except asyncio.TimeoutError:
                 pass
-
-            # Remove the reactions if we're done
             if not done:
-                try:
-                    await message.clear_reactions()
-                except discord.Exception:
-                    pass
-                return
+                break
 
             # See what they reacted with
             payload = done.pop().result()
@@ -108,15 +103,24 @@ class Paginator(object):
             self.current_page = {
                 "\N{BLACK LEFT-POINTING DOUBLE TRIANGLE}": lambda i: 0,
                 "\N{LEFTWARDS BLACK ARROW}": lambda i: i - 1,
+                "\N{BLACK SQUARE FOR STOP}": lambda i: None,
                 "\N{BLACK RIGHTWARDS ARROW}": lambda i: i + 1,
                 "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}": lambda i: self.max_pages,
             }[str(payload.emoji)](self.current_page)
+            if self.current_page is None:
+                break
 
             # Make sure the page number is still valid
             if self.current_page >= self.max_pages:
                 self.current_page = self.max_pages - 1
             elif self.current_page < 0:
                 self.current_page = 0
+
+        # Let us break from the loop
+        try:
+            await message.clear_reactions()
+        except discord.Exception:
+            pass
 
     def get_page(self, page_number:int) -> typing.List[typing.Any]:
         """
