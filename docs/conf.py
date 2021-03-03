@@ -33,6 +33,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx_rtd_theme",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.viewcode",
 ]
 
 # autodoc_default_options = {
