@@ -8,7 +8,7 @@ Embed
    :members:
 
    .. note::
-      All of the methods and attributes available in :ref:`discord.Embed` still work as they did before; nothing has had any breaking changes.
+      All of the methods and attributes available in :class:`discord.Embed` still work as they did before; nothing has had any breaking changes.
 
    .. code-block:: python
 
@@ -44,7 +44,7 @@ Cog
 .. autoclass:: voxelbotutils.Cog
    :members:
 
-   Almost everything is still the same as the defaul discord.py cog. Notable changes: `Cog.logger` is a thing - that's a deafult logger that follows the same loglevel as `Bot.logger`; `Cog.cache_setup` is a new awaitable method that's run at bot startup - use it to set up your cache values should you need them, but otherwise you should just pull from your database tbh.
+   Almost everything is still the same as the default :class:`discord.ext.Cog`. Notable changes: `Cog.logger` is a thing - that's a deafult logger that follows the same loglevel as `Bot.logger`; `Cog.cache_setup` is a new awaitable method that's run at bot startup - use it to set up your cache values should you need them, but otherwise you should just pull from your database tbh.
 
 Command
 -----------------------------------------------
@@ -91,7 +91,7 @@ Paginator
 
    An automatic paginator util that takes a list and listens for reactions on a message to change the content.
 
-   .. codeblock:: python
+   .. code-block:: python
 
       # Items will automatically be cast to strings and joined
       my_list = list(range(30))
@@ -122,7 +122,7 @@ RedisConnection
 
    Redis channels can be subscribed to via the use of the `redis_channel_handler` method;
 
-   .. codeblock:: python
+   .. code-block:: python
 
       @redis_channel_handler("channel_name")
       async def handler(self, payload):
@@ -130,7 +130,7 @@ RedisConnection
 
    You can publish data to them with the `publish` method:
 
-   .. codeblock:: python
+   .. code-block:: python
 
       async with RedisConnection() as re:
          await re.publish("channel_name", {"foo": "bar"})
