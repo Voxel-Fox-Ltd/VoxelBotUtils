@@ -44,8 +44,6 @@ Cog
 .. autoclass:: voxelbotutils.Cog
    :members:
 
-   Almost everything is still the same as the default :class:`discord.ext.Cog`. Notable changes: `Cog.logger` is a thing - that's a deafult logger that follows the same loglevel as `Bot.logger`; `Cog.cache_setup` is a new awaitable method that's run at bot startup - use it to set up your cache values should you need them, but otherwise you should just pull from your database tbh.
-
 Command
 -----------------------------------------------
 
@@ -55,7 +53,7 @@ Command
 .. autoclass:: voxelbotutils.Group
    :members:
 
-voxelbotutils.Context
+Context
 -----------------------------------------------
 
 .. autoclass:: voxelbotutils.Context
