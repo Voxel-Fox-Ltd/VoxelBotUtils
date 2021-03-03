@@ -62,6 +62,7 @@ class Paginator(object):
                 ctx.bot.loop.create_task(message.add_reaction(e))
 
         # Loop the reaction handler
+        last_payload = None
         while True:
 
             # Edit the message with the relevant data
@@ -73,7 +74,9 @@ class Paginator(object):
                 payload = {"content": payload}
             payload.setdefault("content", None)
             payload.setdefault("embed", None)
-            await message.edit(**payload)
+            if payload != last_payload:
+                await message.edit(**payload)
+            payload = last_payload
             if self.max_pages == 1:
                 return
 
