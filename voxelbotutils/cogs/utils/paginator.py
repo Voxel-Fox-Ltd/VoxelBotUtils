@@ -84,7 +84,7 @@ class Paginator(object):
             # Wait for reactions to be added by the user
             done, pending = None, None
             try:
-                check = lambda p: str(p.emoji) in valid_emojis and p.user_id == ctx.author.id
+                check = lambda p: str(p.emoji) in valid_emojis and p.user_id == ctx.author.id and p.message_id == message.id
                 done, pending = await asyncio.wait([
                     ctx.bot.wait_for("raw_reaction_add", check=check),
                     ctx.bot.wait_for("raw_reaction_remove", check=check),
