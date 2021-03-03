@@ -15,3 +15,6 @@ aiohttp_jinja2
 aiohttp_session
 jinja2
 
+# Docs
+sphinx
+sphinx_rtd_theme
