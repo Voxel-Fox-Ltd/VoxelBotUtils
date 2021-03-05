@@ -29,7 +29,10 @@ class Cog(OriginalCog):
 
         self.redis_channels: typing.Set[RedisChannelHandler] = set()
         for attr in dir(self):
-            item = getattr(self, attr)
+            try:
+                item = getattr(self, attr)
+            except AttributeError:
+                continue
             if isinstance(item, RedisChannelHandler):
                 item.cog = self
                 self.redis_channels.add(item)
