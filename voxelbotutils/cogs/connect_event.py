@@ -141,16 +141,26 @@ class ConnectEvent(utils.Cog):
         """
 
         if guild.me:
+            try:
+                member_count = guild.member_count
+                text = f"Removed from guild - ``{guild.name}`` (`{member_count}` members; `{utils.TimeValue((dt.utcnow() - guild.me.joined_at).total_seconds()).clean_full}` guild duration)",
+            except Exception:
+                text = f"Removed from guild - ``{guild.name}`` (`{utils.TimeValue((dt.utcnow() - guild.me.joined_at).total_seconds()).clean_full}` guild duration)",
             await self.send_webhook(
                 "guild_remove",
-                f"Removed from guild - ``{guild.name}`` (`{guild.member_count}` members; `{utils.TimeValue((dt.utcnow() - guild.me.joined_at).total_seconds()).clean_full}` guild duration)",
+                text,
                 f"{self.bot.user.name} - Guild Remove",
                 "Sent webhook for on_guild_remove event",
             )
         else:
+            try:
+                member_count = guild.member_count
+                text = f"Removed from guild - ``{guild.name}`` (`{member_count}` members)",
+            except Exception:
+                text = f"Removed from guild - ``{guild.name}``",
             await self.send_webhook(
                 "guild_remove",
-                f"Removed from guild - ``{guild.name}`` (`{guild.member_count}` members)",
+                text,
                 f"{self.bot.user.name} - Guild Remove",
                 "Sent webhook for on_guild_remove event",
             )
