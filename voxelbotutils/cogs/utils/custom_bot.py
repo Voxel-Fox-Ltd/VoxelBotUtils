@@ -271,6 +271,11 @@ class Bot(commands.AutoShardedBot):
 
     @property
     def user_agent(self):
+        if self.user is None:
+            return self.config.get("user_agent", (
+                f"DiscordBot (Discord.py discord bot https://github.com/Rapptz/discord.py) "
+                f"Python/{platform.python_version()} aiohttp/{aiohttp.__version__}"
+            ))
         return self.config.get("user_agent", (
             f"{self.user.name.replace(' ', '-')} (Discord.py discord bot https://github.com/Rapptz/discord.py) "
             f"Python/{platform.python_version()} aiohttp/{aiohttp.__version__}"
@@ -282,6 +287,22 @@ class Bot(commands.AutoShardedBot):
             return self._upgrade_chat
         self._upgrade_chat = UpgradeChat(self.config["upgrade_chat"]["client_id"], self.config["upgrade_chat"]["client_secret"])
         return self._upgrade_chat
+
+    async def get_user_topgg_vote(self, user_id:int) -> bool:
+        """
+        Returns whether or not the user has voted on Top.gg.
+        """
+
+        topgg_token = self.config.get('bot_listing_api_keys', {}).get('topgg_token')
+        url = "https://top.gg/api/bots/{bot.user.id}/check".format(bot=self)
+        async with self.session.get(url, params={"userId": user_id}, headers={"Authorization": topgg_token}) as r:
+            try:
+                data = await r.json()
+            except Exception:
+                return False
+            if r.status != 200:
+                return False
+        return data.get("voted", False)
 
     def get_event_webhook(self, event_name:str) -> typing.Optional[discord.Webhook]:
         """

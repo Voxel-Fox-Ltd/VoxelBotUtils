@@ -48,7 +48,7 @@ errors.MissingRequiredArgumentString
 .. autoclass:: voxelbotutils.errors.MissingRequiredArgumentString
     :members:
 
-    This is a version of :ref:`discord.ext.commands.MissingRequiredArgument` that just takes a string as a parameter so you can manually raise it inside commands.
+    This is a version of :class:`discord.ext.commands.MissingRequiredArgument` that just takes a string as a parameter so you can manually raise it inside commands.
 
 errors.InvalidTimeDuration
 -------------------------------------------
@@ -56,9 +56,9 @@ errors.InvalidTimeDuration
 .. autoclass:: voxelbotutils.errors.InvalidTimeDuration
     :members:
 
-    A subclass of :ref:`discord.ext.commands.BadArgument` that's thrown when a user passes an invalid input to a :ref:`voxelbotutils.TimeValue` converter in a command.
+    A subclass of :class:`discord.ext.commands.BadArgument` that's thrown when a user passes an invalid input to a :class:`voxelbotutils.TimeValue` converter in a command.
 
-errors.IsNotUpgradeChatSupporter
+errors.IsNotUpgradeChatSubscriber
 -------------------------------------------
 
-.. autoclass:: voxelbotutils.errors.IsNotUpgradeChatSupporter
+.. autoclass:: voxelbotutils.errors.IsNotUpgradeChatSubscriber

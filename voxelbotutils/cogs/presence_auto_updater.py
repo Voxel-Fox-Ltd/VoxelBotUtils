@@ -50,7 +50,12 @@ class PresenceAutoUpdater(utils.Cog):
         self.logger.debug(f"POST {self.TWITCH_TOKEN_URL} returned {data}")
 
         # Store it
-        self._twitch_app_token = data["access_token"]
+        try:
+            self._twitch_app_token = data["access_token"]
+        except KeyError:
+            self.logger.error("The Twitch client ID or secret in the config is invalid")
+            self.presence_auto_update_loop.cancel()
+            return ""
 
         # Set up our refresh task
         async def refresh_token_coro():

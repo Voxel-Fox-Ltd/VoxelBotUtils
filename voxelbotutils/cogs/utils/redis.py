@@ -4,6 +4,7 @@ import asyncio
 import json
 
 import aioredis
+import aioredlock
 
 
 class RedisConnection(object):
@@ -14,6 +15,7 @@ class RedisConnection(object):
     config: dict = None
     pool: aioredis.Redis = None
     logger: logging.Logger = None  # Set as a child of bot.logger
+    lock_manager: aioredlock.Aioredlock = None
 
     def __init__(self, connection:aioredis.RedisConnection=None):
         self.conn = connection
@@ -33,6 +35,7 @@ class RedisConnection(object):
             raise NotImplementedError("The Redis connection has been disabled.")
         address = modified_config.pop('host'), modified_config.pop('port')
         cls.pool = await aioredis.create_redis_pool(address, **modified_config)
+        cls.lock_manager = aioredlock.Aioredlock([cls.pool])
 
     @classmethod
     async def get_connection(cls):

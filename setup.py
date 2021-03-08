@@ -16,6 +16,7 @@ requirements = [
     "toml",
     "asyncpg",
     "aioredis",
+    "aioredlock",
     "aiodogstatsd",
     "aiohttp",
 ]
@@ -30,6 +31,10 @@ extras = {
         "jinja2",
         "markdown",
         "htmlmin",
+    ],
+    "docs": [
+        "sphinx",
+        "sphinx_rtd_theme",
     ]
 }
 
@@ -45,8 +50,8 @@ version = regex.search(text).group(1)
 setuptools.setup(
     name="voxelbotutils",
     version=version,
-    author="Callum Bartlett",
-    author_email="callum@voxelfox.co.uk",
+    author="Kae Bartlett",
+    author_email="kae@voxelfox.co.uk",
     description="A set of bot utilities for Discord.py",
     long_description=long_description,
     long_description_content_type="text/markdown",

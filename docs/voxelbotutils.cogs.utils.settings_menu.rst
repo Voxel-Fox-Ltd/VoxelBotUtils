@@ -12,7 +12,7 @@ Running one of these menus can be a *just a tad* unintuitive, so I'm putting an 
    menu = voxelbotutils.SettingsMenu()
 
    # This is just a shorthand function for mentioning an item in the `bot.guild_settings` attr
-   settings_mention = utils.SettingsMenuOption.get_guild_settings_mention
+   settings_mention = voxelbotutils.SettingsMenuOption.get_guild_settings_mention
 
    # Now we're gonna add options to our menu
    menu.add_option(voxelbotutils.SettingsMenuOption(
@@ -43,11 +43,11 @@ Here's an in-use example from one of my projects:
 
 .. code-block:: python
 
-   @commands.group(cls=utils.Group)
+   @voxelbotutils.group()
    @commands.has_permissions(manage_guild=True)
    @commands.bot_has_permissions(send_messages=True, embed_links=True, add_reactions=True)
    @commands.guild_only()
-   async def setup(self, ctx:utils.Context):
+   async def setup(self, ctx:voxelbotutils.Context):
       """Run the bot setup"""
 
       # Make sure it's only run as its own command, not a parent
@@ -55,14 +55,14 @@ Here's an in-use example from one of my projects:
          return
 
       # Create settings menu
-      menu = utils.SettingsMenu()
-      settings_mention = utils.SettingsMenuOption.get_guild_settings_mention
+      menu = voxelbotutils.SettingsMenu()
+      settings_mention = voxelbotutils.SettingsMenuOption.get_guild_settings_mention
       menu.bulk_add_options(
          ctx,
          {
             'display': lambda c: "Set quote channel (currently {0})".format(settings_mention(c, 'quote_channel_id')),
             'converter_args': [("What do you want to set the quote channel to?", "quote channel", commands.TextChannelConverter)],
-            'callback': utils.SettingsMenuOption.get_set_guild_settings_callback('guild_settings', 'quote_channel_id'),
+            'callback': voxelbotutils.SettingsMenuOption.get_set_guild_settings_callback('guild_settings', 'quote_channel_id'),
          },
          {
             'display': "Nickname settings",
@@ -72,12 +72,12 @@ Here's an in-use example from one of my projects:
       try:
          await menu.start(ctx)
          await ctx.send("Done setting up!")
-      except utils.errors.InvokedMetaCommand:
+      except voxelbotutils.errors.InvokedMetaCommand:
          pass
 
-   @setup.command(cls=utils.Command)
-   @utils.checks.meta_command()
-   async def nicknames(self, ctx:utils.Context):
+   @setup.command()
+   @voxelbotutils.checks.meta_command()
+   async def nicknames(self, ctx:voxelbotutils.Context):
       """Run the bot setup"""
 
       # Make sure it's only run as its own command, not a parent
@@ -85,14 +85,14 @@ Here's an in-use example from one of my projects:
          return
 
       # Create settings menu
-      menu = utils.SettingsMenu()
-      settings_mention = utils.SettingsMenuOption.get_guild_settings_mention
+      menu = voxelbotutils.SettingsMenu()
+      settings_mention = voxelbotutils.SettingsMenuOption.get_guild_settings_mention
       menu.bulk_add_options(
          ctx,
          {
             'display': lambda c: "Set nickname change ban role (currently {0})".format(settings_mention(c, 'nickname_banned_role_id')),
             'converter_args': [("Which role should be set to stop users changing their nickname?", "nickname change ban role", commands.RoleConverter)],
-            'callback': utils.SettingsMenuOption.get_set_guild_settings_callback('guild_settings', 'nickname_banned_role_id'),
+            'callback': voxelbotutils.SettingsMenuOption.get_set_guild_settings_callback('guild_settings', 'nickname_banned_role_id'),
          },
       )
       await menu.start(ctx)

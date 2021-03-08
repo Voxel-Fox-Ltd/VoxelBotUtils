@@ -76,17 +76,17 @@ Making cogs is pretty much the same as you would do normally in Discord.py - her
 
 .. code-block:: python
 
-    import voxelbotutils as utils
+    import voxelbotutils
 
-    class PingCommand(utils.Cog):
+    class PingCommand(voxelbotutils.Cog):
 
-        @utils.command()
-        async def ping(self, ctx:utils.Context):
+        @voxelbotutils.command()
+        async def ping(self, ctx:voxelbotutils.Context):
             """A sexy lil ping command for the bot"""
 
             await ctx.send("Pong!")
 
-    def setup(bot:utils.Bot):
+    def setup(bot:voxelbotutils.Bot):
         x = PingCommand(bot)
         bot.add_cog(x)
 
@@ -104,12 +104,12 @@ There's no easy way to segue into it, so let's just have another cog example wit
 .. code-block:: python
 
     import discord
-    import voxelbotutils as utils
+    import voxelbotutils
 
-    class AnimalImageCommands(utils.Cog):
+    class AnimalImageCommands(voxelbotutils.Cog):
 
-        @utils.command()
-        async def cat(self, ctx:utils.Context):
+        @voxelbotutils.command()
+        async def cat(self, ctx:voxelbotutils.Context):
             """
             Gives you a cat image
             """
@@ -119,15 +119,15 @@ There's no easy way to segue into it, so let's just have another cog example wit
                 data = await r.json()
 
             # Format it into an embed
-            with utils.Embed(use_random_colour=True) as embed:
+            with voxelbotutils.Embed(use_random_colour=True) as embed:
                 embed.set_image(data['file'])
             await ctx.send(embed=embed)
 
             # Dispatch the context to event "on_animal_command"
             self.bot.dispatch("animal_command", ctx)
 
-        @utils.Cog.listener()
-        async def on_animal_command(self, ctx:utils.Context):
+        @voxelbotutils.Cog.listener()
+        async def on_animal_command(self, ctx:voxelbotutils.Context):
             """
             Add the user to the database
             """
@@ -141,7 +141,7 @@ There's no easy way to segue into it, so let's just have another cog example wit
             user_animal_information = row_input[0]  # Data returned from DB calls is a list of dicts, so this would be [{'user_id': ctx.author.id, ...}]
             self.logger.info(f"Set {ctx.author.id}'s {ctx.command.name} usage to {user_animal_information['count']}")
 
-    def setup(bot:utils.Bot):
+    def setup(bot:voxelbotutils.Bot):
         x = AnimalImageCommands(bot)
         bot.add_cog(x)
 

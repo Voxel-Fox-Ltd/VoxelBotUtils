@@ -8,7 +8,7 @@ Embed
    :members:
 
    .. note::
-      All of the methods and attributes available in :ref:`discord.Embed` still work as they did before; nothing has had any breaking changes.
+      All of the methods and attributes available in :class:`discord.Embed` still work as they did before; nothing has had any breaking changes.
 
    .. code-block:: python
 
@@ -44,8 +44,6 @@ Cog
 .. autoclass:: voxelbotutils.Cog
    :members:
 
-   Almost everything is still the same as the defaul discord.py cog. Notable changes: `Cog.logger` is a thing - that's a deafult logger that follows the same loglevel as `Bot.logger`; `Cog.cache_setup` is a new awaitable method that's run at bot startup - use it to set up your cache values should you need them, but otherwise you should just pull from your database tbh.
-
 Command
 -----------------------------------------------
 
@@ -55,7 +53,7 @@ Command
 .. autoclass:: voxelbotutils.Group
    :members:
 
-voxelbotutils.Context
+Context
 -----------------------------------------------
 
 .. autoclass:: voxelbotutils.Context
@@ -83,6 +81,34 @@ DatabaseConnection
       await db("DELETE FROM user_settings")
       await db.disconnect()
 
+Paginator
+-------------------------------------------
+
+.. autoclass:: voxelbotutils.Paginator
+   :members:
+
+   An automatic paginator util that takes a list and listens for reactions on a message to change the content.
+
+   .. code-block:: python
+
+      # Items will automatically be cast to strings and joined
+      my_list = list(range(30))
+      p = Paginator(my_list, per_page=5)
+      await p.start(ctx, timeout=15)
+
+      # Alternatively you can give a function, which can return a string, an embed, or a dict that gets unpacked directly
+      # into the message's edit method
+      def my_formatter(menu, items):
+         output = []
+         for i in items:
+            output.append(f"The {i}th item")
+         output_string = "\n".join(output)
+         embed = voxelbotutils.Embed(description=output_string)
+         embed.set_footer(f"Page {menu.current_page + 1}/{menu.max_pages}")
+
+      p = Paginator(my_list, formatter=my_formatter)
+      await p.start(ctx)
+
 RedisConnection
 -------------------------------------
 
@@ -94,7 +120,7 @@ RedisConnection
 
    Redis channels can be subscribed to via the use of the `redis_channel_handler` method;
 
-   .. codeblock:: python
+   .. code-block:: python
 
       @redis_channel_handler("channel_name")
       async def handler(self, payload):
@@ -102,7 +128,7 @@ RedisConnection
 
    You can publish data to them with the `publish` method:
 
-   .. codeblock:: python
+   .. code-block:: python
 
       async with RedisConnection() as re:
          await re.publish("channel_name", {"foo": "bar"})
