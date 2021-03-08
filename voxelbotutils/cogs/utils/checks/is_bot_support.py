@@ -1,4 +1,5 @@
 from discord.ext import commands
+import discord
 
 
 class NotBotSupport(commands.MissingRole):
@@ -18,9 +19,14 @@ def is_bot_support():
     async def predicate(ctx:commands.Context):
         if ctx.author.id in ctx.bot.owner_ids:
             return True
-        if ctx.guild is None:
+        supportguild = await ctx.bot.fetch_support_guild()
+        if supportguild is None:
             raise NotBotSupport()
-        if ctx.bot.config.get("bot_support_role_id", 0) in ctx.author._roles or ctx.author.id in ctx.bot.owner_ids:
+        try:
+            member = supportguild.get_member(ctx.author.id) or await supportguild.fetch_member(ctx.author.id)
+        except discord.HTTPException:
+            return NotBotSupport()
+        if ctx.bot.config.get("bot_support_role_id", 0) in member._roles or ctx.author.id in ctx.bot.owner_ids:
             return True
         raise NotBotSupport()
     return commands.check(predicate)
