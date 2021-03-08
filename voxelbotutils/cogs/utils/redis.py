@@ -9,7 +9,7 @@ import aioredlock
 
 class RedisConnection(object):
     """
-    A wrapper for an `aioredis.Redis` object.
+    A wrapper for an :class:`aioredis.Redis` object.
     """
 
     config: dict = None
@@ -18,6 +18,8 @@ class RedisConnection(object):
     lock_manager: aioredlock.Aioredlock = None
 
     def __init__(self, connection:aioredis.RedisConnection=None):
+        """:meta private:"""
+
         self.conn = connection
 
     @classmethod
@@ -26,7 +28,7 @@ class RedisConnection(object):
         Creates and connects the pool object.
 
         Args:
-            config (dict): The config dictionary that should be passed directly to `aioredis.create_redis_pool` directly as kwargs.
+            config (dict): The config dictionary that should be passed directly to :func:`aioredis.create_redis_pool` directly as kwargs.
         """
 
         cls.config = config.copy()
@@ -135,6 +137,9 @@ class RedisConnection(object):
 
 
 class RedisChannelHandler(object):
+    """
+    A channel handler wrapper for a function, meant for cogs to run a task in the background when added to cogs.
+    """
 
     connection = RedisConnection
 
@@ -192,6 +197,10 @@ class RedisChannelHandler(object):
                 self.logger.error(e)
 
     async def unsubscribe(self):
+        """
+        Unsubscribe from the channel that this instance refers to.
+        """
+
         self.connection.logger.info(f"Unsubscribing from Redis channel {self.channel_name}")
         await self.connection.pool.unsubscribe(self.channel_name)
 

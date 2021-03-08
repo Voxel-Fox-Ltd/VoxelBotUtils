@@ -1,6 +1,6 @@
 import typing
 import logging
-import re as regex
+import re
 
 from discord.ext.commands import Cog as OriginalCog
 
@@ -11,7 +11,7 @@ from .redis import RedisChannelHandler
 
 class Cog(OriginalCog):
     """
-    A slightly modified cog class to allow for cache_setup and for the logger instance.
+    A slightly modified cog class to allow for the `cache_setup` method and for the class' `logger` instance.
 
     Attributes:
         bot (discord.ext.commands.Bot): The bot instance that will be added to the cog.
@@ -20,6 +20,8 @@ class Cog(OriginalCog):
     """
 
     def __init__(self, bot:Bot, logger_name:str=None):
+        """:meta private:"""
+
         self.bot = bot
         bot_logger = getattr(bot, "logger", logging.getLogger("bot"))
         if logger_name:
@@ -54,12 +56,12 @@ class Cog(OriginalCog):
         Gets the "human readable" name of the class.
         """
 
-        return regex.sub(r"(?:[A-Z])(?:(?:[a-z0-9])+|[A-Z]+$|[A-Z]+(?=[A-Z]))?", "\\g<0> ", super().qualified_name.replace(' ', '')).strip()
+        return re.sub(r"(?:[A-Z])(?:(?:[a-z0-9])+|[A-Z]+$|[A-Z]+(?=[A-Z]))?", "\\g<0> ", super().qualified_name.replace(' ', '')).strip()
 
     async def cache_setup(self, database:DatabaseConnection):
         """
         A method that gets run when the bot's startup method is run - intended for setting up cached information
-        in the bot object that aren't in the guild_settings or user_settings tables
+        in the bot object that aren't in the :attr:`voxelbotutils.Bot.guild_settings` or :attr:`voxelbotutils.Bot.user_settings` tables.
         """
 
         pass

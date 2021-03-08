@@ -7,16 +7,21 @@ from discord.ext import commands
 
 class InvalidTimeDuration(commands.BadArgument):
     """
-    A conversion error for time durations.
+    A conversion error for an invalid input passed to :class:`voxelbotutils.TimeValue`.
 
     Args:
-        value (str): Description
+        value (str): The given value that was invalid.
 
     Attributes:
         value (str): The value that was given that failed to parse.
     """
 
     def __init__(self, value:str):
+        """
+        Args:
+            value (str): The given value that was invalid.
+        """
+
         self.value: str = value
 
     def __str__(self):
@@ -115,7 +120,7 @@ class TimeValue(object):
         Returns:
             TimeValue: A time value instance.
 
-        No Longer Raises:
+        Raises:
             InvalidTimeDuration: If the time could not be successfully converted.
         """
 

@@ -5,7 +5,7 @@ import discord
 
 class Embed(discord.Embed):
     """
-    A small mod for discord.Embed that allows for some of the more common things
+    A small mod for :class:`discord.Embed` that allows for some of the more common things
     that I tend to do with them.
     """
 

@@ -18,9 +18,11 @@ class SettingsMenuOption(object):
     a role list, etc.
     """
 
+    __slots__ = ('context', '_display', 'args', 'callback', 'emoji', 'allow_nullable',)
+
     def __init__(
             self, ctx:commands.Context, display:typing.Union[str, typing.Callable[[commands.Context], str]],
-            converter_args:typing.List[typing.Tuple[str, str, commands.Converter, typing.Optional[typing.List[discord.Emoji]]]]=list(),
+            converter_args:typing.List[typing.Tuple[str, str, typing.Union[type, commands.Converter], typing.Optional[typing.List[discord.Emoji]]]]=list(),
             callback:typing.Callable[['SettingsMenuOption', typing.List[typing.Any]], None]=lambda x: None,
             emoji:str=None, allow_nullable:bool=True):
         """
@@ -28,14 +30,15 @@ class SettingsMenuOption(object):
             ctx (commands.Context): The context for which the menu is being invoked.
             display (typing.Union[str, typing.Callable[[commands.Context], str]]): A string (or callable that returns string) that gives the
                 display prompt for the option.
-            converter_args (typing.List[typing.Tuple[str, str, commands.Converter, typing.Optional[typing.List[discord.Emoji]]]], optional):
-                A list of tuples that should be used to convert the user-provided arguments. Tuples are passed directly
-                into `convert_prompted_information`.
+            converter_args (typing.List[typing.Tuple[str, str, typing.Union[type, commands.Converter], typing.Optional[typing.List[discord.Emoji]]]], optional):
+                A list of tuples that should be used to convert the user-provided arguments. Tuples are passed directly into
+                `convert_prompted_information`. Args are passed in the order "prompt", "asking_for", "converter", "reactions".
             callback (typing.Callable[['SettingsMenuOption', typing.List[typing.Any]], None], optional): A callable that's passed the
                 information from the converter for you do to whatever with.
             emoji (str, optional): The emoji that this option refers to.
             allow_nullable (bool, optional): Whether or not this option is allowed to return None.
         """
+
         self.context: commands.Context = ctx
         self._display: typing.Union[str, typing.Callable[[commands.Context], str]] = display
         self.args: typing.List[typing.Tuple] = converter_args
@@ -84,7 +87,7 @@ class SettingsMenuOption(object):
     async def convert_prompted_information(
             self, prompt:str, asking_for:str, converter:commands.Converter, reactions:typing.List[discord.Emoji]=list()) -> typing.Any:
         """
-        Ask the user for some information, convert it, and return that converted value to the user.
+        Ask the user for some information, convert said information, and then return that converted value.
 
         Args:
             prompt (str): The text that we sent to the user -- something along the lines of "what channel do you want to use" etc.
@@ -122,6 +125,7 @@ class SettingsMenuOption(object):
 
         # Run converter
         conversion_failed = False
+        value = None
         if hasattr(converter, 'convert'):
             try:
                 converter = converter()
@@ -130,13 +134,11 @@ class SettingsMenuOption(object):
             try:
                 value = await converter.convert(self.context, content)
             except commands.CommandError:
-                value = None
                 conversion_failed = True
         else:
             try:
                 value = converter(content)
             except Exception:
-                value = None
                 conversion_failed = True
 
         # Delete prompt messages
@@ -159,7 +161,8 @@ class SettingsMenuOption(object):
     @classmethod
     def get_guild_settings_mention(cls, ctx:commands.Context, attr:str, default:str='none') -> str:
         """
-        Get an item from the bot's guild settings.
+        Get an item from the cached `Bot.guild_settings` object for the running guild and return
+        either it's mention string, or the `default` arg.
 
         Args:
             ctx (commands.Context): The context for the command.
@@ -176,7 +179,8 @@ class SettingsMenuOption(object):
     @classmethod
     def get_user_settings_mention(cls, ctx:commands.Context, attr:str, default:str='none') -> str:
         """
-        Get an item from the bot's user settings.
+        Get an item from the cached `Bot.user_settings` object for the running user and return
+        either it's mention string, or the `default` arg.
 
         Args:
             ctx (commands.Context): The context for the command.
@@ -194,6 +198,8 @@ class SettingsMenuOption(object):
     def get_settings_mention(cls, ctx:commands.Context, settings:dict, attr:str, default:str='none') -> str:
         """
         Get an item from the bot's settings.
+
+        :meta private:
 
         Args:
             ctx (commands.Context): The context for the command.
@@ -224,6 +230,8 @@ class SettingsMenuOption(object):
         """
         Get the mention of an object.
 
+        :meta private:
+
         Args:
             data (typing.Union[discord.abc.GuildChannel, discord.Role, None]): The object we want to mention.
             default (str): The default string that should be output if we can't mention the object.
@@ -235,50 +243,79 @@ class SettingsMenuOption(object):
         mention = data.mention if data else default
         return mention
 
-    @staticmethod
-    def get_set_guild_settings_callback(table_name:str, column_name:str, serialize_function:typing.Callable[[typing.Any], typing.Any]=lambda x: x) -> typing.Callable[[dict], None]:
-        """Return an async method that takes the data retuend by convert_prompted_information and then
-        saves it into the database - should be used for the add_option stuff in the SettingsMenu init
+    @classmethod
+    def get_set_guild_settings_callback(
+            cls, table_name:str, column_name:str,
+            serialize_function:typing.Callable[[typing.Any], typing.Any]=None) -> typing.Callable[[typing.Any], None]:
+        """
+        Return an async method that takes the data given by `convert_prompted_information`, then
+        saves it into the database - should be used in the SettingsMenu init.
+
+        :meta private:
 
         Args:
-            table_name (str): The name of the table the data should be inserted into. This is not used when caching information. This should NOT be a user supplied value.
-            column_name (str): The name of the column that the data should be inserted into. This is the same name that's used for caching. This should NOT be a user supplied value.
-            serialize_function (typing.Callable[[typing.Any], typing.Any], optional): The function that is called to convert the input data in the callback into a database-friendly value. This is _not_ called for caching the value, only for databasing. The default serialize function doesn't do anything, but is provided so you don't have to provide one yourself.
+            table_name (str): The name of the table the data should be inserted into. This is not used when caching information.
+                This should NOT be a user supplied value.
+            column_name (str): The name of the column that the data should be inserted into. This is the same name that's used
+                for caching. This should NOT be a user supplied value.
+            serialize_function (typing.Callable[[typing.Any], typing.Any], optional): The function that is called to convert the
+                input data in the callback into a database-friendly value. This is _not_ called for caching the value, only
+                for databasing. The default serialize function doesn't do anything, but is provided so you don't have to provide
+                one yourself.
 
         Returns:
-            typing.Callable[[dict], None]: A callable function that sets the guild settings when provided with data
+            typing.Callable[[typing.Any], None]: A callable function that sets the guild settings when provided with data
         """
 
-        async def callback(self, data):
-            """
-            The function that actually sets the data in the specified table in the database.
-            Any input to this function should be a direct converted value from `convert_prompted_information`.
-            If the input is a discord.Role or discord.TextChannel, it is automatcally converted to that value's ID,
-            which is then put into the datbase and cache.
-            """
+        if serialize_function is None:
+            serialize_function = lambda x: x
+        return cls.get_set_settings_callback(table_name, "guild_id", column_name, serialize_function)
 
-            if isinstance(data, (discord.Role, discord.TextChannel, discord.User, discord.Member, discord.Object, discord.CategoryChannel)):
-                data = data.id
-            original_data, data = data, serialize_function(data)
-
-            async with self.context.bot.database() as db:
-                await db(
-                    "INSERT INTO {0} (guild_id, {1}) VALUES ($1, $2) ON CONFLICT (guild_id) DO UPDATE SET {1}=$2".format(table_name, column_name),
-                    self.context.guild.id, data
-                )
-            self.context.bot.guild_settings[self.context.guild.id][column_name] = original_data
-        return callback
-
-    @staticmethod
-    def get_set_user_settings_callback(table_name:str, column_name:str, serialize_function:typing.Callable[[typing.Any], typing.Any]=lambda x: x) -> typing.Callable[[dict], None]:
+    @classmethod
+    def get_set_user_settings_callback(
+            cls, table_name:str, column_name:str,
+            serialize_function:typing.Callable[[typing.Any], typing.Any]=None) -> typing.Callable[[dict], None]:
         """
-        Return an async method that takes the data retuend by convert_prompted_information and then
-        saves it into the database - should be used for the add_option stuff in the SettingsMenu init.
+        Return an async method that takes the data given by `convert_prompted_information`, then
+        saves it into the database - should be used in the SettingsMenu init.
+
+        :meta private:
 
         Args:
-            table_name (str): The name of the table the data should be inserted into. This is not used when caching information. This should NOT be a user supplied value.
-            column_name (str): The name of the column that the data should be inserted into. This is the same name that's used for caching the value. This should NOT be a user supplied value.
-            serialize_function (typing.Callable[[typing.Any], typing.Any], optional): The function that is called to convert the input data in the callback into a database-friendly value. This is _not_ called for caching the value, only for databasing. The default serialize function doesn't do anything, but is provided so you don't have to provide one yourself.
+            table_name (str): The name of the table the data should be inserted into. This is not used when caching information.
+                This should NOT be a user supplied value.
+            column_name (str): The name of the column that the data should be inserted into. This is the same name that's used for
+                caching the value. This should NOT be a user supplied value.
+            serialize_function (typing.Callable[[typing.Any], typing.Any], optional): The function that is called to convert the input data
+                in the callback into a database-friendly value. This is _not_ called for caching the value, only for databasing. The default
+                serialize function doesn't do anything, but is provided so you don't have to provide one yourself.
+
+        Returns:
+            typing.Callable[[dict], None]: A callable function that sets the user settings when provided with data
+        """
+
+        if serialize_function is None:
+            serialize_function = lambda x: x
+        return cls.get_set_settings_callback(table_name, "user_id", column_name, serialize_function)
+
+    @staticmethod
+    def get_set_settings_callback(
+            table_name:str, primary_key:str, column_name:str,
+            serialize_function:typing.Callable[[typing.Any], typing.Any]=None) -> typing.Callable[[dict], None]:
+        """
+        Return an async method that takes the data given by `convert_prompted_information`, then
+        saves it into the database - should be used in the SettingsMenu init.
+
+        Args:
+            table_name (str): The name of the table the data should be inserted into. This is not used when caching information.
+                This should NOT be a user supplied value.
+            primary_key (str): The primary key of the table that you want to insert to. This _only_ supports single primary keys and not
+                compound ones.
+            column_name (str): The name of the column that the data should be inserted into. This is the same name that's used for
+                caching the value. This should NOT be a user supplied value.
+            serialize_function (typing.Callable[[typing.Any], typing.Any], optional): The function that is called to convert the input data
+                in the callback into a database-friendly value. This is _not_ called for caching the value, only for databasing. The default
+                serialize function doesn't do anything, but is provided so you don't have to provide one yourself.
 
         Returns:
             typing.Callable[[dict], None]: A callable function that sets the user settings when provided with data
@@ -292,23 +329,33 @@ class SettingsMenuOption(object):
             which is then put into the datbase and cache.
             """
 
+            # See if we need to get the object's ID
             if isinstance(data, (discord.Role, discord.TextChannel, discord.User, discord.Member, discord.Object, discord.CategoryChannel)):
                 data = data.id
+
+            # Serialize via the passed serialize function
             original_data, data = data, serialize_function(data)
 
+            # Add to the database
             async with self.context.bot.database() as db:
                 await db(
-                    "INSERT INTO {0} (user_id, {1}) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET {1}=$2".format(table_name, column_name),
-                    self.context.author.id, data
+                    "INSERT INTO {0} ({1}, {2}) VALUES ($1, $2) ON CONFLICT ({1}) DO UPDATE SET {2}=$2".format(table_name, primary_key, column_name),
+                    self.context.guild.id, data,
                 )
-            self.context.bot.user_settings[self.context.author.id][column_name] = original_data
+
+            # Cache
+            self.context.bot.guild_settings[self.context.guild.id][column_name] = original_data
+
+        # Return the callback
         return callback
 
     @staticmethod
-    def get_set_iterable_delete_callback(table_name:str, column_name:str, cache_key:str, database_key:str) -> typing.Callable:
+    def get_set_iterable_delete_callback(
+            table_name:str, column_name:str, cache_key:str,
+            database_key:str) -> typing.Callable[['SettingsMenu', commands.Context, int], None]:
         """
-        Return an async method that takes the data retuend by convert_prompted_information and then
-        saves it into the database - should be used for the add_option stuff in the SettingsMenu init.
+        Return an async method that takes the data retuend by `convert_prompted_information` and then
+        saves it into the database - should be used for the SettingsMenu init.
 
         Args:
             table_name (str): The name of the database that you want to remove data from.
@@ -317,10 +364,14 @@ class SettingsMenuOption(object):
             database_key (str): The key that's used to refer to the role ID in the `role_list` table.
 
         Returns:
-            typing.Callable: A callable for `SettingsMenuIterable` objects to use.
+            typing.Callable[['SettingsMenu', commands.Context, int], None]: A callable for `SettingsMenuIterable` objects to use.
         """
 
         def wrapper(menu, ctx, role_id:int):
+            """
+            A sync wrapper so that we can return an async callback that deletes from the database.
+            """
+
             async def callback(menu):
                 """
                 The function that actually deletes the role from the database
@@ -335,32 +386,47 @@ class SettingsMenuOption(object):
                         ctx.guild.id, role_id, database_key
                     )
 
-                # Cache it
+                # Remove the converted value from cache
                 try:
                     ctx.bot.guild_settings[ctx.guild.id][cache_key].remove(role_id)
                 except AttributeError:
                     ctx.bot.guild_settings[ctx.guild.id][cache_key].pop(role_id)
+
             return callback
+
         return wrapper
 
     @staticmethod
-    def get_set_iterable_add_callback(table_name:str, column_name:str, cache_key:str, database_key:str, serialize_function:typing.Callable[[typing.Any], str]=lambda x: x) -> typing.Callable:
+    def get_set_iterable_add_callback(
+            table_name:str, column_name:str, cache_key:str, database_key:str,
+            serialize_function:typing.Callable[[typing.Any], str]=None) -> typing.Callable[['SettingsMenu', commands.Context], None]:
         """
-        Return an async method that takes the data retuend by convert_prompted_information and then
-        saves it into the database - should be used for the add_option stuff in the SettingsMenu init.
+        Return an async method that takes the data retuend by `convert_prompted_information` and then
+        saves it into the database - should be used for the SettingsMenu init.
 
         Args:
             table_name (str): The name of the database that you want to add data to.
             column_name (str): The column name that the key is inserted into in the table.
             cache_key (str): This is the key that's used when caching the value in `bot.guild_settings`.
             database_key (str): This is the key that the value is added to the database table `role_list`.
-            serialize_function (typing.Callable[[typing.Any], str], optional): The function run on the value to convert it into to make it database-safe. Values are automatically cast to strings after being run through the serialize function. The serialize_function is called when caching the value, but the cached value is not cast to a string. The default serialize function doesn't do anything, but is provided so you don't have to provide one yourself.
+            serialize_function (typing.Callable[[typing.Any], str], optional): The function run on the value to convert it
+                into to make it database-safe. Values are automatically cast to strings after being run through the serialize function.
+                The serialize_function is called when caching the value, but the cached value is not cast to a string. The default
+                serialize function doesn't do anything, but is provided so you don't have to provide one yourself.
 
         Returns:
-            typing.Callable: A callable for `SettingsMenuIterable` objects to use.
+            typing.Callable[['SettingsMenu', commands.Context], typing.Callable[['SettingsMenu', typing.Any, typing.Optional[typing.Any]], None]]:
+                A callable for `SettingsMenuIterable` objects to use.
         """
 
+        if serialize_function is None:
+            serialize_function = lambda x: x
+
         def wrapper(menu, ctx):
+            """
+            A sync wrapper so that we can return an async callback that deletes from the database.
+            """
+
             async def callback(menu, *data):
                 """
                 The function that actually adds the role to the table in the database
@@ -384,13 +450,15 @@ class SettingsMenuOption(object):
                         ctx.guild.id, role.id, database_key, value
                     )
 
-                # Cache it
+                # Cache the converted value
                 if value:
                     ctx.bot.guild_settings[ctx.guild.id][cache_key][role.id] = serialize_function(original_value)
                 else:
                     if role.id not in ctx.bot.guild_settings[ctx.guild.id][cache_key]:
                         ctx.bot.guild_settings[ctx.guild.id][cache_key].append(role.id)
+
             return callback
+
         return wrapper
 
 
@@ -415,10 +483,19 @@ class SettingsMenu(object):
 
         self.options.append(option)
 
+    def add_multiple_options(self, *option:SettingsMenuOption):
+        """
+        Add multiple options to the settings list at once.
+        """
+
+        self.options.extend(option)
+
     def bulk_add_options(self, ctx:commands.Context, *args):
         """
-        Add MULTIPLE options to the settings list.
-        Each option is simply thrown into a SettingsMenuOption item and then added to the options list.
+        Add multiple options to the settings list. Each option is simply thrown into a SettingsMenuOption item
+        and then added to the options list.
+
+        :meta private:
         """
 
         for data in args:

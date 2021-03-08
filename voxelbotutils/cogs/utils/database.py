@@ -6,7 +6,7 @@ import asyncpg
 
 class DatabaseConnection(object):
     """
-    A helper class to wrap around an asyncpg.Connection object so as to make it a little easier to use.
+    A helper class to wrap around an :class:`asyncpg.Connection` object.
     """
 
     config: dict = None
@@ -15,6 +15,7 @@ class DatabaseConnection(object):
     __slots__ = ('conn', 'transaction', 'is_active',)
 
     def __init__(self, connection:asyncpg.Connection=None, transaction:asyncpg.transaction.Transaction=None):
+        """:meta private:"""
         self.conn = connection
         self.transaction = transaction
         self.is_active = False
@@ -22,10 +23,10 @@ class DatabaseConnection(object):
     @classmethod
     async def create_pool(cls, config:dict) -> None:
         """
-        Creates the database pool and plonks it in DatabaseConnection.pool.
+        Creates the database pool and plonks it in :attr:`DatabaseConnection.pool`.
 
         Args:
-            config (dict): The configuration for the dictionary, passed directly to `asyncpg.create_pool` as kwargs.
+            config (dict): The configuration for the dictionary, passed directly to :func:`asyncpg.create_pool` as kwargs.
         """
 
         cls.config = config.copy()
@@ -69,7 +70,7 @@ class DatabaseConnection(object):
 
     async def commit_transaction(self):
         """
-        Commits the transaction wew lad.
+        Commits the current transaction.
         """
 
         await self.transaction.commit()
@@ -88,8 +89,7 @@ class DatabaseConnection(object):
 
     async def __call__(self, sql:str, *args) -> typing.Union[typing.List[dict], None]:
         """
-        Runs a line of SQL and returns a list, if things are expected back,
-        or None, if nothing of interest is happening.
+        Runs a line of SQL and returns a list, if things are expected back, or None, if nothing of interest is happening.
 
         Args:
             sql (str): The SQL that you want to run.

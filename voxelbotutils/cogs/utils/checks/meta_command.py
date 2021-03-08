@@ -3,7 +3,7 @@ from discord.ext import commands
 
 class InvokedMetaCommand(commands.CheckFailure):
     """
-    Raised on any command decorated with `@voxelfoxutils.checks.meta_command()`.
+    Raised on any command decorated with :func:`voxelfoxutils.checks.meta_command`.
     This stops users from running commands that we've made for internal use only.
     """
 
@@ -11,7 +11,7 @@ class InvokedMetaCommand(commands.CheckFailure):
 def meta_command():
     """
     Stops users from being able to run this command.
-    Should be caught and then reinvoked OR have ctx.invoke_meta set to `True`.
+    Should be caught and then reinvoked, or should have :attr:`ctx.invoke_meta` set to `True`.
 
     Example:
 
@@ -27,6 +27,9 @@ def meta_command():
                 '''But you can still run the command like this'''
                 ctx.invoke_meta = True
                 await ctx.invoke(ctx.bot.get_command('notrunnable'), 1, 2, 3)
+
+    Raises:
+        InvokedMetaCommand: If the command was run without the meta tag being set.
     """
 
     def predicate(ctx):

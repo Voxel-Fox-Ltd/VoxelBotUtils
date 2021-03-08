@@ -3,7 +3,7 @@ import discord
 
 
 class NotBotSupport(commands.MissingRole):
-    """The generic error for the bot failing the is_bot_support check"""
+    """The generic error for the bot failing the :func:`voxelbotutils.checks.is_bot_support` check"""
 
     def __init__(self):
         super().__init__("Bot Support Team")
@@ -12,8 +12,11 @@ class NotBotSupport(commands.MissingRole):
 def is_bot_support():
     """
     Checks whether or not the calling user has the bot support role, as defined in the bot's configuration
-    file (bot_support_role_id). As it checks a role ID, this will only work it the command in quesiton is called
-    in a guild where the calling user _has_ the given role.
+    file (:attr:`config.bot_support_role_id`). As it checks a role ID, this will only work it the command in quesiton is called
+    in a guild where the calling user *has* the given role.
+
+    Raises:
+        NotBotSupport: If the given user isn't a member of the bot's support team.
     """
 
     async def predicate(ctx:commands.Context):

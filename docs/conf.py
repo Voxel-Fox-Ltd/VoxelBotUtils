@@ -29,21 +29,25 @@ author = 'Kae Bartlett'
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
-    # "sphinxcontrib.napoleon",
     "sphinx.ext.napoleon",
     "sphinx_rtd_theme",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
 ]
 
-# autodoc_default_options = {
-#     "member_order": "bysource",
-#     "imported-members": True,
-# }
+autodoc_default_options = {
+    "member_order": "bysource",
+    "imported-members": True,
+    'members': True,
+    'special-members': '__init__',
+}
 
 intersphinx_mapping = {
-    # 'py': ('https://docs.python.org/3', None),
+    'python': ('https://docs.python.org/3', None),
     'discord': ('https://discordpy.readthedocs.io/en/latest', None),
+    'asyncpg': ('https://magicstack.github.io/asyncpg/current/', None),
+    'aioredis': ('https://aioredis.readthedocs.io/en/v1.3.0/', None),
+    # 'aiodogstatsd': ('https://gr1n.github.io/aiodogstatsd/', None),
 }
 
 # Add any paths that contain templates here, relative to this directory.

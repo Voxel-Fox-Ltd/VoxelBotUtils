@@ -13,8 +13,12 @@ class IsNotUpgradeChatSubscriber(commands.CheckFailure):
 
 def is_upgrade_chat_subscriber(*any_item_names):
     """
-    A check to see whether a given user is an UpgradeChat subscriber for _any_ of the given item names,
+    A check to see whether a given user is an UpgradeChat subscriber for *any* of the given item names,
     returning a list of things that they've purchased.
+
+    Raises:
+        IsNotUpgradeChatSubscriber: If the user isn't subscribing to the given item.
+        commands.CheckFailure: If the Upgrade.Chat API is unavailable.
     """
 
     async def predicate(ctx):

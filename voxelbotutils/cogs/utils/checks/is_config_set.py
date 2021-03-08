@@ -12,6 +12,9 @@ class ConfigNotSet(commands.DisabledCommand):
 def is_config_set(*config_keys):
     """
     Checks that your config has been set given the keys for the item.
+
+    Raises:
+        ConfigNotSet: If the config item hasn't been set for the bot.
     """
 
     def predicate(ctx:commands.Context):

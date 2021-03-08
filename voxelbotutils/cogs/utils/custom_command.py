@@ -13,6 +13,8 @@ class Command(commands.Command):
     """
 
     def __init__(self, *args, **kwargs):
+        """:meta private:"""
+
         super().__init__(*args, cooldown_after_parsing=kwargs.pop('cooldown_after_parsing', True), **kwargs)
         self.ignore_checks_in_help: bool = kwargs.get('ignore_checks_in_help', False)
         self.locally_handled_errors: list = kwargs.get('locally_handled_errors', None)
@@ -111,13 +113,15 @@ class Command(commands.Command):
 class Group(commands.Group):
 
     def __init__(self, *args, **kwargs):
+        """:meta private:"""
+
         super().__init__(*args, cooldown_after_parsing=kwargs.get('cooldown_after_parsing', True), **kwargs)
         self.ignore_checks_in_help = kwargs.get('ignore_checks_in_help', False)
         self.locally_handled_errors: list = kwargs.get('locally_handled_errors', None)
 
     async def can_run(self, ctx:commands.Context) -> bool:
         """
-        The normal Command.can_run but it ignores cooldowns.
+        The normal :func:`discord.ext.Command.can_run` but it ignores cooldowns.
 
         Args:
             ctx (commands.Context): The command we want to chek if can be run.
@@ -135,7 +139,7 @@ class Group(commands.Group):
 
     def command(self, *args, **kwargs):
         """
-        Add the usual utils.Command to the mix.
+        Add the usual :class:`voxelbotutils.Command` to the mix.
         """
 
         if 'cls' not in kwargs:
@@ -144,7 +148,7 @@ class Group(commands.Group):
 
     def group(self, *args, **kwargs):
         """
-        Add the usual utils.Group to the mix.
+        Add the usual :class:`voxelbotutils.Group` to the mix.
         """
 
         if 'cls' not in kwargs:
@@ -155,7 +159,7 @@ class Group(commands.Group):
 
     def subcommand_group(self, *args, **kwargs):
         """
-        Add the usual utils.Group to the mix.
+        Add the usual :class:`voxelbotutils.Group` to the mix.
         """
 
         if 'cls' not in kwargs:

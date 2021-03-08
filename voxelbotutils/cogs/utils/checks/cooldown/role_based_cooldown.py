@@ -14,7 +14,7 @@ class RoleBasedCooldown(Cooldown):
         """
         Args:
             tiers (dict): The dictionary of `{role_id: seconds}` that should be used for this cooldown.
-            **kwargs: **kwargs: The default kwargs to be passed to the original cooldown class.
+            **kwargs: The default kwargs to be passed to the original cooldown class.
         """
         super().__init__(**kwargs)
         self.tier_cooldowns = tiers  # RoleID: CooldownSeconds

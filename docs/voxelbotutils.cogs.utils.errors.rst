@@ -5,17 +5,13 @@ errors.ConfigNotSet
 -------------------------------------------
 
 .. autoclass:: voxelbotutils.errors.ConfigNotSet
-    :members:
 
-    This is a subclass of :ref:`dpy:DisabledCommand` raised exclusively by the :ref:`voxelbotutils.checks.is\_config\_set` check. For normal users, this should just say that the command is disabled.
+    This is a subclass of :class:`discord.ext.commands.DisabledCommand` raised exclusively by the :func:`voxelbotutils.checks.is\_config\_set` check. For normal users, this should just say that the command is disabled.
 
 errors.InvokedMetaCommand
 -------------------------------------------
 
 .. autoclass:: voxelbotutils.errors.InvokedMetaCommand
-    :members:
-
-    This is to be invoked by :ref:`voxelbotutils.checks.meta\_command`, and should just result in a silent failure.
 
 errors.BotNotReady
 -------------------------------------------
@@ -31,6 +27,7 @@ errors.NotBotSupport
 -------------------------------------------
 
 .. autoclass:: voxelbotutils.errors.NotBotSupport
+    :no-special-members:
 
 errors.IsSlashCommand
 -------------------------------------------
@@ -46,19 +43,16 @@ errors.MissingRequiredArgumentString
 ---------------------------------------------------------
 
 .. autoclass:: voxelbotutils.errors.MissingRequiredArgumentString
-    :members:
-
-    This is a version of :class:`discord.ext.commands.MissingRequiredArgument` that just takes a string as a parameter so you can manually raise it inside commands.
+    :no-special-members:
 
 errors.InvalidTimeDuration
 -------------------------------------------
 
 .. autoclass:: voxelbotutils.errors.InvalidTimeDuration
-    :members:
-
-    A subclass of :class:`discord.ext.commands.BadArgument` that's thrown when a user passes an invalid input to a :class:`voxelbotutils.TimeValue` converter in a command.
+    :no-special-members:
 
 errors.IsNotUpgradeChatSubscriber
 -------------------------------------------
 
 .. autoclass:: voxelbotutils.errors.IsNotUpgradeChatSubscriber
+    :no-special-members:

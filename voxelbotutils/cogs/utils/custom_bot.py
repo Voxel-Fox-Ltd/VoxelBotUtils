@@ -233,7 +233,7 @@ class Bot(commands.AutoShardedBot):
 
         try:
             return self.get_guild(self.config['support_guild_id']) or await self.fetch_guild(self.config['support_guild_id'])
-        except KeyError:
+        except Exception:
             return None
 
     def get_invite_link(self, *, scope:str='bot', response_type:str=None, redirect_uri:str=None, guild_id:int=None, **kwargs) -> str:
@@ -293,10 +293,16 @@ class Bot(commands.AutoShardedBot):
 
     async def get_user_topgg_vote(self, user_id:int) -> bool:
         """
-        Returns whether or not the user has voted on Top.gg.
+        Returns whether or not the user has voted on Top.gg. If there's no Top.gg token provided then this will always return `False`.
+        This method doesn't handle timeouts; you are expected to implement them yourself.
         """
 
+        # Make sure there's a token provided
         topgg_token = self.config.get('bot_listing_api_keys', {}).get('topgg_token')
+        if not topgg_token:
+            return False
+
+        # Try and see whether the user has voted
         url = "https://top.gg/api/bots/{bot.user.id}/check".format(bot=self)
         async with self.session.get(url, params={"userId": user_id}, headers={"Authorization": topgg_token}) as r:
             try:
@@ -305,11 +311,13 @@ class Bot(commands.AutoShardedBot):
                 return False
             if r.status != 200:
                 return False
+
+        # Return
         return data.get("voted", False)
 
     def get_event_webhook(self, event_name:str) -> typing.Optional[discord.Webhook]:
         """
-        Wowie it's time for webhooks
+        Get a :class:`discord.Webhook` object based on the keys in the bot's config.
         """
 
         # First we're gonna use the legacy way of event webhooking, which is to say: it's just in the config
@@ -344,14 +352,20 @@ class Bot(commands.AutoShardedBot):
             self.logger.error(f"The webhook set in your config for the event {event_name} is not a valid Discord webhook")
             return None
 
-    async def get_application_id(self):
+    async def get_application_id(self) -> int:
+        """
+        Get the bot's application client ID.
+        """
+
         if self._application_id:
             return self._application_id
         app = await self.application_info()
         self._application_id = app.id
         return self._application_id
 
-    async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User]=None, *, delete:typing.List[discord.Message]=None, timeout=60.0, wait:bool=False) -> None:
+    async def add_delete_button(
+            self, message:discord.Message, valid_users:typing.List[discord.User]=None, *,
+            delete:typing.List[discord.Message]=None, timeout=60.0, wait:bool=False) -> None:
         """
         Adds a delete button to the given message.
 
@@ -368,7 +382,9 @@ class Bot(commands.AutoShardedBot):
 
         # See if we want to make this as a task or not
         if wait is False:
-            return self.loop.create_task(self.add_delete_button(message=message, valid_users=valid_users, delete=delete, timeout=timeout, wait=True))
+            return self.loop.create_task(self.add_delete_button(
+                message=message, valid_users=valid_users, delete=delete, timeout=timeout, wait=True,
+            ))
 
         # See if we were given a list of authors
         # This is an explicit check for None rather than just a falsy value;
@@ -430,7 +446,7 @@ class Bot(commands.AutoShardedBot):
 
     def set_footer_from_config(self, embed:discord.Embed) -> None:
         """
-        Sets a footer on the embed from the config
+        Sets a footer on the given embed based on the items in the bot's config.
         """
 
         pool = []
@@ -457,6 +473,9 @@ class Bot(commands.AutoShardedBot):
 
     async def create_message_log(self, messages:typing.List[discord.Message]) -> str:
         """
+        Creates and returns an HTML log of all of the messages provided. This is an API method, and may return an asyncio HTTP
+        error.
+
         Args:
             messages (typing.List[discord.Message]): The messages you want to create into a log.
 
@@ -495,7 +514,6 @@ class Bot(commands.AutoShardedBot):
                 "author_id": message.author.id,
                 "timestamp": int(message.created_at.timestamp()),
                 "attachments": [str(i.url) for i in message.attachments],
-                # "embeds": [i.to_dict() for i in message.embeds],
             }
             embeds = []
             for i in message.embeds:
@@ -596,6 +614,8 @@ class Bot(commands.AutoShardedBot):
     async def get_context(self, message, *, cls=Context) -> 'discord.ext.commands.Context':
         """
         Create a new context object using the utils' Context.
+
+        :meta private:
         """
 
         return await super().get_context(message, cls=cls)
@@ -617,7 +637,7 @@ class Bot(commands.AutoShardedBot):
 
     def load_all_extensions(self) -> None:
         """
-        Loads all the given extensions from self.get_extensions().
+        Loads all the given extensions from :func:`voxelbotutils.Bot.get_extensions`.
         """
 
         # Unload all the given extensions
@@ -689,13 +709,17 @@ class Bot(commands.AutoShardedBot):
             self.logger.critical(f"Couldn't read config file - {e}")
             exit(1)
 
-        # Reset cache items
+        # Reset cache items that might need updating
         self._upgrade_chat = None
 
     async def login(self, token:str=None, *args, **kwargs):
+        """:meta private:"""
+
         await super().login(token or self.config['token'], *args, **kwargs)
 
     async def start(self, token:str=None, *args, **kwargs):
+        """:meta private:"""
+
         if self.config.get('database', {}).get('enabled', False):
             self.logger.info("Running startup method")
             self.startup_method = self.loop.create_task(self.startup())
@@ -705,6 +729,8 @@ class Bot(commands.AutoShardedBot):
         await super().start(token or self.config['token'], *args, **kwargs)
 
     async def close(self, *args, **kwargs):
+        """:meta private:"""
+
         self.logger.debug("Closing aiohttp ClientSession")
         await asyncio.wait_for(self.session.close(), timeout=None)
         self.logger.debug("Running original D.py logout method")
@@ -717,6 +743,8 @@ class Bot(commands.AutoShardedBot):
         self.logger.info('Bot loaded.')
 
     async def invoke(self, ctx):
+        """:meta private:"""
+
         if ctx.command is None:
             return await super().invoke(ctx)
         command_stats_name = ctx.command.qualified_name.replace(' ', ':')

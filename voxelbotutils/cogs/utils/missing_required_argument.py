@@ -3,7 +3,8 @@ from discord.ext import commands
 
 class MissingRequiredArgumentString(commands.MissingRequiredArgument):
     """
-    Used so you can manually throw a missing required argument without having to inspect the function.
+    This is a version of :class:`discord.ext.commands.MissingRequiredArgument` that just takes a string as
+    a parameter so you can manually raise it inside commands.
 
     Attributes:
         param (str): The parameter that was missing from the command.

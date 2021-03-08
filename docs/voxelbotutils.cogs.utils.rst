@@ -5,7 +5,6 @@ Embed
 ----------------------------------------------
 
 .. autoclass:: voxelbotutils.Embed
-   :members:
 
    .. note::
       All of the methods and attributes available in :class:`discord.Embed` still work as they did before; nothing has had any breaking changes.
@@ -34,36 +33,34 @@ Bot
 -------------------------------------------
 
 .. autoclass:: voxelbotutils.Bot
-   :members:
+   :exclude-members: close, invoke, login, start
    :no-inherited-members:
-   :no-members: close, invoke, login, start
 
 Cog
 -------------------------------------------
 
 .. autoclass:: voxelbotutils.Cog
-   :members:
+   :no-special-members:
 
 Command
 -----------------------------------------------
 
 .. autoclass:: voxelbotutils.Command
-   :members:
+   :no-special-members:
 
 .. autoclass:: voxelbotutils.Group
-   :members:
+   :no-special-members:
 
 Context
 -----------------------------------------------
 
 .. autoclass:: voxelbotutils.Context
-   :members:
 
 DatabaseConnection
 ----------------------------------------
 
 .. autoclass:: voxelbotutils.DatabaseConnection
-   :members:
+   :no-special-members:
 
    .. note::
       This is only enabled if the database is enabled in the config.
@@ -85,7 +82,6 @@ Paginator
 -------------------------------------------
 
 .. autoclass:: voxelbotutils.Paginator
-   :members:
 
    An automatic paginator util that takes a list and listens for reactions on a message to change the content.
 
@@ -113,7 +109,7 @@ RedisConnection
 -------------------------------------
 
 .. autoclass:: voxelbotutils.RedisConnection
-   :members:
+   :no-special-members:
 
    .. note::
       This is only enabled if redis is enabled in the config.
@@ -138,13 +134,12 @@ StatsdConnection
 -------------------------------------
 
 .. autoclass:: voxelbotutils.StatsdConnection
-   :members:
+   :no-special-members:
 
 TimeValue
 -------------------------------------------
 
 .. autoclass:: voxelbotutils.TimeValue
-   :members:
 
    .. note::
        This util is also available as an argument converter for your commands, though it can be used outide of being a converter as well via use of the `.parse` classmethod.

@@ -47,7 +47,7 @@ class _FakeStatsdConnection(object):
 
 class StatsdConnection(object):
     """
-    A helper class to wrap around an aiodogstatsd.Client object so as to make it a little easier to use.
+    A helper class to wrap around an :class:`aiodogstatsd.Client` object so as to make it a little easier to use.
     Statsd is unique in my wrapper utils in that it'll fail silently if there's no connection to be made.
     """
 
@@ -56,6 +56,8 @@ class StatsdConnection(object):
     __slots__ = ('conn',)
 
     def __init__(self, connection:aiodogstatsd.Client=None):
+        """:meta private:"""
+
         self.conn = connection
 
     @classmethod
