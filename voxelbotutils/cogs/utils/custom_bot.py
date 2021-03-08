@@ -231,7 +231,10 @@ class Bot(commands.AutoShardedBot):
         Fetch the support guild based on the config from the API.
         """
 
-        return self.get_guild(self.config['support_guild_id']) or await self.fetch_guild(self.config['support_guild_id'])
+        try:
+            return self.get_guild(self.config['support_guild_id']) or await self.fetch_guild(self.config['support_guild_id'])
+        except KeyError:
+            return None
 
     def get_invite_link(self, *, scope:str='bot', response_type:str=None, redirect_uri:str=None, guild_id:int=None, **kwargs) -> str:
         """
