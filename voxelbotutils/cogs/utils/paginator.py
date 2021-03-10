@@ -37,13 +37,13 @@ class Paginator(object):
         self._page_cache = {}
 
         self.max_pages = '?'
-        data_is_generator = any((
+        self._data_is_generator = any((
             inspect.isasyncgenfunction(self.data),
             inspect.isasyncgen(self.data),
             inspect.isgeneratorfunction(self.data),
             inspect.isgenerator(self.data),
         ))
-        if not data_is_generator:
+        if not self._data_is_generator:
             pages, left_over = divmod(len(data), self.per_page)
             if left_over:
                 pages += 1
@@ -66,14 +66,15 @@ class Paginator(object):
         message = await ctx.send("Menu loading...")
 
         # Add the emojis if there's more than one page
+        valid_emojis = [
+            "\N{BLACK LEFT-POINTING DOUBLE TRIANGLE}",
+            "\N{LEFTWARDS BLACK ARROW}",
+            "\N{BLACK SQUARE FOR STOP}",
+            "\N{BLACK RIGHTWARDS ARROW}",
+        ]
+        if not self._data_is_generator:
+            valid_emojis.append("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}")
         if self.max_pages > 1:
-            valid_emojis = [
-                "\N{BLACK LEFT-POINTING DOUBLE TRIANGLE}",
-                "\N{LEFTWARDS BLACK ARROW}",
-                "\N{BLACK SQUARE FOR STOP}",
-                "\N{BLACK RIGHTWARDS ARROW}",
-                "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}",
-            ]
             for e in valid_emojis:
                 ctx.bot.loop.create_task(message.add_reaction(e))
 
@@ -95,6 +96,11 @@ class Paginator(object):
             payload = last_payload
             if self.max_pages == 1:
                 return
+
+            # See if we now need to add a new emoji
+            if self._data_is_generator and self.max_pages != "?" and "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}" not in valid_emojis:
+                ctx.bot.loop.create_task(message.add_reaction("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}"))
+                valid_emojis.append("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}")
 
             # Wait for reactions to be added by the user
             done, pending = None, None
