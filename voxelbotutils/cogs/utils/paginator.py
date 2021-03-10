@@ -74,7 +74,7 @@ class Paginator(object):
         ]
         if not self._data_is_generator:
             valid_emojis.append("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}")
-        if self.max_pages > 1:
+        if self.max_pages != "?" and self.max_pages > 1:
             for e in valid_emojis:
                 ctx.bot.loop.create_task(message.add_reaction(e))
 
@@ -132,7 +132,7 @@ class Paginator(object):
                 break
 
             # Make sure the page number is still valid
-            if self.current_page >= self.max_pages:
+            if self.max_pages != "?" and self.current_page >= self.max_pages:
                 self.current_page = self.max_pages - 1
             elif self.current_page < 0:
                 self.current_page = 0
@@ -164,7 +164,7 @@ class Paginator(object):
             else:
                 v = self.data[page_number * self.per_page: (page_number + 1) * self.per_page]
         except (StopIteration, StopAsyncIteration):
-            self.max_pages = page_number
-            return v
+            self.max_pages = page_number - 1
+            page_number -= 1
         self._page_cache[page_number] = v
         return v
