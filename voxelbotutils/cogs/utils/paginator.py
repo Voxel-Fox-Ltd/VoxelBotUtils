@@ -74,7 +74,7 @@ class Paginator(object):
         ]
         if not self._data_is_generator:
             valid_emojis.append("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}")
-        if self.max_pages != "?" and self.max_pages > 1:
+        if self._data_is_generator or self.max_pages > 1:
             for e in valid_emojis:
                 ctx.bot.loop.create_task(message.add_reaction(e))
 
