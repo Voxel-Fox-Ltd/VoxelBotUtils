@@ -15,13 +15,15 @@ class Paginator(object):
     """
 
     def __init__(
-            self, data:typing.Union[typing.Sequence, typing.Generator, typing.AsyncGenerator], *, per_page:int=10,
+            self, data:typing.Union[typing.Sequence, typing.Generator, typing.Callable[[int], typing.Any]], *, per_page:int=10,
             formatter:typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]]=None):
         """
         Args:
-            data (typing.Union[typing.Sequence, typing.Generator, typing.AsyncGenerator]): The data that you want to paginate. If a generator is
-                given then the `max_pages` will start as the string "?", and the `per_page` parameter will be ignored - the formatter will
-                be passed the content of whatever your generator returns.
+            data (typing.Union[typing.Sequence, typing.Generator, typing.Callable[[int], typing.Any]]): The data that you want to paginate.
+                If a generator or function is given then the `max_pages` will start as the string "?", and the `per_page` parameter will be ignored -
+                the formatter will be passed the content of whatever your generator returns. If a function is given, then you will be passed
+                the page number as an argument - raising `StopIteration` from this function will cause the `max_pages` attribute to be set,
+                and the page will go back to what it was previously.
             per_page (int, optional): The number of items that appear on each page. This argument only works for sequences
             formatter (typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]], optional): A
                 function taking the paginator instance and a list of things to display, returning a dictionary of kwargs that get passed
@@ -43,6 +45,11 @@ class Paginator(object):
             inspect.isgeneratorfunction(self.data),
             inspect.isgenerator(self.data),
         ))
+        self._data_is_function = any((
+            inspect.isfunction(self.data),
+            inspect.iscoroutine(self.data),
+        ))
+        self._data_is_iterable = not (self._data_is_generator or self._data_is_function)
         if not self._data_is_generator:
             pages, left_over = divmod(len(data), self.per_page)
             if left_over:
@@ -72,7 +79,7 @@ class Paginator(object):
             "\N{BLACK SQUARE FOR STOP}",
             "\N{BLACK RIGHTWARDS ARROW}",
         ]
-        if not self._data_is_generator:
+        if self._data_is_iterable:
             valid_emojis.append("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}")
         if self._data_is_generator or self.max_pages > 1:
             for e in valid_emojis:
@@ -98,7 +105,7 @@ class Paginator(object):
                 return
 
             # See if we now need to add a new emoji
-            if self._data_is_generator and self.max_pages != "?" and "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}" not in valid_emojis:
+            if self._data_is_iterable and self.max_pages != "?" and "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}" not in valid_emojis:
                 ctx.bot.loop.create_task(message.add_reaction("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}"))
                 ctx.bot.loop.create_task(message.add_reaction("\N{INPUT SYMBOL FOR NUMBERS}"))
                 valid_emojis.append("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}")
@@ -180,6 +187,10 @@ class Paginator(object):
                 v = await self.data.__anext__()
             elif inspect.isgeneratorfunction(self.data) or inspect.isgenerator(self.data):
                 v = next(self.data)
+            elif inspect.iscoroutine(self.data):
+                v = await self.data(page_number)
+            elif inspect.isfunction(self.data):
+                v = self.data(page_number)
             else:
                 v = self.data[page_number * self.per_page: (page_number + 1) * self.per_page]
             self._page_cache[page_number] = v
