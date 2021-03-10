@@ -33,8 +33,7 @@ class Paginator(object):
         self.per_page = per_page
         self.formatter = formatter
         if self.formatter is None:
-            colour = random.randint(1, 0xffffff)
-            self.formatter = lambda m, d: Embed(colour=colour, description="\n".join(d)).set_footer(f"Page {m.current_page + 1}/{m.max_pages}")
+            self.formatter = self.default_list_formatter
         self.current_page = None
         self._page_cache = {}
 
@@ -200,3 +199,25 @@ class Paginator(object):
             page_number -= 1
             self.current_page -= 1
         return self._page_cache[page_number]
+
+    @staticmethod
+    def default_list_formatter(m, d):
+        return Embed(
+            use_random_colour=True,
+            description="\n".join(d),
+        ).set_footer(
+            f"Page {m.current_page + 1}/{m.max_pages}",
+        )
+
+    @staticmethod
+    def default_ranked_list_formatter(m, d):
+        return Embed(
+            use_random_colour=True,
+            description="\n".join([
+                f"{i}. {o}"
+                for i, o in enumerate(d, start=(m.current_page * m.per_page) + 1)
+            ])
+        ).set_footer(
+            f"Page {m.current_page + 1}/{m.max_pages}",
+        )
+
