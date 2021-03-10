@@ -1,6 +1,7 @@
 import typing
 import asyncio
 import random
+import inspect
 
 import discord
 from discord.ext import commands
@@ -14,14 +15,16 @@ class Paginator(object):
     """
 
     def __init__(
-            self, data:typing.List[typing.Any], *, per_page:int=10,
-            formatter:typing.Callable[['Paginator', typing.List[typing.Any]], typing.Union[str, discord.Embed, dict]]=None):
+            self, data:typing.Union[typing.Sequence, typing.Generator, typing.AsyncGenerator], *, per_page:int=10,
+            formatter:typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]]=None):
         """
         Args:
-            data (typing.List[typing.Any]): The data that you want to paginate.
-            per_page (int, optional): The number of items that appear on each page.
-            formatter (typing.Callable[['Paginator', typing.List[typing.Any]], dict], optional): A function taking the
-                paginator instance and a list of things to display, returning a dictionary of kwargs that get passed
+            data (typing.Union[typing.Sequence, typing.Generator, typing.AsyncGenerator]): The data that you want to paginate. If a generator is
+                given then the `max_pages` will start as the string "?", and the `per_page` parameter will be ignored - the formatter will
+                be passed the content of whatever your generator returns.
+            per_page (int, optional): The number of items that appear on each page. This argument only works for sequences
+            formatter (typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]], optional): A
+                function taking the paginator instance and a list of things to display, returning a dictionary of kwargs that get passed
                 directly into a `Message.edit`.
         """
         self.data = data
@@ -31,11 +34,20 @@ class Paginator(object):
             colour = random.randint(1, 0xffffff)
             self.formatter = lambda m, d: Embed(colour=colour, description="\n".join(d)).set_footer(f"Page {m.current_page + 1}/{m.max_pages}")
         self.current_page = None
+        self._page_cache = {}
 
-        pages, left_over = divmod(len(data), self.per_page)
-        if left_over:
-            pages += 1
-        self.max_pages = pages
+        self.max_pages = '?'
+        data_is_generator = any((
+            inspect.isasyncgenfunction(self.data),
+            inspect.isasyncgen(self.data),
+            inspect.isgeneratorfunction(self.data),
+            inspect.isgenerator(self.data),
+        ))
+        if not data_is_generator:
+            pages, left_over = divmod(len(data), self.per_page)
+            if left_over:
+                pages += 1
+            self.max_pages = pages
 
     async def start(self, ctx:commands.Context, *, timeout:float=120):
         """
@@ -48,6 +60,9 @@ class Paginator(object):
 
         # Set our initial values
         self.current_page = 0
+        if self.max_pages == 0:
+            await ctx.send("There's no data to be shown.")
+            return
         message = await ctx.send("Menu loading...")
 
         # Add the emojis if there's more than one page
@@ -67,7 +82,7 @@ class Paginator(object):
         while True:
 
             # Edit the message with the relevant data
-            items = self.get_page(self.current_page)
+            items = await self.get_page(self.current_page)
             payload = self.formatter(self, items)
             if isinstance(payload, discord.Embed):
                 payload = {"embed": payload}
@@ -122,7 +137,7 @@ class Paginator(object):
         except discord.Exception:
             pass
 
-    def get_page(self, page_number:int) -> typing.List[typing.Any]:
+    async def get_page(self, page_number:int) -> typing.List[typing.Any]:
         """
         Get a list of items that appear for a given page.
 
@@ -133,4 +148,17 @@ class Paginator(object):
             typing.List[typing.Any]: The list of items that would be on the page.
         """
 
-        return self.data[page_number * self.per_page: (page_number + 1) * self.per_page]
+        if page_number in self._page_cache:
+            return self._page_cache[page_number]
+        try:
+            if inspect.isasyncgenfunction(self.data) or inspect.isasyncgen(self.data):
+                v = next(self.data)
+            elif inspect.isgeneratorfunction(self.data) or inspect.isgenerator(self.data):
+                v = await self.data.__anext__()
+            else:
+                v = self.data[page_number * self.per_page: (page_number + 1) * self.per_page]
+        except (StopIteration, StopAsyncIteration):
+            self.max_pages = page_number
+            return v
+        self._page_cache[page_number] = v
+        return v
