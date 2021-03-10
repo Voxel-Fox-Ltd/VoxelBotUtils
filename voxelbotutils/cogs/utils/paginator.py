@@ -50,7 +50,7 @@ class Paginator(object):
             inspect.iscoroutine(self.data),
         ))
         self._data_is_iterable = not (self._data_is_generator or self._data_is_function)
-        if not self._data_is_generator:
+        if self._data_is_iterable:
             pages, left_over = divmod(len(data), self.per_page)
             if left_over:
                 pages += 1
