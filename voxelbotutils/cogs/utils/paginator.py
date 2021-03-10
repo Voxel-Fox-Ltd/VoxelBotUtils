@@ -188,7 +188,7 @@ class Paginator(object):
                 v = await self.data.__anext__()
             elif inspect.isgeneratorfunction(self.data) or inspect.isgenerator(self.data):
                 v = next(self.data)
-            elif inspect.iscoroutine(self.data):
+            elif inspect.iscoroutinefunction(self.data):
                 v = await self.data(page_number)
             elif inspect.isfunction(self.data):
                 v = self.data(page_number)
