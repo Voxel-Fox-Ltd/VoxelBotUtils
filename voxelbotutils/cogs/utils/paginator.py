@@ -137,15 +137,17 @@ class Paginator(object):
 
             # Let the user ask for a page number
             if self.current_page == "CHANGE":
+                ask_page_number_message = await ctx.send("What page do you want to change to?")
                 try:
-                    check = lambda m: m.author.id == ctx.author.id and m.channel.id == message.id
+                    check = lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id
                     change_page_number_message = await ctx.bot.wait_for("message", check=check, timeout=timeout)
                 except asyncio.TimeoutError:
                     break
                 try:
-                    self.current_page = int(change_page_number_message.content)
+                    self.current_page = int(change_page_number_message.content) - 1
                 except ValueError:
                     self.current_page = before_page
+                ctx.bot.loop.create_task(ask_page_number_message.delete())
                 ctx.bot.loop.create_task(change_page_number_message.delete())
 
             # Make sure the page number is still valid
