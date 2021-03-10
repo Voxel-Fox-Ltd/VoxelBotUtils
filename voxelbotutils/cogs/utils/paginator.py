@@ -81,7 +81,8 @@ class Paginator(object):
         ]
         if self._data_is_iterable:
             valid_emojis.append("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}")
-        if self._data_is_iterable or self.max_pages > 1:
+            valid_emojis.append("\N{INPUT SYMBOL FOR NUMBERS}")
+        if not self._data_is_iterable or self.max_pages > 1:
             for e in valid_emojis:
                 ctx.bot.loop.create_task(message.add_reaction(e))
 
