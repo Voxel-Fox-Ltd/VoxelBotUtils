@@ -158,9 +158,9 @@ class Paginator(object):
             return self._page_cache[page_number]
         try:
             if inspect.isasyncgenfunction(self.data) or inspect.isasyncgen(self.data):
-                v = next(self.data)
-            elif inspect.isgeneratorfunction(self.data) or inspect.isgenerator(self.data):
                 v = await self.data.__anext__()
+            elif inspect.isgeneratorfunction(self.data) or inspect.isgenerator(self.data):
+                v = next(self.data)
             else:
                 v = self.data[page_number * self.per_page: (page_number + 1) * self.per_page]
         except (StopIteration, StopAsyncIteration):
