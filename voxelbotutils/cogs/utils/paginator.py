@@ -100,7 +100,9 @@ class Paginator(object):
             # See if we now need to add a new emoji
             if self._data_is_generator and self.max_pages != "?" and "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}" not in valid_emojis:
                 ctx.bot.loop.create_task(message.add_reaction("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}"))
+                ctx.bot.loop.create_task(message.add_reaction("\N{INPUT SYMBOL FOR NUMBERS}"))
                 valid_emojis.append("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}")
+                valid_emojis.append("\N{INPUT SYMBOL FOR NUMBERS}")
 
             # Wait for reactions to be added by the user
             done, pending = None, None
@@ -121,15 +123,30 @@ class Paginator(object):
                 future.cancel()
 
             # Change the page number based on the reaction
+            before_page = self.current_page
             self.current_page = {
                 "\N{BLACK LEFT-POINTING DOUBLE TRIANGLE}": lambda i: 0,
                 "\N{LEFTWARDS BLACK ARROW}": lambda i: i - 1,
-                "\N{BLACK SQUARE FOR STOP}": lambda i: None,
+                "\N{BLACK SQUARE FOR STOP}": lambda i: "STOP",
                 "\N{BLACK RIGHTWARDS ARROW}": lambda i: i + 1,
                 "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}": lambda i: self.max_pages,
+                "\N{INPUT SYMBOL FOR NUMBERS}": lambda i: "CHANGE",
             }[str(payload.emoji)](self.current_page)
-            if self.current_page is None:
+            if self.current_page == "STOP":
                 break
+
+            # Let the user ask for a page number
+            if self.current_page == "CHANGE":
+                try:
+                    check = lambda m: m.author.id == ctx.author.id and m.channel.id == message.id
+                    change_page_number_message = await ctx.bot.wait_for("message", check=check, timeout=timeout)
+                except asyncio.TimeoutError:
+                    break
+                try:
+                    self.current_page = int(change_page_number_message.content)
+                except ValueError:
+                    self.current_page = before_page
+                ctx.bot.loop.create_task(change_page_number_message.delete())
 
             # Make sure the page number is still valid
             if self.max_pages != "?" and self.current_page >= self.max_pages:
