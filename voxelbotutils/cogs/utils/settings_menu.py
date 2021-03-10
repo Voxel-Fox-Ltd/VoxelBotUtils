@@ -617,7 +617,8 @@ class SettingsMenuIterable(SettingsMenu):
             self, table_name:str, column_name:str, cache_key:str, database_key:str,
             key_converter:commands.Converter, key_prompt:str, key_display_function:typing.Callable[[typing.Any], str],
             value_converter:commands.Converter=str, value_prompt:str=None, value_serialize_function:typing.Callable=None,
-            *, iterable_add_callback:typing.Callable[['SettingsMenu', commands.Context], None]=None,
+            value_display_function:typing.Callable[[typing.Any], str]=str, *,
+            iterable_add_callback:typing.Callable[['SettingsMenu', commands.Context], None]=None,
             iterable_delete_callback:typing.Callable[['SettingsMenu', commands.Context, int], None]=None):
         """
         Args:
@@ -636,12 +637,16 @@ class SettingsMenuIterable(SettingsMenu):
             value_prompt (str, optional): The string send to the user when asking for the value.
             value_serialize_function (typing.Callable, optional): A function used to take the converted value and change it into
                 something database-friendly.
-            iterable_add_callback (typing.Callable, optional): A function that's run with the params of the database name,
-                the column name, the cache key, the database key, and the value serialize function. If left blank then it defaults
-                to making a new callback for you that just adds to the `role_list` or `channel_list` table as specified.
-            iterable_delete_callback (typing.Callable, optional): A function that's run with the params of the database name,
-                the column name, the item to be deleted, the cache key, and the database key. If left blank then it defaults
-                to making a new callback for you that just deletes from the `role_list` or `channel_list` table as specified.
+            value_display_function (typing.Callable[[typing.Any], str], optional): The function used to take the saved raw value
+                from the database and nicely show it to the user in the embed.
+            iterable_add_callback (typing.Callable[['SettingsMenu', commands.Context], None], optional): A function that's run with the
+                params of the database name, the column name, the cache key, the database key, and the value serialize function.
+                If left blank then it defaults to making a new callback for you that just adds to the `role_list` or `channel_list`
+                table as specified.
+            iterable_delete_callback (typing.Callable[['SettingsMenu', commands.Context, int], None], optional): A function that's run
+                with the params of the database name, the column name, the item to be deleted, the cache key, and the database key.
+                If left blank then it defaults to making a new callback for you that just deletes from the `role_list` or `channel_list`
+                table as specified.
         """
         super().__init__()
 
@@ -660,6 +665,7 @@ class SettingsMenuIterable(SettingsMenu):
         self.value_converter = value_converter
         self.value_prompt = value_prompt
         self.value_serialize_function = value_serialize_function or (lambda x: x)
+        self.value_display_function = value_display_function
 
         # Callbacks
         self.iterable_add_callback = iterable_add_callback or SettingsMenuOption.get_set_iterable_add_callback(table_name, column_name, cache_key, database_key, value_serialize_function)
@@ -675,7 +681,7 @@ class SettingsMenuIterable(SettingsMenu):
         if isinstance(data_points, dict):
             self.options = [
                 SettingsMenuOption(
-                    ctx, f"{self.key_display_function(i)} - {self.value_converter(o)!s}", (),
+                    ctx, f"{self.key_display_function(i)} - {self.value_display_function(o)!s}", (),
                     self.iterable_delete_callback(self, ctx, i),
                     allow_nullable=False,
                 )
@@ -697,7 +703,7 @@ class SettingsMenuIterable(SettingsMenu):
         elif isinstance(data_points, list):
             self.options = [
                 SettingsMenuOption(
-                    ctx, f"{self.key_display_function(i)}", (),
+                    ctx, str(self.key_display_function(i)), (),
                     self.iterable_delete_callback(self.table_name, self.column_name, i, self.cache_key, self.database_key),
                     allow_nullable=False,
                 )
