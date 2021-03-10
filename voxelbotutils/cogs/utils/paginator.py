@@ -163,8 +163,8 @@ class Paginator(object):
                 v = next(self.data)
             else:
                 v = self.data[page_number * self.per_page: (page_number + 1) * self.per_page]
+            self._page_cache[page_number] = v
         except (StopIteration, StopAsyncIteration):
             self.max_pages = page_number - 1
             page_number -= 1
-        self._page_cache[page_number] = v
-        return v
+        return self._page_cache[page_number]
