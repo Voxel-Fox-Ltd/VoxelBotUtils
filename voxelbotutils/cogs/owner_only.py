@@ -28,10 +28,15 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         Shows you the source for a given command.
         """
 
+        # Get command
         command = self.bot.get_command(command_name)
         if command is None:
             return await ctx.send(f"I couldn't find a command named `{command_name}`.", allowed_mentions=discord.AllowedMentions.none())
+
+        # Get its source
         data = textwrap.dedent(inspect.getsource(command.callback))
+
+        # Work out our pages
         lines = data.strip().split("\n")
         current, last = "", ""
         pages = []
@@ -44,57 +49,8 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         if last:
             pages.append(f"```py\n{last}\n```")
 
-        message = await ctx.send(pages[0])
-
-        # List of valid emojis the user can react with
-        valid_emoji = [
-            "\N{BLACK LEFT-POINTING TRIANGLE}",
-            "\N{BLACK RIGHT-POINTING TRIANGLE}",
-            "\N{WHITE HEAVY CHECK MARK}"
-        ]
-
-        # Reacts to the initial message with left arrow, right arrow, and check mark
-        for i in valid_emoji:
-            try:
-                await message.add_reaction(i)
-            except discord.HTTPException:
-                return
-
-        # Loops until checkmark is reacted
-        index = 0
-        while True:
-
-            # Checks that author is who typed the command and that the emoji reacted by the user is in validEmoji
-            def check(reaction, user):
-                return user == ctx.author and str(reaction.emoji) in valid_emoji
-
-            # Waits for the reaction from the user
-            try:
-                reaction, _ = await self.bot.wait_for('reaction_add', timeout=300.0, check=check)
-                emoji = str(reaction.emoji)
-            except asyncio.TimeoutError:
-                emoji = valid_emoji[2]
-
-            # Checks which emoji was reacted and add to the index
-            if emoji == valid_emoji[0]:
-                new_index = index + 1
-            if emoji == valid_emoji[1]:
-                new_index = index - 1
-            if emoji == valid_emoji[2]:
-                break
-
-            # See if our index has changed
-            new_index = max(0, new_index)
-            new_index = min(len(pages), new_index)
-            if new_index == index:
-                continue
-            index = new_index
-
-            # Update the message
-            try:
-                await message.edit(content=pages[index])
-            except discord.HTTPException:
-                return
+        # Paginate
+        await utils.Paginator(pages, per_page=1).start(ctx)
 
     @commands.command(aliases=['pm', 'dm', 'send'], cls=utils.Command)
     @commands.is_owner()
