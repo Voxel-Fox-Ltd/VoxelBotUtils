@@ -166,7 +166,7 @@ class Paginator(object):
         # Let us break from the loop
         try:
             await message.clear_reactions()
-        except discord.Exception:
+        except discord.HTTPException:
             pass
 
     async def get_page(self, page_number:int) -> typing.List[typing.Any]:
