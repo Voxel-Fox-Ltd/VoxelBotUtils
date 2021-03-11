@@ -6,6 +6,7 @@ import os
 import json
 import textwrap
 import traceback
+import time
 import typing
 import inspect
 
@@ -105,7 +106,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         await ctx.okay()
 
     def _cleanup_code(self, content):
-        """Automatically removes code blocks from the code."""
+        """
+        Automatically removes code blocks from the code.
+        """
 
         # remove ```py\n```
         if content.startswith('```') and content.endswith('```'):
@@ -122,9 +125,6 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
     async def ev(self, ctx:utils.Context, *, content:str):
         """
         Evaluates some Python code.
-
-        Gracefully stolen from Rapptz ->
-        https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/admin.py#L72-L117
         """
 
         # Make the environment
@@ -155,7 +155,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         try:
             # Shove stdout into StringIO
             with contextlib.redirect_stdout(stdout):
+                start_time = time.perf_counter()
                 ret = await func()
+                end_time = time.perf_counter()
         except Exception:
             # Oh no it caused an error
             stdout_value = stdout.getvalue() or None
@@ -190,6 +192,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
                 pass
             else:
                 text = f'```json\n{result}\n```'
+        text += f"Executed in {(start_time - end_time) / 1_000:.2f} seconds."
 
         # Output to chat
         if len(text) > 2000:
