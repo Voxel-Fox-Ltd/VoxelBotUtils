@@ -192,7 +192,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
                 pass
             else:
                 text = f'```json\n{result}\n```'
-        text += f"Executed in {(start_time - end_time) / 1_000:.2f} seconds."
+        text += f"Executed in {(end_time - start_time) / 1_000:.2f} seconds."
 
         # Output to chat
         if len(text) > 2000:
