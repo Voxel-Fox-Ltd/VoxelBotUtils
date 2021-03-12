@@ -152,16 +152,16 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
 
         # Grab the function we just made and run it
         func = env['func']
+        start_time = time.perf_counter()
+        end_time = None
         try:
-            # Shove stdout into StringIO
             with contextlib.redirect_stdout(stdout):
-                start_time = time.perf_counter()
                 ret = await func()
-                end_time = time.perf_counter()
         except Exception:
-            # Oh no it caused an error
+            end_time = time.perf_counter()
             stdout_value = stdout.getvalue() or None
             return await ctx.send(f'```py\n{stdout_value}\n{traceback.format_exc()}\n```', embeddify=False)
+        end_time = time.perf_counter()
 
         # Oh no it didn't cause an error
         stdout_value = stdout.getvalue() or None
@@ -176,7 +176,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         if ret is None:
             # It might have printed something
             if stdout_value is not None:
-                await ctx.send(f'```py\n{stdout_value}\n```', embeddify=False)
+                await ctx.send(f'```py\n{stdout_value}\n```Executed in **{end_time - start_time:.3f}** seconds.', embeddify=False)
             return
 
         # If the function did return a value
@@ -192,7 +192,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
                 pass
             else:
                 text = f'```json\n{result}\n```'
-        text += f"Executed in {(end_time - start_time) / 1_000:.2f} seconds."
+        text += f"Executed in **{end_time - start_time:.3f}** seconds."
 
         # Output to chat
         if len(text) > 2000:
