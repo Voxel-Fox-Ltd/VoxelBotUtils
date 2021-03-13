@@ -32,7 +32,7 @@ class SettingsMenuOption(object):
     a role list, etc.
     """
 
-    __slots__ = ('context', '_display', 'args', 'callback', 'emoji', 'allow_nullable',)
+    __slots__ = ('context', '_display', 'converter_args', 'callback', 'emoji', 'allow_nullable',)
 
     def __init__(
             self, ctx:commands.Context, display:typing.Union[str, typing.Callable[[commands.Context], str]],
