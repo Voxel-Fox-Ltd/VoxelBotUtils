@@ -11,6 +11,20 @@ class SettingsMenuError(commands.CommandError):
     pass
 
 
+class SettingsMenuConverter(object):
+
+    __slots__ = ('prompt', 'asking_for', 'converter', 'emojis', 'serialize')
+
+    def __init__(
+            self, prompt:str, asking_for:str, converter:typing.Union[typing.Callable, commands.Converter],
+            emojis:typing.Optional[typing.List[discord.Emoji]]=None, serialize_function:typing.Callable[[typing.Any], typing.Any]=lambda x: x):
+        self.prompt = prompt
+        self.asking_for = asking_for
+        self.converter = converter
+        self.emojis = emojis or list()
+        self.serialize = serialize_function
+
+
 class SettingsMenuOption(object):
     """
     An option that can be chosen for a settings menu's selectable item,
@@ -22,7 +36,7 @@ class SettingsMenuOption(object):
 
     def __init__(
             self, ctx:commands.Context, display:typing.Union[str, typing.Callable[[commands.Context], str]],
-            converter_args:typing.List[typing.Tuple[str, str, typing.Union[type, commands.Converter], typing.Optional[typing.List[discord.Emoji]]]]=list(),
+            converter_args:typing.List[SettingsMenuConverter]=None,
             callback:typing.Callable[['SettingsMenuOption', typing.List[typing.Any]], None]=lambda x: None,
             emoji:str=None, allow_nullable:bool=True):
         """
@@ -30,9 +44,8 @@ class SettingsMenuOption(object):
             ctx (commands.Context): The context for which the menu is being invoked.
             display (typing.Union[str, typing.Callable[[commands.Context], str]]): A string (or callable that returns string) that gives the
                 display prompt for the option.
-            converter_args (typing.List[typing.Tuple[str, str, typing.Union[type, commands.Converter], typing.Optional[typing.List[discord.Emoji]]]], optional):
-                A list of tuples that should be used to convert the user-provided arguments. Tuples are passed directly into
-                `convert_prompted_information`. Args are passed in the order "prompt", "asking_for", "converter", "reactions".
+            converter_args (typing.List[SettingsMenuConverter], optional): A list of converter arguments that should be used to
+                convert the user-provided arguments. Tuples are passed directly into `convert_prompted_information`.
             callback (typing.Callable[['SettingsMenuOption', typing.List[typing.Any]], None], optional): A callable that's passed the
                 information from the converter for you do to whatever with.
             emoji (str, optional): The emoji that this option refers to.
@@ -41,7 +54,7 @@ class SettingsMenuOption(object):
 
         self.context: commands.Context = ctx
         self._display: typing.Union[str, typing.Callable[[commands.Context], str]] = display
-        self.args: typing.List[typing.Tuple] = converter_args
+        self.converter_args: typing.List[SettingsMenuConverter] = converter_args or list()
         self.callback: typing.Callable[['SettingsMenuOption', typing.List[typing.Any]], None] = callback
         self.emoji: str = emoji
         self.allow_nullable: bool = allow_nullable
@@ -65,9 +78,9 @@ class SettingsMenuOption(object):
 
         # Get data
         returned_data = []
-        for i in self.args:
+        for arg in self.converter_args:
             try:
-                data = await self.convert_prompted_information(*i)
+                data = await self.convert_prompted_information(arg.prompt, arg.asking_for, arg.converter, arg.emojis)
             except SettingsMenuError as e:
                 if not self.allow_nullable:
                     raise e
@@ -85,7 +98,7 @@ class SettingsMenuOption(object):
                 await called_data
 
     async def convert_prompted_information(
-            self, prompt:str, asking_for:str, converter:commands.Converter, reactions:typing.List[discord.Emoji]=list()) -> typing.Any:
+            self, prompt:str, asking_for:str, converter:commands.Converter, reactions:typing.List[discord.Emoji]=None) -> typing.Any:
         """
         Ask the user for some information, convert said information, and then return that converted value.
 
@@ -367,7 +380,7 @@ class SettingsMenuOption(object):
             typing.Callable[['SettingsMenu', commands.Context, int], None]: A callable for `SettingsMenuIterable` objects to use.
         """
 
-        def wrapper(menu, ctx, role_id:int):
+        def wrapper(menu, ctx, delete_key:int):
             """
             A sync wrapper so that we can return an async callback that deletes from the database.
             """
@@ -376,21 +389,21 @@ class SettingsMenuOption(object):
                 """
                 The function that actually deletes the role from the database
                 Any input to this function will be silently discarded, since the actual input to this function is defined
-                in the callback definition
+                in the callback definition.
                 """
 
                 # Database it
                 async with ctx.bot.database() as db:
                     await db(
                         "DELETE FROM {0} WHERE guild_id=$1 AND {1}=$2 AND key=$3".format(table_name, column_name),
-                        ctx.guild.id, role_id, database_key
+                        ctx.guild.id, delete_key, database_key
                     )
 
                 # Remove the converted value from cache
                 try:
-                    ctx.bot.guild_settings[ctx.guild.id][cache_key].remove(role_id)
+                    ctx.bot.guild_settings[ctx.guild.id][cache_key].remove(delete_key)
                 except AttributeError:
-                    ctx.bot.guild_settings[ctx.guild.id][cache_key].pop(role_id)
+                    ctx.bot.guild_settings[ctx.guild.id][cache_key].pop(delete_key)
 
             return callback
 
@@ -402,7 +415,9 @@ class SettingsMenuOption(object):
             serialize_function:typing.Callable[[typing.Any], str]=None) -> typing.Callable[['SettingsMenu', commands.Context], None]:
         """
         Return an async method that takes the data retuend by `convert_prompted_information` and then
-        saves it into the database - should be used for the SettingsMenu init.
+        saves it into the database - should be used for the SettingsMenu init. This particular iterable
+        can only deal with one convertable datapoint (for a list) or two (for a mapping). Any more than that
+        and you will need to provide your own callback.
 
         Args:
             table_name (str): The name of the database that you want to add data to.
@@ -615,9 +630,8 @@ class SettingsMenuIterable(SettingsMenu):
 
     def __init__(
             self, table_name:str, column_name:str, cache_key:str, database_key:str,
-            key_converter:commands.Converter, key_prompt:str, key_display_function:typing.Callable[[typing.Any], str],
-            value_converter:commands.Converter=str, value_prompt:str=None, value_serialize_function:typing.Callable=None,
-            value_display_function:typing.Callable[[typing.Any], str]=str, *,
+            key_display_function:typing.Callable[[typing.Any], str], value_display_function:typing.Callable[[typing.Any], str]=str,
+            converters:typing.List[SettingsMenuConverter]=None, *,
             iterable_add_callback:typing.Callable[['SettingsMenu', commands.Context], None]=None,
             iterable_delete_callback:typing.Callable[['SettingsMenu', commands.Context, int], None]=None):
         """
@@ -627,27 +641,33 @@ class SettingsMenuIterable(SettingsMenu):
             cache_key (str): The key that goes into `bot.guild_settings` to get to the cached iterable.
             database_key (str): The key that would be inserted into the default `role_list` or `channel_list` tables. If you're not using this field
                 then this will probably be pretty useless to you.
-            key_converter (commands.Converter): The converter that's used to take the user's input and convert it into a given object.
-                Usually this will be a `discord.ext.commands.RoleConverter` or `discord.ext.commands.TextChannelConverter`.
-            key_prompt (str): The string send to the user when asking for the key.
             key_display_function (typing.Callable[[typing.Any], str]): A function used to take the raw data from the key and
                 change it into a display value.
-            value_converter (commands.Converter, optional): The converter that's used to take the user's input and change it into
-                something of value.
-            value_prompt (str, optional): The string send to the user when asking for the value.
-            value_serialize_function (typing.Callable, optional): A function used to take the converted value and change it into
-                something database-friendly.
             value_display_function (typing.Callable[[typing.Any], str], optional): The function used to take the saved raw value
                 from the database and nicely show it to the user in the embed.
+            converters (typing.List[SettingsMenuConverter], optional): A list of the converters that should be used for the user to provide
+                their new values for the menu.
             iterable_add_callback (typing.Callable[['SettingsMenu', commands.Context], None], optional): A function that's run with the
                 params of the database name, the column name, the cache key, the database key, and the value serialize function.
                 If left blank then it defaults to making a new callback for you that just adds to the `role_list` or `channel_list`
-                table as specified.
+                table as specified. These methods are only directly compatible with lists and dictionaries - nothing that requires multiple
+                arguments to be saved in a database; for those you will need to write your own method.
             iterable_delete_callback (typing.Callable[['SettingsMenu', commands.Context, int], None], optional): A function that's run
                 with the params of the database name, the column name, the item to be deleted, the cache key, and the database key.
                 If left blank then it defaults to making a new callback for you that just deletes from the `role_list` or `channel_list`
-                table as specified.
+                table as specified. These methods are only directly compatible with lists and dictionaries - nothing that requires multiple
+                arguments to be saved in a database; for those you will need to write your own method.
+
+        Raises:
+            ValueError: Description
         """
+
+        try:
+            if converters or not converters[0]:
+                pass
+        except Exception as e:
+            raise ValueError("You need to provide at least one converter.") from e
+
         super().__init__()
 
         # Set up the storage data
@@ -656,69 +676,87 @@ class SettingsMenuIterable(SettingsMenu):
         self.cache_key = cache_key
         self.database_key = database_key
 
-        # Key conversion
-        self.key_converter = key_converter
-        self.key_prompt = key_prompt
+        # Converters
         self.key_display_function = key_display_function
-
-        # Value conversion
-        self.value_converter = value_converter
-        self.value_prompt = value_prompt
-        self.value_serialize_function = value_serialize_function or (lambda x: x)
         self.value_display_function = value_display_function
+        self.converters = converters
 
-        # Callbacks
-        self.iterable_add_callback = iterable_add_callback or SettingsMenuOption.get_set_iterable_add_callback(table_name, column_name, cache_key, database_key, value_serialize_function)
-        self.iterable_delete_callback = iterable_delete_callback or SettingsMenuOption.get_set_iterable_delete_callback(table_name, column_name, cache_key, database_key)
+        # Add callback
+        self.iterable_add_callback = iterable_add_callback or SettingsMenuOption.get_set_iterable_add_callback(
+            table_name=table_name,
+            column_name=column_name,
+            cache_key=cache_key,
+            database_key=database_key,
+            serialize_function=str if len(self.converters) == 1 else self.converters[1].serialize,
+        )
+        # This default returns an async function which takes the content of the converted values which adds to the db.
+        # Callable[
+        #     [SettingsMenu, commands.Context],
+        #     Callable[
+        #         [SettingsMenu, *typing.Any],
+        #         None
+        #     ]
+        # ]
+
+        # Delete callback
+        self.iterable_delete_callback = iterable_delete_callback or SettingsMenuOption.get_set_iterable_delete_callback(
+            table_name=table_name,
+            column_name=column_name,
+            cache_key=cache_key,
+            database_key=database_key,
+        )
+        # This default returns an async function which takes the content of the converted values which removes from the db.
+        # Callable[
+        #     [SettingsMenu, commands.Context, int],
+        #     Callable[
+        #         [SettingsMenu],
+        #         None
+        #     ]
+        # ]
 
     def get_sendable_data(self, ctx:commands.Context):
-        """Create a list of mentions from the given guild settings key, creating all relevant callbacks"""
+        """
+        Create a list of mentions from the given guild settings key, creating all relevant callbacks.
+        """
 
         # Get the current data
         data_points = ctx.bot.guild_settings[ctx.guild.id][self.cache_key]
 
-        # Current data is a key-value pair
+        # See what our display function should be
         if isinstance(data_points, dict):
-            self.options = [
-                SettingsMenuOption(
-                    ctx, f"{self.key_display_function(i)} - {self.value_display_function(o)!s}", (),
-                    self.iterable_delete_callback(self, ctx, i),
-                    allow_nullable=False,
-                )
-                for i, o in data_points.items()
-            ]
-            if len(self.options) < 10:
-                self.options.append(
-                    SettingsMenuOption(
-                        ctx, "", [
-                            (self.key_prompt, "value", self.key_converter),
-                            (self.value_prompt, "value", self.value_converter)
-                        ], self.iterable_add_callback(self, ctx),
-                        emoji=self.PLUS_EMOJI,
-                        allow_nullable=False,
-                    )
-                )
-
-        # Current data is a key list
+            display_function = lambda i, o: f"{self.key_display_function(i)} - {self.value_display_function(o)!s}"
+            corrected_data_points = data_points.items()
         elif isinstance(data_points, list):
-            self.options = [
+            display_function = lambda _, i: self.key_display_function(i)
+            corrected_data_points = enumerate(data_points)
+        else:
+            raise ValueError("Invalid cache type from database to use in an iterable.")
+
+        # Delete buttons
+        self.options = [
+            SettingsMenuOption(
+                ctx=ctx,
+                display=display_function(i, o),
+                converter_args=(),
+                callback=self.iterable_delete_callback(self, ctx, i),
+                allow_nullable=False,
+            )
+            for i, o in corrected_data_points
+        ]
+
+        # Add more buttons
+        # TODO add pagination so that users can add more than 10 options
+        if len(self.options) < 10:
+            self.options.append(
                 SettingsMenuOption(
-                    ctx, str(self.key_display_function(i)), (),
-                    self.iterable_delete_callback(self.table_name, self.column_name, i, self.cache_key, self.database_key),
+                    ctx=ctx,
+                    display="",
+                    converter_args=self.converterss,
+                    callback=self.iterable_add_callback(self, ctx),
+                    emoji=self.PLUS_EMOJI,
                     allow_nullable=False,
                 )
-                for i in data_points
-            ]
-            if len(self.options) < 10:
-                self.options.append(
-                    SettingsMenuOption(
-                        ctx, "", [
-                            (self.key_prompt, "value", self.key_converter),
-                        ], self.iterable_add_callback(self.table_name, self.column_name, self.cache_key, self.database_key),
-                        emoji=self.PLUS_EMOJI,
-                        allow_nullable=False,
-                    )
-                )
+            )
 
         # Generate the data as normal
         return super().get_sendable_data(ctx)
