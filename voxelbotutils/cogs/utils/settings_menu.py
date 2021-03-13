@@ -727,8 +727,8 @@ class SettingsMenuIterable(SettingsMenu):
             display_function = lambda i, o: f"{self.key_display_function(i)} - {self.value_display_function(o)!s}"
             corrected_data_points = data_points.items()
         elif isinstance(data_points, list):
-            display_function = lambda _, i: self.key_display_function(i)
-            corrected_data_points = enumerate(data_points)
+            display_function = lambda i, _: self.key_display_function(i)
+            corrected_data_points = [(i, _) for _, i in enumerate(data_points)]
         else:
             raise ValueError("Invalid cache type from database to use in an iterable.")
 
