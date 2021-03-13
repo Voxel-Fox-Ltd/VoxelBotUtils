@@ -90,7 +90,11 @@ class Paginator(object):
         while True:
 
             # Edit the message with the relevant data
-            items = await self.get_page(self.current_page)
+            try:
+                items = await self.get_page(self.current_page)
+            except IndexError:
+                await message.edit(content="There's no data to be shown.")
+                break
             payload = self.formatter(self, items)
             if isinstance(payload, discord.Embed):
                 payload = {"embed": payload}
@@ -164,10 +168,7 @@ class Paginator(object):
                 self.current_page = 0
 
         # Let us break from the loop
-        try:
-            await message.clear_reactions()
-        except discord.HTTPException:
-            pass
+        ctx.bot.loop.create_task(message.clear_reactions())
 
     async def get_page(self, page_number:int) -> typing.List[typing.Any]:
         """
