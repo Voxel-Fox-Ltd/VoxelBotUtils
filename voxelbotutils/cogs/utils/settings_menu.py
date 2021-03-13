@@ -751,7 +751,7 @@ class SettingsMenuIterable(SettingsMenu):
                 SettingsMenuOption(
                     ctx=ctx,
                     display="",
-                    converter_args=self.converterss,
+                    converter_args=self.converters,
                     callback=self.iterable_add_callback(self, ctx),
                     emoji=self.PLUS_EMOJI,
                     allow_nullable=False,
