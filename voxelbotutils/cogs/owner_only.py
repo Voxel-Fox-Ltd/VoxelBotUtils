@@ -119,6 +119,22 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         # remove `foo`
         return content.strip('` \n')
 
+    @staticmethod
+    def get_execution_time(end, start) -> str:
+        """
+        Gets the execution time string for the ev command.
+        """
+
+        time_taken = end - start
+        precision = "seconds"
+        prefixes = ["milli", "micro", "nano", "pico"]
+        index = 1
+        while float(format(time_taken, ",.3f")) < 10:
+            time_taken *= 1_000
+            precision = f"{prefixes[index]}seconds"
+            index += 1
+        return f"Executed in **{time_taken:.3f}** {precision}."
+
     @commands.command(aliases=['evall', 'eval'], cls=utils.Command)
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
@@ -176,7 +192,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         if ret is None:
             # It might have printed something
             if stdout_value is not None:
-                await ctx.send(f'```py\n{stdout_value}\n```Executed in **{end_time - start_time:.3f}** seconds.', embeddify=False)
+                await ctx.send(f'```py\n{stdout_value}\n```{self.get_execution_time(end_time, start_time)}', embeddify=False)
             return
 
         # If the function did return a value
@@ -192,12 +208,12 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
                 pass
             else:
                 text = f'```json\n{result}\n```'
-        text += f"Executed in **{end_time - start_time:.3f}** seconds."
+        text += self.get_execution_time(end_time, start_time)
 
         # Output to chat
         if len(text) > 2000:
             try:
-                return await ctx.send(file=discord.File(io.StringIO(result), filename='ev.txt'))
+                return await ctx.send(self.get_execution_time(end_time, start_time), file=discord.File(io.StringIO(result), filename='ev.txt'))
             except discord.HTTPException:
                 return await ctx.send("I don't have permission to attach files here.", embeddify=False)
         else:
