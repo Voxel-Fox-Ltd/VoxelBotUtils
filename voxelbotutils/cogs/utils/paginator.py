@@ -81,9 +81,9 @@ class Paginator(object):
         if self._data_is_iterable:
             valid_emojis.append("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}")
             valid_emojis.append("\N{INPUT SYMBOL FOR NUMBERS}")
+        add_emoji_tasks = []
         if not self._data_is_iterable or self.max_pages > 1:
-            for e in valid_emojis:
-                ctx.bot.loop.create_task(message.add_reaction(e))
+            add_emoji_tasks = [ctx.bot.loop.create_task(message.add_reaction(e)) for e in valid_emojis]
 
         # Loop the reaction handler
         last_payload = None
@@ -168,6 +168,8 @@ class Paginator(object):
                 self.current_page = 0
 
         # Let us break from the loop
+        for t in add_emoji_tasks:
+            t.cancel()
         ctx.bot.loop.create_task(message.clear_reactions())
 
     async def get_page(self, page_number:int) -> typing.List[typing.Any]:
