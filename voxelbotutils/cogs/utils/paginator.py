@@ -92,7 +92,7 @@ class Paginator(object):
             # Edit the message with the relevant data
             try:
                 items = await self.get_page(self.current_page)
-            except IndexError:
+            except (KeyError, IndexError):
                 await message.edit(content="There's no data to be shown.")
                 break
             payload = self.formatter(self, items)
