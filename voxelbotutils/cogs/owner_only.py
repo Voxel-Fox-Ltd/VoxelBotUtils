@@ -156,9 +156,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         env.update(globals())
 
         # See if the user attached a file (alix was here)
-        if ctx.message.attachments
-          async with self.bot.session.get(ctx.message.attachments[0].url) as r:
-               try:
+        if ctx.message.attachments:
+            async with self.bot.session.get(ctx.message.attachments[0].url) as r:
+                try:
                     content = await r.text()
                 except Exception:
                     pass
