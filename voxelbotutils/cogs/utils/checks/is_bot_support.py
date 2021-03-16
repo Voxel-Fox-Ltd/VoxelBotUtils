@@ -24,7 +24,7 @@ def is_bot_support():
             return True
         supportguild = await ctx.bot.fetch_support_guild() or ctx.guild
         if supportguild is None:
-            return raise commands.NoPrivateMessage
+            raise commands.NoPrivateMessage()
         try:
             member = supportguild.get_member(ctx.author.id) or await supportguild.fetch_member(ctx.author.id)
         except discord.HTTPException:
