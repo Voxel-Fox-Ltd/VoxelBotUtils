@@ -13,10 +13,20 @@ class BotSettings(utils.Cog):
     @commands.bot_has_permissions(send_messages=True)
     @commands.guild_only()
     @utils.checks.is_config_set('database', 'enabled')
-    async def prefix(self, ctx:utils.Context, *, new_prefix:str):
+    async def prefix(self, ctx:utils.Context, *, new_prefix:str=None):
         """
         Changes the prefix that the bot uses.
         """
+
+        # See if the prefix was actually specified
+        if new_prefix is None:
+            return await ctx.send(f"The current prefix is `{self.bot.guild_settings[ctx.guild.id][prefix_column]}`.")
+
+        # See if the user has permission
+        try:
+            await commands.has_guild_permissions(manage_guild=True).predicate(ctx)
+        except Exception:
+            return await ctx.send(f"You do not have permission to change the command prefix.")
 
         # Validate prefix
         if len(new_prefix) > 30:
