@@ -100,7 +100,7 @@ def check_config_value(base_config_key:typing.List[str], base_config_value:typin
     return
 
 
-if __name__ == '__main__':
+def main():
 
     # Wew let's see if we want to run a bot
     parser = get_default_program_arguments()
@@ -195,3 +195,7 @@ if __name__ == '__main__':
         run_bot(args)
     elif args.subcommand == "run-website":
         run_website(args)
+
+
+if __name__ == '__main__':
+    main()

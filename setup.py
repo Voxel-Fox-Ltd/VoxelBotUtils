@@ -12,7 +12,7 @@ except Exception:
 
 # Here are the requirements
 requirements = [
-    "discord.py>=1.5.0",
+    "discord.py>=1.6.0",
     "toml",
     "asyncpg",
     "aioredis",
@@ -65,4 +65,9 @@ setuptools.setup(
     python_requires='>=3.6',
     install_requires=requirements,
     extras_require=extras,
+    entry_points={
+        "console_scripts": [
+            "voxelbotutils=voxelbotutils.__main__:main",
+        ],
+    },
 )
