@@ -82,7 +82,7 @@ class Paginator(object):
             valid_emojis.append("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}")
             valid_emojis.append("\N{INPUT SYMBOL FOR NUMBERS}")
         add_emoji_tasks = []
-        if not self._data_is_iterable or self.max_pages > 1:
+        if self._data_is_iterable is False or self.max_pages > 1:
             add_emoji_tasks = [ctx.bot.loop.create_task(message.add_reaction(e)) for e in valid_emojis]
 
         # Loop the reaction handler
@@ -109,7 +109,7 @@ class Paginator(object):
                 return
 
             # See if we now need to add a new emoji
-            if self._data_is_iterable and self.max_pages != "?" and "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}" not in valid_emojis:
+            if self.max_pages != "?" and "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}" not in valid_emojis:
                 ctx.bot.loop.create_task(message.add_reaction("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}"))
                 ctx.bot.loop.create_task(message.add_reaction("\N{INPUT SYMBOL FOR NUMBERS}"))
                 valid_emojis.append("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}")
@@ -183,8 +183,10 @@ class Paginator(object):
             typing.List[typing.Any]: The list of items that would be on the page.
         """
 
-        if page_number in self._page_cache:
+        try:
             return self._page_cache[page_number]
+        except KeyError:
+            pass
         try:
             if inspect.isasyncgenfunction(self.data) or inspect.isasyncgen(self.data):
                 v = await self.data.__anext__()
