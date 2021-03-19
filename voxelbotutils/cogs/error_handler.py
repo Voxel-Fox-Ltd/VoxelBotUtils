@@ -25,6 +25,10 @@ class ErrorHandler(utils.Cog):
             lambda ctx, error: "The quotes in your message have been done incorrectly."
         ),
         (
+            utils.checks.cooldown.NoRaiseCommandOnCooldown,
+            lambda ctx, error: None
+        ),
+        (
             commands.CommandOnCooldown,
             lambda ctx, error: f"You can't use this command again for another {utils.TimeValue(error.retry_after).clean_spaced}."
         ),

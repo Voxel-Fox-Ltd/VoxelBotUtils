@@ -188,6 +188,15 @@ class Cooldown(commands.Cooldown):
         return self
 
 
+class NoRaiseCommandOnCooldown(commands.CommandOnCooldown):
+    """A version of :class:`commands.CommandOnCooldown` that doesn't output an error."""
+
+
+class NoRaiseCooldown(Cooldown):
+
+    default_cooldown_error = NoRaiseCommandOnCooldown
+
+
 def cooldown(rate:int, per:int, type:commands.BucketType=commands.BucketType.default, *, cls:commands.Cooldown=None) -> typing.Callable:
     """
     Args:
