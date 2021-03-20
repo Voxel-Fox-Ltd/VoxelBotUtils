@@ -14,11 +14,11 @@ class ErrorHandler(utils.Cog):
     COMMAND_ERROR_RESPONSES = (
         (
             utils.errors.MissingRequiredArgumentString,
-            lambda ctx, error: f"You're missing the `{error.param}` argument, which is required for this command - see `{ctx.clean_prefix}help {ctx.invoked_with}`."
+            lambda ctx, error: f"You're missing `{error.param}`, which is required for this command - see `{ctx.clean_prefix}help {ctx.invoked_with}`."
         ),
         (
             commands.MissingRequiredArgument,
-            lambda ctx, error: f"You're missing the `{error.param.name}` argument, which is required for this command - see `{ctx.clean_prefix}help {ctx.invoked_with}`."
+            lambda ctx, error: f"You're missing `{error.param.name}`, which is required for this command - see `{ctx.clean_prefix}help {ctx.invoked_with}`."
         ),
         (
             (commands.UnexpectedQuoteError, commands.InvalidEndOfQuotedStringError, commands.ExpectedClosingQuoteError),
