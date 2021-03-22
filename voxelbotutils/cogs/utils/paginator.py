@@ -225,4 +225,3 @@ class Paginator(object):
         ).set_footer(
             f"Page {m.current_page + 1}/{m.max_pages}",
         )
-

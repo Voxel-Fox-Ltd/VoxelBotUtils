@@ -1,4 +1,3 @@
-# flake8: noqa
 from .checks.is_config_set import ConfigNotSet
 from .checks.meta_command import InvokedMetaCommand
 from .checks.bot_is_ready import BotNotReady

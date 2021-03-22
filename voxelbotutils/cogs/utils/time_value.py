@@ -140,16 +140,16 @@ class TimeValue(object):
         Raises:
             InvalidTimeDuration: If the time could not be successfully converted.
         """
-        
+
         # If the value given is purely a number, add the "minute" unit to the end
         if value.isdigit():
             value += "m"
 
         match = cls.TIME_VALUE_REGEX.search(value)
-        
-        if match is None:  
+
+        if match is None:
             raise InvalidTimeDuration(value)
-                    
+
         duration = 0
 
         if match.group('years'):

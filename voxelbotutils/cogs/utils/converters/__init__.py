@@ -1,4 +1,3 @@
-# flake8: noqa
 from .user_id import UserID
 from .channel_id import ChannelID
 from .enum_converter import EnumConverter

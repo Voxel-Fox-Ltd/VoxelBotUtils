@@ -1,3 +1,5 @@
+from discord.ext import commands as _dpy_commands
+
 from . import checks, converters, errors, interactions
 from .checks import cooldown
 from .context_embed import Embed
@@ -12,9 +14,6 @@ from .time_value import TimeValue
 from .settings_menu import SettingsMenu, SettingsMenuOption, SettingsMenuIterable, SettingsMenuConverter
 from .upgrade_chat import UpgradeChat, UpgradeChatOrder, UpgradeChatUser, UpgradeChatOrderItem
 from .paginator import Paginator
-
-
-from discord.ext import commands as _dpy_commands
 
 
 def command(*args, **kwargs):
