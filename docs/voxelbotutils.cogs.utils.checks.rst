@@ -38,3 +38,8 @@ checks.is\_upgrade\_chat\_subscriber
 ----------------------------------------------------
 
 .. autofunction:: voxelbotutils.checks.is_upgrade_chat_subscriber
+
+checks.is\_upgrade\_chat\_purchaser
+----------------------------------------------------
+
+.. autofunction:: voxelbotutils.checks.is_upgrade_chat_purchaser

@@ -51,6 +51,12 @@ errors.InvalidTimeDuration
 .. autoclass:: voxelbotutils.errors.InvalidTimeDuration
     :no-special-members:
 
+errors.IsNotUpgradeChatPurchaser
+-------------------------------------------
+
+.. autoclass:: voxelbotutils.errors.IsNotUpgradeChatPurchaser
+    :no-special-members:
+
 errors.IsNotUpgradeChatSubscriber
 -------------------------------------------
 
