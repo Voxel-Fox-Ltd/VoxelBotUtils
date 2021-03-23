@@ -220,3 +220,8 @@ def cooldown(rate:int, per:int, type:commands.BucketType=commands.BucketType.def
             func.__commands_cooldown__ = cls(rate, per, type)
         return func
     return decorator
+
+
+def no_raise_cooldown(*args, **kwargs):
+    cls = kwargs.pop('cls', NoRaiseCooldown)
+    return cooldown(*args, cls=cls, **kwargs)
