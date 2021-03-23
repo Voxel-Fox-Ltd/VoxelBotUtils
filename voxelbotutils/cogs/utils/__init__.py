@@ -12,7 +12,10 @@ from .redis import RedisConnection, RedisChannelHandler, redis_channel_handler
 from .statsd import StatsdConnection
 from .time_value import TimeValue
 from .settings_menu import SettingsMenu, SettingsMenuOption, SettingsMenuIterable, SettingsMenuConverter
-from .upgrade_chat import UpgradeChat, UpgradeChatOrder, UpgradeChatUser, UpgradeChatOrderItem
+from .upgrade_chat import (
+    UpgradeChat, UpgradeChatOrder, UpgradeChatUser, UpgradeChatOrderItem, UpgradeChatInterval, UpgradeChatProduct,
+    UpgradeChatItemType, UpgradeChatPaymentProcessor, UpgradeChatProductType,
+)
 from .paginator import Paginator
 
 

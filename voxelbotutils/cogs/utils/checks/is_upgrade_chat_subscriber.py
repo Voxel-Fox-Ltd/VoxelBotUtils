@@ -3,6 +3,8 @@ from datetime import datetime as dt
 
 from discord.ext import commands
 
+from ..upgrade_chat import UpgradeChatItemType
+
 
 class IsNotUpgradeChatPurchaser(commands.CheckFailure):
     """The error raised when the user is missing an UpradeChat purchase."""
@@ -22,7 +24,7 @@ class IsNotUpgradeChatSubscriber(commands.CheckFailure):
 def is_upgrade_chat_purchaser(*any_item_names):
     """
     A check to see whether a given user is an UpgradeChat purchaser for *any* of the given item names,
-    returning a list of things that they've purchased that match.
+    adding an `upgrade_chat_items` attribute to the context object with the given purchases.
 
     Raises:
         IsNotUpgradeChatPurchaser: If the user hasn't purchased the given item.
@@ -38,7 +40,10 @@ def is_upgrade_chat_purchaser(*any_item_names):
 
         # Grab all purchased roles by the user
         try:
-            purchases = await asyncio.wait_for(ctx.bot.upgrade_chat.get_orders(discord_id=ctx.author.id), timeout=3)
+            purchases = await asyncio.wait_for(
+                ctx.bot.upgrade_chat.get_orders(discord_id=ctx.author.id, type=UpgradeChatItemType.SHOP),
+                timeout=3,
+            )
         except asyncio.TimeoutError:
             raise commands.CheckFailure("Upgrade.Chat is currently unable to process my request for purchasers - please try again later.")
 
@@ -52,7 +57,8 @@ def is_upgrade_chat_purchaser(*any_item_names):
                 if product_name in any_item_names:
                     output_items.append(product_name)
         if output_items:
-            return output_items
+            ctx.upgrade_chat_items = output_items
+            return True
 
         # They didn't purchase anything [valid]
         raise IsNotUpgradeChatPurchaser()
@@ -63,7 +69,7 @@ def is_upgrade_chat_purchaser(*any_item_names):
 def is_upgrade_chat_subscriber(*any_item_names):
     """
     A check to see whether a given user is an UpgradeChat subscriber for *any* of the given item names,
-    returning a list of things that they've purchased that match.
+    adding an `upgrade_chat_items` attribute to the context object with the given purchases.
 
     Raises:
         IsNotUpgradeChatSubscriber: If the user isn't subscribing to the given item.
@@ -79,7 +85,10 @@ def is_upgrade_chat_subscriber(*any_item_names):
 
         # Grab all purchased roles by the user
         try:
-            purchases = await asyncio.wait_for(ctx.bot.upgrade_chat.get_orders(discord_id=ctx.author.id), timeout=3)
+            purchases = await asyncio.wait_for(
+                ctx.bot.upgrade_chat.get_orders(discord_id=ctx.author.id, type=UpgradeChatItemType.UPGRADE),
+                timeout=3,
+            )
         except asyncio.TimeoutError:
             raise commands.CheckFailure("Upgrade.Chat is currently unable to process my request for subscribers - please try again later.")
 
@@ -95,7 +104,8 @@ def is_upgrade_chat_subscriber(*any_item_names):
                 if product_name in any_item_names:
                     output_items.append(product_name)
         if output_items:
-            return output_items
+            ctx.upgrade_chat_items = output_items
+            return True
 
         # They didn't purchase anything [valid]
         raise IsNotUpgradeChatSubscriber()

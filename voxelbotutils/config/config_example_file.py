@@ -109,8 +109,6 @@ guild_settings_prefix_column = "prefix"  # Used if multiple bots connect to the 
 [upgrade_chat]
     client_id = ""
     client_secret = ""
-    [upgrade_chat.roles]
-        "Role Name" = 0  # (role id)
 
 # Statsd analytics port using the aiodogstatsd package
 [statsd]

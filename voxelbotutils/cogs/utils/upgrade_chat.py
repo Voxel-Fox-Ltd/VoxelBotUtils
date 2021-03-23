@@ -6,10 +6,30 @@ import enum
 import aiohttp
 
 
-UpgradeChatInterval = enum.Enum("UpgradeChatInterval", "day week month year")
-UpgradeChatItemType = enum.Enum("UpgradeChatItemType", "UPGRADE SHOP")
-UpgradeChatProductType = enum.Enum("UpgradeChatProductType", "DISCORD_ROLE SHOP_PRODUCT")
-UpgradeChatPaymentProcessor = enum.Enum("UpgradeChatPaymentProcessor", "PAYPAL STRIPE")
+class UpgradeChatInterval(enum.Enum):
+    """A subscription interval enum for Upgrade.Chat role subscriptions."""
+    day = enum.auto()
+    week = enum.auto()
+    month = enum.auto()
+    year = enum.auto()
+
+
+class UpgradeChatItemType(enum.Enum):
+    """An item type enum to allow you to query the Upgrade.Chat API."""
+    UPGRADE = enum.auto()
+    SHOP = enum.auto()
+
+
+class UpgradeChatProductType(enum.Enum):
+    """A product type enum for internal responses from the Upgrade.Chat API - this is not for querying with."""
+    DISCORD_ROLE = enum.auto()
+    SHOP_PRODUCT = enum.auto()
+
+
+class UpgradeChatPaymentProcessor(enum.Enum):
+    """A payment processor enum for Upgrade.Chat purchases."""
+    PAYPAL = enum.auto()
+    STRIPE = enum.auto()
 
 
 class UpgradeChatUser(object):
@@ -220,7 +240,9 @@ class UpgradeChat(object):
         self._access_token = (data['access_token'], data['refresh_token'], dt.fromtimestamp(int(data['access_token_expires_in']) / 1_000))
         return self._access_token[0]
 
-    async def get_orders(self, limit:int=100, offset:int=0, discord_id:int=None) -> typing.List[UpgradeChatOrder]:
+    async def get_orders(
+            self, limit:int=100, offset:int=0, discord_id:int=None,
+            type:typing.Union[UpgradeChatItemType, str]=None) -> typing.List[UpgradeChatOrder]:
         """
         Get a list of order objects that adhere to the request parameters given.
 
@@ -240,6 +262,10 @@ class UpgradeChat(object):
         }
         if discord_id:
             params.update({"userDiscordId": discord_id})
+        if type:
+            if isinstance(type, UpgradeChatItemType):
+                type = type.name
+            params.update({"type": type})
 
         # And our headers
         access_token = await self.get_access_token()
