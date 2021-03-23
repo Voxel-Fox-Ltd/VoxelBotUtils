@@ -21,14 +21,18 @@ class BotStats(utils.Cog):
 
     @commands.command(cls=utils.Command)
     @commands.bot_has_permissions(send_messages=True)
-    @utils.checks.is_config_set('command_data', 'invite_command_permissions')
+    @utils.checks.is_config_set('oauth', 'enabled')
     async def invite(self, ctx:utils.Context):
         """
         Gives you the bot's invite link.
         """
 
-        invite_permissions = {i: True for i in self.bot.config['command_data']['invite_command_permissions']}
-        await ctx.send(f"<{self.bot.get_invite_link(**invite_permissions)}>", embeddify=False)
+        oauth = self.bot.config['oauth']
+        permissions = discord.Permissions.none()
+        for i in oauth.pop('permissions', list()):
+            setattr(permissions, i, True)
+        oauth['permissions'] = permissions
+        await ctx.send(f"<{self.bot.get_invite_link(**oauth)}>", embeddify=False)
 
     @commands.command(cls=utils.Command)
     @commands.bot_has_permissions(send_messages=True)

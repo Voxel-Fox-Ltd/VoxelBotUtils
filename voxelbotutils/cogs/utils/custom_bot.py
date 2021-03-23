@@ -236,7 +236,9 @@ class Bot(commands.AutoShardedBot):
         except Exception:
             return None
 
-    def get_invite_link(self, *, scope:str='bot', response_type:str=None, redirect_uri:str=None, guild_id:int=None, **kwargs) -> str:
+    def get_invite_link(
+            self, *, client_id:int=None, scope:str='bot', response_type:str=None, redirect_uri:str=None, guild_id:int=None,
+            permissions:discord.Permissions=discord.Permissions.none()) -> str:
         """
         Gets the invite link for the bot, with permissions all set properly.
 
@@ -251,16 +253,11 @@ class Bot(commands.AutoShardedBot):
             str: The URL for the invite.
         """
 
-        # Make the permissions object
-        permissions = discord.Permissions()
-        for name, value in kwargs.items():
-            setattr(permissions, name, value)
-
         # Make the params for the url
         data = {
-            'client_id': self.config.get('oauth', {}).get('client_id', None) or self.user.id,
+            'client_id': client_id or self.config.get('oauth', {}).get('client_id', None) or self.user.id,
             'scope': scope,
-            'permissions': permissions.value
+            'permissions': permissions.value,
         }
         if redirect_uri:
             data['redirect_uri'] = redirect_uri

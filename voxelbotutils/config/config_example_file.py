@@ -54,12 +54,18 @@ guild_settings_prefix_column = "prefix"  # Used if multiple bots connect to the 
     guild_invite = ""  # A link to be used on !support
     github_link = ""  # A link to be used on !git
     donate_link = ""  # A link to be used on !donate
-    invite_command_permissions = []  # args here are passed directly to discord.Permissions. An empty list disabled the invite command
     echo_command_enabled = true  # Whether or not the invite command is enabled
     stats_command_enabled = true  # Whether or not the stats command is enabled
     vote_command_enabled = false  # Whether or not the top.gg vote command is enabled
     updates_channel_id = 0  # The ID of the news channel for the bot
     info = ""  # The text passed out with the !info command
+
+# Used to generate the invite link
+[oauth]
+    enabled = false
+    client_id = ""  #  If not set then will use the bot's ID, which is correct as of around 2017 I think
+    scope = "bot"  # The scope that will be generated with the invite link, space seperated (applications.commands for slash)
+    permissions = []  # args here are passed directly to discord.Permissions as True
 
 # This data is passed directly over to asyncpg.connect()
 [database]
@@ -100,10 +106,6 @@ guild_settings_prefix_column = "prefix"  # Used if multiple bots connect to the 
         twitch_usernames = []  # The username of your Twitch.tv channel
         twitch_client_id = ""  # Your client ID - https://dev.twitch.tv/console/apps
         twitch_client_secret = ""  # Your client secret
-
-# Used to generate the invite link - if not set then will use the bot's ID, which is correct more often than not
-[oauth]
-    client_id = ""
 
 # UpgradeChat API key data - https://upgrade.chat/developers
 [upgrade_chat]
