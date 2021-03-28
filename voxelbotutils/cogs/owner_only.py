@@ -129,11 +129,11 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         precision = "seconds"
         prefixes = ["milli", "micro", "nano", "pico"]
         index = 1
-        while float(format(time_taken, ",.3f")) < 10:
+        while float(format(time_taken, ".3f")) < 10:
             time_taken *= 1_000
             precision = f"{prefixes[index]}seconds"
             index += 1
-        return f"Executed in **{time_taken:.3f}** {precision}."
+        return f"Executed in **{time_taken:,.3f}** {precision}."
 
     @commands.command(aliases=['evall', 'eval'], cls=utils.Command)
     @commands.is_owner()
