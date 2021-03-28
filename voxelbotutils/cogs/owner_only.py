@@ -138,7 +138,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
     @commands.command(aliases=['evall', 'eval'], cls=utils.Command)
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def ev(self, ctx:utils.Context, *, content:str):
+    async def ev(self, ctx:utils.Context, *, content:str=None):
         """
         Evaluates some Python code.
         """
@@ -165,6 +165,8 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
 
         # Make code and output string
         content = self._cleanup_code(content)
+        if not content:
+            raise utils.errors.MissingRequiredArgumentString("content")
         code = f'async def func():\n{textwrap.indent(content, "  ")}'
 
         # Make the function into existence
