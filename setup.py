@@ -12,7 +12,7 @@ except Exception:
 
 # Here are the requirements
 requirements = [
-    "discord.py>=1.6.0",
+    "discord.py>=1.6",
     "toml",
     "asyncpg",
     "aioredis",
