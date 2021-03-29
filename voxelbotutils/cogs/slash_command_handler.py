@@ -10,6 +10,18 @@ from discord.ext import commands
 from . import utils
 
 
+class SlashCommandWebhookAdapter(dicord.AsyncWebhookAdapter):
+
+    def __init__(self, bot):
+        super().__init__(bot.session)
+        self.bot = bot
+
+    async def send(self, *args, **kwargs):
+        x = await super().send(*args, **kwargs)
+        x._state = self.bot._connection
+        return x
+
+
 class SlashCommandHandler(utils.Cog):
 
     COMMAND_TYPE_MAPPER = {
@@ -58,7 +70,7 @@ class SlashCommandHandler(utils.Cog):
         ctx.invoked_with = invoker
         ctx._interaction_webhook = discord.Webhook.partial(
             await self.bot.get_application_id(), payload["token"],
-            adapter=discord.AsyncWebhookAdapter(self.bot.session)
+            adapter=SlashCommandWebhookAdapter(self.bot)
         )
         ctx.command = self.bot.all_commands.get(invoker)
 
