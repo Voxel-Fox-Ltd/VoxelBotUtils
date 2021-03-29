@@ -41,6 +41,10 @@ class ErrorHandler(utils.Cog):
             lambda ctx, error: "This command can't be run in a non-NSFW channel."
         ),
         (
+            utils.errors.BotNotInGuild,
+            lambda ctx, error: "The bot needs to be in the guild for you to run this command."
+        ),
+        (
             utils.errors.IsSlashCommand,
             lambda ctx, error: "This command cannot be run as a slash command."
         ),

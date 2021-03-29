@@ -11,6 +11,10 @@ class IsNotSlashCommand(commands.DisabledCommand):
     """Raised when a given command failes the :func:`voxelbotutils.checks.is_slash_command` check."""
 
 
+class BotNotInGuild(commands.DisabledCommand):
+    """Raised when a given command failes the :func:`voxelbotutils.checks.is_slash_command` check."""
+
+
 def is_slash_command():
     """
     Checks that the command has been invoked from a slash command.
@@ -40,4 +44,19 @@ def is_not_slash_command():
         if not v:
             return True
         raise IsSlashCommand()
+    return commands.check(predicate)
+
+
+def bot_in_guild():
+    """
+    Checks that the bot is in the guild where this command is being called.
+
+    Raises:
+        BotNotInGuild: If the bot isn't in the guild where the command is being called.
+    """
+
+    async def predicate(ctx):
+        if ctx.bot.get_guild(ctx.guild.id) is None:
+            raise BotNotInGuild()
+        return True
     return commands.check(predicate)

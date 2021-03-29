@@ -4,3 +4,4 @@ from .bot_is_ready import bot_is_ready
 from .is_bot_support import is_bot_support
 from .is_voter import is_voter
 from .is_upgrade_chat_subscriber import is_upgrade_chat_purchaser, is_upgrade_chat_subscriber
+from .slash_commands import bot_in_guild, is_slash_command, is_not_slash_command
