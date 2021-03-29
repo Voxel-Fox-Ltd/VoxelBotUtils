@@ -52,6 +52,12 @@ def get_prefix(bot, message:discord.Message):
     possible_word_prefixes = [i for i in prefix if not any([o in i for o in string.punctuation])]
     prefix.extend([f"{i.strip()} " for i in possible_word_prefixes])
 
+    # Add the bot's managed role
+    if message.guild:
+        managed_role = [i for i in message.guild.roles if i.tags and i.bot_id == bot.user.id]
+        if managed_role:
+            prefix.extend([f"<@&{managed_role[0].id}> "])
+
     # And we're FINALLY done
     return commands.when_mentioned_or(*prefix)(bot, message)
 
