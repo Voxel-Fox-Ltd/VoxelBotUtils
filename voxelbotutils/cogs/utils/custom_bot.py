@@ -244,7 +244,7 @@ class Bot(commands.AutoShardedBot):
 
     def get_invite_link(
             self, *, client_id:int=None, scope:str='bot', response_type:str=None, redirect_uri:str=None, guild_id:int=None,
-            permissions:discord.Permissions=discord.Permissions.none()) -> str:
+            permissions:discord.Permissions=discord.Permissions.none(), enabled:bool=None) -> str:
         """
         Gets the invite link for the bot, with permissions all set properly.
 
