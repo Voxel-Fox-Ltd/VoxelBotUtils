@@ -259,6 +259,13 @@ class Bot(commands.AutoShardedBot):
             str: The URL for the invite.
         """
 
+        # Make sure our permissions is a valid object
+        permissions_object = discord.Permissions()
+        if isinstance(permissions, (list, set, tuple)):
+            for p in permissions:
+                setattr(permissions_object, p, True)
+            permissions = permissions_object
+
         # Make the params for the url
         data = {
             'client_id': client_id or self.config.get('oauth', {}).get('client_id', None) or self.user.id,
