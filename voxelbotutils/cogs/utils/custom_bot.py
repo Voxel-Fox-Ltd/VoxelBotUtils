@@ -335,12 +335,14 @@ class Bot(commands.AutoShardedBot):
         if url:
             try:
                 self.logger.debug("Grabbed event webhook from config")
-                return discord.Webhook.from_url(url, adapter=discord.AsyncWebhookAdapter(self.session))
+                w = discord.Webhook.from_url(url, adapter=discord.AsyncWebhookAdapter(self.session))
+                w._state = self._connection
+                return w
             except discord.InvalidArgument:
                 self.logger.error("The webhook set in your config is not a valid Discord webhook")
                 return None
         if url is not None:
-            return
+            return None
 
         # Now we're gonna do with the new handler
         webhook_picker = self.config.get("event_webhook")
@@ -357,7 +359,9 @@ class Bot(commands.AutoShardedBot):
             url = webhook_picker.get("event_webhook_url", "")
         try:
             self.logger.debug(f"Grabbed event webhook for event {event_name} from config")
-            return discord.Webhook.from_url(url, adapter=discord.AsyncWebhookAdapter(self.session))
+            w = discord.Webhook.from_url(url, adapter=discord.AsyncWebhookAdapter(self.session))
+            w._state = self._connection
+            return w
         except discord.InvalidArgument:
             self.logger.error(f"The webhook set in your config for the event {event_name} is not a valid Discord webhook")
             return None
