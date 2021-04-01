@@ -165,6 +165,12 @@ def main():
             create_file("cogs", "ping_command.py", content=config.cog_example.lstrip())
             create_file("run_bot.bat", content="py -m voxelbotutils run-bot .\n")
             create_file("run_bot.sh", content="python3 -m voxelbotutils run-bot .\n")
+            create_file("run_bot.py", content="""#!/usr/bin/env python
+import voxelbotutils.__main__
+parser = voxelbotutils.__main__.get_default_program_arguments()
+args = parser.parse_args(['run-bot', '.'])
+voxelbotutils.runner.run_bot(args)
+""")
             create_file(".gitignore", content="__pycache__/\nconfig/config.toml\nconfig/website.toml\n")
             create_file("requirements.txt", content="voxelbotutils\n")
             print("Created bot config file.")
