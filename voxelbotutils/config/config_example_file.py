@@ -7,6 +7,7 @@ default_prefix = "!"  # The prefix for the bot's commands
 support_guild_id = 0  # The ID for the support guild - used by `Bot.fetch_support_guild()`
 bot_support_role_id = 0  # The ID used to determine whether or not the user is part of the bot's support team - used for `.checks.is_bot_support()` check
 guild_settings_prefix_column = "prefix"  # Used if multiple bots connect to the same database and need to seperate their prefixes
+cached_messages = 1000  # The number of messages to cache within the bot
 
 # Event webhook information - some of the events (noted) will be sent to the specified url
 [event_webhook]

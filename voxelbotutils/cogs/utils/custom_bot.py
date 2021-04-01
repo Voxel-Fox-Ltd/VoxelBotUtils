@@ -101,10 +101,13 @@ class Bot(commands.AutoShardedBot):
         else:
             intents = discord.Intents(guilds=True, guild_messages=True, dm_messages=True)
 
+        # Get our max messages
+        cached_messages = self.config.get('cached_messages', 1000)
+
         # Run original
         super().__init__(
             command_prefix=get_prefix, activity=activity, status=status, case_insensitive=case_insensitive, intents=intents,
-            allowed_mentions=allowed_mentions, *args, **kwargs,
+            allowed_mentions=allowed_mentions, max_messages=cached_messages, *args, **kwargs,
         )
 
         # Set up our default guild settings
