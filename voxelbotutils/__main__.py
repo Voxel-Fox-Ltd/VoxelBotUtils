@@ -6,17 +6,17 @@ from .runner import run_bot, run_website
 
 
 def create_file(*path, content:str=None, throw_error:bool=False):
-    for index, i in enumerate(path[:-1]):
-        try:
-            os.mkdir(f"./{os.sep.join(path[:index + 1])}")
-        except FileExistsError:
-            pass
+    try:
+        os.makedirs(f"./{os.sep.join(path[:-1])}")
+    except FileExistsError:
+        pass
     try:
         with open(f"./{os.sep.join(path)}", "x") as a:
             a.write(content)
-    except FileExistsError as e:
-        if throw_error:
-            raise e
+    except FileExistsError:
+        # if throw_error:
+        #     raise
+        print(f"File {os.sep.join(path)} was not created due to already existings")
 
 
 # Parse arguments
