@@ -1,22 +1,20 @@
 import argparse
-import os
 import typing
+from pathlib import Path
 
 from .runner import run_bot, run_website
 
 
 def create_file(*path, content:str=None, throw_error:bool=False):
+    joined_path = Path("./").joinpath(*path)
+    joined_path.mkdir(parents=True, exist_ok=True)
     try:
-        os.makedirs(f"./{os.sep.join(path[:-1])}")
-    except FileExistsError:
-        pass
-    try:
-        with open(f"./{os.sep.join(path)}", "x") as a:
+        with open(joined_path, "x") as a:
             a.write(content)
     except FileExistsError:
         # if throw_error:
         #     raise
-        print(f"File {os.sep.join(path)} was not created due to already existings")
+        print(f"File {joined_path} was not created due to already existing.")
 
 
 # Parse arguments
@@ -185,6 +183,7 @@ voxelbotutils.runner.run_bot(args)
             base_config_file_text = config.web_config_file.lstrip()
         elif config_type == "bot":
             base_config_file_text = config.config_file.lstrip()
+        # todo: what happens if the option given isn't web or bot?
         base_config_file = toml.loads(base_config_file_text)
         try:
             with open(args.config_file) as a:
