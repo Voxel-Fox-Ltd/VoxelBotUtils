@@ -27,7 +27,7 @@ class BotStats(utils.Cog):
         Gives you the bot's invite link.
         """
 
-        oauth = self.bot.config['oauth']
+        oauth = self.bot.config['oauth'].copy()
         permissions = discord.Permissions.none()
         for i in oauth.pop('permissions', list()):
             setattr(permissions, i, True)
