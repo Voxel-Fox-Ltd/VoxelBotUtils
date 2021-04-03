@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import typing
 
@@ -47,7 +48,7 @@ class Command(commands.Command):
         bucket = self._buckets.get_bucket(ctx.message)
         return bucket.get_remaining_cooldown()
 
-    def _prepare_cooldowns(self, ctx:commands.Context):
+    async def _prepare_cooldowns(self, ctx:commands.Context):
         """
         Prepares all the cooldowns for the command to be called.
         """
@@ -56,7 +57,9 @@ class Command(commands.Command):
             current = ctx.message.created_at.replace(tzinfo=datetime.timezone.utc).timestamp()
             bucket = self._buckets.get_bucket(ctx.message, current)
             try:
-                bucket.predicate(ctx)
+                coro = bucket.predicate(ctx)
+                if asyncio.iscoroutine(coro) or asyncio.iscoroutinefunction(coro):
+                    await coro
             except AttributeError:
                 ctx.bot.logger.critical(f"Invalid cooldown set on command {ctx.invoked_with}")
                 raise commands.CheckFailure("Invalid cooldown set for this command")
@@ -67,6 +70,36 @@ class Command(commands.Command):
                 except AttributeError:
                     error = bucket.default_cooldown_error
                 raise error(bucket, retry_after)
+
+    async def prepare(self, ctx):
+        """
+        This is entirely stolen from the original method so I could make `prepare_cooldowns` an async
+        method.
+
+        https://github.com/Rapptz/discord.py/blob/a4d29e8cfdb91b5e120285b605e65be2c01f2c87/discord/ext/commands/core.py#L774-L795
+        """
+
+        ctx.command = self
+
+        if not await self.can_run(ctx):
+            raise CheckFailure('The check functions for command {0.qualified_name} failed.'.format(self))
+
+        if self._max_concurrency is not None:
+            await self._max_concurrency.acquire(ctx)
+
+        try:
+            if self.cooldown_after_parsing:
+                await self._parse_arguments(ctx)
+                await self._prepare_cooldowns(ctx)
+            else:
+                await self._prepare_cooldowns(ctx)
+                await self._parse_arguments(ctx)
+
+            await self.call_before_hooks(ctx)
+        except Exception:
+            if self._max_concurrency is not None:
+                await self._max_concurrency.release(ctx)
+            raise
 
     async def dispatch_error(self, ctx, error):
         """
