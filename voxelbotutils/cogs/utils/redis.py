@@ -194,7 +194,7 @@ class RedisChannelHandler(object):
                 else:
                     self.callback(data)
             except Exception as e:
-                self.logger.error(e)
+                self.connection.logger.error(e)
 
     async def unsubscribe(self):
         """
