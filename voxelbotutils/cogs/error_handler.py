@@ -142,7 +142,7 @@ class ErrorHandler(utils.Cog):
         ),
         (
             commands.BadArgument,
-            lambda ctx, error: str(error)
+            lambda ctx, error: str(error).format(ctx=ctx, error=error)
         ),
         (
             commands.TooManyArguments,
@@ -154,7 +154,7 @@ class ErrorHandler(utils.Cog):
         ),
         (
             commands.CheckFailure,
-            lambda ctx, error: str(error)
+            lambda ctx, error: str(error).format(ctx=ctx, error=error)
         ),
         (
             discord.Forbidden,
