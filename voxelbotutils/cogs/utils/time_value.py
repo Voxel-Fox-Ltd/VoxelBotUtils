@@ -85,6 +85,11 @@ class TimeValue(object):
             f"{self.seconds} seconds" if self.seconds > 0 else None,
         ] if i])
 
+        self.clean_days = ' '.join([i for i in [
+            f"{self.years} years" if self.years > 0 else None,
+            f"{self.days} days" if self.days > 0 else None,
+        ] if i]) or 'less than a day'
+
         if self.duration > self.MAX_SIZE:
             raise InvalidTimeDuration(self.clean)
 
