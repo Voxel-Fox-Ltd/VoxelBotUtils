@@ -192,7 +192,7 @@ class RedisChannelHandler(object):
                 if asyncio.iscoroutine(self.callback) or asyncio.iscoroutinefunction(self.callback):
                     asyncio.create_task(self.callback(self.cog, data))
                 else:
-                    self.callback(data)
+                    self.callback(self.cog, data)
             except Exception as e:
                 self.connection.logger.error(e)
 
