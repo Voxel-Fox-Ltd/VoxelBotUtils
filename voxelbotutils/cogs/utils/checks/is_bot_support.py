@@ -22,14 +22,16 @@ def is_bot_support():
     async def predicate(ctx:commands.Context):
         if ctx.author.id in ctx.bot.owner_ids:
             return True
-        supportguild = await ctx.bot.fetch_support_guild()
-        if supportguild is None:
+        support_guild = await ctx.bot.fetch_support_guild()
+        if support_guild is None:
             raise commands.NoPrivateMessage()
         try:
-            member = supportguild.get_member(ctx.author.id) or await supportguild.fetch_member(ctx.author.id)
-        except discord.HTTPException:
+            member = support_guild.get_member(ctx.author.id) or await support_guild.fetch_member(ctx.author.id)
+            if member is None:
+                raise AttributeError
+        except (discord.HTTPException, AttributeError):
             return NotBotSupport()
-        if ctx.bot.config.get("bot_support_role_id", 0) in member._roles or ctx.author.id in ctx.bot.owner_ids:
+        if ctx.bot.config.get("bot_support_role_id", None) in [i.id for i in member.roles] or ctx.author.id in ctx.bot.owner_ids:
             return True
         raise NotBotSupport()
     return commands.check(predicate)
