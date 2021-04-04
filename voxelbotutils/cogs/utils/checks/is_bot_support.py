@@ -22,7 +22,7 @@ def is_bot_support():
     async def predicate(ctx:commands.Context):
         if ctx.author.id in ctx.bot.owner_ids:
             return True
-        supportguild = await ctx.bot.fetch_support_guild() or ctx.guild
+        supportguild = await ctx.bot.fetch_support_guild()
         if supportguild is None:
             raise commands.NoPrivateMessage()
         try:
