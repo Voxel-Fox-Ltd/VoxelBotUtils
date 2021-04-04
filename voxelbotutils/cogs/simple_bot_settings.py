@@ -21,7 +21,7 @@ class BotSettings(utils.Cog):
         prefix_column = self.bot.config.get('guild_settings_prefix_column', 'prefix')
         if new_prefix is None:
             return await ctx.send(
-                f"The current prefix is `{self.bot.guild_settings[ctx.guild.id][prefix_column]}`.",
+                f"The current prefix is `{self.bot.guild_settings[ctx.guild.id][prefix_column] or self.bot.config['default_prefix']}`.",
                 allowed_mentions=discord.AllowedMentions.none(),
             )
 
