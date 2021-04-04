@@ -67,8 +67,10 @@ class Command(commands.Command):
             if retry_after:
                 try:
                     error = bucket.error
+                    if error is None:
+                        raise AttributeError
                 except AttributeError:
-                    error = bucket.default_cooldown_error
+                    error = getattr(bucket, 'default_cooldown_error', commands.CommandOnCooldown)
                 raise error(bucket, retry_after)
 
     async def prepare(self, ctx):

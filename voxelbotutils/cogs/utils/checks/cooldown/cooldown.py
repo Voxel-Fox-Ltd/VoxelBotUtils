@@ -101,7 +101,7 @@ class Cooldown(commands.Cooldown):
             mapping (CooldownMapping, optional): The cooldown mapping to be used.
         """
 
-        self.error = error or commands.CommandOnCooldown
+        self.error = error
         self.mapping = mapping
 
     def predicate(self, ctx) -> bool:
