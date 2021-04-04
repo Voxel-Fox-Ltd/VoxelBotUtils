@@ -18,8 +18,12 @@ class BotSettings(utils.Cog):
         """
 
         # See if the prefix was actually specified
+        prefix_column = self.bot.config.get('guild_settings_prefix_column', 'prefix')
         if new_prefix is None:
-            return await ctx.send(f"The current prefix is `{self.bot.guild_settings[ctx.guild.id][prefix_column]}`.")
+            return await ctx.send(
+                f"The current prefix is `{self.bot.guild_settings[ctx.guild.id][prefix_column]}`.",
+                allowed_mentions=discord.AllowedMentions.none(),
+            )
 
         # See if the user has permission
         try:
@@ -32,7 +36,6 @@ class BotSettings(utils.Cog):
             return await ctx.send("The maximum length a prefix can be is 30 characters.")
 
         # Store setting
-        prefix_column = self.bot.config.get('guild_settings_prefix_column', 'prefix')
         self.bot.guild_settings[ctx.guild.id][prefix_column] = new_prefix
         async with self.bot.database() as db:
             await db(
@@ -40,7 +43,10 @@ class BotSettings(utils.Cog):
                 ON CONFLICT (guild_id) DO UPDATE SET {prefix_column}=excluded.prefix""".format(prefix_column=prefix_column),
                 ctx.guild.id, new_prefix
             )
-        await ctx.send(f"My prefix has been updated to `{new_prefix}`.")
+        await ctx.send(
+            f"My prefix has been updated to `{new_prefix}`.",
+            allowed_mentions=discord.AllowedMentions.none(),
+        )
 
     @commands.command(cls=utils.Command, aliases=['follow'], add_slash_command=False)
     @commands.has_permissions(manage_guild=True, manage_channels=True)
