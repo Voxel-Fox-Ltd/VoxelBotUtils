@@ -21,6 +21,41 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
     Handles commands that only the owner should be able to run.
     """
 
+    def __init__(self, bot:utils.Bot):
+        super().__init__(bot)
+        if bot.config.get("redis", {}).get("enabled"):
+            self.redis_ev_listener.start()
+
+    def cog_unload(self):
+        if bot.config.get("redis", {}).get("enabled"):
+            self.redis_ev_listener.stop()
+
+    @utils.redis_channel_handler("RunRedisEval")
+    async def redis_ev_listener(self, payload):
+        """
+        Listens for the redis* commands being run and invokes them.
+        """
+
+        channel_id = payload['channel_id']
+        message_id = payload['message_id']
+        channel = self.bot.get_channel(channel_id) or await self.bot.fetch_channel(channel_id)
+        message = await channel.fetch_message(message_id)
+        new_content = f"<@{self.bot.user.id}> {payload['content']}"
+        message.content = new_content
+        await self.bot.process_commands(message)
+
+    @commands.command(cls=utils.Command)
+    @commands.is_owner()
+    @utils.checks.is_config_set("redis", "enabled")
+    @commands.bot_has_permissions(send_messages=True, attach_files=True, add_reactions=True)
+    async def redis(self, ctx:utils.Context, *, content:str):
+        """
+        Pings a command to be run over redis.
+        """
+
+        async with self.bot.redis() as re:
+            await re.publish("RunRedisEval", {'channel_id': ctx.channel.id, 'message_id': ctx.message.id, 'content': content})
+
     @commands.command(aliases=['src'], cls=utils.Command)
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, attach_files=True, add_reactions=True)
