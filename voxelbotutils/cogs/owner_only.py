@@ -56,6 +56,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         # And process
         ctx: utils.Context = await self.bot.get_context(message)
         ctx.message = message
+        ctx.guild = guild
+        ctx.channel = channel
+        ctx.author = author
+        ctx.me = bot
         await self.bot.invoke(ctx)
 
     @commands.command(cls=utils.Command)
