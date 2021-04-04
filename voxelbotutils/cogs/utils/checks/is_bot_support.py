@@ -28,9 +28,9 @@ def is_bot_support():
         try:
             member = support_guild.get_member(ctx.author.id) or await support_guild.fetch_member(ctx.author.id)
             if member is None:
-                raise AttributeError
+                raise AttributeError()
         except (discord.HTTPException, AttributeError):
-            return NotBotSupport()
+            raise NotBotSupport()
         if ctx.bot.config.get("bot_support_role_id", None) in [i.id for i in member.roles] or ctx.author.id in ctx.bot.owner_ids:
             return True
         raise NotBotSupport()
