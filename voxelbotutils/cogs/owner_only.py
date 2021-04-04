@@ -44,6 +44,8 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         channel: discord.TextChannel = await self.bot.fetch_channel(channel_id)
         guild: discord.Guild = await self.bot.fetch_guild(guild_id)
         author: discord.Member = await guild.fetch_member(author_id)
+        bot: discord.Member = await guild.fetch_member(self.bot.user.id)
+        guild._add_member(bot)
         message: discord.Message = await channel.fetch_message(message_id)
         message.author = author
 
@@ -52,7 +54,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         message.content = new_content
 
         # And process
-        await self.bot.process_commands(message)
+        ctx: utils.Context = await self.bot.get_context(message)
+        ctx.message = message
+        await self.bot.invoke(ctx)
 
     @commands.command(cls=utils.Command)
     @commands.is_owner()
