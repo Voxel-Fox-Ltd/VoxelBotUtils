@@ -143,7 +143,7 @@ class ConnectEvent(utils.Cog):
         application_id = await self.bot.get_application_id()
         await self.send_webhook(
             "guild_join",
-            f"Added to new guild - ``{guild.name}`` (`{guild.member_count}` members)",
+            f"Added to new guild - ``{guild.name}``/``{guild.id}`` (`{guild.member_count}` members)",
             f"{self.bot.user.name if self.bot.user else application_id} - Guild Join",
             "Sent webhook for on_guild_join event",
         )
@@ -158,9 +158,9 @@ class ConnectEvent(utils.Cog):
         if guild.me:
             try:
                 member_count = guild.member_count
-                text = f"Removed from guild - ``{guild.name}`` (`{member_count}` members; `{utils.TimeValue((dt.utcnow() - guild.me.joined_at).total_seconds()).clean_full}` guild duration)"
+                text = f"Removed from guild - ``{guild.name}``/``{guild.id}`` (`{member_count}` members; `{utils.TimeValue((dt.utcnow() - guild.me.joined_at).total_seconds()).clean_full}` guild duration)"
             except Exception:
-                text = f"Removed from guild - ``{guild.name}`` (`{utils.TimeValue((dt.utcnow() - guild.me.joined_at).total_seconds()).clean_full}` guild duration)"
+                text = f"Removed from guild - ``{guild.name}``/``{guild.id}`` (`{utils.TimeValue((dt.utcnow() - guild.me.joined_at).total_seconds()).clean_full}` guild duration)"
             await self.send_webhook(
                 "guild_remove",
                 text,
@@ -170,9 +170,9 @@ class ConnectEvent(utils.Cog):
         else:
             try:
                 member_count = guild.member_count
-                text = f"Removed from guild - ``{guild.name}`` (`{member_count}` members)"
+                text = f"Removed from guild - ``{guild.name}``/``{guild.id}`` (`{member_count}` members)"
             except Exception:
-                text = f"Removed from guild - ``{guild.name}``"
+                text = f"Removed from guild - ``{guild.name}``/``{guild.id}``"
             await self.send_webhook(
                 "guild_remove",
                 text,
