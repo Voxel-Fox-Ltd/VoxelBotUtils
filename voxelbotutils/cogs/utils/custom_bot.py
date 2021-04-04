@@ -764,7 +764,7 @@ class Bot(commands.AutoShardedBot):
 
         if ctx.command is None:
             return await super().invoke(ctx)
-        command_stats_name = ctx.command.qualified_name.replace(' ', ':')
+        command_stats_name = ctx.command.qualified_name.replace(' ', '_')
         command_stats_tags = {"command_name": command_stats_name}
         async with self.stats() as stats:
             stats.increment("discord.bot.commands", tags=command_stats_tags)
