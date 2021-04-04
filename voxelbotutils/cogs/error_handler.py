@@ -150,7 +150,7 @@ class ErrorHandler(utils.Cog):
         ),
         (
             discord.NotFound,
-            lambda ctx, error: None
+            lambda ctx, error: str(error).format(ctx=ctx, error=error)
         ),
         (
             commands.CheckFailure,
@@ -235,8 +235,10 @@ class ErrorHandler(utils.Cog):
 
         # See if it's in our list of common outputs
         output = None
+        error_found = False
         for error_types, function in self.COMMAND_ERROR_RESPONSES:
             if isinstance(error, error_types):
+                error_found = True
                 output = function(ctx, error)
                 break
 
@@ -251,6 +253,10 @@ class ErrorHandler(utils.Cog):
             except ValueError:
                 output = (output,)
             return await self.send_to_ctx_or_author(ctx, *output)
+
+        # Make sure not to send an error if it's "handled"
+        if error_found:
+            return
 
         # The output isn't a common output -- send them a plain error response
         try:
