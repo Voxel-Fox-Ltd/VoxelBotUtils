@@ -43,6 +43,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         author_id = payload['author_id']
         channel: discord.TextChannel = await self.bot.fetch_channel(channel_id)
         guild: discord.Guild = await self.bot.fetch_guild(guild_id)
+        channel.guild = guild
         author: discord.Member = await guild.fetch_member(author_id)
         bot: discord.Member = await guild.fetch_member(self.bot.user.id)
         guild._add_member(bot)
