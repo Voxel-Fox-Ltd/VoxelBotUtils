@@ -210,6 +210,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         result = str(result_raw)  # The result as a string
         if result_raw is None:
             return
+        filetype = "py"
         text = f'```py\n{result}\n```'
         if type(result_raw) == dict:
             try:
@@ -217,13 +218,14 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
             except Exception:
                 pass
             else:
+                filetype = "json"
                 text = f'```json\n{result}\n```'
         text += self.get_execution_time(end_time, start_time)
 
         # Output to chat
         if len(text) > 2000:
             try:
-                return await ctx.send(self.get_execution_time(end_time, start_time), file=discord.File(io.StringIO(result), filename='ev.txt'))
+                return await ctx.send(self.get_execution_time(end_time, start_time), file=discord.File(io.StringIO(result), filename=f"ev.{filetype}"))
             except discord.HTTPException:
                 return await ctx.send("I don't have permission to attach files here.", embeddify=False)
         else:
