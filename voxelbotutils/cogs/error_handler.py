@@ -260,7 +260,7 @@ class ErrorHandler(utils.Cog):
 
         # The output isn't a common output -- send them a plain error response
         try:
-            await ctx.send(f"`{str(error).strip()}`")
+            await ctx.send(f"`{str(error).strip()}`", allowed_mentions=discord.AllowedMentions.none())
         except (discord.Forbidden, discord.NotFound):
             pass
 
@@ -286,7 +286,13 @@ class ErrorHandler(utils.Cog):
             file_handle.seek(0)
             try:
                 file = discord.File(file_handle, filename="error_log.py")
-                await event_webhook.send(error_text, file=file, username=f"{self.bot.user.name} - Error", avatar_url=avatar_url)
+                await event_webhook.send(
+                    error_text,
+                    file=file,
+                    username=f"{self.bot.user.name} - Error",
+                    avatar_url=avatar_url,
+                    allowed_mentions=discord.AllowedMentions.none(),
+                )
             except discord.HTTPException as e:
                 self.logger.error(f"Failed to send webhook for event unhandled_error - {e}")
 

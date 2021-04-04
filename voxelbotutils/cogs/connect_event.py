@@ -20,7 +20,12 @@ class ConnectEvent(utils.Cog):
         except Exception:
             avatar_url = None
         try:
-            await event_webhook.send(discord.utils.escape_mentions(text), username=username, avatar_url=avatar_url)
+            await event_webhook.send(
+                discord.utils.escape_mentions(text),
+                username=username,
+                avatar_url=avatar_url,
+                allowed_mentions=discord.AllowedMentions.none(),
+            )
         except discord.HTTPException as e:
             self.logger.error(f"Failed to send webhook for event {event_name} - {e}")
             return False
