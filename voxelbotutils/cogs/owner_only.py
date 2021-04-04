@@ -40,10 +40,12 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         channel_id = payload['channel_id']
         message_id = payload['message_id']
         guild_id = payload['guild_id']
+        author_id = payload['author_id']
         channel: discord.TextChannel = await self.bot.fetch_channel(channel_id)
         guild: discord.Guild = await self.bot.fetch_guild(guild_id)
-        channel.guild = guild
+        author: discord.Member = await guild.fetch_member(author_id)
         message: discord.Message = await channel.fetch_message(message_id)
+        message.author = author
 
         # Fix up the content
         new_content = f"<@{self.bot.user.id}> {payload['content']}"
@@ -66,6 +68,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
                 'channel_id': ctx.channel.id,
                 'message_id': ctx.message.id,
                 'guild_id': ctx.guild.id,
+                'author_id': ctx.author.id,
                 'content': content,
             })
 
