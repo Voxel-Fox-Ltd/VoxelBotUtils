@@ -54,7 +54,10 @@ def get_prefix(bot, message:discord.Message):
 
     # Add the bot's managed role
     if message.guild:
-        managed_role = [i for i in message.guild.roles if i.tags and i.tags.bot_id == bot.user.id]
+        try:
+            managed_role = [i for i in message.guild.roles if i.tags and i.tags.bot_id == bot.user.id]
+        except Exception:
+            managed_role = None
         if managed_role:
             prefix.extend([f"<@&{managed_role[0].id}> "])
 
