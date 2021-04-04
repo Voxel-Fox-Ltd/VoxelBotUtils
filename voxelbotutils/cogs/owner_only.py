@@ -36,12 +36,20 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         Listens for the redis* commands being run and invokes them.
         """
 
+        # Get the info
         channel_id = payload['channel_id']
         message_id = payload['message_id']
-        channel = self.bot.get_channel(channel_id) or await self.bot.fetch_channel(channel_id)
-        message = await channel.fetch_message(message_id)
+        guild_id = payload['guild_id']
+        channel: discord.TextChannel = await self.bot.fetch_channel(channel_id)
+        guild: discord.Guild = await self.bot.fetch_guild(guild_id)
+        channel.guild = guild
+        message: discord.Message = await channel.fetch_message(message_id)
+
+        # Fix up the content
         new_content = f"<@{self.bot.user.id}> {payload['content']}"
         message.content = new_content
+
+        # And process
         await self.bot.process_commands(message)
 
     @commands.command(cls=utils.Command)
@@ -54,7 +62,12 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         """
 
         async with self.bot.redis() as re:
-            await re.publish("RunRedisEval", {'channel_id': ctx.channel.id, 'message_id': ctx.message.id, 'content': content})
+            await re.publish("RunRedisEval", {
+                'channel_id': ctx.channel.id,
+                'message_id': ctx.message.id,
+                'guild_id': ctx.guild.id,
+                'content': content,
+            })
 
     @commands.command(aliases=['src'], cls=utils.Command)
     @commands.is_owner()
