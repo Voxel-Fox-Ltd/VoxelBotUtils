@@ -110,7 +110,10 @@ class SlashCommandHandler(utils.Cog):
 
     @staticmethod
     def get_non_optional_type(annotation):
-        return annotation.__args__[0]
+        try:
+            return annotation.__args__[0]
+        except Exception:
+            return None
 
     async def get_slash_commands(self):
         """
