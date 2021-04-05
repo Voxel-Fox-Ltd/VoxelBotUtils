@@ -95,6 +95,9 @@ class ApplicationCommand(object):
             command.add_option(ApplicationCommandOption.from_data(option))
         return command
 
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.to_json() == other.to_json()
+
     def to_json(self):
         return {
             "name": self.name,

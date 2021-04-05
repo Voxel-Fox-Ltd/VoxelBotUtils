@@ -211,27 +211,36 @@ class SlashCommandHandler(utils.Cog):
 
         # Get the commands we want to add
         ctx.author = ctx.guild.me
-        application_command_list: typing.List[utils.interactions.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
-        current_commands = None
+        commands_to_add: typing.List[utils.interactions.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
+        command_names_to_add = [i.name for i in commands_to_add]
 
-        # Get the commands that currently exist
-        if guild:
-            current_commands = await self.bot.get_guild_application_commands(ctx.guild)
-        else:
-            current_commands = await self.bot.get_global_application_commands()
-
-        # See which commands we need to delete
-        to_remove_commands = [i for i in current_commands if i.name not in [o.name for o in application_command_list]]
-        for command in to_remove_commands:
-            if guild:
-                await self.bot.delete_guild_application_command(ctx.guild, command)
-            else:
-                await self.bot.delete_global_application_command(command)
-            self.logger.info(f"Removed slash command for {command.name}")
-
-        # Add the new commands
+        # Start typing because this takes a while
         async with ctx.typing():
-            for command in application_command_list:
+
+            # Get the commands that currently exist
+            if guild:
+                commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
+            else:
+                commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_global_application_commands()
+
+            # See which commands we need to delete
+            commands_to_remove = [i for i in commands_current if i.name not in command_names_to_add]
+            for command in commands_to_remove:
+                if guild:
+                    await self.bot.delete_guild_application_command(ctx.guild, command)
+                else:
+                    await self.bot.delete_global_application_command(command)
+                self.logger.info(f"Removed slash command for {command.name}")
+
+            # Loop through commands to add/update
+            for command in commands_to_add:
+
+                # See if we should bother updating it
+                if command in commands_current:
+                    self.logger.info(f"Didn't update slash command for {command.name}")
+                    continue
+
+                # Add command
                 try:
                     if guild:
                         await self.bot.add_guild_application_command(ctx.guild, command)
@@ -244,7 +253,7 @@ class SlashCommandHandler(utils.Cog):
                     await ctx.send(f"Failed to add `{command.name}` as a command - {e}", file=file)
 
         # And we done
-        await ctx.okay()
+        await ctx.reply("Done.")
 
 
 def setup(bot):
