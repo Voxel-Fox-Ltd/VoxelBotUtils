@@ -15,10 +15,16 @@ class SlashCommandHandler(utils.Cog):
     COMMAND_TYPE_MAPPER = {
         discord.User: utils.interactions.ApplicationCommandOptionType.USER,
         discord.Member: utils.interactions.ApplicationCommandOptionType.USER,
+        commands.UserConverter: utils.interactions.ApplicationCommandOptionType.USER,
+        commands.MemberConverter: utils.interactions.ApplicationCommandOptionType.USER,
         discord.TextChannel: utils.interactions.ApplicationCommandOptionType.CHANNEL,
+        commands.TextChannelConverter: utils.interactions.ApplicationCommandOptionType.CHANNEL,
         discord.VoiceChannel: utils.interactions.ApplicationCommandOptionType.CHANNEL,
+        commands.VoiceChannelConverter: utils.interactions.ApplicationCommandOptionType.CHANNEL,
         discord.CategoryChannel: utils.interactions.ApplicationCommandOptionType.CHANNEL,
+        commands.CategoryChannelConverter: utils.interactions.ApplicationCommandOptionType.CHANNEL,
         discord.Role: utils.interactions.ApplicationCommandOptionType.ROLE,
+        commands.RoleConverter: utils.interactions.ApplicationCommandOptionType.ROLE,
         str: utils.interactions.ApplicationCommandOptionType.STRING,
         int: utils.interactions.ApplicationCommandOptionType.INTEGER,
         utils.converters.UserID: utils.interactions.ApplicationCommandOptionType.USER,
@@ -140,17 +146,30 @@ class SlashCommandHandler(utils.Cog):
         # Go through its args
         for arg in command.clean_params.values():
             arg_type = None
+            safe_arg_type = None
             required = True
+
+            # See if it's one of our common types
             if arg.annotation in self.COMMAND_TYPE_MAPPER:
-                arg_type = arg.annotation
-            elif self.is_typing_optional(arg.annotation) and self.get_non_optional_type(arg.annotation) in self.COMMAND_TYPE_MAPPER:
-                arg_type = self.get_non_optional_type(arg.annotation)
-                required = False
-            if arg_type is None:
+                safe_arg_type = self.COMMAND_TYPE_MAPPER[arg.annotation]
+            elif self.get_non_optional_type(arg.annotation) in self.COMMAND_TYPE_MAPPER:
+                safe_arg_type = self.COMMAND_TYPE_MAPPER[self.get_non_optional_type(arg.annotation)]
+
+            # It isn't - let's see if it's a subclass
+            for i, o in self.COMMAND_TYPE_MAPPER.items():
+                if i in arg.annotation.mro()[1:]:
+                    safe_arg_type = o
+                    break
+
+            # Make sure the type exists
+            if safe_arg_type is None:
                 raise Exception(f"Couldn't add a convert {command.qualified_name} into a slash command")
-            safe_arg_type = self.COMMAND_TYPE_MAPPER[arg_type]
-            if arg.default is not inspect._empty:
+
+            # Say if it's optional
+            if arg.default is not inspect._empty or self.is_typing_optional(arg.annotation):
                 required = False
+
+            # Add option
             application_command.add_option(utils.interactions.ApplicationCommandOption(
                 name=arg.name,
                 description=f"The {arg.name} that you want to use for the {command.qualified_name} command.",
@@ -176,7 +195,7 @@ class SlashCommandHandler(utils.Cog):
             slash_commands.append(await self.convert_into_application_command(ctx, command))
         return slash_commands
 
-    @commands.command(cls=utils.Command)
+    @commands.command(aliases=['addslashcommands'], cls=utils.Command)
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)

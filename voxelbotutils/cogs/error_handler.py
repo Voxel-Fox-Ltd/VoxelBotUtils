@@ -162,7 +162,7 @@ class ErrorHandler(utils.Cog):
         ),
         (
             (discord.HTTPException, aiohttp.ClientOSError),
-            lambda ctx, error: f"Discord messed up there somewhere - do you mind trying again? I received a {error.status} error."
+            lambda ctx, error: "Either I or Discord messed up running this command. Please try again later."
         ),
 
         # Disabled because they're base classes for the subclasses above
