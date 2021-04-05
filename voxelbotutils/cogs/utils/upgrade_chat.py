@@ -277,7 +277,10 @@ class UpgradeChat(object):
         # Send the web request
         async with aiohttp.ClientSession() as session:
             async with session.get(self.BASE.format(endpoint="orders"), params=params, headers=headers) as r:
-                data = await r.json()
+                try:
+                    data = await r.json()
+                except Exception:
+                    return []
 
         # Deal with our response
         if data.get("data"):
