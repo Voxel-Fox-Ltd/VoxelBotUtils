@@ -129,7 +129,9 @@ class SlashCommandHandler(utils.Cog):
         self.commands = [utils.interactions.ApplicationCommand.from_data(i) for i in data]
         return self.commands
 
-    async def convert_into_application_command(self, ctx, command:typing.Union[utils.Command, utils.Group], *, is_option:bool=False) -> utils.interactions.ApplicationCommand:
+    async def convert_into_application_command(
+            self, ctx, command:typing.Union[utils.Command, utils.Group], *,
+            is_option:bool=False) -> utils.interactions.ApplicationCommand:
         """
         Convert a given Discord command into an application command.
         """
@@ -209,7 +211,7 @@ class SlashCommandHandler(utils.Cog):
 
         # Get the commands we want to add
         ctx.author = ctx.guild.me
-        application_command_list = await self.convert_all_into_application_command(ctx)
+        application_command_list: typing.List[utils.interactions.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
         current_commands = None
 
         # Get the commands that currently exist
@@ -225,6 +227,7 @@ class SlashCommandHandler(utils.Cog):
                 await self.bot.delete_guild_application_command(ctx.guild, command)
             else:
                 await self.bot.delete_global_application_command(command)
+            self.logger.info(f"Removed slash command for {command.name}")
 
         # Add the new commands
         async with ctx.typing():
@@ -234,6 +237,7 @@ class SlashCommandHandler(utils.Cog):
                         await self.bot.add_guild_application_command(ctx.guild, command)
                     else:
                         await self.bot.add_global_application_command(command)
+                    self.logger.info(f"Added slash command for {command.name}")
                 except discord.HTTPException as e:
                     file_handle = io.StringIO(json.dumps(command.to_json(), indent=4))
                     file = discord.File(file_handle, filename="command.json")
