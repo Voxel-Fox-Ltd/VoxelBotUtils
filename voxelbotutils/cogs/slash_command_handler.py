@@ -230,14 +230,17 @@ class SlashCommandHandler(utils.Cog):
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
-    async def addinteractioncommands(self, ctx, guild:bool):
+    async def addinteractioncommands(self, ctx, guild:bool, *, command_name:str=None):
         """
         Adds all of the bot's interaction commands to the global interaction handler.
         """
 
         # Get the commands we want to add
         ctx.author = ctx.guild.me
-        commands_to_add: typing.List[utils.interactions.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
+        if command_name:
+            commands_to_add = [await self.convert_all_into_application_command(ctx, self.bot.get_command(command_name))]
+        else:
+            commands_to_add: typing.List[utils.interactions.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
         command_names_to_add = [i.name for i in commands_to_add]
 
         # Start typing because this takes a while
@@ -278,6 +281,44 @@ class SlashCommandHandler(utils.Cog):
                     file_handle = io.StringIO(json.dumps(command.to_json(), indent=4))
                     file = discord.File(file_handle, filename="command.json")
                     await ctx.send(f"Failed to add `{command.name}` as a command - {e}", file=file)
+
+        # And we done
+        await ctx.reply("Done.", embeddify=False)
+
+    @commands.command(aliases=['removeslashcommands'], cls=utils.Command)
+    @commands.guild_only()
+    @commands.is_owner()
+    @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
+    async def removeinteractioncommands(self, ctx, guild:bool, *, command_name:str=None):
+        """
+        Removes all of the bot's interaction commands from the global interaction handler.
+        """
+
+        # Get the commands we want to add
+        ctx.author = ctx.guild.me
+        if command_name:
+            commands_to_add = [await self.convert_all_into_application_command(ctx, self.bot.get_command(command_name))]
+        else:
+            commands_to_add: typing.List[utils.interactions.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
+        command_names_to_add = [i.name for i in commands_to_add]
+
+        # Start typing because this takes a while
+        async with ctx.typing():
+
+            # Get the commands that currently exist
+            if guild:
+                commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
+            else:
+                commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_global_application_commands()
+            command_json_current = [i.to_json() for i in commands_current]
+
+            # See which commands we need to delete
+            for command in commands_current:
+                if guild:
+                    await self.bot.delete_guild_application_command(ctx.guild, command)
+                else:
+                    await self.bot.delete_global_application_command(command)
+                self.logger.info(f"Removed slash command for {command.name}")
 
         # And we done
         await ctx.reply("Done.", embeddify=False)
