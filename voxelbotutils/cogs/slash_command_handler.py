@@ -95,7 +95,8 @@ class SlashCommandHandler(utils.Cog):
             await self.bot.get_application_id(), payload["token"],
             adapter=discord.AsyncWebhookAdapter(self.bot.session),
         )
-        state = discord.webhook._PartialWebhookState(adapter, ctx._interaction_webhook, self.bot._get_state())
+        # state = discord.webhook._PartialWebhookState(adapter, ctx._interaction_webhook, self.bot._get_state())
+        state = self.bot._get_state()
         ctx._interaction_webhook._state = state
         ctx.command = self.bot.all_commands.get(invoker)
         ctx._sent_interaction_response = False
