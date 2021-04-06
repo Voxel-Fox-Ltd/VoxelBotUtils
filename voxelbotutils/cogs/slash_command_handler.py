@@ -25,8 +25,6 @@ class SlashCommandHandler(utils.Cog):
         commands.CategoryChannelConverter: utils.interactions.ApplicationCommandOptionType.CHANNEL,
         discord.Role: utils.interactions.ApplicationCommandOptionType.ROLE,
         commands.RoleConverter: utils.interactions.ApplicationCommandOptionType.ROLE,
-        str: utils.interactions.ApplicationCommandOptionType.STRING,
-        int: utils.interactions.ApplicationCommandOptionType.INTEGER,
         utils.converters.UserID: utils.interactions.ApplicationCommandOptionType.USER,
         utils.converters.ChannelID: utils.interactions.ApplicationCommandOptionType.CHANNEL,
         utils.converters.EnumConverter: utils.interactions.ApplicationCommandOptionType.STRING,
@@ -35,6 +33,8 @@ class SlashCommandHandler(utils.Cog):
         utils.converters.FilteredUser: utils.interactions.ApplicationCommandOptionType.USER,
         utils.converters.FilteredMember: utils.interactions.ApplicationCommandOptionType.USER,
         utils.TimeValue: utils.interactions.ApplicationCommandOptionType.STRING,
+        str: utils.interactions.ApplicationCommandOptionType.STRING,
+        int: utils.interactions.ApplicationCommandOptionType.INTEGER,
         inspect._empty: utils.interactions.ApplicationCommandOptionType.STRING,
     }
 
@@ -52,6 +52,7 @@ class SlashCommandHandler(utils.Cog):
         view = commands.view.StringView(
             f"<@{self.bot.user.id}> {payload['data']['name']} {' '.join([i['value'] for i in payload['data'].get('options', list())])}"
         )
+        self.logger.debug(f"Made up fake string for interaction command: {view.buffer}")
 
         # Get some objects we can use to make the interaction message
         guild = self.bot.get_guild(int(payload['guild_id']))
@@ -70,8 +71,8 @@ class SlashCommandHandler(utils.Cog):
         )
         ctx = cls(prefix=f"<@{self.bot.user.id}> ", view=view, bot=self.bot, message=fake_message)
         ctx.is_slash_command = True
-        ctx.original_author_id = int(payload['member']['user']['id'])
-        view.skip_string(f"<@{self.bot.user.id}> ")
+        ctx.original_author_id = member.id
+        view.skip_string(ctx.prefix)
         invoker = view.get_word()
 
         # Make it work
@@ -79,8 +80,8 @@ class SlashCommandHandler(utils.Cog):
         ctx._interaction_webhook = discord.Webhook.partial(
             await self.bot.get_application_id(), payload["token"],
             adapter=discord.AsyncWebhookAdapter(self.bot.session),
-            state=self.bot._get_state(),
         )
+        ctx._interaction_webhook._state = self.bot._get_state()
         ctx.command = self.bot.all_commands.get(invoker)
 
         # Send async data response
