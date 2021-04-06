@@ -11,16 +11,6 @@ from discord.ext import commands
 from . import utils
 
 
-class InteractionWebhookAdapter(discord.AsyncWebhookAdapter):
-
-    def execute_webhook(self, *, payload, **kwargs):
-        payload = {"type": 4, "data": payload}
-        kwargs.pop("wait", True)
-        v = super().execute_webhook(payload=payload, wait=False, **kwargs)
-        self._request_url = self._second_request_url
-        return v
-
-
 class SlashCommandHandler(utils.Cog):
 
     COMMAND_TYPE_MAPPER = {
@@ -88,16 +78,17 @@ class SlashCommandHandler(utils.Cog):
 
         # Make it work
         ctx.invoked_with = invoker
-        adapter = InteractionWebhookAdapter(self.bot.session)
-        adapter.logger = self.logger
-        adapter._request_url = "https://discord.com/api/v8/interactions/{id}/{token}/callback".format(id=payload["id"], token=payload["token"])
-        ctx._interaction_webhook = discord.Webhook.partial(
+        adapter = discord.AsyncWebhookAdapter(self.bot.session)
+        # adapter.logger = self.logger
+        # adapter._request_url = "https://discord.com/api/v8/interactions/{id}/{token}/callback".format(id=payload["id"], token=payload["token"])
+        webhook = discord.Webhook.partial(
             await self.bot.get_application_id(), payload["token"],
-            adapter=discord.AsyncWebhookAdapter(self.bot.session),
+            adapter=adapter,
         )
-        ctx._interaction_webhook.channel_id = int(payload['data']['guild_id'])
-        ctx._interaction_webhook.guild_id = int(payload['data']['guild_id'])
-        ctx._interaction_webhook._state = self.bot._connection
+        webhook._state = self.bot._connection
+        webhook.channel_id = int(payload['data']['guild_id'])
+        webhook.guild_id = int(payload['data']['guild_id'])
+        ctx._interaction_webhook = webhook
         ctx.command = self.bot.all_commands.get(invoker)
         ctx._sent_interaction_response = False
 
