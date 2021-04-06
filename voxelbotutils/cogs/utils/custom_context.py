@@ -14,7 +14,7 @@ class Context(commands.Context):
         super().__init__(*args, **kwargs)
         self.original_author_id = self.author.id
         self.is_slash_command = False
-        self._sent_interaction_response = True
+        self._send_interaction_response_task = None
 
     def get_context_message(
             self, content:str, embed:discord.Embed=None, file:discord.File=None, embeddify:bool=None, image_url:str=None,
@@ -107,8 +107,9 @@ class Context(commands.Context):
         Waits until the "_sent_interaction_response" attr is set to True before returning.
         """
 
-        while self._sent_interaction_response is False:
-            await asyncio.sleep(0.1)
+        if self._send_interaction_response_task:
+            await asyncio.wait_for(self._send_interaction_response_task)
+            self._send_interaction_response_task = None
 
     async def send(
             self, content:str=None, *args, embed:discord.Embed=None, file:discord.File=None, ignore_error:bool=False, embeddify:bool=None,

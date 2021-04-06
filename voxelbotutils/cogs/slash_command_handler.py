@@ -90,15 +90,14 @@ class SlashCommandHandler(utils.Cog):
         webhook.guild_id = int(payload['guild_id'])
         ctx._interaction_webhook = webhook
         ctx.command = self.bot.all_commands.get(invoker)
-        ctx._sent_interaction_response = False
 
         # Send async data response
         async def send_callback():
             self.logger.debug("Posting type 5 response for interaction command %s." % (str(payload)))
             url = "https://discord.com/api/v8/interactions/{id}/{token}/callback".format(id=payload["id"], token=payload["token"])
             await self.bot.session.post(url, json={"type": 5}, headers={"Authorization": f"Bot {self.bot.config['token']}"})
-            ctx._sent_interaction_response = True
-        self.bot.loop.create_task(send_callback())
+        callback_task = self.bot.loop.create_task(send_callback())
+        ctx._send_interaction_response_task = callback_task
 
         # Return context
         return ctx
