@@ -176,10 +176,11 @@ class SlashCommandHandler(utils.Cog):
                 safe_arg_type = self.COMMAND_TYPE_MAPPER[self.get_non_optional_type(arg.annotation)]
 
             # It isn't - let's see if it's a subclass
-            for i, o in self.COMMAND_TYPE_MAPPER.items():
-                if i in arg.annotation.mro()[1:]:
-                    safe_arg_type = o
-                    break
+            if safe_arg_type is None:
+                for i, o in self.COMMAND_TYPE_MAPPER.items():
+                    if i in arg.annotation.mro()[1:]:
+                        safe_arg_type = o
+                        break
 
             # Make sure the type exists
             if safe_arg_type is None:
@@ -237,6 +238,7 @@ class SlashCommandHandler(utils.Cog):
                 commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
             else:
                 commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_global_application_commands()
+            command_json_current = [i.to_json() for i in commands_current]
 
             # See which commands we need to delete
             commands_to_remove = [i for i in commands_current if i.name not in command_names_to_add]
@@ -251,7 +253,7 @@ class SlashCommandHandler(utils.Cog):
             for command in commands_to_add:
 
                 # See if we should bother updating it
-                if command in commands_current:
+                if command.to_json() in command_json_current:
                     self.logger.info(f"Didn't update slash command for {command.name}")
                     continue
 
