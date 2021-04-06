@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from ..interactions import InteractionContext
+# from ..interactions import InteractionContext
 
 
 class IsSlashCommand(commands.DisabledCommand):
@@ -24,8 +24,7 @@ def is_slash_command():
     """
 
     async def predicate(ctx):
-        v = isinstance(ctx, InteractionContext)
-        if v:
+        if ctx.is_slash_command:
             return True
         raise IsNotSlashCommand()
     return commands.check(predicate)
@@ -40,8 +39,7 @@ def is_not_slash_command():
     """
 
     async def predicate(ctx):
-        v = isinstance(ctx, InteractionContext)
-        if not v:
+        if not ctx.is_slash_command:
             return True
         raise IsSlashCommand()
     return commands.check(predicate)
