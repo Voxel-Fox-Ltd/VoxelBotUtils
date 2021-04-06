@@ -141,6 +141,8 @@ class Context(commands.Context):
         )
         try:
             location = getattr(self, '_interaction_webhook', super())
+            if isinstance(location, discord.Webhook):
+                kwargs['wait'] = True
             await self._wait_until_interaction_sent()
             return await location.send(content=content, *args, embed=embed, file=file, **kwargs)
         except Exception as e:
