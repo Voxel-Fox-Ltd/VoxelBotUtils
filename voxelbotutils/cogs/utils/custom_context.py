@@ -129,7 +129,8 @@ class Context(commands.Context):
             embeddify_file=embeddify_file,
         )
         try:
-            return await super().send(content=content, *args, embed=embed, file=file, **kwargs)
+            location = getattr(self, '_interaction_webhook', super())
+            return await location.send(content=content, *args, embed=embed, file=file, **kwargs)
         except Exception as e:
             if ignore_error:
                 return None

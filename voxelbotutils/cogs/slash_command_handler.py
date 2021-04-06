@@ -43,7 +43,7 @@ class SlashCommandHandler(utils.Cog):
         self.commands: typing.List[utils.interactions.ApplicationCommand] = None
         self.application_id = None
 
-    async def get_context_from_interaction(self, payload, *, cls=utils.interactions.InteractionContext):
+    async def get_context_from_interaction(self, payload, *, cls=utils.Context):
         """
         Make a context object from an interaction.
         """

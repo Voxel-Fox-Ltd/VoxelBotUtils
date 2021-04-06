@@ -126,15 +126,15 @@ class InteractionMessage(discord.Object):
                 self.author = found
 
 
-class InteractionContext(Context):
+# class InteractionContext(Context):
 
-    async def send(self, *args, **kwargs):
-        kwargs.pop("embeddify", False)
-        return await self._interaction_webhook.send(*args, wait=True, **kwargs)
+#     async def send(self, *args, **kwargs):
+#         kwargs.pop("embeddify", False)
+#         return await self._interaction_webhook.send(*args, wait=True, **kwargs)
 
-    @property
-    def typing(self):
-        return self.channel.typing
+#     @property
+#     def typing(self):
+#         return self.channel.typing
 
-    async def trigger_typing(self):
-        return await self.channel.trigger_typing()
+#     async def trigger_typing(self):
+#         return await self.channel.trigger_typing()
