@@ -118,6 +118,10 @@ class InteractionMessage(discord.Object):
         self.mentions = []
         self._handle_author(data['member']['user'])
 
+    @property
+    def edited_at(self):
+        return self.created_at
+
     def _handle_author(self, author):
         self.author = self._state.store_user(author)
         if isinstance(self.guild, discord.Guild):
