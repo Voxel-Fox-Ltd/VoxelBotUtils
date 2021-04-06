@@ -108,7 +108,8 @@ class Context(commands.Context):
         """
 
         if self._send_interaction_response_task:
-            await asyncio.wait_for(self._send_interaction_response_task)
+            while not self._send_interaction_response_task.done():
+                await asyncio.sleep(0.1)
             self._send_interaction_response_task = None
 
     async def send(
