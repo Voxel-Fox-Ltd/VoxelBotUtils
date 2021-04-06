@@ -150,9 +150,22 @@ class Group(commands.Group):
     def __init__(self, *args, **kwargs):
         """:meta private:"""
 
-        super().__init__(*args, cooldown_after_parsing=kwargs.get('cooldown_after_parsing', True), **kwargs)
-        self.ignore_checks_in_help = kwargs.get('ignore_checks_in_help', False)
+        super().__init__(*args, cooldown_after_parsing=kwargs.pop('cooldown_after_parsing', True), **kwargs)
+        self.ignore_checks_in_help: bool = kwargs.get('ignore_checks_in_help', False)
         self.locally_handled_errors: list = kwargs.get('locally_handled_errors', None)
+        self.add_slash_command: bool = kwargs.get('add_slash_command', True)
+
+        # Fix cooldown to be our custom type
+        cooldown = self._buckets._cooldown
+        if cooldown is None:
+            mapping = commands.CooldownMapping  # No mapping
+        elif getattr(cooldown, 'mapping', None) is not None:
+            mapping = cooldown.mapping  # There's a mapping in the instance
+        elif getattr(cooldown, 'default_mapping_class') is not None:
+            mapping = cooldown.default_mapping_class()  # Get the default mapping from the object
+        else:
+            raise ValueError("No mapping found for cooldown")
+        self._buckets = mapping(cooldown)  # Wrap the cooldown in the mapping
 
     async def can_run(self, ctx:commands.Context) -> bool:
         """
