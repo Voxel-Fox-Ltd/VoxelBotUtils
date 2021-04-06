@@ -69,14 +69,14 @@ class SlashCommandHandler(utils.Cog):
         guild = self.bot.get_guild(int(payload['guild_id']))
         channel = self.bot.get_channel(int(payload['channel_id']))
         member_data = payload['member']
-        member = discord.Member(data=member_data, guild=guild, state=self.bot._get_state())
+        member = discord.Member(data=member_data, guild=guild, state=self.bot._connection)
 
         # Make our fake message
         fake_message = utils.interactions.InteractionMessage(
             guild=guild,
             channel=channel,
             author=member,
-            state=self.bot._get_state(),
+            state=self.bot._connection,
             data=payload,
             content=view.buffer,
         )
@@ -95,9 +95,9 @@ class SlashCommandHandler(utils.Cog):
             await self.bot.get_application_id(), payload["token"],
             adapter=discord.AsyncWebhookAdapter(self.bot.session),
         )
-        # state = discord.webhook._PartialWebhookState(adapter, ctx._interaction_webhook, self.bot._get_state())
-        state = self.bot._get_state()
-        ctx._interaction_webhook._state = state
+        ctx._interaction_webhook.channel_id = int(payload['data']['guild_id'])
+        ctx._interaction_webhook.guild_id = int(payload['data']['guild_id'])
+        ctx._interaction_webhook._state = self.bot._connection
         ctx.command = self.bot.all_commands.get(invoker)
         ctx._sent_interaction_response = False
 
