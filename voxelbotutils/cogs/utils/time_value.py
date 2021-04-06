@@ -78,16 +78,16 @@ class TimeValue(object):
         ] if i])
 
         self.clean_full = ' '.join([i for i in [
-            f"{self.years} years" if self.years > 0 else None,
-            f"{self.days} days" if self.days > 0 else None,
-            f"{self.hours} hours" if self.hours > 0 else None,
-            f"{self.minutes} minutes" if self.minutes > 0 else None,
-            f"{self.seconds} seconds" if self.seconds > 0 else None,
+            f"{self.years} years" if self.years > 1 else f"{self.years} year" if self.years >= 1 else None,
+            f"{self.days} days" if self.days > 1 else f"{self.days} day" if self.days >= 1 else None,
+            f"{self.hours} hours" if self.hours > 1 else f"{self.hours} hour" if self.hours >= 1 else None,
+            f"{self.minutes} minutes" if self.minutes > 1 else f"{self.minutes} minute" if self.minutes >= 1 else None,
+            f"{self.seconds} seconds" if self.seconds > 1 else f"{self.seconds} second" if self.seconds >= 1 else None,
         ] if i])
 
         self.clean_days = ' '.join([i for i in [
-            f"{self.years} years" if self.years > 0 else None,
-            f"{self.days} days" if self.days > 0 else None,
+            f"{self.years} years" if self.years > 1 else f"{self.years} year" if self.years >= 1 else None,
+            f"{self.days} days" if self.days > 1 else f"{self.days} day" if self.days >= 1 else None,
         ] if i]) or 'less than a day'
 
         if self.duration > self.MAX_SIZE:
