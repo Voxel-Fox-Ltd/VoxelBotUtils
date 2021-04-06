@@ -3,6 +3,7 @@ import enum
 import io
 import json
 import inspect
+import asyncio
 
 import discord
 from discord.ext import commands
@@ -110,12 +111,13 @@ class SlashCommandHandler(utils.Cog):
             A callable that sends a type 5 response to the webhook callback
             """
 
+            await asyncio.sleep(2.5)
             if adapter._request_url != adapter._second_request_url:
                 self.logger.debug("Posting type 5 response for interaction command %s." % (str(payload)))
                 url = "https://discord.com/api/v8/interactions/{id}/{token}/callback".format(id=payload["id"], token=payload["token"])
                 await self.bot.session.post(url, json={"type": 5}, headers={"Authorization": f"Bot {self.bot.config['token']}"})
             ctx._interaction_webhook = post_send_webhook
-        self.bot.loop.call_later(2.5, waiter())  # Send a type 5 response after 2.5 seconds - after 3 seconds a token is invalidated
+        self.bot.loop.create_task(waiter())  # Send a type 5 response after 2.5 seconds - after 3 seconds a token is invalidated
 
         # Return context
         return ctx
