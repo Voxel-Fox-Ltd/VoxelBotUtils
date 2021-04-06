@@ -14,7 +14,7 @@ class InteractionWebhookAdapter(discord.AsyncWebhookAdapter):
 
     def execute_webhook(self, *, payload, **kwargs):
         payload = {"type": 4, "data": payload}
-        kwargs.pop("wait")
+        kwargs.pop("wait", True)
         v = super().execute_webhook(payload=payload, wait=True, **kwargs)
         self._request_url = self._second_request_url
         return v
