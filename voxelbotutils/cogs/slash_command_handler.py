@@ -86,7 +86,7 @@ class SlashCommandHandler(utils.Cog):
             adapter=adapter,
         )
         webhook._state = self.bot._connection
-        webhook.channel_id = int(payload['guild_id'])
+        webhook.channel_id = int(payload['channel_id'])
         webhook.guild_id = int(payload['guild_id'])
         ctx._interaction_webhook = webhook
         ctx.command = self.bot.all_commands.get(invoker)
