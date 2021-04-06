@@ -44,12 +44,26 @@ class SlashCommandHandler(utils.Cog):
         self.application_id = None
 
     async def get_context_from_interaction(self, payload, *, cls=utils.interactions.InteractionContext):
-        # Make a context
-        view = commands.view.StringView(f"<@{self.bot.user.id}> {payload['data']['name']} {' '.join([i['value'] for i in payload['data'].get('options', list())])}")
+        """
+        Make a context object from an interaction.
+        """
+
+        # Make a string view
+        view = commands.view.StringView(
+            f"<@{self.bot.user.id}> {payload['data']['name']} {' '.join([i['value'] for i in payload['data'].get('options', list())])}"
+        )
+
+        # Get some objects we can use to make the interaction message
+        guild = self.bot.get_guild(int(payload['guild_id']))
+        channel = self.bot.get_channel(int(payload['channel_id']))
+        member_data = payload['member']
+        member = discord.Member(data=member_data, guild=guild, state=self.bot._get_state())
+
+        # Make our fake message
         fake_message = utils.interactions.InteractionMessage(
-            guild=self.bot.get_guild(int(payload['guild_id'])),
-            channel=self.bot.get_channel(int(payload['channel_id'])),
-            author=self.bot.get_guild(int(payload['guild_id'])).get_member(int(payload['member']['user']['id'])),
+            guild=guild,
+            channel=channel,
+            author=member,
             state=self.bot._get_state(),
             data=payload,
             content=view.buffer,
@@ -65,7 +79,7 @@ class SlashCommandHandler(utils.Cog):
         ctx._interaction_webhook = discord.Webhook.partial(
             await self.bot.get_application_id(), payload["token"],
             adapter=discord.AsyncWebhookAdapter(self.bot.session),
-            state=self.bot._connection,
+            state=self.bot._get_state(),
         )
         ctx.command = self.bot.all_commands.get(invoker)
 
@@ -253,7 +267,7 @@ class SlashCommandHandler(utils.Cog):
                     await ctx.send(f"Failed to add `{command.name}` as a command - {e}", file=file)
 
         # And we done
-        await ctx.reply("Done.")
+        await ctx.reply("Done.", embeddify=False)
 
 
 def setup(bot):
