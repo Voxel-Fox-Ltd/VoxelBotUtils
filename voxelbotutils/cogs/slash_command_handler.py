@@ -238,7 +238,7 @@ class SlashCommandHandler(utils.Cog):
         # Get the commands we want to add
         ctx.author = ctx.guild.me
         if command_name:
-            commands_to_add = [await self.convert_all_into_application_command(ctx, self.bot.get_command(command_name))]
+            commands_to_add = [await self.convert_into_application_command(ctx, self.bot.get_command(command_name))]
         else:
             commands_to_add: typing.List[utils.interactions.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
         command_names_to_add = [i.name for i in commands_to_add]
@@ -297,7 +297,7 @@ class SlashCommandHandler(utils.Cog):
         # Get the commands we want to add
         ctx.author = ctx.guild.me
         if command_name:
-            commands_to_add = [await self.convert_all_into_application_command(ctx, self.bot.get_command(command_name))]
+            commands_to_add = [await self.convert_into_application_command(ctx, self.bot.get_command(command_name))]
         else:
             commands_to_add: typing.List[utils.interactions.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
         command_names_to_add = [i.name for i in commands_to_add]
