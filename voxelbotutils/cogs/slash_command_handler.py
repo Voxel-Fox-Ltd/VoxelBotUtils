@@ -94,7 +94,8 @@ class SlashCommandHandler(utils.Cog):
             await self.bot.get_application_id(), payload["token"],
             adapter=adapter,
         )
-        ctx._interaction_webhook._state = self.bot._get_state()
+        state = discord.webhook._PartialWebhookState(adapter, ctx._interaction_webhook, self.bot._get_state())
+        ctx._interaction_webhook._state = state
         ctx.command = self.bot.all_commands.get(invoker)
 
         # Set up our afterwards webhook
@@ -102,7 +103,8 @@ class SlashCommandHandler(utils.Cog):
             await self.bot.get_application_id(), payload["token"],
             adapter=discord.AsyncWebhookAdapter(self.bot.session),
         )
-        post_send_webhook._state = self.bot._get_state()
+        post_send_state = discord.webhook._PartialWebhookState(post_send_webhook._adapter, post_send_webhook, self.bot._get_state())
+        post_send_webhook._state = post_send_state
         adapter._second_request_url = post_send_webhook.url
 
         # Send async data response

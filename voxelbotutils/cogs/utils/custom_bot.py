@@ -342,7 +342,7 @@ class Bot(commands.AutoShardedBot):
             try:
                 self.logger.debug("Grabbed event webhook from config")
                 w = discord.Webhook.from_url(url, adapter=discord.AsyncWebhookAdapter(self.session))
-                w._state = self._get_state()
+                w._state = discord.webhook._PartialWebhookState(w._adapter, w, self._get_state())
                 return w
             except discord.InvalidArgument:
                 self.logger.error("The webhook set in your config is not a valid Discord webhook")
@@ -366,7 +366,7 @@ class Bot(commands.AutoShardedBot):
         try:
             self.logger.debug(f"Grabbed event webhook for event {event_name} from config")
             w = discord.Webhook.from_url(url, adapter=discord.AsyncWebhookAdapter(self.session))
-            w._state = self._get_state()
+            w._state = discord.webhook._PartialWebhookState(w._adapter, w, self._get_state())
             return w
         except discord.InvalidArgument:
             self.logger.error(f"The webhook set in your config for the event {event_name} is not a valid Discord webhook")
