@@ -1,4 +1,5 @@
 import typing
+import asyncio
 import random
 
 import discord
@@ -13,6 +14,7 @@ class Context(commands.Context):
         super().__init__(*args, **kwargs)
         self.original_author_id = self.author.id
         self.is_slash_command = False
+        self._sent_interaction_response = True
 
     def get_context_message(
             self, content:str, embed:discord.Embed=None, file:discord.File=None, embeddify:bool=None, image_url:str=None,
@@ -100,6 +102,14 @@ class Context(commands.Context):
 
         return self.bot.set_footer_from_config(embed)
 
+    async def _wait_until_interaction_sent(self):
+        """
+        Waits until the "_sent_interaction_response" attr is set to True before returning.
+        """
+
+        while self._sent_interaction_response is False:
+            await asyncio.sleep(0.1)
+
     async def send(
             self, content:str=None, *args, embed:discord.Embed=None, file:discord.File=None, ignore_error:bool=False, embeddify:bool=None,
             embeddify_file:bool=True, image_url:str=None, **kwargs) -> typing.Optional[discord.Message]:
@@ -130,6 +140,7 @@ class Context(commands.Context):
         )
         try:
             location = getattr(self, '_interaction_webhook', super())
+            await self._wait_until_interaction_sent()
             return await location.send(content=content, *args, embed=embed, file=file, **kwargs)
         except Exception as e:
             if ignore_error:

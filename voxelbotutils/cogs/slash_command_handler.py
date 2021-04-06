@@ -16,7 +16,7 @@ class InteractionWebhookAdapter(discord.AsyncWebhookAdapter):
     def execute_webhook(self, *, payload, **kwargs):
         payload = {"type": 4, "data": payload}
         kwargs.pop("wait", True)
-        v = super().execute_webhook(payload=payload, wait=True, **kwargs)
+        v = super().execute_webhook(payload=payload, wait=False, **kwargs)
         self._request_url = self._second_request_url
         return v
 
@@ -89,37 +89,24 @@ class SlashCommandHandler(utils.Cog):
         # Make it work
         ctx.invoked_with = invoker
         adapter = InteractionWebhookAdapter(self.bot.session)
+        adapter.logger = self.logger
         adapter._request_url = "https://discord.com/api/v8/interactions/{id}/{token}/callback".format(id=payload["id"], token=payload["token"])
         ctx._interaction_webhook = discord.Webhook.partial(
             await self.bot.get_application_id(), payload["token"],
-            adapter=adapter,
+            adapter=discord.AsyncWebhookAdapter(self.bot.session),
         )
         state = discord.webhook._PartialWebhookState(adapter, ctx._interaction_webhook, self.bot._get_state())
         ctx._interaction_webhook._state = state
         ctx.command = self.bot.all_commands.get(invoker)
-
-        # Set up our afterwards webhook
-        post_send_webhook = discord.Webhook.partial(
-            await self.bot.get_application_id(), payload["token"],
-            adapter=discord.AsyncWebhookAdapter(self.bot.session),
-        )
-        post_send_state = discord.webhook._PartialWebhookState(post_send_webhook._adapter, post_send_webhook, self.bot._get_state())
-        post_send_webhook._state = post_send_state
-        adapter._second_request_url = post_send_webhook.url
+        ctx._sent_interaction_response = False
 
         # Send async data response
-        async def waiter():
-            """
-            A callable that sends a type 5 response to the webhook callback
-            """
-
-            await asyncio.sleep(2.5)
-            if adapter._request_url != adapter._second_request_url:
-                self.logger.debug("Posting type 5 response for interaction command %s." % (str(payload)))
-                url = "https://discord.com/api/v8/interactions/{id}/{token}/callback".format(id=payload["id"], token=payload["token"])
-                await self.bot.session.post(url, json={"type": 5}, headers={"Authorization": f"Bot {self.bot.config['token']}"})
-            ctx._interaction_webhook = post_send_webhook
-        self.bot.loop.create_task(waiter())  # Send a type 5 response after 2.5 seconds - after 3 seconds a token is invalidated
+        async def send_callback():
+            self.logger.debug("Posting type 5 response for interaction command %s." % (str(payload)))
+            url = "https://discord.com/api/v8/interactions/{id}/{token}/callback".format(id=payload["id"], token=payload["token"])
+            await self.bot.session.post(url, json={"type": 5}, headers={"Authorization": f"Bot {self.bot.config['token']}"})
+            ctx._sent_interaction_response = True
+        self.bot.loop.create_task(send_callback())
 
         # Return context
         return ctx
