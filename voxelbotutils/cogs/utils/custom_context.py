@@ -2,6 +2,7 @@ import typing
 import asyncio
 import random
 
+import aiohttp
 import discord
 from discord.ext import commands
 
@@ -149,6 +150,8 @@ class Context(commands.Context):
         except Exception as e:
             if ignore_error:
                 return None
+            if isinstance(e, aiohttp.ClientOSError):
+                raise discord.HTTPException(500, str(e))
             raise e
 
     async def reply(self, *args, **kwargs):
