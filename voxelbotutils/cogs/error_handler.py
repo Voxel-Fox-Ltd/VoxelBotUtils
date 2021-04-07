@@ -223,7 +223,8 @@ class ErrorHandler(utils.Cog):
         # Set up some errors that the owners are able to bypass
         owner_reinvoke_errors = (
             commands.MissingRole, commands.MissingAnyRole, commands.MissingPermissions,
-            commands.CommandOnCooldown, commands.DisabledCommand,
+            commands.CommandOnCooldown, commands.DisabledCommand, utils.errors.CheckFailure,
+            utils.errors.IsNotUpgradeChatSubscriber, utils.errors.IsNotVoter, utils.errors.NotBotSupport,
         )
         if isinstance(error, owner_reinvoke_errors) and ctx.original_author_id in self.bot.owner_ids:
             return await ctx.reinvoke()
