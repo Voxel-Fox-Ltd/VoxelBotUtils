@@ -60,6 +60,7 @@ class AnalyticsLogHandler(logging.NullHandler):
         },
     }
     MESSAGE_DECONSTRUCTOR = re.compile(r"^(?P<method>.+) https://discord(:?app)?.(?:com|gg)/api/v\d(?P<endpoint>.+) with (?P<payload>.+) has returned (?P<status>\d+)$")
+    WEBHOOK_MESSAGE_DECONSTRUCTOR = re.compile(r"^Webhook ID (?P<webhookid>.+) with (?P<method>.+) https://discord(:?app)?.(?:com|gg)/api/v\d(?P<endpoint>.+) has returned status code (?P<status>\d+)$")
 
     def __init__(self, bot, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -80,13 +81,18 @@ class AnalyticsLogHandler(logging.NullHandler):
 
     async def log_response(self, message):
         match = self.MESSAGE_DECONSTRUCTOR.search(message)
-        if match is None:
-            return
+        if match is not None:
+            return await self.log_resopnse_increment("discord.http", match)
+        match = self.WEBHOOK_MESSAGE_DECONSTRUCTOR.search(message)
+        if match is not None:
+            return await self.log_response_increment("discord.webhook", match)
+
+    async def log_message_increment(self, increment, match):
         event_name = self.get_event_name(match.group("method"), match.group("endpoint"))
         if event_name is None:
             return
         async with self.bot.stats() as stats:
-            stats.increment("discord.http", tags={
+            stats.increment(increment, tags={
                 "endpoint": event_name,
                 "status_code": int(match.group("status")),
                 "status_code_class": match.group("status")[0] + "x" * (len(match.group("status")) - 1)
