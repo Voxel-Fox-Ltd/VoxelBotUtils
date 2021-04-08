@@ -1,3 +1,4 @@
+import re as _re
 from discord.ext import commands as _dpy_commands
 
 from . import checks, converters, errors, interactions
@@ -33,3 +34,10 @@ def subcommand_group(*args, **kwargs):
     if 'case_insensitive' not in kwargs:
         kwargs['case_insensitive'] = True
     return _dpy_commands.group(*args, cls=SubcommandGroup, **kwargs)
+
+
+_html_minifier = _re.compile(r"\s{2,}|\n")
+
+
+def minify_html(text:str) -> str:
+    return _html_minifier.sub("", text)
