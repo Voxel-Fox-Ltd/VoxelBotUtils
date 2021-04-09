@@ -5,7 +5,7 @@ import logging
 class AnalyticsLogHandler(logging.NullHandler):
     """Woah sometimes it's nice to send stats requests as well"""
 
-    EVENT_NAMES = {
+    HTTP_EVENT_NAMES = {
         "GET": {
             re.compile(r'/users/([0-9]{15,23})$', re.IGNORECASE): 'get_user',
             re.compile(r'/users/@me/guilds$', re.IGNORECASE): 'get_guilds',
@@ -59,6 +59,15 @@ class AnalyticsLogHandler(logging.NullHandler):
             re.compile(r'/guilds/([0-9]{15,23})/roles$', re.IGNORECASE): 'move_role_position',
         },
     }
+    WEBHOOK_EVENT_NAMES = {
+        "POST": {
+            re.compile(r'/webhooks/([0-9]{16,23})/([a-zA-Z0-9\-_]+?)$', re.IGNORECASE): 'send_message',
+            re.compile(r'/webhooks/([0-9]{16,23})/([a-zA-Z0-9\-_]+?)/messages/([0-9]{16,23})$', re.IGNORECASE): 'edit_message',
+        },
+        "DELETE": {
+            re.compile(r'/webhooks/([0-9]{16,23})/([a-zA-Z0-9\-_]+?)/messages/([0-9]{16,23})$', re.IGNORECASE): 'delete_message',
+        },
+    }
     MESSAGE_DECONSTRUCTOR = re.compile(r"^(?P<method>.+) https://discord(:?app)?.(?:com|gg)/api/v\d(?P<endpoint>.+) with (?P<payload>.+) has returned (?P<status>\d+)$")
     WEBHOOK_MESSAGE_DECONSTRUCTOR = re.compile(r"^Webhook ID (?P<webhookid>.+) with (?P<method>.+) https://discord(:?app)?.(?:com|gg)/api/v\d(?P<endpoint>.+) has returned status code (?P<status>\d+)$")
 
@@ -67,8 +76,13 @@ class AnalyticsLogHandler(logging.NullHandler):
         self.bot = bot
 
     @classmethod
-    def get_event_name(cls, method:str, url:str) -> str:
-        possible_endpoints = cls.EVENT_NAMES.get(method.upper(), {})
+    def get_http_event_name(cls, increment:str, method:str, url:str) -> str:
+        if increment == "discord.http":
+            possible_endpoints = cls.HTTP_EVENT_NAMES.get(method.upper(), {})
+        elif increment == "discord.webhook":
+            possible_endpoints = cls.WEBHOOK_EVENT_NAMES.get(method.upper(), {})
+        else:
+            return None
         for endpoint_regex, event_name in possible_endpoints.items():
             if endpoint_regex.search(str(url)):
                 return event_name
@@ -88,7 +102,7 @@ class AnalyticsLogHandler(logging.NullHandler):
             return await self.log_message_increment("discord.webhook", match)
 
     async def log_message_increment(self, increment, match):
-        event_name = self.get_event_name(match.group("method"), match.group("endpoint"))
+        event_name = self.get_http_event_name(increment, match.group("method"), match.group("endpoint"))
         if event_name is None:
             return
         async with self.bot.stats() as stats:
