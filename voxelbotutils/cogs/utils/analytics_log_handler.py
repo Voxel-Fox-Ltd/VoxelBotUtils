@@ -82,10 +82,10 @@ class AnalyticsLogHandler(logging.NullHandler):
     async def log_response(self, message):
         match = self.MESSAGE_DECONSTRUCTOR.search(message)
         if match is not None:
-            return await self.log_resopnse_increment("discord.http", match)
+            return await self.log_message_increment("discord.http", match)
         match = self.WEBHOOK_MESSAGE_DECONSTRUCTOR.search(message)
         if match is not None:
-            return await self.log_response_increment("discord.webhook", match)
+            return await self.log_message_increment("discord.webhook", match)
 
     async def log_message_increment(self, increment, match):
         event_name = self.get_event_name(match.group("method"), match.group("endpoint"))
