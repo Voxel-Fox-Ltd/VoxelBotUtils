@@ -32,11 +32,11 @@ def get_prefix(bot, message:discord.Message):
 
     # Default prefix for DMs
     if message.guild is None:
-        prefix = bot.config['default_prefix']
+        prefix = bot.config.get('default_prefix')
 
     # Custom prefix or default prefix
     else:
-        prefix = bot.guild_settings[message.guild.id][bot.config.get('guild_settings_prefix_column', 'prefix')] or bot.config['default_prefix']
+        prefix = bot.guild_settings[message.guild.id][bot.config.get('guild_settings_prefix_column', 'prefix')] or bot.config.get('default_prefix')
 
     # Fuck iOS devices
     if type(prefix) is not list and prefix in ["'", "‘"]:
@@ -46,10 +46,10 @@ def get_prefix(bot, message:discord.Message):
     prefix = [prefix] if isinstance(prefix, str) else prefix
 
     # Make it slightly more case insensitive
-    prefix.extend([i.title() for i in prefix])
+    prefix.extend([i.title() for i in prefix if i])
 
     # Add spaces for words
-    possible_word_prefixes = [i for i in prefix if not any([o in i for o in string.punctuation])]
+    possible_word_prefixes = [i for i in prefix if i and not any([o in i for o in string.punctuation])]
     prefix.extend([f"{i.strip()} " for i in possible_word_prefixes])
 
     # Add the bot's managed role
