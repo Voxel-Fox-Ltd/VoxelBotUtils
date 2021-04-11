@@ -6,6 +6,7 @@ from discord.ext.commands import Cog as OriginalCog
 
 from .custom_bot import Bot
 from .database import DatabaseConnection
+from .redis import RedisChannelHandler
 
 
 class Cog(OriginalCog):
@@ -26,6 +27,15 @@ class Cog(OriginalCog):
             self.logger = bot_logger.getChild(logger_name)
         else:
             self.logger = bot_logger.getChild(self.get_logger_name())
+
+        # Add the cog instance to redis channel handlers
+        for attr in dir(self):
+            try:
+                item = getattr(self, attr)
+            except AttributeError:
+                continue
+            if isinstance(item, RedisChannelHandler):
+                item.cog = self
 
     def get_logger_name(self, *prefixes, sep:str='.') -> str:
         """
