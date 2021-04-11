@@ -27,6 +27,9 @@ class Embed(discord.Embed):
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
+    def __eq__(self, other):
+        return isinstance(other, discord.Embed) and self.to_dict() == other.to_dict()
+
     def use_random_colour(self) -> 'Embed':
         """
         Sets the colour for the embed to a random one.
@@ -178,3 +181,11 @@ class Embed(discord.Embed):
             if field.name == key:
                 return self.edit_field_by_index(index, name=name, value=value, inline=inline)
         raise KeyError("Key not found in embed")
+
+    @classmethod
+    def from_native(cls, embed:discord.Embed):
+        """
+        Upgrade a native embed into a VBU embed.
+        """
+
+        return cls.from_dict(embed.to_dict())
