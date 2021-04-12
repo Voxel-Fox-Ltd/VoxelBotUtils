@@ -1,10 +1,14 @@
 import typing
 import asyncio
 import random
+import collections
 
 import aiohttp
 import discord
 from discord.ext import commands
+
+
+FakeResponse = collections.namedtuple("FakeResponse", ["status", "reason"])
 
 
 class Context(commands.Context):
@@ -115,7 +119,8 @@ class Context(commands.Context):
             if 200 <= result.status < 300:
                 pass
             else:
-                raise discord.HTTPException(500, "Failed to create webhook.")
+                fr = FakeResponse(status=500, reason="Failed to create webhook.")
+                raise discord.HTTPException(fr, fr.reason)
             self._send_interaction_response_task = None
 
     async def send(
@@ -156,7 +161,8 @@ class Context(commands.Context):
             if ignore_error:
                 return None
             if isinstance(e, aiohttp.ClientOSError):
-                raise discord.HTTPException(500, str(e))
+                fr = FakeResponse(status=500, reason=str(e))
+                raise discord.HTTPException(fr, fr.reason)
             raise e
 
     async def reply(self, *args, **kwargs):
