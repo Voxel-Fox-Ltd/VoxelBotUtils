@@ -45,7 +45,10 @@ class DatabaseConnection(object):
             DatabaseConnection: The connection that was aquired from the pool.
         """
 
-        conn = await cls.pool.acquire()
+        try:
+            conn = await cls.pool.acquire()
+        except AttributeError:
+            raise Exception("Could not open a database connection as the database is disabled in your config.")
         v = cls(conn)
         v.is_active = True
         return v
