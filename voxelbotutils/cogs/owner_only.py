@@ -300,11 +300,13 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         """
 
         # Get a list of cogs to reload
-        cog_name = 'cogs.' + '_'.join([i for i in cog_name])
-        if cog_name == 'cogs.*':
+        cog_name = '_'.join([i for i in cog_name])
+        if cog_name == '*':
             cog_list = [i for i in self.bot.get_extensions() if i.startswith('cogs.')]
-        else:
+        elif '.' in cog_name:
             cog_list = [cog_name]
+        else:
+            cog_list = ['cogs.' + cog_name]
 
         # Reload our cogs
         reloaded_cogs = []
@@ -322,10 +324,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
                 await ctx.send(f"Error loading cog `{cog}`: ```py\n{traceback.format_exc()}```")
 
         # Output which cogs have been reloaded
-        if len(cog_list) == 1:
-            await ctx.send(f"Reloaded: `{cog_list[0]}`")
+        if len(reloaded_cogs) == 1:
+            await ctx.send(f"Reloaded: `{reloaded_cogs[0]}`")
         else:
-            await ctx.send("Reloaded:\n`" + "`\n`".join(cog_list) + "`")
+            await ctx.send("Reloaded:\n`" + "`\n`".join(reloaded_cogs) + "`")
         return
 
     @commands.command(cls=utils.Command, aliases=['downloadcog', 'dlcog', 'download', 'dl', 'stealcog'])
