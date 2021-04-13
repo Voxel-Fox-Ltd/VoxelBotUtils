@@ -130,7 +130,9 @@ class Analytics(utils.Cog):
 
     @utils.Cog.listener()
     async def on_socket_raw_send(self, payload:dict):
-        """A raw socket response message send Discord"""
+        """
+        A raw socket response message send Discord.
+        """
 
         # Get the event opcode
         try:
@@ -159,13 +161,33 @@ class Analytics(utils.Cog):
 
     @utils.Cog.listener()
     async def on_socket_response(self, payload:dict):
-        """A raw socket response message from Discord"""
+        """
+        A raw socket response message from Discord.
+        """
 
         async with self.bot.stats() as stats:
             try:
                 stats.increment("discord.gateway.receive", tags={"event_name": payload['t']})
             except KeyError:
                 pass
+
+    @utils.Cog.listener()
+    async def on_guild_join(self, guild:discord.Guild):
+        """
+        Pinged when the bot joins a guild
+        """
+
+        async with self.bot.stats() as stats:
+            stats.increment("discord.stats.guild_joins")
+
+    @utils.Cog.listener()
+    async def on_guild_remove(self, guild:discord.Guild):
+        """
+        Pinged when the bot joins a guild
+        """
+
+        async with self.bot.stats() as stats:
+            stats.decrement("discord.stats.guild_joins")
 
 
 def setup(bot:utils.Bot):
