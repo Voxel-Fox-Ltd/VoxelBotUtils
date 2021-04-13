@@ -86,12 +86,12 @@ class PresenceAutoUpdater(utils.Cog):
         self.logger.debug(f"GET {self.TWITCH_USERNAME_URL} returned {data}")
         try:
             self.twitch_user_ids[username] = data["data"][0]["id"]
-        except KeyError as e:
+        except KeyError:
             self.logger.error(f"Failed to get Twitch username from search - {data.get('message') or 'no error message'}")
-            raise e
-        except IndexError as e:
+            raise
+        except IndexError:
             self.logger.error("Invalid Twitch username set in config")
-            raise e
+            raise
         return self.twitch_user_ids[username]
 
     @tasks.loop(seconds=30)
