@@ -38,7 +38,7 @@ class ErrorHandler(utils.Cog):
         ),
         (
             commands.NSFWChannelRequired,
-            lambda ctx, error: "This command can't be run in a non-NSFW channel."
+            lambda ctx, error: f"You can only run this command in channels set as NSFW. {'You can set channels as NSFW in their channel settings.' if ctx.channel.permissions_for(ctx.author).manage_channels else ''}"
         ),
         (
             utils.errors.BotNotInGuild,
