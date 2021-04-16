@@ -92,7 +92,8 @@ class BotSettings(utils.Cog):
 
         # Output message
         try:
-            await self.bot.wait_for("message", check=lambda m: m.content == f"{channel.guild.name} #{channel.name}", timeout=5)
+            check = lambda m: m.guild and m.guild.id == ctx.guild.id and m.content.endswith(f"#{channel.name}")
+            await self.bot.wait_for("message", check=check, timeout=5)
         except asyncio.TimeoutError:
             pass
         try:
