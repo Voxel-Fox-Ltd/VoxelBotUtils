@@ -249,8 +249,8 @@ class Bot(commands.AutoShardedBot):
             return None
 
     def get_invite_link(
-            self, *, client_id:int=None, scope:str='bot', response_type:str=None, redirect_uri:str=None, guild_id:int=None,
-            permissions:discord.Permissions=discord.Permissions.none(), enabled:bool=None) -> str:
+            self, *, base:str=None, client_id:int=None, scope:str='bot', response_type:str=None, redirect_uri:str=None,
+            guild_id:int=None, permissions:discord.Permissions=discord.Permissions.none(), enabled:bool=None) -> str:
         """
         Gets the invite link for the bot, with permissions all set properly.
 
@@ -286,7 +286,7 @@ class Bot(commands.AutoShardedBot):
             data['response_type'] = response_type
 
         # Return url
-        return 'https://discord.com/oauth2/authorize?' + urlencode(data)
+        return f"{base or 'https://discord.com/oauth2/authorize'}?" + urlencode(data)
 
     @property
     def user_agent(self):

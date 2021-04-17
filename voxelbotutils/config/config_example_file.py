@@ -63,7 +63,10 @@ cached_messages = 1000  # The number of messages to cache within the bot
 
 # Used to generate the invite link
 [oauth]
-    enabled = false
+    enabled = false  # Whether or not an invite link is enabled via the !invite command
+    base = ""  # The base url
+    response_type = ""  # The response type given to the redirect URI
+    redirect_uri = ""  # Where the user should be redirected to upon authorizing
     client_id = ""  #  If not set then will use the bot's ID, which is correct as of around 2017 I think
     scope = "bot"  # The scope that will be generated with the invite link, space seperated (applications.commands for slash)
     permissions = []  # args here are passed directly to discord.Permissions as True
