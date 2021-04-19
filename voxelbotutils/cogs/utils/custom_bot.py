@@ -105,7 +105,7 @@ class Bot(commands.AutoShardedBot):
             intents = discord.Intents(guilds=True, guild_messages=True, dm_messages=True)
 
         # Get our max messages
-        cached_messages = self.config.get('cached_messages', 1000)
+        cached_messages = self.config.get('cached_messages', 1_000)
 
         # Run original
         super().__init__(
@@ -144,13 +144,13 @@ class Bot(commands.AutoShardedBot):
         self._upgrade_chat = None
 
         # Store the startup method so I can see if it completed successfully
-        self.startup_time = dt.now()
         self.startup_method = None
 
         # Regardless of whether we start statsd or not, I want to add the log handler
         handler = AnalyticsLogHandler(self)
         handler.setLevel(logging.DEBUG)
         logging.getLogger('discord.http').addHandler(handler)
+        logging.getLogger('discord.webhook').addHandler(handler)
 
         # Here's the storage for cached stuff
         self.guild_settings = collections.defaultdict(lambda: copy.deepcopy(self.DEFAULT_GUILD_SETTINGS))
@@ -491,13 +491,13 @@ class Bot(commands.AutoShardedBot):
             return v
         return v[0]
 
-    async def create_message_log(self, messages:typing.List[discord.Message]) -> str:
+    async def create_message_log(self, messages:typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]) -> str:
         """
         Creates and returns an HTML log of all of the messages provided. This is an API method, and may return an asyncio HTTP
         error.
 
         Args:
-            messages (typing.List[discord.Message]): The messages you want to create into a log.
+            messages (typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]): The messages you want to create into a log.
 
         Returns:
             str: The HTML for a log file.
@@ -619,17 +619,6 @@ class Bot(commands.AutoShardedBot):
             return self.config['embed']['enabled']
         except Exception:
             return False
-
-    def get_uptime(self) -> float:
-        """
-        Gets the uptime of the bot in seconds.
-        Uptime is a bit of a misnomer, since it starts when the instance is created, but yknow that's close enough.
-
-        Returns:
-            float: The total seconds that the bot's instance has been created for.
-        """
-
-        return (dt.now() - self.startup_time).total_seconds()
 
     async def get_context(self, message, *, cls=Context) -> 'discord.ext.commands.Context':
         """
