@@ -6,15 +6,14 @@ from .runner import run_bot, run_website
 
 
 def create_file(*path, content:str=None, throw_error:bool=False):
-    joined_path = pathlib.Path("./").joinpath(*path[:-1])
-    joined_path.mkdir(parents=True, exist_ok=True)
+    joined_folder_path = pathlib.Path("./").joinpath(*path[:-1])
+    joined_file_path = pathlib.Path("./").joinpath(*path[])
+    joined_folder_path.mkdir(parents=True, exist_ok=True)
     try:
-        with open(joined_path, "x") as a:
+        with open(joined_file_path, "x") as a:
             a.write(content)
     except FileExistsError:
-        # if throw_error:
-        #     raise
-        print(f"File {joined_path} was not created due to already existing.")
+        print(f"File {joined_file_path} was not created as one already exists.")
 
 
 # Parse arguments
