@@ -1,12 +1,12 @@
 import argparse
 import typing
-from pathlib import Path
+import pathlib
 
 from .runner import run_bot, run_website
 
 
 def create_file(*path, content:str=None, throw_error:bool=False):
-    joined_path = Path("./").joinpath(*path)
+    joined_path = pathlib.Path("./").joinpath(*path[:-1])
     joined_path.mkdir(parents=True, exist_ok=True)
     try:
         with open(joined_path, "x") as a:
