@@ -9,6 +9,7 @@ from urllib.parse import urlencode
 import string
 import platform
 import random
+import json
 
 import aiohttp
 import discord
@@ -724,7 +725,13 @@ class Bot(commands.AutoShardedBot):
     async def login(self, token:str=None, *args, **kwargs):
         """:meta private:"""
 
-        await super().login(token or self.config['token'], *args, **kwargs)
+        try:
+            await super().login(token or self.config['token'], *args, **kwargs)
+        except discord.HTTPException as e:
+            if str(e).startswith("429 Too Many Requests"):
+                headers = {i: o for i, o in dict(e.response.headers).items() if "rate" in i.lower()}
+                self.logger.critical(f"Cloudflare rate limit reached - {json.dumps(headers)}")
+            raise
 
     async def start(self, token:str=None, *args, **kwargs):
         """:meta private:"""
