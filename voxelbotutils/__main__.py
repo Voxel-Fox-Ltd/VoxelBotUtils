@@ -7,7 +7,7 @@ from .runner import run_bot, run_website
 
 def create_file(*path, content:str=None, throw_error:bool=False):
     joined_folder_path = pathlib.Path("./").joinpath(*path[:-1])
-    joined_file_path = pathlib.Path("./").joinpath(*path[])
+    joined_file_path = pathlib.Path("./").joinpath(*path)
     joined_folder_path.mkdir(parents=True, exist_ok=True)
     try:
         with open(joined_file_path, "x") as a:
