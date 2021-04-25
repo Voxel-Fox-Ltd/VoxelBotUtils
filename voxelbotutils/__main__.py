@@ -2,6 +2,8 @@ import argparse
 import typing
 import pathlib
 
+import discord
+
 from .runner import run_bot, run_website
 
 
@@ -95,6 +97,18 @@ def check_config_value(base_config_key:typing.List[str], base_config_value:typin
         for i, o in base_config_value.items():
             check_config_value(base_config_key + [i], o, compare_config_value.get(i))
     return
+
+
+def mess_with_default_dpy():
+    """
+    We want to fuck up the default D.py library to add things that are important to us, but we don't want to
+    fork the whole thing.
+    """
+
+    async def add_reactions_callback(message, *reactions):
+        for r in reactions:
+            await message.add_reaction(r)
+    discord.Message.add_reactions = add_reactions_callback
 
 
 def main():
@@ -195,6 +209,7 @@ voxelbotutils.runner.run_bot(args)
         exit(1)
 
     # Run things
+    mess_with_default_dpy()
     elif args.subcommand == "run-bot":
         run_bot(args)
     elif args.subcommand == "run-website":
