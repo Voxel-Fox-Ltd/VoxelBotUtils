@@ -203,8 +203,25 @@ class Help(utils.Cog):
     def cog_unload(self):
         self.bot.help_command = self._original_help_command
 
+    @utils.command(hidden=True)
+    async def commands(self, ctx: utils.Context, *args):
+        """
+        An alias for help.
+        """
+
+        return await ctx.send_help(*args)
+
+    @utils.command(hidden=True)
+    @commands.has_permissions(manage_messages=True)
+    async def channelhelp(self, ctx: utils.Context, *args):
+        """
+        An alias for help that outputs into the current channel.
+        """
+
+        return await ctx.send_help(*args)
+
 
 def setup(bot:utils.Bot):
     x = Help(bot)
     bot.add_cog(x)
-    bot.get_command("help").update(aliases=["commands", "channelhelp"])
+    bot.get_command("help")
