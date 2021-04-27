@@ -210,7 +210,7 @@ voxelbotutils.runner.run_bot(args)
 
     # Run things
     mess_with_default_dpy()
-    elif args.subcommand == "run-bot":
+    if args.subcommand == "run-bot":
         run_bot(args)
     elif args.subcommand == "run-website":
         run_website(args)
