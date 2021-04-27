@@ -203,8 +203,8 @@ class Help(utils.Cog):
     def cog_unload(self):
         self.bot.help_command = self._original_help_command
 
-    @utils.command(hidden=True)
-    async def commands(self, ctx: utils.Context, *args):
+    @utils.command(name="commands", hidden=True)
+    async def _commands(self, ctx: utils.Context, *args):
         """
         An alias for help.
         """
