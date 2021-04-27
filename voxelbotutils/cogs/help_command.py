@@ -185,6 +185,8 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         Return where we want the bot to send the embed to
         """
 
+        if self.context.invoked_with.lower() == "channelhelp" and self.context.channel.permissions_for(self.context.author).manage_messages:
+            return self.context.channel
         if self.context.bot.config.get("help_command", {}).get("dm_help", True):
             return self.context.author
         return self.context.channel
@@ -205,3 +207,4 @@ class Help(utils.Cog):
 def setup(bot:utils.Bot):
     x = Help(bot)
     bot.add_cog(x)
+    bot.get_command("help").update(aliases=["commands", "channelhelp"])
