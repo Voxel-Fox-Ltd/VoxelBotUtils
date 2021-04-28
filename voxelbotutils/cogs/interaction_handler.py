@@ -91,8 +91,8 @@ class InteractionHandler(utils.Cog):
 
         # See if it was a clicked component
         elif payload['d']['type'] == 3:
-            # Construct button object
-            # Dispatch button click event
+            clicked_button_payload = utils.interactions.components.ButtonInteractionPayload.from_payload(payload['d'])
+            self.bot.dispatch("button_click", clicked_button_payload)
             return
 
         # Something that we're unable to handle

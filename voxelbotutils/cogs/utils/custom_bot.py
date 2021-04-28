@@ -157,6 +157,16 @@ class Bot(commands.AutoShardedBot):
         self.guild_settings = collections.defaultdict(lambda: copy.deepcopy(self.DEFAULT_GUILD_SETTINGS))
         self.user_settings = collections.defaultdict(lambda: copy.deepcopy(self.DEFAULT_USER_SETTINGS))
 
+        # Mess with the default D.py message send and edit methods
+        async def send_button_msg_prop(messagable, *args, **kwargs) -> discord.Message:
+            return await self._send_button_message(messagable, *args, **kwargs)
+
+        async def edit_button_msg_prop(*args, **kwargs):
+            return await self._edit_button_message(*args, **kwargs)
+
+        Messageable.send = send_button_msg_prop
+        Message.edit = edit_button_msg_prop
+
     async def startup(self):
         """
         Clears all the bot's caches and fills them from a DB read
@@ -768,3 +778,165 @@ class Bot(commands.AutoShardedBot):
         async with self.stats() as stats:
             stats.increment("discord.bot.commands", tags=command_stats_tags)
         return await super().invoke(ctx)
+
+    async def _send_button_message(
+            self, messagable, content=None, *, tts=False, embed=None, file=None,
+            files=None, delete_after=None, nonce=None, allowed_mentions=None,
+            reference=None, mention_author=None, components=None):
+        """
+        An alternative send method so that we can add components to messages.
+        """
+
+        # Work out where we want to send to
+        channel = await self._get_channel()
+        state = self._connection
+
+        # Work out the main content
+        content = str(content) if content is not None else None
+        if embed is not None:
+            embed = embed.to_dict()
+
+        # Work out our allowed mentions
+        if allowed_mentions is not None:
+            if state.allowed_mentions is not None:
+                allowed_mentions = state.allowed_mentions.merge(allowed_mentions).to_dict()
+            else:
+                allowed_mentions = allowed_mentions.to_dict()
+        else:
+            allowed_mentions = state.allowed_mentions and state.allowed_mentions.to_dict()
+
+        # Work out our message references
+        if mention_author is not None:
+            allowed_mentions = allowed_mentions or AllowedMentions().to_dict()
+            allowed_mentions['replied_user'] = bool(mention_author)
+        if reference is not None:
+            try:
+                reference = reference.to_message_reference_dict()
+            except AttributeError:
+                raise InvalidArgument('reference parameter must be Message or MessageReference') from None
+
+        # Make sure the files are valid
+        if file is not None and files is not None:
+            raise InvalidArgument('cannot pass both file and files parameter to send()')
+        if file:
+            files = [file]
+        if len(files) > 10:
+            raise InvalidArgument('files parameter must be a list of up to 10 elements')
+        elif not all(isinstance(file, File) for file in files):
+            raise InvalidArgument('files parameter must be a list of File')
+
+        # Get our playload data
+        r = Route('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
+        payload = {}
+        if content:
+            payload['content'] = content
+        if tts:
+            payload['tts'] = True
+        if embed:
+            payload['embed'] = embed
+        if nonce:
+            payload['nonce'] = nonce
+        if allowed_mentions:
+            payload['allowed_mentions'] = allowed_mentions
+        if message_reference:
+            payload['message_reference'] = message_reference
+
+        # Send the HTTP requests
+        if files is not None:
+            form = []
+            form.append({'name': 'payload_json', 'value': discord.utils.to_json(payload)})
+            try:
+                if len(files) == 1:
+                    file = files[0]
+                    form.append(
+                        {
+                            'name': 'file', 'value': file.fp,
+                            'filename': file.filename, 'content_type': 'application/octet-stream',
+                        }
+                    )
+                else:
+                    for index, file in enumerate(files):
+                        form.append(
+                            {
+                                'name': f'file{index}', 'value': file.fp,
+                                'filename': file.filename, 'content_type': 'application/octet-stream',
+                            }
+                        )
+                response_data = self.bot.http.request(r, form=form, files=files)
+            finally:
+                for f in files:
+                    f.close()
+        else:
+            response_data = self.bot.http.request(r, json=payload)
+
+        ret = state.create_message(channel=messagable, data=response_data)
+        if delete_after is not None:
+            await ret.delete(delay=delete_after)
+        return ret
+
+    async def _edit_button_message(self, message, **fields):
+        """
+        An alternative message edit method so we can edit components onto messages.
+        """
+
+        try:
+            content = fields['content']
+        except KeyError:
+            pass
+        else:
+            if content is not None:
+                fields['content'] = str(content)
+
+        try:
+            embed = fields['embed']
+        except KeyError:
+            pass
+        else:
+            if embed is not None:
+                fields['embed'] = embed.to_dict()
+
+        try:
+            components = fields['components']
+        except KeyError:
+            pass
+        else:
+            if components is not None:
+                fields['components'] = components.to_dict()
+
+        try:
+            suppress = fields.pop('suppress')
+        except KeyError:
+            pass
+        else:
+            flags = discord.message.MessageFlags._from_value(message.flags.value)
+            flags.suppress_embeds = suppress
+            fields['flags'] = flags.value
+
+        delete_after = fields.pop('delete_after', None)
+
+        try:
+            allowed_mentions = fields.pop('allowed_mentions')
+        except KeyError:
+            if message._state.allowed_mentions is not None:
+                fields['allowed_mentions'] = message._state.allowed_mentions.to_dict()
+        else:
+            if allowed_mentions is not None:
+                if message._state.allowed_mentions is not None:
+                    allowed_mentions = message._state.allowed_mentions.merge(allowed_mentions).to_dict()
+                else:
+                    allowed_mentions = allowed_mentions.to_dict()
+                fields['allowed_mentions'] = allowed_mentions
+
+        try:
+            attachments = fields.pop('attachments')
+        except KeyError:
+            pass
+        else:
+            fields['attachments'] = [a.to_dict() for a in attachments]
+
+        if fields:
+            data = await message._state.http.edit_message(message.channel.id, message.id, **fields)
+            message._update(data)
+
+        if delete_after is not None:
+            await message.delete(delay=delete_after)
