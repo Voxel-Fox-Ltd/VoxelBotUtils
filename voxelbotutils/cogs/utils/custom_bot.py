@@ -789,7 +789,7 @@ class Bot(commands.AutoShardedBot):
         """
 
         # Work out where we want to send to
-        channel = await self._get_channel()
+        channel = await messagable._get_channel()
         state = self._connection
 
         # Work out the main content
