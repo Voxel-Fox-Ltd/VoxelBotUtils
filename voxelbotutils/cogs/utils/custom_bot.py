@@ -821,9 +821,9 @@ class Bot(commands.AutoShardedBot):
             raise InvalidArgument('cannot pass both file and files parameter to send()')
         if file:
             files = [file]
-        if len(files) > 10:
+        if files and len(files) > 10:
             raise InvalidArgument('files parameter must be a list of up to 10 elements')
-        elif not all(isinstance(file, File) for file in files):
+        elif files and not all(isinstance(file, File) for file in files):
             raise InvalidArgument('files parameter must be a list of File')
 
         # Get our playload data
