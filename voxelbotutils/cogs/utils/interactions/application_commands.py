@@ -3,7 +3,7 @@ import typing
 
 import discord
 
-from .custom_context import Context
+from ..custom_context import Context
 
 
 class ApplicationCommandOptionType(enum.IntEnum):
@@ -128,17 +128,3 @@ class InteractionMessage(discord.Object):
             found = self.guild.get_member(self.author.id)
             if found is not None:
                 self.author = found
-
-
-# class InteractionContext(Context):
-
-#     async def send(self, *args, **kwargs):
-#         kwargs.pop("embeddify", False)
-#         return await self._interaction_webhook.send(*args, wait=True, **kwargs)
-
-#     @property
-#     def typing(self):
-#         return self.channel.typing
-
-#     async def trigger_typing(self):
-#         return await self.channel.trigger_typing()
