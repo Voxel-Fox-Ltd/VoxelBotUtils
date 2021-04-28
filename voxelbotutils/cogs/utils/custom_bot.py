@@ -15,6 +15,7 @@ import aiohttp
 import discord
 import toml
 from discord.ext import commands
+from discord.abc import Messageable
 
 from .custom_context import Context
 from .database import DatabaseConnection
@@ -165,7 +166,7 @@ class Bot(commands.AutoShardedBot):
             return await self._edit_button_message(*args, **kwargs)
 
         Messageable.send = send_button_msg_prop
-        Message.edit = edit_button_msg_prop
+        discord.Message.edit = edit_button_msg_prop
 
     async def startup(self):
         """
