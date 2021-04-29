@@ -827,7 +827,7 @@ class Bot(commands.AutoShardedBot):
             raise InvalidArgument('files parameter must be a list of File')
 
         # Get our playload data
-        r = RouteV8('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
+        r = discord.http.Route('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
         payload = {}
         if content:
             payload['content'] = content
@@ -839,8 +839,8 @@ class Bot(commands.AutoShardedBot):
             payload['nonce'] = nonce
         if allowed_mentions:
             payload['allowed_mentions'] = allowed_mentions
-        if message_reference:
-            payload['message_reference'] = message_reference
+        if reference:
+            payload['message_reference'] = reference
 
         # Send the HTTP requests
         if files is not None:
