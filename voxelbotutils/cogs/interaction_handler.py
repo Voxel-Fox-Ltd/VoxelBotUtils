@@ -97,7 +97,7 @@ class InteractionHandler(utils.Cog):
                     id=payload["id"], token=payload["token"],
                 )
                 return await self.bot.session.post(
-                    url, json={"type": 5},
+                    url, json={"type": 6},
                     headers={"Authorization": f"Bot {self.bot.config['token']}"},
                 )
             callback_task = self.bot.loop.create_task(send_callback())
