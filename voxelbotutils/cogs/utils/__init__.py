@@ -18,6 +18,7 @@ from .upgrade_chat import (
     UpgradeChatItemType, UpgradeChatPaymentProcessor, UpgradeChatProductType,
 )
 from .paginator import Paginator
+from .interactions.components import *
 
 
 def command(*args, **kwargs):
