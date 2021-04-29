@@ -40,7 +40,6 @@ class Button(object):
         v = {
             "type": 2,
             "label": self.label,
-            "custom_id": self.custom_id,
             "style": self.style.value,
             "disabled": self.disabled,
         }
@@ -61,6 +60,8 @@ class Button(object):
                 })
         if self.url:
             v.update({"url": self.url})
+        else:
+            v.update({"custom_id": self.custom_id})
         return v
 
     @classmethod
