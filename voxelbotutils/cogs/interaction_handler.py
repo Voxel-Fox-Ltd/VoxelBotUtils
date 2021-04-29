@@ -101,7 +101,7 @@ class InteractionHandler(utils.Cog):
                     headers={"Authorization": f"Bot {self.bot.config['token']}"},
                 )
             callback_task = self.bot.loop.create_task(send_callback())
-            clicked_button_payload = utils.interactions.components.ButtonInteractionPayload.from_payload(payload['d'])
+            clicked_button_payload = utils.interactions.components.ButtonInteractionPayload.from_payload(payload['d'], self.bot._connection)
             self.bot.dispatch("button_click", clicked_button_payload)
             return
 

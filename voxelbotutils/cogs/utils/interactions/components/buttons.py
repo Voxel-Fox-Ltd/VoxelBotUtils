@@ -4,6 +4,8 @@ import uuid
 
 import discord
 
+from ..interaction_messageable import InteractionMessageable
+
 
 class ButtonStyle(enum.IntEnum):
     PRIMARY = 1  # A blurple button
@@ -85,12 +87,19 @@ class Button(object):
         )
 
 
-class ButtonInteractionPayload(object):
+class ButtonInteractionPayload(InteractionMessageable):
 
-    __slots__ = ("button", "user_id", "message_id", "guild_id", "channel_id",)
+    __slots__ = ("button", "user", "message", "guild", "channel", "_state", "data")
+
+    async def _get_channel(self):
+        """
+        Get the (id, token) pair that's used to send to the webhook necessary.
+        """
+
+        return (self._state.application_id, self.data['token'],)
 
     @classmethod
-    def from_payload(cls, data):
+    def from_payload(cls, data, state):
         """
         Construct a response from the gateway payload.
         """
@@ -109,9 +118,16 @@ class ButtonInteractionPayload(object):
 
         # Make the response
         v = cls()
+        v.data = data
+        v._state = state
         v.button = clicked_button_object
-        v.user_id = int(data['member']['user']['id'])
-        v.channel_id = int(data['channel_id'])
-        v.guild_id = int(data['guild_id'])
-        v.message_id = int(data['message']['id'])
+        channel, guild = state._get_guild_channel(data)
+        v.channel = channel
+        v.guild = guild
+        v.message = discord.Message(channel=channel, data=data, state=state)
+        if guild:
+            v.user = discord.Member(data=data['member'], guild=guild, state=state)
+        else:
+            # v.user = discord.User(data=data['member']['user'], state=state)
+            raise Exception("Cannot create a button payload from DMs")
         return v

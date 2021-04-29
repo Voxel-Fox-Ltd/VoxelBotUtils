@@ -126,7 +126,7 @@ class Bot(commands.AutoShardedBot):
         self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=self.loop)
 
         # Application ID (may not be bot ID)
-        self._application_id = None
+        self.application_id = None
 
         # Allow database connections like this
         self.database: DatabaseConnection = DatabaseConnection
@@ -196,6 +196,9 @@ class Bot(commands.AutoShardedBot):
         self.logger.debug("Clearing caches")
         self.guild_settings.clear()
         self.user_settings.clear()
+
+        # Grab the application ID if we need it
+        await self.get_application_id()
 
         # Get database connection
         db = await self.database.get_connection()
@@ -397,11 +400,12 @@ class Bot(commands.AutoShardedBot):
         Get the bot's application client ID.
         """
 
-        if self._application_id:
-            return self._application_id
+        if self.application_id:
+            return self.application_id
         app = await self.application_info()
-        self._application_id = app.id
-        return self._application_id
+        self.application_id = app.id
+        self._connection.application_id = app.id
+        return self.application_id
 
     async def add_delete_button(
             self, message:discord.Message, valid_users:typing.List[discord.User]=None, *,
@@ -841,7 +845,10 @@ class Bot(commands.AutoShardedBot):
             components = [components.to_dict()]
 
         # Get our playload data
-        r = discord.http.Route('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
+        if isinstance(channel, (list, tuple)):
+            r = discord.http.Route('POST', '/webhooks/{app_id}/{token}?wait=1', app_id=channel[0], token=channel[1])
+        else:
+            r = discord.http.Route('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
         payload = {}
         if content:
             payload['content'] = content
@@ -858,7 +865,7 @@ class Bot(commands.AutoShardedBot):
         if components:
             payload['components'] = components
 
-        # Send the HTTP requests
+        # Send the HTTP requests, including files
         if files is not None:
             form = []
             form.append({'name': 'payload_json', 'value': discord.utils.to_json(payload)})
@@ -886,9 +893,19 @@ class Bot(commands.AutoShardedBot):
         else:
             response_data = await self.http.request(r, json=payload)
 
-        ret = state.create_message(channel=channel, data=response_data)
+        # Make the message object
+        if isinstance(channel, (list, tuple)):
+            webhook = discord.Webhook.partial(channel[0], channel[1], adapter=discord.AsyncWebhookAdapter(session=self.session))
+            webhook._state = self._connection
+            ret = webhook._create_message(response_data)
+        else:
+            ret = state.create_message(channel=channel, data=response_data)
+
+        # See if we want to delete the message
         if delete_after is not None:
             await ret.delete(delay=delete_after)
+
+        # Return the created message
         return ret
 
     async def _edit_button_message(self, message, **fields):
@@ -896,6 +913,7 @@ class Bot(commands.AutoShardedBot):
         An alternative message edit method so we can edit components onto messages.
         """
 
+        # Make the contet
         try:
             content = fields['content']
         except KeyError:
@@ -904,6 +922,7 @@ class Bot(commands.AutoShardedBot):
             if content is not None:
                 fields['content'] = str(content)
 
+        # Make the embeds
         try:
             embed = fields['embed']
         except KeyError:
@@ -912,6 +931,7 @@ class Bot(commands.AutoShardedBot):
             if embed is not None:
                 fields['embed'] = embed.to_dict()
 
+        # Make the components
         try:
             components = fields['components']
         except KeyError:
@@ -923,6 +943,7 @@ class Bot(commands.AutoShardedBot):
                 else:
                     fields['components'] = [components.to_dict()]
 
+        # Make the supress flag
         try:
             suppress = fields.pop('suppress')
         except KeyError:
@@ -932,8 +953,10 @@ class Bot(commands.AutoShardedBot):
             flags.suppress_embeds = suppress
             fields['flags'] = flags.value
 
+        # See if we should delete the message
         delete_after = fields.pop('delete_after', None)
 
+        # Make the allowed mentions
         try:
             allowed_mentions = fields.pop('allowed_mentions')
         except KeyError:
@@ -947,6 +970,7 @@ class Bot(commands.AutoShardedBot):
                     allowed_mentions = allowed_mentions.to_dict()
                 fields['allowed_mentions'] = allowed_mentions
 
+        # Make the attachments
         try:
             attachments = fields.pop('attachments')
         except KeyError:
@@ -954,10 +978,20 @@ class Bot(commands.AutoShardedBot):
         else:
             fields['attachments'] = [a.to_dict() for a in attachments]
 
+        # Edit the message
         if fields:
-            data = await message._state.http.edit_message(message.channel.id, message.id, **fields)
-            message._update(data)
+            if isinstance(message, discord.WebhookMessage):
+                r = discord.http.Route(
+                    'PATCH', '/webhooks/{app_id}/{token}/messages/{message_id}',
+                    app_id=message._state._webhook.id, token=message._state._webhook.token,
+                    message_id=message.id,
+                )
+                response_data = await self.http.request(r, json=payload)
+            else:
+                response_data = await message._state.http.edit_message(message.channel.id, message.id, **fields)
+            message._update(response_data)
 
+        # See if we should delete the message
         if delete_after is not None:
             await message.delete(delay=delete_after)
 
