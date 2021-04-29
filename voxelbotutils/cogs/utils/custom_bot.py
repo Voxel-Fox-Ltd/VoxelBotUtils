@@ -168,9 +168,13 @@ class Bot(commands.AutoShardedBot):
         async def wait_for_button_prop(*args, **kwargs):
             return await self._wait_for_button_message(*args, **kwargs)
 
+        async def clear_components_msg_prop(message):
+            return await message.edit(components=None)
+
         Messageable.send = send_button_msg_prop
         discord.Message.edit = edit_button_msg_prop
         discord.Message.wait_for_button_click = wait_for_button_prop
+        discord.Message.clear_components = clear_components_msg_prop
 
     async def startup(self):
         """
