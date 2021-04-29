@@ -966,6 +966,10 @@ class Bot(commands.AutoShardedBot):
         Wait for an interaction on a button.
         """
 
-        if check is None:
-            check = lambda payload: payload.message_id == message.id
+        message_check = lambda payload: payload.message_id == message.id
+        if check:
+            original_check = check
+            check = lambda payload: original_check(payload) and message_check(payload)
+        else:
+            check = message_check
         return await self.wait_for("button_click", check=check, timeout=timeout)
