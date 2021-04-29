@@ -828,9 +828,9 @@ class Bot(commands.AutoShardedBot):
 
         # Fix up the components
         if components and isinstance(components, list):
-            fields['components'] = [i.to_dict() for i in components]
+            components = [i.to_dict() for i in components]
         elif components:
-            fields['components'] = [components.to_dict()]
+            components = [components.to_dict()]
 
         # Get our playload data
         r = discord.http.Route('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
