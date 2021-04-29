@@ -1000,7 +1000,7 @@ class Bot(commands.AutoShardedBot):
         Wait for an interaction on a button.
         """
 
-        message_check = lambda payload: payload.message_id == message.id
+        message_check = lambda payload: payload.message.id == message.id
         if check:
             original_check = check
             check = lambda payload: original_check(payload) and message_check(payload)
