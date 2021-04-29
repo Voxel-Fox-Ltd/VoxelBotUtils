@@ -827,7 +827,7 @@ class Bot(commands.AutoShardedBot):
             raise InvalidArgument('files parameter must be a list of File')
 
         # Get our playload data
-        r = Route('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
+        r = RouteV8('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
         payload = {}
         if content:
             payload['content'] = content
