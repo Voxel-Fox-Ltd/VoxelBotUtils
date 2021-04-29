@@ -10,4 +10,5 @@ all_packages = (
     'owner_only',
     'presence_auto_updater',
     'slash_command_handler',
+    'interaction_handler',
 )

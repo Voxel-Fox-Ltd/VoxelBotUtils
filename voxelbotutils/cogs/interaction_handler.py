@@ -92,7 +92,7 @@ class InteractionHandler(utils.Cog):
         # See if it was a clicked component
         elif payload['d']['type'] == 3:
             async def send_callback():
-                self.logger.debug("Posting type 5 response for button click %s." % (str(payload)))
+                self.logger.debug("Posting type 6 response for button click %s." % (str(payload)))
                 url = "https://discord.com/api/v8/interactions/{id}/{token}/callback".format(
                     id=payload["d"]["id"], token=payload["d"]["token"],
                 )
