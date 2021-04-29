@@ -826,6 +826,12 @@ class Bot(commands.AutoShardedBot):
         elif files and not all(isinstance(file, File) for file in files):
             raise InvalidArgument('files parameter must be a list of File')
 
+        # Fix up the components
+        if components and isinstance(components, list):
+            fields['components'] = [i.to_dict() for i in components]
+        elif components:
+            fields['components'] = [components.to_dict()]
+
         # Get our playload data
         r = discord.http.Route('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
         payload = {}
@@ -841,6 +847,8 @@ class Bot(commands.AutoShardedBot):
             payload['allowed_mentions'] = allowed_mentions
         if reference:
             payload['message_reference'] = reference
+        if components:
+            payload['components'] = components
 
         # Send the HTTP requests
         if files is not None:
@@ -902,7 +910,10 @@ class Bot(commands.AutoShardedBot):
             pass
         else:
             if components is not None:
-                fields['components'] = components.to_dict()
+                if isinstance(components, list):
+                    fields['components'] = [i.to_dict() for i in components]
+                else:
+                    fields['components'] = [components.to_dict()]
 
         try:
             suppress = fields.pop('suppress')
