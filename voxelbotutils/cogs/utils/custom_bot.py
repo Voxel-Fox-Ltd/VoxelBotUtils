@@ -886,7 +886,7 @@ class Bot(commands.AutoShardedBot):
         else:
             response_data = await self.http.request(r, json=payload)
 
-        ret = state.create_message(channel=messagable, data=response_data)
+        ret = state.create_message(channel=channel, data=response_data)
         if delete_after is not None:
             await ret.delete(delay=delete_after)
         return ret
