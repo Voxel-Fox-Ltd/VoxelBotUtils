@@ -831,7 +831,7 @@ class Bot(commands.AutoShardedBot):
             files = [file]
         if files and len(files) > 10:
             raise InvalidArgument('files parameter must be a list of up to 10 elements')
-        elif files and not all(isinstance(file, File) for file in files):
+        elif files and not all(isinstance(file, discord.File) for file in files):
             raise InvalidArgument('files parameter must be a list of File')
 
         # Fix up the components
