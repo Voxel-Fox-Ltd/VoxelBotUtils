@@ -165,8 +165,12 @@ class Bot(commands.AutoShardedBot):
         async def edit_button_msg_prop(*args, **kwargs):
             return await self._edit_button_message(*args, **kwargs)
 
+        async def wait_for_button_prop(*args, **kwargs):
+            return await self._wait_for_button_message(*args, **kwargs)
+
         Messageable.send = send_button_msg_prop
         discord.Message.edit = edit_button_msg_prop
+        discord.Message.wait_for_button_click = wait_for_button_prop
 
     async def startup(self):
         """
@@ -952,3 +956,12 @@ class Bot(commands.AutoShardedBot):
 
         if delete_after is not None:
             await message.delete(delay=delete_after)
+
+    async def _wait_for_button_message(self, message, *, check=None, timeout=None):
+        """
+        Wait for an interaction on a button.
+        """
+
+        if check is None:
+            check = lambda payload: payload.message_id == message.ids
+        return await self.wait_for("button_click", check=check, timeout=timeout)
