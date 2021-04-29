@@ -963,5 +963,5 @@ class Bot(commands.AutoShardedBot):
         """
 
         if check is None:
-            check = lambda payload: payload.message_id == message.ids
+            check = lambda payload: payload.message_id == message.id
         return await self.wait_for("button_click", check=check, timeout=timeout)
