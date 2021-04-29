@@ -1,6 +1,7 @@
 import enum
 import typing
 import uuid
+import asyncio
 
 import discord
 
@@ -96,6 +97,7 @@ class ButtonInteractionPayload(InteractionMessageable):
         Get the (id, token) pair that's used to send to the webhook necessary.
         """
 
+        await self._wait_until_interaction_sent()
         return (self._state.application_id, self.data['token'],)
 
     @classmethod

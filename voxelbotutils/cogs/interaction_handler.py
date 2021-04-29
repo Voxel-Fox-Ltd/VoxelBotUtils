@@ -102,6 +102,7 @@ class InteractionHandler(utils.Cog):
                 )
             callback_task = self.bot.loop.create_task(send_callback())
             clicked_button_payload = utils.interactions.components.ButtonInteractionPayload.from_payload(payload['d'], self.bot._connection)
+            clicked_button_payload._send_interaction_response_task = callback_task
             self.bot.dispatch("button_click", clicked_button_payload)
             return
 

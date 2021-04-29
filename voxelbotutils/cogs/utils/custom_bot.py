@@ -846,7 +846,7 @@ class Bot(commands.AutoShardedBot):
 
         # Get our playload data
         if isinstance(channel, (list, tuple)):
-            r = discord.http.Route('POST', '/webhooks/{app_id}/{token}?wait=1', app_id=channel[0], token=channel[1])
+            r = discord.http.Route('POST', '/webhooks/{app_id}/{token}', app_id=channel[0], token=channel[1])
         else:
             r = discord.http.Route('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
         payload = {}
