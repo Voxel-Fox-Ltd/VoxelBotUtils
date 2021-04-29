@@ -91,13 +91,14 @@ class InteractionHandler(utils.Cog):
 
         # See if it was a clicked component
         elif payload['d']['type'] == 3:
+            response_type = 5
             async def send_callback():
-                self.logger.debug("Posting type 6 response for button click %s." % (str(payload)))
+                self.logger.debug("Posting type %d response for button click %s." % (response_type, str(payload)))
                 url = "https://discord.com/api/v8/interactions/{id}/{token}/callback".format(
                     id=payload["d"]["id"], token=payload["d"]["token"],
                 )
                 return await self.bot.session.post(
-                    url, json={"type": 6},
+                    url, json={"type": response_type},
                     headers={"Authorization": f"Bot {self.bot.config['token']}"},
                 )
             callback_task = self.bot.loop.create_task(send_callback())
