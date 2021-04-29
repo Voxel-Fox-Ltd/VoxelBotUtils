@@ -863,12 +863,12 @@ class Bot(commands.AutoShardedBot):
                                 'filename': file.filename, 'content_type': 'application/octet-stream',
                             }
                         )
-                response_data = self.bot.http.request(r, form=form, files=files)
+                response_data = await self.http.request(r, form=form, files=files)
             finally:
                 for f in files:
                     f.close()
         else:
-            response_data = self.bot.http.request(r, json=payload)
+            response_data = await self.http.request(r, json=payload)
 
         ret = state.create_message(channel=messagable, data=response_data)
         if delete_after is not None:
