@@ -8,7 +8,7 @@ import discord
 class ButtonStyle(enum.IntEnum):
     PRIMARY = 1  # A blurple button
     SECONDARY = 2  # A grey button
-    SUCCEESS = 3  # A green button
+    SUCCESS = 3  # A green button
     DANGER = 4  # A red button
     LINK = 5  # A button that navigates to a URL
 
