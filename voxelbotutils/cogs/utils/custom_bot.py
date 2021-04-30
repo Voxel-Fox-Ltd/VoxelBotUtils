@@ -851,7 +851,7 @@ class Bot(commands.AutoShardedBot):
             if not messageable._sent_ack_response:  # Sent no responses
                 r = discord.http.Route('POST', '/interactions/{interaction_id}/{token}/callback', interaction_id=channel[0], token=channel[2])
                 await self.http.request(r, json={"type": messageable.ACK_RESPONSE_TYPE})
-            if not messageable._sent_message_response:  # Sent an ack but not a message
+            if not messageable._sent_message_response and messageable.ACK_IS_EDITABLE:  # Sent an ack but not a message
                 r = discord.http.Route('PATCH', '/webhooks/{app_id}/{token}/messages/@original', app_id=channel[1], token=channel[2])
             else:  # Sent both an ack and a message
                 r = discord.http.Route('POST', '/webhooks/{app_id}/{token}', app_id=channel[1], token=channel[2])
