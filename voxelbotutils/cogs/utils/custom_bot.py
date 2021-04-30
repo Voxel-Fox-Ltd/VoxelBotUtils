@@ -178,6 +178,7 @@ class Bot(commands.AutoShardedBot):
         discord.WebhookMessage.edit = edit_button_msg_prop
         discord.WebhookMessage.wait_for_button_click = wait_for_button_prop
         discord.WebhookMessage.clear_components = clear_components_msg_prop
+        discord.message.MessageFlags.ephemeral = discord.flags.flag_value(lambda _: 64)
 
     async def startup(self):
         """
@@ -908,7 +909,7 @@ class Bot(commands.AutoShardedBot):
     async def _send_button_message(
             self, messageable, content=None, *, tts=False, embed=None, file=None,
             files=None, delete_after=None, nonce=None, allowed_mentions=None,
-            reference=None, mention_author=None, components=None,
+            reference=None, mention_author=None, components=None, ephemeral=False,
             embeddify=None, image_url=None, embeddify_file=True):
         """
         An alternative send method so that we can add components to messages.
@@ -992,6 +993,10 @@ class Bot(commands.AutoShardedBot):
             payload['message_reference'] = reference
         if components:
             payload['components'] = components
+        if ephemeral:
+            if not getattr(messageable, "CAN_SEND_EPHEMERAL", False):
+                raise ValueError("Cannot send ephemeral messages with type {0.__class__}".format(messageable))
+            payload['flags'] = discord.message.MessageFlags(ephemeral=True)
 
         # Send the HTTP requests, including files
         if files is not None:
