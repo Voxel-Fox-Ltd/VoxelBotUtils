@@ -98,7 +98,7 @@ class ButtonInteractionPayload(InteractionMessageable):
         """
 
         await self._wait_until_interaction_sent()
-        return (self._state.application_id, self.data['token'],)
+        return (self.data['id'], self._state.application_id, self.data['token'],)
 
     @classmethod
     def from_payload(cls, data, state):

@@ -37,6 +37,7 @@ class InteractionHandler(utils.Cog):
             content=view.buffer,
         )
         ctx = cls(prefix=f"<@{self.bot.user.id}> ", view=view, bot=self.bot, message=fake_message)
+        ctx.data = payload
         ctx.is_slash_command = True
         ctx.original_author_id = member.id
         view.skip_string(ctx.prefix)
@@ -57,7 +58,6 @@ class InteractionHandler(utils.Cog):
                 headers={"Authorization": f"Bot {self.bot.config['token']}"},
             )
         callback_task = self.bot.loop.create_task(send_callback())
-        ctx.data = payload
         ctx._send_interaction_response_task = callback_task
 
         # Return context

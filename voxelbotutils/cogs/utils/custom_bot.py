@@ -847,9 +847,9 @@ class Bot(commands.AutoShardedBot):
         # Get our playload data
         if isinstance(channel, (list, tuple)):
             if getattr(messagable, "_sent_original_callback", True):
-                r = discord.http.Route('POST', '/webhooks/{app_id}/{token}', app_id=channel[0], token=channel[1])
+                r = discord.http.Route('POST', '/webhooks/{app_id}/{token}', app_id=channel[1], token=channel[2])
             else:
-                r = discord.http.Route('POST', '/interactions/{app_id}/{token}/callback', app_id=channel[0], token=channel[1])
+                r = discord.http.Route('POST', '/interactions/{app_id}/{token}/callback', app_id=channel[0], token=channel[2])
         else:
             r = discord.http.Route('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
         payload = {}
