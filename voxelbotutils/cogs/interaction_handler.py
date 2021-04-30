@@ -4,7 +4,7 @@ from discord.ext import commands
 from . import utils
 
 
-class SlashCommandContext(utils.interactions.interaction_messageable.InteractionMessageablem utils.Context):
+class SlashCommandContext(utils.interactions.interaction_messageable.InteractionMessageable, utils.Context):
 
     def __init__(self, *args, **kwargs):
         super(utils.Context).__init__(*args, **kwargs)
