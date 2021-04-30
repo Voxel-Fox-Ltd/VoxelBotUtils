@@ -23,8 +23,8 @@ class InteractionMessageable(Messageable):
     ACK_IS_EDITABLE = True
     ACK_RESPONSE_TYPE = 5
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._send_interaction_response_lock = asyncio.Lock()  # A lock so we don't try to respond initially twice
         self._send_interaction_response_task = None  # The task for sending an initial "waiting" response
         self._sent_ack_response = False
