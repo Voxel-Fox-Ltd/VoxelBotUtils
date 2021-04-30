@@ -1131,7 +1131,7 @@ class Bot(commands.AutoShardedBot):
                     app_id=message._state._webhook.id, token=message._state._webhook.token,
                     message_id=message.id,
                 )
-                response_data = await self.http.request(r, json=payload)
+                response_data = await self.http.request(r, json=fields)
             else:
                 response_data = await message._state.http.edit_message(message.channel.id, message.id, **fields)
             message._update(response_data)
