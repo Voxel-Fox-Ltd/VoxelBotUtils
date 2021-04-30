@@ -898,7 +898,10 @@ class Bot(commands.AutoShardedBot):
                 response_data = await self.http.request(r, json=payload)
             else:
                 response_data = await self.http.request(r, json={"type": 4, "data": payload})
-        messagable._sent_original_callback = True
+        try:
+            messagable._sent_original_callback = True
+        except AttributeError:
+            pass
 
         # Make the message object
         if isinstance(channel, (list, tuple)):
