@@ -26,7 +26,6 @@ class InteractionMessageable(Messageable):
     def __init__(self):
         super().__init__()
         self._send_interaction_response_lock = asyncio.Lock()  # A lock so we don't try to respond initially twice
-        # self._sent_original_callback = False  # If we've already sent an original response
         self._send_interaction_response_task = None  # The task for sending an initial "waiting" response
         self._sent_ack_response = False
         self._sent_message_response = False
@@ -40,6 +39,14 @@ class InteractionMessageable(Messageable):
         Buttons have the luxury of a type 6 response - an ack response that doesn't tell the user we're waiting.
             Button responses can go immediately to the webhook response endpoint after this ack is received.
         """
+
+    async def _get_channel(self):
+        """
+        Get the (interaction_id, application_id, token) tuple that's used to send to the webhook necessary.
+        """
+
+        await self._wait_until_interaction_sent()
+        return (self.data['id'], self._state.application_id, self.data['token'],)
 
     def _send_interaction_response_callback(self):
         """

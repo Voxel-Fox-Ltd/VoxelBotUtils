@@ -94,14 +94,6 @@ class ButtonInteractionPayload(InteractionMessageable):
     ACK_RESPONSE_TYPE = 6
     ACK_IS_EDITABLE = False
 
-    async def _get_channel(self):
-        """
-        Get the (interaction_id, application_id, token) tuple that's used to send to the webhook necessary.
-        """
-
-        await self._wait_until_interaction_sent()
-        return (self.data['id'], self._state.application_id, self.data['token'],)
-
     @classmethod
     def from_payload(cls, data, state):
         """

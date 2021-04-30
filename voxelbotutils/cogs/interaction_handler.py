@@ -49,19 +49,6 @@ class InteractionHandler(utils.Cog):
         ctx.invoked_with = invoker
         ctx.command = self.bot.all_commands.get(invoker)
 
-        # Send async data response
-        async def send_callback():
-            self.logger.debug("Posting type 5 response for interaction command %s." % (str(payload)))
-            url = "https://discord.com/api/v8/interactions/{id}/{token}/callback".format(
-                id=payload["id"], token=payload["token"],
-            )
-            return await self.bot.session.post(
-                url, json={"type": 5},
-                headers={"Authorization": f"Bot {self.bot.config['token']}"},
-            )
-        callback_task = self.bot.loop.create_task(send_callback())
-        ctx._send_interaction_response_task = callback_task
-
         # Return context
         return ctx
 
@@ -84,6 +71,7 @@ class InteractionHandler(utils.Cog):
             ctx = await self.get_context_from_interaction(payload['d'])
             if ctx.command:
                 self.logger.debug("Invoking interaction context for command %s" % (ctx.command.name))
+            ctx._send_interaction_response_callback()
             await self.bot.invoke(ctx)
             return
 
