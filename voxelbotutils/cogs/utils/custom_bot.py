@@ -897,7 +897,8 @@ class Bot(commands.AutoShardedBot):
         if isinstance(channel, (list, tuple)):
             webhook = discord.Webhook.partial(channel[0], channel[1], adapter=discord.AsyncWebhookAdapter(session=self.session))
             webhook._state = self._connection
-            ret = webhook._create_message(response_data)
+            partial_webhook_state = discord.webhooks._PartialWebhookState(webhook._adapter, webhook, parent=webhook._state)
+            ret = discord.WebhookMessage(data=response_data, state=partial_webhook_state, channel=webhook.channel)
         else:
             ret = state.create_message(channel=channel, data=response_data)
 
