@@ -2,6 +2,7 @@ import enum
 import typing
 import uuid
 import asyncio
+import re
 
 import discord
 
@@ -28,6 +29,17 @@ class Button(object):
         self.style = style
         self.custom_id = custom_id or str(uuid.uuid1())
         self.emoji = emoji
+        if isinstance(emoji, str):
+            match = re.match(r'<(a?):([a-zA-Z0-9\_]+):([0-9]+)>$', emoji)
+            if match:
+                emoji_animated = bool(match.group(1))
+                emoji_name = match.group(2)
+                emoji_id = int(match.group(3))
+                emoji = discord.PartialEmoji(
+                    name=emoji_name,
+                    animated=emoji_animated,
+                    id=emoji_id,
+                )
         self.url = url
         self.disabled = disabled
         if url is None and self.style == ButtonStyle.LINK:
