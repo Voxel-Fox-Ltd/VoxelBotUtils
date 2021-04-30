@@ -13,7 +13,7 @@ class InteractionTyping(Typing):
     async def do_typing(self):
         if not self.messageable._sent_ack_response and not self.messageable._sent_message_response:
             app_id, _, token = await self.messageable._get_channel()
-            r = discord.http.Route('POST', '/interactions/{app_id}/{token}/callback', app_id=self.messageable.data)
+            r = discord.http.Route('POST', '/interactions/{app_id}/{token}/callback', app_id=app_id, token=token)
             async with self.messageable._send_interaction_response_lock:
                 await self.messageable._state.request(r, json={"type": self.messageable.ACK_RESPONSE_TYPE})
                 self.messageable._sent_ack_response = True
