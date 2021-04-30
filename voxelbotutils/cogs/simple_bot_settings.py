@@ -74,7 +74,7 @@ class BotSettings(utils.Cog):
 
         # Cancel follow
         if str(reaction) == "\N{THUMBS DOWN SIGN}":
-            return await ctx.send("Alright, cancelling!", ignore_error=True)
+            return await ctx.send("Alright, cancelling!")
 
         # Get channel
         channel_id = self.bot.config['command_data']['updates_channel_id']
@@ -100,7 +100,7 @@ class BotSettings(utils.Cog):
             await m.delete()
         except discord.HTTPException:
             pass
-        return await ctx.send("Now following the bot's updates channel!", ignore_error=True)
+        return await ctx.send("Now following the bot's updates channel!")
 
 
 def setup(bot:utils.Bot):

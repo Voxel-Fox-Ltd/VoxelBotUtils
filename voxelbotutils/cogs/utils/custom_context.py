@@ -124,7 +124,7 @@ class Context(commands.Context):
             self._send_interaction_response_task = None
 
     async def send(
-            self, content:str=None, *args, embed:discord.Embed=None, file:discord.File=None, ignore_error:bool=False, embeddify:bool=None,
+            self, content:str=None, *args, embed:discord.Embed=None, file:discord.File=None, embeddify:bool=None,
             embeddify_file:bool=True, image_url:str=None, **kwargs) -> typing.Optional[discord.Message]:
         """
         The normal `discord.abc.Messageable.send` but with an optional arg to ignore errors, as well as automatically
@@ -135,7 +135,6 @@ class Context(commands.Context):
             *args: The default args for `discord.abc.Messageable.send`.
             embed (discord.Embed, optional): The embed object to be sent with the message.
             file (discord.File, optional): The file object to be sent with the message.
-            ignore_error (bool, optional): Whether or not to ignore `discord.HTTPException` errors on message send.
             embeddify (bool, optional): Whether or not to automatically embed the content of the message.
             embeddify_file (bool, optional): Whether or not ot automatically embed the file of the message.
             **kwargs: The default args for `discord.abc.Messageable.send`.
@@ -158,8 +157,6 @@ class Context(commands.Context):
             await self._wait_until_interaction_sent()
             return await location.send(content=content, *args, embed=embed, file=file, **kwargs)
         except Exception as e:
-            if ignore_error:
-                return None
             if isinstance(e, aiohttp.ClientOSError):
                 fr = FakeResponse(status=500, reason=str(e))
                 raise discord.HTTPException(fr, fr.reason)
