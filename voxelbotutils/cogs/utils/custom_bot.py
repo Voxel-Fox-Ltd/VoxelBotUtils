@@ -846,7 +846,10 @@ class Bot(commands.AutoShardedBot):
 
         # Get our playload data
         if isinstance(channel, (list, tuple)):
-            r = discord.http.Route('POST', '/webhooks/{app_id}/{token}', app_id=channel[0], token=channel[1])
+            if getattr(messagable, "_sent_original_callback", True):
+                r = discord.http.Route('POST', '/webhooks/{app_id}/{token}', app_id=channel[0], token=channel[1])
+            else:
+                r = discord.http.Route('POST', '/interactions/{app_id}/{token}/callback', app_id=channel[0], token=channel[1])
         else:
             r = discord.http.Route('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
         payload = {}
@@ -891,7 +894,11 @@ class Bot(commands.AutoShardedBot):
                 for f in files:
                     f.close()
         else:
-            response_data = await self.http.request(r, json=payload)
+            if getattr(messagable, "_sent_original_callback", True):
+                response_data = await self.http.request(r, json=payload)
+            else:
+                response_data = await self.http.request(r, json={"type": 4, "data": payload})
+        messagable._sent_original_callback = True
 
         # Make the message object
         if isinstance(channel, (list, tuple)):
