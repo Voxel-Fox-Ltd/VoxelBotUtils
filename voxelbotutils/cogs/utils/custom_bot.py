@@ -849,11 +849,11 @@ class Bot(commands.AutoShardedBot):
         # Get our playload data
         if isinstance(channel, (list, tuple)):
             if not messagable._sent_ack_response:  # Sent no responses
-                r = discord.http.Route('POST', '/interactions/{app_id}/{token}/callback', app_id=channel[0], token=channel[2])
+                r = discord.http.Route('POST', '/interactions/{app_id}/{token}/callback?wait=1', app_id=channel[0], token=channel[2])
             elif not messagable._sent_message_response:  # Sent an ack but not a message
-                r = discord.http.Route('PATCH', '/interactions/{app_id}/{token}/callback/@original', app_id=channel[0], token=channel[2])
+                r = discord.http.Route('PATCH', '/interactions/{app_id}/{token}/callback/@original?wait=1', app_id=channel[0], token=channel[2])
             else:  # Sent both an ack and a message
-                r = discord.http.Route('POST', '/webhooks/{interaction_id}/{token}', interaction_id=channel[1], token=channel[2])
+                r = discord.http.Route('POST', '/webhooks/{interaction_id}/{token}?wait=1', interaction_id=channel[1], token=channel[2])
             # messagable._sent_ack_response = True
             # messagable._sent_message_response = True
         else:
