@@ -4,8 +4,10 @@ from discord.ext import commands
 from . import utils
 
 
-class SlashCommandContext(utils.Context, utils.interactions.interaction_messageable.InteractionMessageable):
-    pass
+class SlashCommandContext(utils.interactions.interaction_messageable.InteractionMessageablem utils.Context):
+
+    def __init__(self, *args, **kwargs):
+        super(utils.Context).__init__(*args, **kwargs)
 
 
 class InteractionHandler(utils.Cog):
