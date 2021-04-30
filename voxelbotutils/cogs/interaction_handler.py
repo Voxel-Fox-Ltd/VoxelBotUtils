@@ -8,6 +8,7 @@ class SlashCommandContext(utils.interactions.interaction_messageable.Interaction
 
     def __init__(self, *args, **kwargs):
         utils.Context.__init__(self, *args, **kwargs)
+        utils.interactions.interaction_messageable.InteractionMessageable.__init__(self)
 
 
 class InteractionHandler(utils.Cog):
