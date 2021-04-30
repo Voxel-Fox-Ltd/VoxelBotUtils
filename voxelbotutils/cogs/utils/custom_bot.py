@@ -803,6 +803,8 @@ class Bot(commands.AutoShardedBot):
         # Work out where we want to send to
         channel = await messagable._get_channel()
         state = self._connection
+        lock = getattr(messagable, "_send_interaction_response_lock", asyncio.Lock())
+        await lock.acquire()
 
         # Work out the main content
         content = str(content) if content is not None else None
@@ -846,10 +848,14 @@ class Bot(commands.AutoShardedBot):
 
         # Get our playload data
         if isinstance(channel, (list, tuple)):
-            if getattr(messagable, "_sent_original_callback", True):
-                r = discord.http.Route('POST', '/webhooks/{app_id}/{token}', app_id=channel[1], token=channel[2])
-            else:
+            if not messagable._sent_ack_response:  # Sent no responses
                 r = discord.http.Route('POST', '/interactions/{app_id}/{token}/callback', app_id=channel[0], token=channel[2])
+            elif not messagable._sent_message_response:  # Sent an ack but not a message
+                r = discord.http.Route('PATCH', '/interactions/{app_id}/{token}/callback/@original', app_id=channel[0], token=channel[2])
+            else:  # Sent both an ack and a message
+                r = discord.http.Route('POST', '/webhooks/{interaction_id}/{token}', interaction_id=channel[1], token=channel[2])
+            # messagable._sent_ack_response = True
+            # messagable._sent_message_response = True
         else:
             r = discord.http.Route('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
         payload = {}
@@ -894,14 +900,13 @@ class Bot(commands.AutoShardedBot):
                 for f in files:
                     f.close()
         else:
-            if getattr(messagable, "_sent_original_callback", True):
+            if getattr(messagable, "_sent_message_response", True):
                 response_data = await self.http.request(r, json=payload)
             else:
                 response_data = await self.http.request(r, json={"type": 4, "data": payload})
-        try:
-            messagable._sent_original_callback = True
-        except AttributeError:
-            pass
+                response_data = response_data['message']
+                messagable._sent_ack_response = True
+                messagable._sent_message_response = True
 
         # Make the message object
         if isinstance(channel, (list, tuple)):
@@ -913,6 +918,7 @@ class Bot(commands.AutoShardedBot):
             ret = state.create_message(channel=channel, data=response_data)
 
         # See if we want to delete the message
+        lock.release()
         if delete_after is not None:
             await ret.delete(delay=delete_after)
 

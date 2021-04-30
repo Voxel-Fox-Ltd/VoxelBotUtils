@@ -91,6 +91,7 @@ class Button(object):
 class ButtonInteractionPayload(InteractionMessageable):
 
     __slots__ = ("button", "user", "message", "guild", "channel", "_state", "data")
+    ACK_RESPONSE_TYPE = 6
 
     async def _get_channel(self):
         """

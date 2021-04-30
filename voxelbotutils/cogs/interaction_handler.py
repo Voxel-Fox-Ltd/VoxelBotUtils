@@ -87,20 +87,9 @@ class InteractionHandler(utils.Cog):
 
         # See if it was a clicked component
         elif payload['d']['type'] == 3:
-            # response_type = 5
-            # async def send_callback():
-            #     self.logger.debug("Posting type %d response for button click %s." % (response_type, str(payload)))
-            #     url = "https://discord.com/api/v8/interactions/{id}/{token}/callback".format(
-            #         id=payload["d"]["id"], token=payload["d"]["token"],
-            #     )
-            #     return await self.bot.session.post(
-            #         url, json={"type": response_type},
-            #         headers={"Authorization": f"Bot {self.bot.config['token']}"},
-            #     )
-            # callback_task = self.bot.loop.create_task(send_callback())
-            clicked_button_payload = utils.interactions.components.ButtonInteractionPayload.from_payload(payload['d'], self.bot._connection)
-            # clicked_button_payload._send_interaction_response_task = callback_task
-            clicked_button_payload._sent_original_callback = False
+            clicked_button_payload = utils.interactions.components.ButtonInteractionPayload.from_payload(
+                payload['d'], self.bot._connection,
+            )
             self.bot.dispatch("button_click", clicked_button_payload)
             return
 
