@@ -179,6 +179,7 @@ class Bot(commands.AutoShardedBot):
         discord.WebhookMessage.wait_for_button_click = wait_for_button_prop
         discord.WebhookMessage.clear_components = clear_components_msg_prop
         discord.message.MessageFlags.ephemeral = discord.flags.flag_value(lambda _: 64)
+        discord.message.MessageFlags.VALID_FLAGS.update({"ephemeral": 64})
 
     async def startup(self):
         """
@@ -996,7 +997,7 @@ class Bot(commands.AutoShardedBot):
         if ephemeral:
             if not getattr(messageable, "CAN_SEND_EPHEMERAL", False):
                 raise ValueError("Cannot send ephemeral messages with type {0.__class__}".format(messageable))
-            payload['flags'] = discord.message.MessageFlags(ephemeral=True)
+            payload['flags'] = discord.message.MessageFlags(ephemeral=True).value
 
         # Send the HTTP requests, including files
         if files is not None:
