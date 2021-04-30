@@ -9,6 +9,8 @@ FakeResponse = collections.namedtuple("FakeResponse", ["status", "reason"])
 
 class InteractionMessageable(Messageable):
 
+    CAN_SEND_EPHEMERAL = True
+
     async def _wait_until_interaction_sent(self):
         """
         Waits until the "_sent_interaction_response" attr is set to True before returning.

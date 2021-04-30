@@ -4,9 +4,13 @@ from discord.ext import commands
 from . import utils
 
 
+class SlashCommandContext(utils.Context, utils.interactions.interaction_messageable.InteractionMessageable):
+    pass
+
+
 class InteractionHandler(utils.Cog):
 
-    async def get_context_from_interaction(self, payload, *, cls=utils.Context):
+    async def get_context_from_interaction(self, payload, *, cls=SlashCommandContext):
         """
         Make a context object from an interaction.
         """
@@ -40,15 +44,6 @@ class InteractionHandler(utils.Cog):
 
         # Make it work
         ctx.invoked_with = invoker
-        adapter = discord.AsyncWebhookAdapter(self.bot.session)
-        webhook = discord.Webhook.partial(
-            await self.bot.get_application_id(), payload["token"],
-            adapter=adapter,
-        )
-        webhook._state = self.bot._connection
-        webhook.channel_id = int(payload['channel_id'])
-        webhook.guild_id = int(payload['guild_id'])
-        ctx._interaction_webhook = webhook
         ctx.command = self.bot.all_commands.get(invoker)
 
         # Send async data response
@@ -62,6 +57,7 @@ class InteractionHandler(utils.Cog):
                 headers={"Authorization": f"Bot {self.bot.config['token']}"},
             )
         callback_task = self.bot.loop.create_task(send_callback())
+        ctx.data = payload
         ctx._send_interaction_response_task = callback_task
 
         # Return context
