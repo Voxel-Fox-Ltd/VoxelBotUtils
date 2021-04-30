@@ -12,11 +12,8 @@ class InteractionTyping(Typing):
 
     async def do_typing(self):
         if not self.messageable._sent_ack_response and not self.messageable._sent_message_response:
-            app_id, _, token = await self.messageable._get_channel()
-            r = discord.http.Route('POST', '/interactions/{app_id}/{token}/callback', app_id=app_id, token=token)
             async with self.messageable._send_interaction_response_lock:
-                await self.messageable._state.http.request(r, json={"type": self.messageable.ACK_RESPONSE_TYPE})
-                self.messageable._sent_ack_response = True
+                self.messageable.ack()
 
 
 class InteractionMessageable(Messageable):
@@ -77,6 +74,12 @@ class InteractionMessageable(Messageable):
 
     async def trigger_typing(self, *args, **kwargs):
         await InteractionTyping(self).do_typing()
+
+    async def ack(self):
+        app_id, _, token = await self._get_channel()
+        r = discord.http.Route('POST', '/interactions/{app_id}/{token}/callback', app_id=app_id, token=token)
+        await self._state.http.request(r, json={"type": self.ACK_RESPONSE_TYPE})
+        self._sent_ack_response = True
 
     def typing(self, *args, **kwargs):
         return InteractionTyping(self)

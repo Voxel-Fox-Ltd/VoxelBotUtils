@@ -848,12 +848,11 @@ class Bot(commands.AutoShardedBot):
 
         # Get our playload data
         if isinstance(channel, (list, tuple)):
-            if not messageable._sent_ack_response:  # Sent no responses
-                r = discord.http.Route('POST', '/interactions/{interaction_id}/{token}/callback', interaction_id=channel[0], token=channel[2])
-                await self.http.request(r, json={"type": messageable.ACK_RESPONSE_TYPE})
-            if not messageable._sent_message_response and messageable.ACK_IS_EDITABLE:  # Sent an ack but not a message
+            if not messageable._sent_ack_response:  # Sent no responses - send an ack
+                await messageable.ack()
+            if messageable.ACK_IS_EDITABLE and not messageable._sent_message_response:  # Sent an ack that we should edit
                 r = discord.http.Route('PATCH', '/webhooks/{app_id}/{token}/messages/@original', app_id=channel[1], token=channel[2])
-            else:  # Sent both an ack and a message
+            else:  # Sent an ack and a response, or sent an ack with no editable original message
                 r = discord.http.Route('POST', '/webhooks/{app_id}/{token}', app_id=channel[1], token=channel[2])
         else:
             r = discord.http.Route('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
@@ -899,13 +898,19 @@ class Bot(commands.AutoShardedBot):
                 for f in files:
                     f.close()
         else:
-            if getattr(messageable, "_sent_message_response", True):
-                response_data = await self.http.request(r, json=payload)
-            else:
-                response_data = await self.http.request(r, json={"type": 4, "data": payload})
-                # response_data = response_data[0]['message']
-                messageable._sent_ack_response = True
-                messageable._sent_message_response = True
+            # if getattr(messageable, "_sent_ack_response", True):
+            #     response_data = await self.http.request(r, json=payload)
+            # else:
+            #     response_data = await self.http.request(r, json={"type": 4, "data": payload})
+            response_data = await self.http.request(r, json=payload)
+        try:
+            messageable._sent_ack_response = True
+        except AttributeError:
+            pass
+        try:
+            messageable._sent_message_response = True
+        except AttributeError:
+            pass
 
         # Make the message object
         if isinstance(channel, (list, tuple)):
