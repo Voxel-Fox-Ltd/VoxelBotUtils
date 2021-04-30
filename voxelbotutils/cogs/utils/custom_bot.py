@@ -1032,7 +1032,7 @@ class Bot(commands.AutoShardedBot):
 
         # Make the message object
         if isinstance(channel, (list, tuple)):
-            webhook = discord.Webhook.partial(channel[0], channel[1], adapter=discord.AsyncWebhookAdapter(session=self.session))
+            webhook = discord.Webhook.partial(channel[1], channel[2], adapter=discord.AsyncWebhookAdapter(session=self.session))
             webhook._state = self._connection
             partial_webhook_state = discord.webhook._PartialWebhookState(webhook._adapter, webhook, parent=webhook._state)
             ret = discord.WebhookMessage(data=response_data, state=partial_webhook_state, channel=webhook.channel)
