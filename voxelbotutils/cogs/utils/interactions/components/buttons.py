@@ -95,7 +95,7 @@ class ButtonInteractionPayload(InteractionMessageable):
 
     async def _get_channel(self):
         """
-        Get the (id, token) pair that's used to send to the webhook necessary.
+        Get the (interaction_id, application_id, token) tuple that's used to send to the webhook necessary.
         """
 
         await self._wait_until_interaction_sent()
