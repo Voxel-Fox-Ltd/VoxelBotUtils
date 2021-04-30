@@ -862,7 +862,10 @@ class Bot(commands.AutoShardedBot):
         if tts:
             payload['tts'] = True
         if embed:
-            payload['embed'] = embed
+            if r.method.startswith('/webhooks'):
+                payload['embeds'] = [embed]
+            else:
+                payload['embed'] = embed
         if nonce:
             payload['nonce'] = nonce
         if allowed_mentions:
@@ -950,7 +953,10 @@ class Bot(commands.AutoShardedBot):
             pass
         else:
             if embed is not None:
-                fields['embed'] = embed.to_dict()
+                if isinstance(message, discord.WebhookMessage):
+                    fields['embeds'] = [embed.to_dict()]
+                else:
+                    fields['embed'] = embed.to_dict()
 
         # Make the components
         try:
