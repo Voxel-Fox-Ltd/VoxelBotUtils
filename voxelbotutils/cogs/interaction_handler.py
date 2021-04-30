@@ -97,7 +97,7 @@ class InteractionHandler(utils.Cog):
             #         url, json={"type": response_type},
             #         headers={"Authorization": f"Bot {self.bot.config['token']}"},
             #     )
-            callback_task = self.bot.loop.create_task(send_callback())
+            # callback_task = self.bot.loop.create_task(send_callback())
             clicked_button_payload = utils.interactions.components.ButtonInteractionPayload.from_payload(payload['d'], self.bot._connection)
             # clicked_button_payload._send_interaction_response_task = callback_task
             clicked_button_payload._sent_original_callback = False
