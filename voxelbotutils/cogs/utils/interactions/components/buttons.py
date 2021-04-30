@@ -35,7 +35,7 @@ class Button(object):
                 emoji_animated = bool(match.group(1))
                 emoji_name = match.group(2)
                 emoji_id = int(match.group(3))
-                emoji = discord.PartialEmoji(
+                self.emoji = discord.PartialEmoji(
                     name=emoji_name,
                     animated=emoji_animated,
                     id=emoji_id,
