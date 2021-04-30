@@ -904,7 +904,7 @@ class Bot(commands.AutoShardedBot):
                 response_data = await self.http.request(r, json=payload)
             else:
                 response_data = await self.http.request(r, json={"type": 4, "data": payload})
-                response_data = response_data['message']
+                # response_data = response_data[0]['message']
                 messagable._sent_ack_response = True
                 messagable._sent_message_response = True
 

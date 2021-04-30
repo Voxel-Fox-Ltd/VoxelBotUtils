@@ -90,6 +90,7 @@ class InteractionHandler(utils.Cog):
             clicked_button_payload = utils.interactions.components.ButtonInteractionPayload.from_payload(
                 payload['d'], self.bot._connection,
             )
+            clicked_button_payload._send_interaction_response_callback()
             self.bot.dispatch("button_click", clicked_button_payload)
             return
 
