@@ -200,11 +200,12 @@ class SlashCommandHandler(utils.Cog):
                     await self.bot.bulk_create_guild_application_commands(ctx.guild, commands_to_add)
                 else:
                     await self.bot.bulk_create_global_application_commands(commands_to_add)
-                self.logger.info(f"Added slash command for {command.name}")
+                # self.logger.info(f"Added slash command for {command.name}")
             except discord.HTTPException as e:
-                file_handle = io.StringIO(json.dumps(command.to_json(), indent=4))
-                file = discord.File(file_handle, filename="command.json")
-                await ctx.send(f"Failed to add `{command.name}` as a command - {e}", file=file)
+                # file_handle = io.StringIO(json.dumps(command.to_json(), indent=4))
+                # file = discord.File(file_handle, filename="command.json")
+                # await ctx.send(f"Failed to add `{command.name}` as a command - {e}", file=file)
+                raise
 
         # And we done
         await ctx.reply("Done.", embeddify=False)
