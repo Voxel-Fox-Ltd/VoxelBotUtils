@@ -76,9 +76,6 @@ class InteractionMessageable(Messageable):
 
         pass
 
-    async def _get_channel(self, *args, **kwargs):
-        raise NotImplementedError()
-
     async def trigger_typing(self, *args, **kwargs):
         await InteractionTyping(self).do_typing()
 
