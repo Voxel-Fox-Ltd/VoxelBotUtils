@@ -6,6 +6,7 @@ import re
 
 import discord
 
+from .models import DisableableComponent
 from ..interaction_messageable import InteractionMessageable
 
 
@@ -17,7 +18,7 @@ class ButtonStyle(enum.IntEnum):
     LINK = 5  # A button that navigates to a URL
 
 
-class Button(object):
+class Button(DisableableComponent):
 
     __slots__ = ("label", "style", "custom_id", "emoji", "url", "disabled",)
 
@@ -136,6 +137,5 @@ class ButtonInteractionPayload(InteractionMessageable):
         if guild:
             v.user = discord.Member(data=data['member'], guild=guild, state=state)
         else:
-            # v.user = discord.User(data=data['member']['user'], state=state)
-            raise Exception("Cannot create a button payload from DMs")
+            v.user = discord.User(data=data['user'], state=state)
         return v
