@@ -573,23 +573,53 @@ class Bot(commands.AutoShardedBot):
         async with self.session.post("https://voxelfox.co.uk/discord/chatlog", json=data) as r:
             return await r.text()
 
-    async def add_global_application_command(self, command:interactions.ApplicationCommand) -> None:
+    async def create_global_application_command(self, command:interactions.ApplicationCommand) -> None:
         """
         Add a global slash command for the bot.
         """
 
         application_id = await self.get_application_id()
-        r = RouteV8('POST', '/applications/{application_id}/commands', application_id=application_id)
+        r = RouteV8(
+            'POST', '/applications/{application_id}/commands',
+            application_id=application_id,
+        )
         return await self.http.request(r, json=command.to_json())
 
-    async def add_guild_application_command(self, guild:discord.Guild, command:interactions.ApplicationCommand) -> None:
+    async def create_guild_application_command(self, guild:discord.Guild, command:interactions.ApplicationCommand) -> None:
         """
         Add a guild-level slash command for the bot.
         """
 
         application_id = await self.get_application_id()
-        r = RouteV8('POST', '/applications/{application_id}/guilds/{guild_id}/commands', application_id=application_id, guild_id=guild.id)
+        r = RouteV8(
+            'POST', '/applications/{application_id}/guilds/{guild_id}/commands',
+            application_id=application_id, guild_id=guild.id,
+        )
         return await self.http.request(r, json=command.to_json())
+
+    async def bulk_create_global_application_commands(self, commands:typing.List[interactions.ApplicationCommand]) -> None:
+        """
+        Bulk add a global slash command for the bot.
+        """
+
+        application_id = await self.get_application_id()
+        r = RouteV8(
+            'PUT', '/applications/{application_id}/commands',
+            application_id=application_id,
+        )
+        return await self.http.request(r, json=[i.to_json() for i in commands])
+
+    async def bulk_create_guild_application_commands(self, guild:discord.Guild, commands:typing.List[interactions.ApplicationCommand]) -> None:
+        """
+        Bulk add a guild-level slash command for the bot.
+        """
+
+        application_id = await self.get_application_id()
+        r = RouteV8(
+            'PUT', '/applications/{application_id}/guilds/{guild_id}/commands',
+            application_id=application_id, guild_id=guild.id,
+        )
+        return await self.http.request(r, json=[i.to_json() for i in commands])
 
     async def get_global_application_commands(self) -> typing.List[interactions.ApplicationCommand]:
         """
@@ -597,7 +627,10 @@ class Bot(commands.AutoShardedBot):
         """
 
         application_id = await self.get_application_id()
-        r = RouteV8('GET', '/applications/{application_id}/commands', application_id=application_id)
+        r = RouteV8(
+            'GET', '/applications/{application_id}/commands',
+            application_id=application_id,
+        )
         data = await self.http.request(r)
         return [interactions.ApplicationCommand.from_data(i) for i in data]
 
@@ -607,7 +640,10 @@ class Bot(commands.AutoShardedBot):
         """
 
         application_id = await self.get_application_id()
-        r = RouteV8('GET', '/applications/{application_id}/guilds/{guild_id}/commands', application_id=application_id, guild_id=guild.id)
+        r = RouteV8(
+            'GET', '/applications/{application_id}/guilds/{guild_id}/commands',
+            application_id=application_id, guild_id=guild.id,
+        )
         data = await self.http.request(r)
         return [interactions.ApplicationCommand.from_data(i) for i in data]
 
@@ -617,7 +653,10 @@ class Bot(commands.AutoShardedBot):
         """
 
         application_id = await self.get_application_id()
-        r = RouteV8('DELETE', '/applications/{application_id}/commands/{command_id}', application_id=application_id, command_id=command.id)
+        r = RouteV8(
+            'DELETE', '/applications/{application_id}/commands/{command_id}',
+            application_id=application_id, command_id=command.id,
+        )
         return await self.http.request(r)
 
     async def delete_guild_application_command(self, guild:discord.Guild, command:interactions.ApplicationCommand) -> None:
@@ -626,7 +665,10 @@ class Bot(commands.AutoShardedBot):
         """
 
         application_id = await self.get_application_id()
-        r = RouteV8('DELETE', '/applications/{application_id}/guilds/{guild_id}/commands/{command_id}', application_id=application_id, guild_id=guild.id, command_id=command.id)
+        r = RouteV8(
+            'DELETE', '/applications/{application_id}/guilds/{guild_id}/commands/{command_id}',
+            application_id=application_id, guild_id=guild.id, command_id=command.id,
+        )
         return await self.http.request(r)
 
     @property

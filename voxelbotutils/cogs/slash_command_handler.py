@@ -194,25 +194,17 @@ class SlashCommandHandler(utils.Cog):
                     await self.bot.delete_global_application_command(command)
                 self.logger.info(f"Removed slash command for {command.name}")
 
-            # Loop through commands to add/update
-            for command in commands_to_add:
-
-                # See if we should bother updating it
-                if command.to_json() in command_json_current:
-                    self.logger.info(f"Didn't update slash command for {command.name}")
-                    continue
-
-                # Add command
-                try:
-                    if guild:
-                        await self.bot.add_guild_application_command(ctx.guild, command)
-                    else:
-                        await self.bot.add_global_application_command(command)
-                    self.logger.info(f"Added slash command for {command.name}")
-                except discord.HTTPException as e:
-                    file_handle = io.StringIO(json.dumps(command.to_json(), indent=4))
-                    file = discord.File(file_handle, filename="command.json")
-                    await ctx.send(f"Failed to add `{command.name}` as a command - {e}", file=file)
+            # Add commands
+            try:
+                if guild:
+                    await self.bot.bulk_create_guild_application_commands(ctx.guild, commands_to_add)
+                else:
+                    await self.bot.bulk_create_global_application_commands(commands_to_add)
+                self.logger.info(f"Added slash command for {command.name}")
+            except discord.HTTPException as e:
+                file_handle = io.StringIO(json.dumps(command.to_json(), indent=4))
+                file = discord.File(file_handle, filename="command.json")
+                await ctx.send(f"Failed to add `{command.name}` as a command - {e}", file=file)
 
         # And we done
         await ctx.reply("Done.", embeddify=False)
