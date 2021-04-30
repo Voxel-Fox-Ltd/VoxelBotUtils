@@ -13,7 +13,7 @@ class InteractionTyping(Typing):
     async def do_typing(self):
         if not self.messageable._sent_ack_response and not self.messageable._sent_message_response:
             async with self.messageable._send_interaction_response_lock:
-                self.messageable.ack()
+                await self.messageable.ack()
 
 
 class InteractionMessageable(Messageable):
