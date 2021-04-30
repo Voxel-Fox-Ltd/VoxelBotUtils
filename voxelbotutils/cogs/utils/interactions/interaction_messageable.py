@@ -55,7 +55,10 @@ class InteractionMessageable(Messageable):
 
         async def send_callback():
             await asyncio.sleep(2)
-            await self.trigger_typing()
+            try:
+                await self.trigger_typing()
+            except Exception:
+                pass
         self._send_interaction_response_task = self._state.loop.create_task(send_callback())
 
     async def _wait_until_interaction_sent(self):

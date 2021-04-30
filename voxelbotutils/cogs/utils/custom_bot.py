@@ -175,6 +175,9 @@ class Bot(commands.AutoShardedBot):
         discord.Message.edit = edit_button_msg_prop
         discord.Message.wait_for_button_click = wait_for_button_prop
         discord.Message.clear_components = clear_components_msg_prop
+        discord.WebhookMessage.edit = edit_button_msg_prop
+        discord.WebhookMessage.wait_for_button_click = wait_for_button_prop
+        discord.WebhookMessage.clear_components = clear_components_msg_prop
 
     async def startup(self):
         """
