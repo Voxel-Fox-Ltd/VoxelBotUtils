@@ -834,16 +834,89 @@ class Bot(commands.AutoShardedBot):
             stats.increment("discord.bot.commands", tags=command_stats_tags)
         return await super().invoke(ctx)
 
+    def get_context_message(
+            self, messageable, content:str, *, embed:discord.Embed=None, file:discord.File=None, embeddify:bool=None,
+            image_url:str=None, embeddify_file:bool=True, **kwargs) -> typing.Tuple[str, discord.Embed]:
+
+        if embeddify is None and image_url is not None:
+            embeddify = True
+        if embeddify is None:
+            embeddify = self.embeddify
+
+        # See if we need to check channel permissions at all
+        if embeddify is False or embed is not None:
+            should_not_embed = True
+        else:
+            try:
+                try:
+                    messageable_channel = messageable.channel
+                except AttributeError:
+                    messageable_channel = messageable
+                channel_permissions: discord.Permissions = messageable_channel.permissions_for(messageable.guild.me)
+                missing_embed_permission = not discord.Permissions(embed_links=True).is_subset(channel_permissions)
+            except AttributeError:
+                missing_embed_permission = False
+            should_not_embed = any([
+                missing_embed_permission,
+                embeddify is False,
+                embed is not None,
+            ])
+
+        # Can't embed? Just send it normally
+        if should_not_embed:
+            return content, embed
+
+        # No current embed, and we _want_ to embed it? Alright!
+        embed = discord.Embed(description=content, colour=random.randint(1, 0xffffff) or self.config.get('embed', dict()).get('colour', 0))
+        self.set_footer_from_config(embed)
+
+        # Set image
+        if image_url is not None:
+            embed.set_image(url=image_url)
+        if file and file.filename and embeddify_file:
+            file_is_image = any([
+                file.filename.casefold().endswith('.png'),
+                file.filename.casefold().endswith('.jpg'),
+                file.filename.casefold().endswith('.jpeg'),
+                file.filename.casefold().endswith('.gif'),
+                file.filename.casefold().endswith('.webm')
+            ])
+            if file_is_image:
+                embed.set_image(url=f'attachment://{file.filename}')
+
+        # Reset content
+        content = self.config.get('embed', dict()).get('content', '').format(ctx=self) or None
+
+        # Set author
+        author_data = self.config.get('embed', dict()).get('author')
+        if author_data.get('enabled', False):
+            name = author_data.get('name', '').format(ctx=self) or discord.Embed.Empty
+            url = author_data.get('url', '').format(ctx=self) or discord.Embed.Empty
+            author_data = {
+                'name': name,
+                'url': url,
+                'icon_url': self.user.avatar_url,
+            }
+            embed.set_author(**author_data)
+
+        # Return information
+        return content, embed
+
     async def _send_button_message(
             self, messageable, content=None, *, tts=False, embed=None, file=None,
             files=None, delete_after=None, nonce=None, allowed_mentions=None,
-            reference=None, mention_author=None, components=None):
+            reference=None, mention_author=None, components=None,
+            embeddify=None, image_url=None, embeddify_file=True):
         """
         An alternative send method so that we can add components to messages.
         """
 
         # Work out where we want to send to
         channel = await messageable._get_channel()
+        content, embed = self.get_context_message(
+            channel, content=content, embed=embed, file=file, embeddify=embeddify,
+            image_url=image_url, embeddify_file=embeddify_file,
+        )
         state = self._connection
         lock = getattr(messageable, "_send_interaction_response_lock", asyncio.Lock())
         await lock.acquire()
