@@ -862,7 +862,7 @@ class Bot(commands.AutoShardedBot):
         if tts:
             payload['tts'] = True
         if embed:
-            if r.method.startswith('/webhooks'):
+            if r.path.startswith('/webhooks'):
                 payload['embeds'] = [embed]
             else:
                 payload['embed'] = embed
