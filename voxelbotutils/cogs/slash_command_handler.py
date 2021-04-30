@@ -78,11 +78,9 @@ class SlashCommandHandler(utils.Cog):
         """
 
         if self.commands is not None:
-            return self.commands
-        url = "https://discord.com/api/applications/{application_id}/commands".format(application_id=await self.bot.get_application_id())
-        headers = {"Authorization": f"Bot {self.bot.config['token']}"}
-        site = await self.bot.session.get(url, headers=headers)
-        data = await site.json()
+            return self.commands#
+        r = discord.http.Route("GET", "/applications/{app_id}/commands", app_id=self.bot.application_id)
+        data = await self.bot.http.request(r)
         self.commands = [utils.interactions.ApplicationCommand.from_data(i) for i in data]
         return self.commands
 
@@ -99,7 +97,10 @@ class SlashCommandHandler(utils.Cog):
             'description': command.short_doc or f"Allows you to run the {command.qualified_name} command",
         }
         if is_option:
-            application_command_type = utils.interactions.ApplicationCommandOptionType.SUBCOMMAND_GROUP if isinstance(command, utils.SubcommandGroup) else utils.interactions.ApplicationCommandOptionType.SUBCOMMAND
+            if isinstance(command, utils.SubcommandGroup):
+                application_command_type = utils.interactions.ApplicationCommandOptionType.SUBCOMMAND_GROUP
+            else:
+                application_command_type = utils.interactions.ApplicationCommandOptionType.SUBCOMMAND
             kwargs.update({'type': application_command_type})
             application_command = utils.interactions.ApplicationCommandOption(**kwargs)
         else:

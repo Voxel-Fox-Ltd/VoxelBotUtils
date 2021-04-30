@@ -106,25 +106,56 @@ class ApplicationCommand(object):
         }
 
 
-class InteractionMessage(discord.Object):
+class InteractionMessage(discord.Message):
 
-    def __init__(self, guild, channel, author, content, state, data):
-        super().__init__(data['id'])
-        self.guild = guild
-        self.channel = channel
-        self.author = author
+    def __init__(self, *, state, channel, data, content):
         self._state = state
+        self.id = int(data['id'])
+        self.webhook_id = None
+        self.reactions = []
+        self.attachments = []
+        self.embeds = []
+        self.application = None
+        self.activity = None
+        self.channel = channel
+        self._edited_timestamp = None
+        self.type = discord.MessageType.default
+        self.pinned = False
+        self.flags = MessageFlags._from_value(0)
+        self.mention_everyone = False
+        self.tts = False
         self.content = content
-        self.mentions = []
-        self._handle_author(data['member']['user'])
+        self.nonce = data.get('nonce')
+        self.stickers = []
+        self.reference = None
 
-    @property
-    def edited_at(self):
-        return self.created_at
+        try:
+            self._handle_author(data['user'])
+        except KeyError:
+            self._handle_member(data['member'])
+        try:
+            self._handle_resolved(data['resolved'])
+        except KeyError:
+            pass
 
-    def _handle_author(self, author):
-        self.author = self._state.store_user(author)
-        if isinstance(self.guild, discord.Guild):
-            found = self.guild.get_member(self.author.id)
-            if found is not None:
-                self.author = found
+    def _handle_resolved(self, data):
+        mentions = []
+        try:
+            for uid, payload in data['users']:
+                user_payload = payload.copy()
+                try:
+                    user_payload.update({'member': data['members'][uid]})
+                except KeyError:
+                    pass
+                mentions.append(user_payload)
+        except KeyError:
+            pass
+        self._handle_mentions(mentions)
+        self._handle_mention_roles(data.get('roles', {}))
+
+    def _handle_mention_roles(self, role_mentions):
+        self.role_mentions = []
+        for _, payload in role_mentions.items():
+            payload.update({"permissions_new": payload.get("permissions", 0)})
+            r = discord.Role(guild=self.guild, state=self._state, data=payload)
+            self.role_mentions.append(r)

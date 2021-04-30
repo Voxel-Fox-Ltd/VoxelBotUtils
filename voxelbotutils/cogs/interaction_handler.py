@@ -17,26 +17,23 @@ class InteractionHandler(utils.Cog):
 
         # Make a string view
         view = commands.view.StringView(
-            f"<@{self.bot.user.id}> {payload['data']['name']} {' '.join([i['value'] for i in payload['data'].get('options', list())])}"
+            f"/{payload['data']['name']} {' '.join([i['value'] for i in payload['data'].get('options', list())])}"
         )
         self.logger.debug(f"Made up fake string for interaction command: {view.buffer}")
 
         # Get some objects we can use to make the interaction message
-        guild = self.bot.get_guild(int(payload['guild_id']))
-        channel = self.bot.get_channel(int(payload['channel_id']))
+        channel, guild = state._get_guild_channel(data)
         member_data = payload['member']
         member = discord.Member(data=member_data, guild=guild, state=self.bot._connection)
 
         # Make our fake message
         fake_message = utils.interactions.InteractionMessage(
-            guild=guild,
             channel=channel,
-            author=member,
             state=self.bot._connection,
             data=payload,
             content=view.buffer,
         )
-        ctx = cls(prefix=f"<@{self.bot.user.id}> ", view=view, bot=self.bot, message=fake_message)
+        ctx = cls(prefix=f"/", view=view, bot=self.bot, message=fake_message)
         ctx.data = payload
         ctx.is_slash_command = True
         ctx.original_author_id = member.id
