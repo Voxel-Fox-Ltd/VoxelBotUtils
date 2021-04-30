@@ -16,7 +16,7 @@ class Context(commands.Context):
     DESIRED_PERMISSIONS = discord.Permissions(embed_links=True)
 
     def __init__(self, *args, **kwargs):
-        commands.Context.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.original_author_id = self.author.id
         self.is_slash_command = False
         self._send_interaction_response_task = None
