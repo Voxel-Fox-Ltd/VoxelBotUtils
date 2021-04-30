@@ -71,20 +71,20 @@ class InteractionMessageable(Messageable):
 
         pass
 
-    async def _get_channel():
+    async def _get_channel(self, *args, **kwargs):
         raise NotImplementedError()
 
-    async def trigger_typing():
+    async def trigger_typing(self, *args, **kwargs):
         await InteractionTyping(self).do_typing()
 
-    def typing():
+    def typing(self, *args, **kwargs):
         return InteractionTyping(self)
 
-    async def fetch_message():
+    async def fetch_message(self, *args, **kwargs):
         raise Exception("This action is not available for this messagable type.")
 
-    async def pins():
+    async def pins(self, *args, **kwargs):
         raise Exception("This action is not available for this messagable type.")
 
-    def history():
+    def history(self, *args, **kwargs):
         raise Exception("This action is not available for this messagable type.")
