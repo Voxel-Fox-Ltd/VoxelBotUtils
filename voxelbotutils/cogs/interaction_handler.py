@@ -22,14 +22,15 @@ class InteractionHandler(utils.Cog):
         self.logger.debug(f"Made up fake string for interaction command: {view.buffer}")
 
         # Get some objects we can use to make the interaction message
+        state = self.bot._connection
         channel, guild = state._get_guild_channel(data)
         member_data = payload['member']
-        member = discord.Member(data=member_data, guild=guild, state=self.bot._connection)
+        member = discord.Member(data=member_data, guild=guild, state=state)
 
         # Make our fake message
         fake_message = utils.interactions.InteractionMessage(
             channel=channel,
-            state=self.bot._connection,
+            state=state,
             data=payload,
             content=view.buffer,
         )
