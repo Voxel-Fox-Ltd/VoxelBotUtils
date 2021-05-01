@@ -19,6 +19,9 @@ class ButtonStyle(enum.IntEnum):
 
 
 class Button(DisableableComponent):
+    """
+    A Discord UI button.
+    """
 
     __slots__ = ("label", "style", "custom_id", "emoji", "url", "disabled",)
 
@@ -26,6 +29,24 @@ class Button(DisableableComponent):
             self, label: str, style: ButtonStyle = ButtonStyle.PRIMARY, custom_id: str = None,
             emoji: typing.Union[str, discord.PartialEmoji] = None,
             url: str = None, disabled: bool = False):
+        """
+        Args:
+            label (str): The label that is added to the button.
+            style (ButtonStyle, optional): The style that the button should use.
+            custom_id (str, optional): The custom ID that should be assigned to the button. If you
+                don't provide one, then a UUID1 is generated automatically. Buttons with the LINK
+                style do not support the :attr:`custom_id` attribute, so it will be ignored.
+            emoji (typing.Union[str, discord.PartialEmoji], optional): The emoji that should be
+                added to the button.
+            url (str, optional): The URL that the button points to. This is only supported when the
+                LINK style is used.
+            disabled (bool, optional): Whether or not the button is clickable.
+
+        Raises:
+            ValueError: If a URL is passed and the style isn't set to `ButtonStyle.LINK` or vice-vera,
+                this will be raised.
+        """
+
         self.label = label
         self.style = style
         self.custom_id = custom_id or str(uuid.uuid1())
@@ -49,10 +70,6 @@ class Button(DisableableComponent):
             raise ValueError("Incompatible URL passed for button not of type link")
 
     def to_dict(self) -> dict:
-        """
-        Convert the current button into an API-friendly dict
-        """
-
         v = {
             "type": 2,
             "label": self.label,
@@ -81,9 +98,15 @@ class Button(DisableableComponent):
         return v
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data: dict) -> 'Button':
         """
         Construct an instance of a button from an API response.
+
+        Args:
+            data (dict): The payload data that the button should be constructed from.
+
+        Returns:
+            Button: The button that the payload describes.
         """
 
         emoji = data.get("emoji")
@@ -102,6 +125,9 @@ class Button(DisableableComponent):
 
 
 class ButtonInteractionPayload(InteractionMessageable):
+    """
+    An interaction messageable that comes from a button interaction.
+    """
 
     __slots__ = ("button", "user", "message", "guild", "channel", "_state", "data")
     ACK_RESPONSE_TYPE = 6

@@ -7,7 +7,7 @@ from . import utils
 
 class ConnectEvent(utils.Cog):
 
-    async def send_webhook(self, event_name:str, text:str, username:str, logger:str) -> bool:
+    async def send_webhook(self, event_name: str, text: str, username: str, logger: str) -> bool:
         """
         Send a webhook to the bot specified event webhook url.
         """
@@ -37,12 +37,12 @@ class ConnectEvent(utils.Cog):
         return True
 
     @utils.Cog.listener()
-    async def on_shard_connect(self, shard_id:int):
+    async def on_shard_connect(self, shard_id: int):
         """
         Ping a given webhook when the shard ID is connected.
         """
 
-        application_id = await self.bot.get_application_id()
+        application_id = await self.bot.application_id
         await self.send_webhook(
             "shard_connect",
             f"Shard connect event just pinged for shard ID `{shard_id}` - {dt.utcnow().strftime('%X.%f')}",
@@ -51,12 +51,12 @@ class ConnectEvent(utils.Cog):
         )
 
     @utils.Cog.listener()
-    async def on_shard_ready(self, shard_id:int):
+    async def on_shard_ready(self, shard_id: int):
         """
         Ping a given webhook when the shard ID becomes ready.
         """
 
-        application_id = await self.bot.get_application_id()
+        application_id = await self.bot.application_id
         await self.send_webhook(
             "shard_ready",
             f"Shard ready event just pinged for shard ID `{shard_id}` - {dt.utcnow().strftime('%X.%f')}",
@@ -70,7 +70,7 @@ class ConnectEvent(utils.Cog):
         Ping a given webhook when the bot becomes ready.
         """
 
-        application_id = await self.bot.get_application_id()
+        application_id = await self.bot.application_id
         await self.send_webhook(
             "bot_ready",
             f"Bot ready event just pinged for instance with shards `{self.bot.shard_ids}` - {dt.utcnow().strftime('%X.%f')}",
@@ -79,12 +79,12 @@ class ConnectEvent(utils.Cog):
         )
 
     @utils.Cog.listener()
-    async def on_shard_disconnect(self, shard_id:int):
+    async def on_shard_disconnect(self, shard_id: int):
         """
         Ping a given webhook when the shard ID is disconnected.
         """
 
-        application_id = await self.bot.get_application_id()
+        application_id = await self.bot.application_id
         await self.send_webhook(
             "shard_disconnect",
             f"Shard disconnect event just pinged for shard ID `{shard_id}` - {dt.utcnow().strftime('%X.%f')}",
@@ -98,7 +98,7 @@ class ConnectEvent(utils.Cog):
         Ping a given webhook when the bot is disconnected.
         """
 
-        application_id = await self.bot.get_application_id()
+        application_id = await self.bot.application_id
         await self.send_webhook(
             "bot_disconnect",
             f"Bot disconnect event just pinged for instance with shards `{self.bot.shard_ids or [0]}` - {dt.utcnow().strftime('%X.%f')}",
@@ -107,12 +107,12 @@ class ConnectEvent(utils.Cog):
         )
 
     @utils.Cog.listener()
-    async def on_shard_resumed(self, shard_id:int):
+    async def on_shard_resumed(self, shard_id: int):
         """
         Ping a given webhook when the shard ID is resumed.
         """
 
-        application_id = await self.bot.get_application_id()
+        application_id = await self.bot.application_id
         await self.send_webhook(
             "shard_connect",
             f"Shard resumed event just pinged for shard ID `{shard_id}` - {dt.utcnow().strftime('%X.%f')}",
@@ -126,7 +126,7 @@ class ConnectEvent(utils.Cog):
         Ping a given webhook when the bot is resumed.
         """
 
-        application_id = await self.bot.get_application_id()
+        application_id = await self.bot.application_id
         await self.send_webhook(
             "bot_connect",
             f"Bot resumed event just pinged for instance with shards `{self.bot.shard_ids or [0]}` - {dt.utcnow().strftime('%X.%f')}",
@@ -135,12 +135,12 @@ class ConnectEvent(utils.Cog):
         )
 
     @utils.Cog.listener()
-    async def on_guild_join(self, guild:discord.Guild):
+    async def on_guild_join(self, guild: discord.Guild):
         """
         Ping a given webhook when the bot is added to a guild.
         """
 
-        application_id = await self.bot.get_application_id()
+        application_id = await self.bot.application_id
         await self.send_webhook(
             "guild_join",
             f"Added to new guild - ``{guild.name}``/``{guild.id}`` (`{guild.member_count}` members)",
@@ -149,12 +149,12 @@ class ConnectEvent(utils.Cog):
         )
 
     @utils.Cog.listener()
-    async def on_guild_remove(self, guild:discord.Guild):
+    async def on_guild_remove(self, guild: discord.Guild):
         """
         Ping a given webhook when the bot is removed from a guild.
         """
 
-        application_id = await self.bot.get_application_id()
+        application_id = await self.bot.application_id
         if guild.me:
             try:
                 member_count = guild.member_count
@@ -181,6 +181,6 @@ class ConnectEvent(utils.Cog):
             )
 
 
-def setup(bot:utils.Bot):
+def setup(bot: utils.Bot):
     x = ConnectEvent(bot)
     bot.add_cog(x)

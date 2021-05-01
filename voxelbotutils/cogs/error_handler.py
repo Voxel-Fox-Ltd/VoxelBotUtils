@@ -187,17 +187,17 @@ class ErrorHandler(utils.Cog):
         # (commands.CommandRegistrationError, lambda ctx, error: ""),
     )
 
-    async def send_to_ctx_or_author(self, ctx:utils.Context, text:str, author_text:str=None) -> typing.Optional[discord.Message]:
+    async def send_to_ctx_or_author(self, ctx: utils.Context, text: str, author_text: str = None) -> typing.Optional[discord.Message]:
         """
         Tries to send the given text to ctx, but failing that, tries to send it to the author
         instead. If it fails that too, it just stays silent.
         """
 
         try:
-            return await ctx.send(text, allowed_mentions=discord.AllowedMentions(users=False, roles=False, everyone=False))
+            return await ctx.send(text, allowed_mentions=discord.AllowedMentions.none())
         except discord.Forbidden:
             try:
-                return await ctx.author.send(author_text or text, allowed_mentions=discord.AllowedMentions(users=False, roles=False, everyone=False))
+                return await ctx.author.send(author_text or text, allowed_mentions=discord.AllowedMentions.none())
             except discord.Forbidden:
                 pass
         except discord.NotFound:
@@ -205,7 +205,7 @@ class ErrorHandler(utils.Cog):
         return None
 
     @utils.Cog.listener()
-    async def on_command_error(self, ctx:utils.Context, error:commands.CommandError):
+    async def on_command_error(self, ctx: utils.Context, error: commands.CommandError):
         """
         Global error handler for all the commands around wew.
         """
@@ -303,6 +303,6 @@ class ErrorHandler(utils.Cog):
             logger.error(line)
 
 
-def setup(bot:utils.Bot):
+def setup(bot: utils.Bot):
     x = ErrorHandler(bot)
     bot.add_cog(x)

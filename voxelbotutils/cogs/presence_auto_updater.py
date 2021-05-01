@@ -12,7 +12,7 @@ class PresenceAutoUpdater(utils.Cog):
     TWITCH_SEARCH_URL = "https://api.twitch.tv/helix/streams"
     TWITCH_USERNAME_URL = "https://api.twitch.tv/helix/users"
 
-    def __init__(self, bot:utils.Bot):
+    def __init__(self, bot: utils.Bot):
         super().__init__(bot)
         self.presence_auto_update_loop.start()
         self.presence_before = None
@@ -24,7 +24,7 @@ class PresenceAutoUpdater(utils.Cog):
     def cog_unload(self):
         self.presence_auto_update_loop.cancel()
 
-    async def get_app_token(self, force_refresh:bool=False) -> str:
+    async def get_app_token(self, force_refresh: bool = False) -> str:
         """
         Get a valid app token from Twitch
         """
@@ -68,9 +68,9 @@ class PresenceAutoUpdater(utils.Cog):
         # And return the app token
         return self._twitch_app_token
 
-    async def get_twitch_user_id(self, username:str) -> str:
+    async def get_twitch_user_id(self, username: str) -> str:
         """
-        Get the user ID for a given Twitch username
+        Get the user ID for a given Twitch username.
         """
 
         if username in self.twitch_user_ids:
@@ -176,6 +176,6 @@ class PresenceAutoUpdater(utils.Cog):
         await asyncio.sleep(1)  # Let's sleep here so we don't override our on_ready's set default presence
 
 
-def setup(bot:utils.Bot):
+def setup(bot: utils.Bot):
     x = PresenceAutoUpdater(bot)
     bot.add_cog(x)

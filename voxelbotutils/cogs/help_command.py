@@ -9,10 +9,13 @@ from . import utils
 
 class CustomHelpCommand(commands.MinimalHelpCommand):
 
-    HELP_COMMAND_HIDDEN_ERRORS = (commands.DisabledCommand, commands.NotOwner, utils.errors.NotBotSupport, utils.errors.InvokedMetaCommand,)
+    HELP_COMMAND_HIDDEN_ERRORS = (
+        commands.DisabledCommand, commands.NotOwner,
+        utils.errors.NotBotSupport, utils.errors.InvokedMetaCommand,
+    )
 
     @classmethod
-    async def filter_commands_classmethod(cls, ctx, commands_to_filter:typing.List[utils.Command]) -> typing.List[utils.Command]:
+    async def filter_commands_classmethod(cls, ctx, commands_to_filter: typing.List[utils.Command]) -> typing.List[utils.Command]:
         """
         Filter the command list down into a list of runnable commands.
         """
@@ -30,17 +33,17 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
             returned_commands.append(comm)
         return returned_commands
 
-    async def filter_commands(self, commands_to_filter:typing.List[utils.Command]) -> typing.List[utils.Command]:
+    async def filter_commands(self, commands_to_filter: typing.List[utils.Command]) -> typing.List[utils.Command]:
         """
         Filter the command list down into a list of runnable commands.
         """
 
         return await self.filter_commands_classmethod(self.context, commands_to_filter)
 
-    def get_command_signature(self, command:commands.Command):
+    def get_command_signature(self, command: commands.Command):
         return '{0.clean_prefix}{1.qualified_name} {1.signature}'.format(self, command)
 
-    async def send_cog_help(self, cog:utils.Cog):
+    async def send_cog_help(self, cog: commands.Cog):
         """
         Sends help command for a cog.
         """
@@ -49,7 +52,7 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
             cog: cog.get_commands()
         })
 
-    async def send_group_help(self, group:commands.Group):
+    async def send_group_help(self, group: commands.Group):
         """
         Sends the help command for a given group.
         """
@@ -58,7 +61,7 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
             group: group.commands
         })
 
-    async def send_command_help(self, command:utils.Command):
+    async def send_command_help(self, command: commands.Command):
         """
         Sends the help command for a given command.
         """
@@ -67,7 +70,7 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
             command: []
         })
 
-    async def send_bot_help(self, mapping:typing.Dict[typing.Optional[utils.Cog], typing.List[commands.Command]]):
+    async def send_bot_help(self, mapping: typing.Dict[typing.Optional[utils.Cog], typing.List[commands.Command]]):
         """
         Sends all help to the given channel.
         """
@@ -167,7 +170,7 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         embed.colour = random.randint(1, 0xffffff)
         return embed
 
-    def get_help_line(self, command:utils.Command, with_signature:bool=False):
+    def get_help_line(self, command: utils.Command, with_signature: bool = False):
         """
         Gets a doc line of help for a given command.
         """
@@ -194,7 +197,7 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
 
 class Help(utils.Cog):
 
-    def __init__(self, bot:utils.Bot):
+    def __init__(self, bot: utils.Bot):
         super().__init__(bot)
         self._original_help_command = bot.help_command
         bot.help_command = CustomHelpCommand(dm_help=True)
@@ -221,7 +224,6 @@ class Help(utils.Cog):
         return await ctx.send_help(*args)
 
 
-def setup(bot:utils.Bot):
+def setup(bot: utils.Bot):
     x = Help(bot)
     bot.add_cog(x)
-    bot.get_command("help")

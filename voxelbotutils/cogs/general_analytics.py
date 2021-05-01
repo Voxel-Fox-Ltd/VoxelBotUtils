@@ -30,7 +30,7 @@ class Analytics(utils.Cog):
     cm1 : custom metric 1    : ISO-format timestamp
     """
 
-    def __init__(self, bot):
+    def __init__(self, bot: utils.Bot):
         super().__init__(bot)
         self.post_statsd_guild_count.start()
         self.post_topgg_guild_count.start()
@@ -129,7 +129,7 @@ class Analytics(utils.Cog):
         await self.bot.wait_until_ready()
 
     @utils.Cog.listener()
-    async def on_socket_raw_send(self, payload:dict):
+    async def on_socket_raw_send(self, payload: dict):
         """
         A raw socket response message send Discord.
         """
@@ -160,7 +160,7 @@ class Analytics(utils.Cog):
                 pass
 
     @utils.Cog.listener()
-    async def on_socket_response(self, payload:dict):
+    async def on_socket_response(self, payload: dict):
         """
         A raw socket response message from Discord.
         """
@@ -172,7 +172,7 @@ class Analytics(utils.Cog):
                 pass
 
     @utils.Cog.listener()
-    async def on_guild_join(self, guild:discord.Guild):
+    async def on_guild_join(self, guild: discord.Guild):
         """
         Pinged when the bot joins a guild
         """
@@ -181,7 +181,7 @@ class Analytics(utils.Cog):
             stats.increment("discord.stats.guild_joins")
 
     @utils.Cog.listener()
-    async def on_guild_remove(self, guild:discord.Guild):
+    async def on_guild_remove(self, guild: discord.Guild):
         """
         Pinged when the bot joins a guild
         """
@@ -190,6 +190,6 @@ class Analytics(utils.Cog):
             stats.decrement("discord.stats.guild_joins")
 
 
-def setup(bot:utils.Bot):
+def setup(bot: utils.Bot):
     x = Analytics(bot)
     bot.add_cog(x)

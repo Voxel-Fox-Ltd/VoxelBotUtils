@@ -50,7 +50,7 @@ class InteractionHandler(utils.Cog):
         return ctx
 
     @utils.Cog.listener()
-    async def on_socket_response(self, payload:dict):
+    async def on_socket_response(self, payload: dict):
         """
         Process any interaction create payloads we may receive.
         """
@@ -88,6 +88,6 @@ class InteractionHandler(utils.Cog):
             self.logger.warning("Invalid interaction type received - %d" % (payload['d']['type']))
 
 
-def setup(bot:utils.Bot):
+def setup(bot: utils.Bot):
     x = InteractionHandler(bot)
     bot.add_cog(x)

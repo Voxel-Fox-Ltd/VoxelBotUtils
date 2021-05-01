@@ -39,15 +39,18 @@ class SlashCommandHandler(utils.Cog):
         inspect._empty: utils.interactions.ApplicationCommandOptionType.STRING,
     }
 
-    def __init__(self, bot:utils.Bot):
+    def __init__(self, bot: utils.Bot):
         super().__init__(bot)
         self.commands: typing.List[utils.interactions.ApplicationCommand] = None
         self.application_id = None
 
     @staticmethod
-    def is_typing_optional(annotation):
+    def is_typing_optional(annotation) -> bool:
         """
-        Stolen from Rapptz - https://github.com/Rapptz/discord.py/blob/60f804c63298d5f46a5ae4352b049d91b16d1b8c/discord/ext/commands/core.py#L975-L984
+        Returns whether or not the annotation is a `typing.Optional`.
+
+        Stolen from Rapptz -
+        discord.py/blob/60f804c63298d5f46a5ae4352b049d91b16d1b8c/discord/ext/commands/core.py#L975-L984
         """
 
         try:
@@ -66,13 +69,17 @@ class SlashCommandHandler(utils.Cog):
         return annotation.__args__[-1] is type(None)
 
     @staticmethod
-    def get_non_optional_type(annotation):
+    def get_non_optional_type(annotation) -> typing.Optional[typing.Any]:
+        """
+        Gets the optional type out of a `typing.Optional`.
+        """
+
         try:
             return annotation.__args__[0]
         except Exception:
             return None
 
-    async def get_slash_commands(self):
+    async def get_slash_commands(self) -> typingList[utils.interactions.ApplicationCommand]:
         """
         Get the application's global command objects.
         """
@@ -85,8 +92,8 @@ class SlashCommandHandler(utils.Cog):
         return self.commands
 
     async def convert_into_application_command(
-            self, ctx, command:typing.Union[utils.Command, utils.Group], *,
-            is_option:bool=False) -> utils.interactions.ApplicationCommand:
+            self, ctx, command: typing.Union[utils.Command, utils.Group], *,
+            is_option: bool = False) -> utils.interactions.ApplicationCommand:
         """
         Convert a given Discord command into an application command.
         """
@@ -144,26 +151,37 @@ class SlashCommandHandler(utils.Cog):
         # Go through its subcommands
         if isinstance(command, utils.Group):
             subcommands = list(command.commands)
-            valid_subcommands = [i for i in await self.bot.help_command.filter_commands_classmethod(ctx, subcommands) if getattr(i, 'add_slash_command', True)]
+            valid_subcommands = []
+            for i in self.bot.help_command.filter_commands_classmethod(ctx, subcommands):
+                if getattr(i, 'add_slash_command', True):
+                    valid_subcommands.append(i)
             for subcommand in valid_subcommands:
-                application_command.add_option(await self.convert_into_application_command(ctx, subcommand, is_option=True))
+                converted_option = await self.convert_into_application_command(ctx, subcommand, is_option=True)
+                application_command.add_option(converted_option)
 
         # Return command
         return application_command
 
-    async def convert_all_into_application_command(self, ctx):
+    async def convert_all_into_application_command(self, ctx: utils.Context) -> typing.List[utils.interactions.ApplicationCommand]:
+        """
+        Convert all of the commands for the bot into application commands.
+        """
+
         slash_commands = []
         commands = list(ctx.bot.commands)
-        filtered_commands = [i for i in await self.bot.help_command.filter_commands_classmethod(ctx, commands) if getattr(i, 'add_slash_command', True)]
+        filtered_commands = []
+        for i in self.bot.help_command.filter_commands_classmethod(ctx, commands):
+            if getattr(i, 'add_slash_command', True):
+                filtered_commands.append(i)
         for command in filtered_commands:
             slash_commands.append(await self.convert_into_application_command(ctx, command))
         return slash_commands
 
-    @commands.command(aliases=['addslashcommands'], cls=utils.Command)
+    @utils.command(aliases=['addslashcommands'])
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
-    async def addinteractioncommands(self, ctx, guild:bool, *, command_name:str=None):
+    async def addinteractioncommands(self, ctx, guild: bool, *, command_name: str = None):
         """
         Adds all of the bot's interaction commands to the global interaction handler.
         """
@@ -201,21 +219,17 @@ class SlashCommandHandler(utils.Cog):
                     await self.bot.bulk_create_guild_application_commands(ctx.guild, commands_to_add)
                 else:
                     await self.bot.bulk_create_global_application_commands(commands_to_add)
-                # self.logger.info(f"Added slash command for {command.name}")
             except discord.HTTPException as e:
-                # file_handle = io.StringIO(json.dumps(command.to_json(), indent=4))
-                # file = discord.File(file_handle, filename="command.json")
-                # await ctx.send(f"Failed to add `{command.name}` as a command - {e}", file=file)
                 raise
 
         # And we done
         await ctx.reply("Done.", embeddify=False)
 
-    @commands.command(aliases=['removeslashcommands'], cls=utils.Command)
+    @utils.command(aliases=['removeslashcommands'])
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
-    async def removeinteractioncommands(self, ctx, guild:bool, *, command_name:str=None):
+    async def removeinteractioncommands(self, ctx, guild: bool, *, command_name: str = None):
         """
         Removes all of the bot's interaction commands from the global interaction handler.
         """
@@ -250,6 +264,6 @@ class SlashCommandHandler(utils.Cog):
         await ctx.reply("Done.", embeddify=False)
 
 
-def setup(bot):
+def setup(bot: utils.Bot):
     x = SlashCommandHandler(bot)
     bot.add_cog(x)

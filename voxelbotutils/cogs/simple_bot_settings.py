@@ -8,11 +8,11 @@ from . import utils
 
 class BotSettings(utils.Cog):
 
-    @commands.command(cls=utils.Command, add_slash_command=False)
+    @utils.command(add_slash_command=False)
     @commands.bot_has_permissions(send_messages=True)
     @commands.guild_only()
     @utils.checks.is_config_set('database', 'enabled')
-    async def prefix(self, ctx:utils.Context, *, new_prefix:str=None):
+    async def prefix(self, ctx: utils.Context, *, new_prefix: str = None):
         """
         Changes the prefix that the bot uses.
         """
@@ -20,8 +20,9 @@ class BotSettings(utils.Cog):
         # See if the prefix was actually specified
         prefix_column = self.bot.config.get('guild_settings_prefix_column', 'prefix')
         if new_prefix is None:
+            current_prefix = self.bot.guild_settings[ctx.guild.id][prefix_column] or self.bot.config['default_prefix']
             return await ctx.send(
-                f"The current prefix is `{self.bot.guild_settings[ctx.guild.id][prefix_column] or self.bot.config['default_prefix']}`.",
+                f"The current prefix is `{current_prefix}`.",
                 allowed_mentions=discord.AllowedMentions.none(),
             )
 
@@ -48,7 +49,7 @@ class BotSettings(utils.Cog):
             allowed_mentions=discord.AllowedMentions.none(),
         )
 
-    @commands.command(cls=utils.Command, aliases=['follow'], add_slash_command=False)
+    @utils.command(aliases=['follow'], add_slash_command=False)
     @commands.has_permissions(manage_guild=True, manage_channels=True)
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, manage_channels=True)
     @commands.guild_only()
@@ -103,6 +104,6 @@ class BotSettings(utils.Cog):
         return await ctx.send("Now following the bot's updates channel!")
 
 
-def setup(bot:utils.Bot):
+def setup(bot: utils.Bot):
     x = BotSettings(bot)
     bot.add_cog(x)

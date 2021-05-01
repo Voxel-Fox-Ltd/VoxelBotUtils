@@ -9,20 +9,20 @@ from .. import __version__
 
 class BotStats(utils.Cog):
 
-    @commands.command(aliases=['git', 'code'], cls=utils.Command, add_slash_command=False)
+    @utils.command(aliases=['git', 'code'], add_slash_command=False)
     @utils.checks.is_config_set('command_data', 'github_link')
     @commands.bot_has_permissions(send_messages=True)
-    async def github(self, ctx:utils.Context):
+    async def github(self, ctx: utils.Context):
         """
         Sends the GitHub Repository link.
         """
 
         await ctx.send(f"<{self.bot.config['command_data']['github_link']}>", embeddify=False)
 
-    @commands.command(cls=utils.Command)
+    @utils.command()
     @commands.bot_has_permissions(send_messages=True)
     @utils.checks.is_config_set('oauth', 'enabled')
-    async def invite(self, ctx:utils.Context):
+    async def invite(self, ctx: utils.Context):
         """
         Gives you the bot's invite link.
         """
@@ -34,10 +34,10 @@ class BotStats(utils.Cog):
         oauth['permissions'] = permissions
         await ctx.send(f"<{self.bot.get_invite_link(**oauth)}>", embeddify=False)
 
-    @commands.command(cls=utils.Command)
+    @utils.command()
     @commands.bot_has_permissions(send_messages=True)
     @utils.checks.is_config_set('command_data', 'vote_command_enabled')
-    async def vote(self, ctx:utils.Context):
+    async def vote(self, ctx: utils.Context):
         """
         Gives you a link to vote for the bot.
         """
@@ -52,10 +52,10 @@ class BotStats(utils.Cog):
             return await ctx.send("Despite being enabled, the vote command has no vote links to provide :/")
         return await ctx.send("\n".join(output_strings), embeddify=False)
 
-    @commands.command(cls=utils.Command, aliases=['status', 'botinfo'], add_slash_command=False)
+    @utils.command(aliases=['status', 'botinfo'], add_slash_command=False)
     @commands.bot_has_permissions(send_messages=True, embed_links=True)
     @utils.checks.is_config_set('command_data', 'stats_command_enabled')
-    async def stats(self, ctx:utils.Context):
+    async def stats(self, ctx: utils.Context):
         """
         Gives you the stats for the bot.
         """
@@ -123,6 +123,6 @@ class BotStats(utils.Cog):
         await ctx.send(embed=embed)
 
 
-def setup(bot:utils.Bot):
+def setup(bot: utils.Bot):
     x = BotStats(bot)
     bot.add_cog(x)
