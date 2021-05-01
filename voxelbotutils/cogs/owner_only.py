@@ -72,6 +72,8 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         Pings a command to be run over redis.
         """
 
+        if not content:
+            raise utils.errors.MissingRequiredArgumentString("content")
         async with self.bot.redis() as re:
             await re.publish("RunRedisEval", {
                 'channel_id': ctx.channel.id,
@@ -90,6 +92,8 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         """
 
         # Get command
+        if not command_name:
+            raise utils.errors.MissingRequiredArgumentString("command_name")
         command = self.bot.get_command(command_name)
         if command is None:
             return await ctx.send(f"I couldn't find a command named `{command_name}`.", allowed_mentions=discord.AllowedMentions.none())
@@ -202,6 +206,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         """
         Evaluates some Python code.
         """
+
+        if not content:
+            raise utils.errors.MissingRequiredArgumentString("content")
 
         # Make the environment
         env = {
@@ -326,7 +333,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         # Output which cogs have been reloaded
         if len(reloaded_cogs) == 1:
             await ctx.send(f"Reloaded: `{reloaded_cogs[0]}`")
-        else:
+        elif reloaded_cogs:
             await ctx.send("Reloaded:\n`" + "`\n`".join(reloaded_cogs) + "`")
         return
 
