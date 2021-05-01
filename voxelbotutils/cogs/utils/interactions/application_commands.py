@@ -130,9 +130,10 @@ class InteractionMessage(discord.Message):
         self.reference = None
 
         try:
-            self._handle_author(data['user'])
-        except KeyError:
+            self._handle_author(data['member']['user'])
             self._handle_member(data['member'])
+        except KeyError:
+            self._handle_author(data['user'])
         try:
             self._handle_resolved(data['resolved'])
         except KeyError:
