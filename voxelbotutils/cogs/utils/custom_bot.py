@@ -961,10 +961,10 @@ class Bot(commands.AutoShardedBot):
             raise InvalidArgument('files parameter must be a list of File')
 
         # Fix up the components
-        if components and isinstance(components, list):
-            components = [i.to_dict() for i in components]
-        elif components:
-            components = [components.to_dict()]
+        if components:
+            if not isinstance(components, interactions.components.MessageComponents):
+                raise TypeError(f"Components kwarg must be of type {interactions.components.MessageComponents}")
+            components = components.to_dict()
 
         # Get our playload data
         if isinstance(channel, (list, tuple)):
@@ -1089,10 +1089,9 @@ class Bot(commands.AutoShardedBot):
             pass
         else:
             if components is not None:
-                if isinstance(components, list):
-                    fields['components'] = [i.to_dict() for i in components]
-                else:
-                    fields['components'] = [components.to_dict()]
+                if not isinstance(components, interactions.components.MessageComponents):
+                    raise TypeError(f"Components kwarg must be of type {interactions.components.MessageComponents}")
+                fields['components'] = components.to_dict()
 
         # Make the supress flag
         try:
