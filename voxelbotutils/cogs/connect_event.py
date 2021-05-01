@@ -42,7 +42,7 @@ class ConnectEvent(utils.Cog):
         Ping a given webhook when the shard ID is connected.
         """
 
-        application_id = await self.bot.application_id
+        application_id = self.bot.application_id
         await self.send_webhook(
             "shard_connect",
             f"Shard connect event just pinged for shard ID `{shard_id}` - {dt.utcnow().strftime('%X.%f')}",
@@ -56,7 +56,7 @@ class ConnectEvent(utils.Cog):
         Ping a given webhook when the shard ID becomes ready.
         """
 
-        application_id = await self.bot.application_id
+        application_id = self.bot.application_id
         await self.send_webhook(
             "shard_ready",
             f"Shard ready event just pinged for shard ID `{shard_id}` - {dt.utcnow().strftime('%X.%f')}",
@@ -70,7 +70,7 @@ class ConnectEvent(utils.Cog):
         Ping a given webhook when the bot becomes ready.
         """
 
-        application_id = await self.bot.application_id
+        application_id = self.bot.application_id
         await self.send_webhook(
             "bot_ready",
             f"Bot ready event just pinged for instance with shards `{self.bot.shard_ids}` - {dt.utcnow().strftime('%X.%f')}",
@@ -84,7 +84,7 @@ class ConnectEvent(utils.Cog):
         Ping a given webhook when the shard ID is disconnected.
         """
 
-        application_id = await self.bot.application_id
+        application_id = self.bot.application_id
         await self.send_webhook(
             "shard_disconnect",
             f"Shard disconnect event just pinged for shard ID `{shard_id}` - {dt.utcnow().strftime('%X.%f')}",
@@ -98,7 +98,7 @@ class ConnectEvent(utils.Cog):
         Ping a given webhook when the bot is disconnected.
         """
 
-        application_id = await self.bot.application_id
+        application_id = self.bot.application_id
         await self.send_webhook(
             "bot_disconnect",
             f"Bot disconnect event just pinged for instance with shards `{self.bot.shard_ids or [0]}` - {dt.utcnow().strftime('%X.%f')}",
@@ -112,7 +112,7 @@ class ConnectEvent(utils.Cog):
         Ping a given webhook when the shard ID is resumed.
         """
 
-        application_id = await self.bot.application_id
+        application_id = self.bot.application_id
         await self.send_webhook(
             "shard_connect",
             f"Shard resumed event just pinged for shard ID `{shard_id}` - {dt.utcnow().strftime('%X.%f')}",
@@ -126,7 +126,7 @@ class ConnectEvent(utils.Cog):
         Ping a given webhook when the bot is resumed.
         """
 
-        application_id = await self.bot.application_id
+        application_id = self.bot.application_id
         await self.send_webhook(
             "bot_connect",
             f"Bot resumed event just pinged for instance with shards `{self.bot.shard_ids or [0]}` - {dt.utcnow().strftime('%X.%f')}",
@@ -140,7 +140,7 @@ class ConnectEvent(utils.Cog):
         Ping a given webhook when the bot is added to a guild.
         """
 
-        application_id = await self.bot.application_id
+        application_id = self.bot.application_id
         await self.send_webhook(
             "guild_join",
             f"Added to new guild - ``{guild.name}``/``{guild.id}`` (`{guild.member_count}` members)",
@@ -154,7 +154,7 @@ class ConnectEvent(utils.Cog):
         Ping a given webhook when the bot is removed from a guild.
         """
 
-        application_id = await self.bot.application_id
+        application_id = self.bot.application_id
         if guild.me:
             try:
                 member_count = guild.member_count
