@@ -333,7 +333,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         # Output which cogs have been reloaded
         if len(reloaded_cogs) == 1:
             await ctx.send(f"Reloaded: `{reloaded_cogs[0]}`")
-        else:
+        elif reloaded_cogs:
             await ctx.send("Reloaded:\n`" + "`\n`".join(reloaded_cogs) + "`")
         return
 
