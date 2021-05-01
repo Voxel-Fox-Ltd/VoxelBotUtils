@@ -23,7 +23,7 @@ class InteractionHandler(utils.Cog):
 
         # Get some objects we can use to make the interaction message
         state = self.bot._connection
-        channel, guild = state._get_guild_channel(data)
+        channel, guild = state._get_guild_channel(payload)
         member_data = payload['member']
         member = discord.Member(data=member_data, guild=guild, state=state)
 
