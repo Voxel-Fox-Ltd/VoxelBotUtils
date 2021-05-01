@@ -23,7 +23,7 @@ from .redis import RedisConnection
 from .statsd import StatsdConnection
 from .analytics_log_handler import AnalyticsLogHandler
 from .upgrade_chat import UpgradeChat
-from . import interactions
+from . import interactions, MessageComponents
 from .. import all_packages as all_vfl_package_names
 
 
@@ -932,7 +932,7 @@ class Bot(commands.AutoShardedBot):
             files: typing.List[discord.File] = None, delete_after: float = None,
             nonce: str = None, allowed_mentions: discord.AllowedMentions = None,
             reference: discord.MessageReference = None, mention_author: bool = None,
-            components: interactions.components.MessageComponents = None,
+            components: MessageComponents = None,
             ephemeral: bool = False, embeddify: bool = None,
             image_url: bool = None, embeddify_file: bool = True):
         """
@@ -985,8 +985,8 @@ class Bot(commands.AutoShardedBot):
 
         # Fix up the components
         if components:
-            if not isinstance(components, interactions.components.MessageComponents):
-                raise TypeError(f"Components kwarg must be of type {interactions.components.MessageComponents}")
+            if not isinstance(components, MessageComponents):
+                raise TypeError(f"Components kwarg must be of type {MessageComponents}")
             components = components.to_dict()
 
         # Get our playload data
@@ -1112,8 +1112,8 @@ class Bot(commands.AutoShardedBot):
             pass
         else:
             if components is not None:
-                if not isinstance(components, interactions.components.MessageComponents):
-                    raise TypeError(f"Components kwarg must be of type {interactions.components.MessageComponents}")
+                if not isinstance(components, MessageComponents):
+                    raise TypeError(f"Components kwarg must be of type {MessageComponents}")
                 fields['components'] = components.to_dict()
 
         # Make the supress flag
