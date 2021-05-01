@@ -23,9 +23,7 @@ class InteractionHandler(utils.Cog):
 
         # Get some objects we can use to make the interaction message
         state = self.bot._connection
-        channel, guild = state._get_guild_channel(payload)
-        member_data = payload['member']
-        member = discord.Member(data=member_data, guild=guild, state=state)
+        channel, _ = state._get_guild_channel(payload)
 
         # Make our fake message
         fake_message = utils.interactions.InteractionMessage(
@@ -34,18 +32,21 @@ class InteractionHandler(utils.Cog):
             data=payload,
             content=view.buffer,
         )
-        ctx = cls(prefix=f"/", view=view, bot=self.bot, message=fake_message)
+        self.logger.debug(f"Made up fake message for interaction command")
+        ctx = cls(prefix="/", view=view, bot=self.bot, message=fake_message)
+        self.logger.debug(f"Made up fake context for interaction command")
         ctx.data = payload
         ctx.is_slash_command = True
-        ctx.original_author_id = member.id
+        ctx.original_author_id = fake_message.author.id
         view.skip_string(ctx.prefix)
         invoker = view.get_word()
 
         # Make it work
         ctx.invoked_with = invoker
-        ctx.command = self.bot.all_commands.get(invoker)
+        ctx.command = self.bot.get_command(invoker)
 
         # Return context
+        self.logger.debug(f"Returning context object")
         return ctx
 
     @utils.Cog.listener()
@@ -67,6 +68,8 @@ class InteractionHandler(utils.Cog):
             ctx = await self.get_context_from_interaction(payload['d'])
             if ctx.command:
                 self.logger.debug("Invoking interaction context for command %s" % (ctx.command.name))
+            else:
+                self.logger.warning("No command found for interaction invoker %s" % (ctx.invoked_with))
             ctx._send_interaction_response_callback()
             await self.bot.invoke(ctx)
             return
