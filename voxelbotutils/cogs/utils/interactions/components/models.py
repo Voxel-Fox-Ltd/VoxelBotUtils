@@ -55,7 +55,9 @@ class ComponentHolder(BaseComponent):
         """
 
         for i in self.components:
-            if isinstance(i, DisableableComponent):
+            if isinstance(i, ComponentHolder):
+                i.disable_components()
+            elif isinstance(i, DisableableComponent):
                 i.disable()
 
     def enable_components(self) -> None:
@@ -65,7 +67,9 @@ class ComponentHolder(BaseComponent):
         """
 
         for i in self.components:
-            if isinstance(i, DisableableComponent):
+            if isinstance(i, ComponentHolder):
+                i.enable_components()
+            elif isinstance(i, DisableableComponent):
                 i.enable()
 
     def get_component(self, custom_id: str) -> typing.Optional[BaseComponent]:
