@@ -79,7 +79,7 @@ class SlashCommandHandler(utils.Cog):
         except Exception:
             return None
 
-    async def get_slash_commands(self) -> typingList[utils.interactions.ApplicationCommand]:
+    async def get_slash_commands(self) -> typing.List[utils.interactions.ApplicationCommand]:
         """
         Get the application's global command objects.
         """
