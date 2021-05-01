@@ -132,6 +132,7 @@ class ButtonInteractionPayload(InteractionMessageable):
     __slots__ = ("button", "user", "message", "guild", "channel", "_state", "data")
     ACK_RESPONSE_TYPE = 6
     ACK_IS_EDITABLE = False
+    IS_COMPONENT = True
 
     @classmethod
     def from_payload(cls, data, state):
