@@ -9,7 +9,7 @@ class Embed(discord.Embed):
     that I tend to do with them.
     """
 
-    def __init__(self, use_random_colour: bool = False, **kwargs):
+    def __init__(self, *args, use_random_colour: bool = False, **kwargs):
         """
         Args:
             use_random_colour (bool, optional): Whether or not to automatically use a random colour.
