@@ -5,8 +5,20 @@ import discord
 
 class Embed(discord.Embed):
     """
-    A small mod for :class:`discord.Embed` that allows for some of the more common things
-    that I tend to do with them.
+    A modification for Discord.py's :class:`discord.Embed` class to allow for args where
+    D.py uses kwargs, as well as inbuilt random colour generation and setting the author
+    field to an instance of a user.
+
+    ::
+
+        embed = voxelbotutils.Embed(use_random_colour=True)
+        embed.set_author_to_user(bot.get_user(141231597155385344))
+
+        # You can also use a with statement if you want to have your
+        # IDE fold the embed code.
+        # There is no other use for the with statement.
+        with embed:
+            embed.set_image("https://example.com/image.png")
     """
 
     def __init__(self, *args, use_random_colour: bool = False, **kwargs):
@@ -17,7 +29,7 @@ class Embed(discord.Embed):
         """
 
         super().__init__(*args, **kwargs)
-        if use_random_colour:
+        if kwargs.pop("use_random_color", use_random_colour):
             self.use_random_colour()
 
     def __enter__(self) -> 'Embed':
@@ -39,6 +51,8 @@ class Embed(discord.Embed):
 
         self.colour = random.randint(0, 0xffffff)
         return self
+
+    use_random_color = use_random_colour
 
     def set_footer(self, text: str, *args, **kwargs) -> 'Embed':
         """
@@ -186,9 +200,15 @@ class Embed(discord.Embed):
         raise KeyError("Key not found in embed")
 
     @classmethod
-    def from_native(cls, embed: discord.Embed):
+    def from_native(cls, embed: discord.Embed) -> 'Embed':
         """
-        Upgrade a native embed into a VBU embed.
+        Upgrade a native embed into a VoxelBotUtils embed.
+
+        Args:
+            embed (discord.Embed): The embed that you want to upgrade.
+
+        Returns:
+            Embed: The upgraded embed instance.
         """
 
         return cls.from_dict(embed.to_dict())

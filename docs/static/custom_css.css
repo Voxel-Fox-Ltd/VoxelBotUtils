@@ -1,0 +1,4 @@
+html.writer-html5 .rst-content dl.attribute > dt {
+    background: #fae7e7 !important;
+    border-left: 3px solid #de6a6a !important;
+}

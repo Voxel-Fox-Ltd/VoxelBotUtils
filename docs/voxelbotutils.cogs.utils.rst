@@ -6,29 +6,6 @@ Embed
 
 .. autoclass:: voxelbotutils.Embed
 
-   .. note::
-      All of the methods and attributes available in :class:`discord.Embed` still work as they did before; nothing has had any breaking changes.
-
-   .. code-block:: python
-
-      # I'm using a context block here, but that's entirely optional - assigning e to Embed() still works just fine
-      with voxelbotutils.Embed(use_random_colour=True) as e:
-         # Adding fields now doesn't need kwargs
-         e.add_field("Test", "Post")
-         e.add_field("Please", "Ignore")
-
-         # You can set author to a user instead of having to deal with the default `.set_author`
-         e.set_author_to_user(bot.get_user(141231597155385344))
-
-         # You can now edit a field by it's name - doing this requires kwargs, non-mentioned fields stay the same
-         e.edit_field_by_key("Test", name="New Test!", value="Whatever")
-
-         # All of the methods also return themselves, so you can chain them if you really want to
-         e.add_field("A", "B").add_field("C", "D")
-
-      # And of course you still send it as it was
-      await channel.send(embed=e)
-
 Bot
 -------------------------------------------
 

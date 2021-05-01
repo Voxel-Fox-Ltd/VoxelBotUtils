@@ -32,7 +32,8 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx_rtd_theme",
     "sphinx.ext.intersphinx",
-    "sphinx.ext.viewcode",
+    # "sphinx.ext.linkcode",
+    # "sphinx.ext.viewcode",
 ]
 
 autodoc_default_options = {
@@ -45,6 +46,7 @@ autodoc_default_options = {
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'discord': ('https://discordpy.readthedocs.io/en/latest', None),
+    'aiohttp': ('https://docs.aiohttp.org/en/stable/', None),
     'asyncpg': ('https://magicstack.github.io/asyncpg/current/', None),
     'aioredis': ('https://aioredis.readthedocs.io/en/v1.3.0/', None),
     # 'aiodogstatsd': ('https://gr1n.github.io/aiodogstatsd/', None),
@@ -69,7 +71,10 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ['static']
+html_css_files = [
+    ('custom_css.css', {'priority': 100}),
+]
 
 master_doc = 'index'
 
