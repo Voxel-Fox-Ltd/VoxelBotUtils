@@ -19,6 +19,7 @@ class InteractionTyping(Typing):
 class InteractionMessageable(Messageable):
 
     IS_INTERACTION = True
+    IS_COMPONENT = False
     CAN_SEND_EPHEMERAL = True
     ACK_IS_EDITABLE = True
     ACK_RESPONSE_TYPE = 5
@@ -82,10 +83,11 @@ class InteractionMessageable(Messageable):
     async def trigger_typing(self, *args, **kwargs):
         await InteractionTyping(self).do_typing()
 
-    async def ack(self):
+    async def ack(self, *, ephemeral: bool = False):
         app_id, _, token = await self._get_channel()
         r = discord.http.Route('POST', '/interactions/{app_id}/{token}/callback', app_id=app_id, token=token)
-        await self._state.http.request(r, json={"type": self.ACK_RESPONSE_TYPE})
+        flags = discord.MessageFlags(ephemeral=ephemeral)
+        await self._state.http.request(r, json={"type": self.ACK_RESPONSE_TYPE, "data": {"flags": flags.value}})
         self._sent_ack_response = True
 
     def typing(self, *args, **kwargs):

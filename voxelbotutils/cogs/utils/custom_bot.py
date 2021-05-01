@@ -992,8 +992,8 @@ class Bot(commands.AutoShardedBot):
         # Get our playload data
         if isinstance(channel, (list, tuple)):
             if not messageable._sent_ack_response:  # Sent no responses - send an ack
-                await messageable.ack()
-            if messageable.ACK_IS_EDITABLE and not messageable._sent_message_response:  # Sent an ack that we should edit
+                await messageable.ack(ephemeral=ephemeral)
+            if messageable.ACK_IS_EDITABLE and messageable._sent_ack_response and not messageable._sent_message_response:  # Sent an ack that we should edit
                 r = discord.http.Route('PATCH', '/webhooks/{app_id}/{token}/messages/@original', app_id=channel[1], token=channel[2])
             else:  # Sent an ack and a response, or sent an ack with no editable original message
                 r = discord.http.Route('POST', '/webhooks/{app_id}/{token}', app_id=channel[1], token=channel[2])
