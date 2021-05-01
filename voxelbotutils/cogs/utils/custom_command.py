@@ -33,7 +33,7 @@ class Command(commands.Command):
             raise ValueError("No mapping found for cooldown")
         self._buckets = mapping(cooldown)  # Wrap the cooldown in the mapping
 
-    def get_remaining_cooldown(self, ctx:commands.Context, current:float=None) -> typing.Optional[float]:
+    def get_remaining_cooldown(self, ctx: commands.Context, current: float = None) -> typing.Optional[float]:
         """
         Gets the remaining cooldown for a given command.
 
@@ -48,7 +48,7 @@ class Command(commands.Command):
         bucket = self._buckets.get_bucket(ctx.message)
         return bucket.get_remaining_cooldown()
 
-    async def _prepare_cooldowns(self, ctx:commands.Context):
+    async def _prepare_cooldowns(self, ctx: commands.Context):
         """
         Prepares all the cooldowns for the command to be called.
         """
@@ -73,7 +73,7 @@ class Command(commands.Command):
                     error = getattr(bucket, 'default_cooldown_error', commands.CommandOnCooldown)
                 raise error(bucket, retry_after)
 
-    async def prepare(self, ctx):
+    async def prepare(self, ctx: commands.Context):
         """
         This is entirely stolen from the original method so I could make `prepare_cooldowns` an async
         method.
@@ -167,7 +167,7 @@ class Group(commands.Group):
             raise ValueError("No mapping found for cooldown")
         self._buckets = mapping(cooldown)  # Wrap the cooldown in the mapping
 
-    async def can_run(self, ctx:commands.Context) -> bool:
+    async def can_run(self, ctx: commands.Context) -> bool:
         """
         The normal :func:`discord.ext.Command.can_run` but it ignores cooldowns.
 

@@ -15,14 +15,17 @@ class Paginator(object):
     """
 
     def __init__(
-            self, data:typing.Union[typing.Sequence, typing.Generator, typing.Callable[[int], typing.Any]], *, per_page:int=10,
-            formatter:typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]]=None):
+            self, data: typing.Union[typing.Sequence, typing.Generator, typing.Callable[[int], typing.Any]], *,
+            per_page: int = 10,
+            formatter: typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]] = None):
         """
         Args:
-            data (typing.Union[typing.Sequence, typing.Generator, typing.Callable[[int], typing.Any]]): The data that you want to paginate.
-                If a generator or function is given then the `max_pages` will start as the string "?", and the `per_page` parameter will be ignored -
-                the formatter will be passed the content of whatever your generator returns. If a function is given, then you will be passed
-                the page number as an argument - raising `StopIteration` from this function will cause the `max_pages` attribute to be set,
+            data (typing.Union[typing.Sequence, typing.Generator, typing.Callable[[int], typing.Any]]): The
+                data that you want to paginate.
+                If a generator or function is given then the `max_pages` will start as the string "?", and the `per_page`
+                parameter will be ignored - the formatter will be passed the content of whatever your generator returns.
+                If a function is given, then you will be passed the page number as an argument - raising
+                `StopIteration` from this function will cause the `max_pages` attribute to be set,
                 and the page will go back to what it was previously.
             per_page (int, optional): The number of items that appear on each page. This argument only works for sequences
             formatter (typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]], optional): A
@@ -55,7 +58,7 @@ class Paginator(object):
                 pages += 1
             self.max_pages = pages
 
-    async def start(self, ctx:commands.Context, *, timeout:float=120):
+    async def start(self, ctx: commands.Context, *, timeout: float = 120):
         """
         Start and handle a paginator instance.
 
@@ -172,7 +175,7 @@ class Paginator(object):
             t.cancel()
         ctx.bot.loop.create_task(message.clear_reactions())
 
-    async def get_page(self, page_number:int) -> typing.List[typing.Any]:
+    async def get_page(self, page_number: int) -> typing.List[typing.Any]:
         """
         Get a list of items that appear for a given page.
 

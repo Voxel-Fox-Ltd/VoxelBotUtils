@@ -16,7 +16,7 @@ class CooldownWithChannelExemptions(Cooldown):
 
     _copy_kwargs = ('cooldown_in', 'no_cooldown_in')
 
-    def __init__(self, *, cooldown_in:list=None, no_cooldown_in:list=None, **kwargs):
+    def __init__(self, *, cooldown_in: list = None, no_cooldown_in: list = None, **kwargs):
         """
         Args:
             cooldown_in (list, optional): A list of channel names where the cooldown should apply. If left blank, it'll apply everywhere minus the deny list given.
@@ -37,7 +37,7 @@ class CooldownWithChannelExemptions(Cooldown):
         super().__call__(rate, per, commands.BucketType.channel)  # Override cooldown type
         return self
 
-    def predicate(self, ctx) -> bool:
+    def predicate(self, ctx: commands.Context) -> bool:
         """
         The check to see if this cooldown is applied.
         """

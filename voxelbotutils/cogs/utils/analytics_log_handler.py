@@ -76,7 +76,7 @@ class AnalyticsLogHandler(logging.NullHandler):
         self.bot = bot
 
     @classmethod
-    def get_http_event_name(cls, increment:str, method:str, url:str) -> str:
+    def get_http_event_name(cls, increment: str, method: str, url: str) -> str:
         if increment == "discord.http":
             possible_endpoints = cls.HTTP_EVENT_NAMES.get(method.upper(), {})
         elif increment == "discord.webhook":
@@ -88,7 +88,7 @@ class AnalyticsLogHandler(logging.NullHandler):
                 return event_name
         return None
 
-    def handle(self, record:logging.LogRecord):
+    def handle(self, record: logging.LogRecord):
         message = record.getMessage()
         self.bot.loop.create_task(self.log_response(message))
         return super().handle(record)

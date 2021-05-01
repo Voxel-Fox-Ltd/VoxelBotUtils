@@ -33,7 +33,9 @@ class ApplicationCommandOptionChoice(object):
 
 class ApplicationCommandOption(object):
 
-    def __init__(self, name:str, type:ApplicationCommandOptionType, description:str, default:typing.Optional[str]=None, required:bool=True):
+    def __init__(
+            self, name: str, type: ApplicationCommandOptionType, description: str,
+            default: typing.Optional[str] = None, required: bool = True):
         self.name: str = name
         self.type: ApplicationCommandOptionType = type
         self.description: str = description
@@ -42,14 +44,14 @@ class ApplicationCommandOption(object):
         self.choices: typing.List[ApplicationCommandOptionChoice] = list()
         self.options: typing.List['ApplicationCommandOption'] = list()
 
-    def add_choice(self, choice:ApplicationCommandOptionChoice) -> None:
+    def add_choice(self, choice: ApplicationCommandOptionChoice) -> None:
         self.choices.append(choice)
 
     def add_option(self, option:'ApplicationCommandOption') -> None:
         self.options.append(option)
 
     @classmethod
-    def from_data(cls, data:dict):
+    def from_data(cls, data: dict):
         base_option = cls(data['name'], ApplicationCommandOptionType(data['type']), data['description'], data.get('required', False))
         for choice in data.get('choices', list()):
             base_option.add_choice(ApplicationCommandOptionChoice.from_data(choice))
@@ -76,18 +78,18 @@ class ApplicationCommandOption(object):
 
 class ApplicationCommand(object):
 
-    def __init__(self, name:str, description:str):
+    def __init__(self, name: str, description: str):
         self.name: str = name
         self.description: str = description
         self.options: typing.List[ApplicationCommandOption] = list()
         self.id: int = None
         self.application_id: int = None
 
-    def add_option(self, option:ApplicationCommandOption):
+    def add_option(self, option: ApplicationCommandOption):
         self.options.append(option)
 
     @classmethod
-    def from_data(cls, data:dict):
+    def from_data(cls, data: dict):
         command = cls(data['name'], data['description'])
         command.id = int(data['id'])
         command.application_id = int(data['application_id'])

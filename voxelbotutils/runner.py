@@ -13,7 +13,9 @@ from .cogs.utils.custom_bot import Bot
 
 
 # Set up the loggers
-def set_log_level(logger_to_change:typing.Union[logging.Logger, str], log_level:str, minimum_level:int=None) -> None:
+def set_log_level(
+        logger_to_change: typing.Union[logging.Logger, str], log_level: str,
+        minimum_level: int = None) -> None:
     """
     Set a logger to a default log level
 
@@ -54,7 +56,7 @@ logger = logging.getLogger('voxelbotutils')
 
 
 # Make sure the sharding info provided is correctish
-def validate_sharding_information(args:argparse.Namespace) -> typing.Optional[typing.List[int]]:
+def validate_sharding_information(args: argparse.Namespace) -> typing.Optional[typing.List[int]]:
     """
     Validate the given shard information and make sure that what's passed in is accurate
 
@@ -97,7 +99,7 @@ class LogFilter(logging.Filter):
     # https://stackoverflow.com/a/28743317/2224197
     # http://stackoverflow.com/a/24956305/408556
 
-    def __init__(self, filter_level:int):
+    def __init__(self, filter_level: int):
         self.filter_level = filter_level
 
     def filter(self, record):
@@ -106,7 +108,7 @@ class LogFilter(logging.Filter):
         return record.levelno < self.filter_level
 
 
-def set_default_log_levels(bot:Bot, args:argparse.Namespace) -> None:
+def set_default_log_levels(bot: Bot, args: argparse.Namespace) -> None:
     """
     Set the default levels for the logger
 
@@ -238,7 +240,7 @@ async def create_initial_database(db) -> None:
     return True
 
 
-async def start_database_pool(config:dict) -> None:
+async def start_database_pool(config: dict) -> None:
     """
     Start the database pool connection
     """
@@ -250,7 +252,10 @@ async def start_database_pool(config:dict) -> None:
     except KeyError:
         raise Exception("KeyError creating database pool - is there a 'database' object in the config?")
     except ConnectionRefusedError:
-        raise Exception("ConnectionRefusedError creating database pool - did you set the right information in the config, and is the database running?")
+        raise Exception(
+            "ConnectionRefusedError creating database pool - did you set the right "
+            "information in the config, and is the database running?"
+        )
     except Exception:
         raise Exception("Error creating database pool")
     logger.info("Created database pool successfully")
@@ -271,13 +276,16 @@ async def start_redis_pool(config:dict) -> None:
     except KeyError:
         raise KeyError("KeyError creating redis pool - is there a 'redis' object in the config?")
     except ConnectionRefusedError:
-        raise ConnectionRefusedError("ConnectionRefusedError creating redis pool - did you set the right information in the config, and is the database running?")
+        raise ConnectionRefusedError(
+            "ConnectionRefusedError creating redis pool - did you set the right "
+            "information in the config, and is the database running?"
+        )
     except Exception:
         raise Exception("Error creating redis pool")
     logger.info("Created redis pool successfully")
 
 
-def run_bot(args:argparse.Namespace) -> None:
+def run_bot(args: argparse.Namespace) -> None:
     """
     Starts the bot, connects the database, runs the async loop forever
 
@@ -341,7 +349,7 @@ def run_bot(args:argparse.Namespace) -> None:
     loop.close()
 
 
-def run_website(args:argparse.Namespace) -> None:
+def run_website(args: argparse.Namespace) -> None:
     """
     Starts the website, connects the database, logs in the specified bots, runs the async loop forever
 
@@ -395,14 +403,19 @@ def run_website(args:argparse.Namespace) -> None:
     # Add our jinja env filters
     def regex_replace(string, find, replace):
         return re.sub(find, replace, string, re.IGNORECASE | re.MULTILINE)
+
     def escape_text(string):
         return html.escape(string)
+
     def timestamp(string):
         return dt.fromtimestamp(float(string))
+
     def int_to_hex(string):
         return format(hex(int(string))[2:], "0>6")
+
     def to_markdown(string):
         return markdown.markdown(string, extensions=['extra'])
+
     def display_mentions(string, users):
         def get_display_name(group):
             user = users.get(group.group('userid'))

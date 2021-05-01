@@ -7,7 +7,10 @@ import aiohttp
 
 
 class UpgradeChatInterval(enum.Enum):
-    """A subscription interval enum for Upgrade.Chat role subscriptions."""
+    """
+    A subscription interval enum for Upgrade.Chat role subscriptions.
+    """
+
     day = enum.auto()
     week = enum.auto()
     month = enum.auto()
@@ -15,19 +18,28 @@ class UpgradeChatInterval(enum.Enum):
 
 
 class UpgradeChatItemType(enum.Enum):
-    """An item type enum to allow you to query the Upgrade.Chat API."""
+    """
+    An item type enum to allow you to query the Upgrade.Chat API.
+    """
+
     UPGRADE = enum.auto()
     SHOP = enum.auto()
 
 
 class UpgradeChatProductType(enum.Enum):
-    """A product type enum for internal responses from the Upgrade.Chat API - this is not for querying with."""
+    """
+    A product type enum for internal responses from the Upgrade.Chat API - this is not for querying with.
+    """
+
     DISCORD_ROLE = enum.auto()
     SHOP_PRODUCT = enum.auto()
 
 
 class UpgradeChatPaymentProcessor(enum.Enum):
-    """A payment processor enum for Upgrade.Chat purchases."""
+    """
+    A payment processor enum for Upgrade.Chat purchases.
+    """
+
     PAYPAL = enum.auto()
     STRIPE = enum.auto()
 
@@ -37,7 +49,7 @@ class UpgradeChatUser(object):
     A user object from the UpgradeChat API.
     """
 
-    def __init__(self, discord_id:str, username:str):
+    def __init__(self, discord_id: str, username: str):
         self.discord_id: int = int(discord_id)
         self.username: str = username
 
@@ -48,16 +60,16 @@ class UpgradeChatUser(object):
 class UpgradeChatProduct(object):
     """
     A product from the UpgradeChat API.
-
-    You only get these objects from an endpoint that we're not using, so it's unlikely to be used in VBU,
-    but is here for completeness sake.
     """
 
     def __init__(
-            self, uuid:str, checkout_uri:str, name:str, account_id:int, price:float, interval:UpgradeChatInterval, interval_count:int,
-            free_trial_length:int, description:str, image_link:str, variable_price:bool, is_time_limited:bool, limited_inventory:bool,
-            available_stock:int, shippable:bool, paymentless_trial:bool, product_types:typing.List[UpgradeChatProductType],
-            created:dt, updated:dt, deleted:dt=None):
+            self, uuid: str, checkout_uri: str, name: str, account_id: int,
+            price: float, interval: UpgradeChatInterval, interval_count: int,
+            free_trial_length: int, description: str, image_link: str, variable_price: bool,
+            is_time_limited: bool, limited_inventory: bool,
+            available_stock: int, shippable: bool, paymentless_trial: bool,
+            product_types: typing.List[UpgradeChatProductType],
+            created: dt, updated: dt, deleted: dt = None):
         self.uuid = uuid
         self.checkout_uri = checkout_uri
         self.name = name
@@ -103,9 +115,11 @@ class UpgradeChatOrderItem(object):
     """
 
     def __init__(
-            self, price:float, quantity:int, interval:UpgradeChatInterval, interval_count:int, free_trial_length:int, is_time_limited:bool,
-            product:dict, discord_roles:typing.List[dict], product_types:typing.List[UpgradeChatProductType],
-            payment_processor:UpgradeChatPaymentProcessor, payment_processor_record_id:str):
+            self, price: float, quantity: int, interval: UpgradeChatInterval,
+            interval_count: int, free_trial_length: int, is_time_limited: bool,
+            product: dict, discord_roles: typing.List[dict],
+            product_types: typing.List[UpgradeChatProductType],
+            payment_processor: UpgradeChatPaymentProcessor, payment_processor_record_id: str):
         self.price = price
         self.quantity = quantity
         self.interval = interval
@@ -144,9 +158,11 @@ class UpgradeChatOrder(object):
     """
 
     def __init__(
-            self, uuid:str, id:str, purchased_at:dt, user:UpgradeChatUser, subtotal:float, discount:float, total:float, type:UpgradeChatItemType,
-            is_subscription:bool, cancelled_at:dt, order_items:typing.List[UpgradeChatOrderItem], created:dt, updated:dt,
-            deleted:dt=None, payment_processor:UpgradeChatPaymentProcessor=None, payment_processor_record_id:str=None):
+            self, uuid: str, id: str, purchased_at: dt, user: UpgradeChatUser,
+            subtotal: float, discount: float, total: float, type: UpgradeChatItemType,
+            is_subscription: bool, cancelled_at: dt, order_items: typing.List[UpgradeChatOrderItem],
+            created: dt, updated: dt, deleted: dt = None, payment_processor: UpgradeChatPaymentProcessor = None,
+            payment_processor_record_id: str = None):
         self.uuid = uuid
         self.id = id
         self.purchased_at = purchased_at
@@ -200,7 +216,7 @@ class UpgradeChat(object):
 
     BASE = "https://api.upgrade.chat/v1/{endpoint}"
 
-    def __init__(self, client_id:str, client_secret:str):
+    def __init__(self, client_id: str, client_secret: str):
         self.client_id = client_id
         self.client_secret = client_secret
         self._basic_auth_token = b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
@@ -241,8 +257,8 @@ class UpgradeChat(object):
         return self._access_token[0]
 
     async def get_orders(
-            self, limit:int=100, offset:int=0, discord_id:int=None,
-            type:typing.Union[UpgradeChatItemType, str]=None) -> typing.List[UpgradeChatOrder]:
+            self, limit: int = 100, offset: int = 0, discord_id: int = None,
+            type: typing.Union[UpgradeChatItemType, str] = None) -> typing.List[UpgradeChatOrder]:
         """
         Get a list of order objects that adhere to the request parameters given.
 
@@ -268,7 +284,10 @@ class UpgradeChat(object):
             params.update({"type": type})
 
         # And our headers
-        access_token = await self.get_access_token()
+        try:
+            access_token = await self.get_access_token()
+        except Exception:
+            return []  # We got an error response when getting an Oauth token - let's just return nothing here
         headers = {
             "Authorization": f"Bearer {access_token}",
             "Accept": "application/json",

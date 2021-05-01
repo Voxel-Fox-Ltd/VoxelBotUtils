@@ -4,7 +4,7 @@ import aiohttp_session
 from aiohttp.web import HTTPFound, Request
 
 
-def add_discord_arguments(*, redirect_if_logged_out:str=None, redirect_if_logged_in:str=None):
+def add_discord_arguments(*, redirect_if_logged_out: str = None, redirect_if_logged_in: str = None):
     """
     This function is a wrapper around all routes. It takes the output and
     adds the user info and request to the returning dictionary

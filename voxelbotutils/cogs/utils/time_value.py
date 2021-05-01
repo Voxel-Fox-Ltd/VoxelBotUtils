@@ -16,7 +16,7 @@ class InvalidTimeDuration(commands.BadArgument):
         value (str): The value that was given that failed to parse.
     """
 
-    def __init__(self, value:str):
+    def __init__(self, value: str):
         """
         Args:
             value (str): The given value that was invalid.
@@ -48,7 +48,7 @@ class TimeValue(object):
     TIME_VALUE_REGEX = re.compile(r"^(?:(?P<years>\d+)y)? *(?:(?P<weeks>\d+)w)? *(?:(?P<days>\d+)d)? *(?:(?P<hours>\d+)h)? *(?:(?P<minutes>\d+)m)? *(?:(?P<seconds>\d+)s)?$")
     MAX_SIZE = 0b1111111111111111111111111111111  # 2**31 - this is about 68 years so anything above this is a bit...... much
 
-    def __init__(self, duration:float):
+    def __init__(self, duration: float):
         """
         Args:
             duration (float): The duration to be converted.
@@ -97,7 +97,7 @@ class TimeValue(object):
         self.delta = timedelta(seconds=self.duration)
 
     @staticmethod
-    def get_quotient_and_remainder(value:int, divisor:int):
+    def get_quotient_and_remainder(value: int, divisor: int):
         """
         A divmod wrapper that just catches a zero division error.
         """
@@ -114,9 +114,10 @@ class TimeValue(object):
         return f"{self.__class__.__name__}.parse('{self.clean}')"
 
     @classmethod
-    async def convert(cls, ctx:commands.Context, value:str) -> 'TimeValue':
+    async def convert(cls, ctx: commands.Context, value: str) -> 'TimeValue':
         """
-        Takes a value (1h/30m/10s/2d etc) and returns a TimeValue instance with the duration. Provided for use of the Discord.py module.
+        Takes a value (1h/30m/10s/2d etc) and returns a TimeValue instance with the duration.
+        Provided for use of the Discord.py module.
 
         Args:
             ctx (commands.Context): The current context object that we want to convert under.
@@ -132,7 +133,7 @@ class TimeValue(object):
         return cls.parse(value)
 
     @classmethod
-    def parse(cls, value:str) -> 'TimeValue':
+    def parse(cls, value: str) -> 'TimeValue':
         """
         Takes a value (1h/30m/10s/2d etc) and returns a TimeValue instance with the duration.
 

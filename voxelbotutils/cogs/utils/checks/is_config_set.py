@@ -17,7 +17,7 @@ def is_config_set(*config_keys):
         ConfigNotSet: If the config item hasn't been set for the bot.
     """
 
-    def predicate(ctx:commands.Context):
+    def predicate(ctx: commands.Context):
         working_config = ctx.bot.config
         try:
             for key in config_keys:

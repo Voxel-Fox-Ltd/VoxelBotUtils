@@ -27,7 +27,7 @@ from . import interactions
 from .. import all_packages as all_vfl_package_names
 
 
-def get_prefix(bot, message:discord.Message):
+def get_prefix(bot, message: discord.Message):
     """
     Gives the prefix for the bot - override this to make guild-specific prefixes.
     """
@@ -38,7 +38,8 @@ def get_prefix(bot, message:discord.Message):
 
     # Custom prefix or default prefix
     else:
-        prefix = bot.guild_settings[message.guild.id][bot.config.get('guild_settings_prefix_column', 'prefix')] or bot.config.get('default_prefix')
+        current_prefix = bot.guild_settings[message.guild.id][bot.config.get('guild_settings_prefix_column', 'prefix')]
+        prefix = current_prefix or bot.config.get('default_prefix')
 
     # Fuck iOS devices
     if type(prefix) is not list and prefix in ["'", "‘"]:
@@ -78,9 +79,12 @@ class Bot(commands.AutoShardedBot):
     """
 
     def __init__(
-            self, config_file:str='config/config.toml', logger:logging.Logger=None, activity:discord.Activity=discord.Game(name="Reconnecting..."),
-            status:discord.Status=discord.Status.dnd, case_insensitive:bool=True, intents:discord.Intents=None,
-            allowed_mentions:discord.AllowedMentions=discord.AllowedMentions(everyone=False), *args, **kwargs):
+            self, config_file: str = 'config/config.toml', logger: logging.Logger = None,
+            activity:discord.Activity = discord.Game(name="Reconnecting..."),
+            status: discord.Status = discord.Status.dnd, case_insensitive: bool = True,
+            intents:discord.Intents = None,
+            allowed_mentions: discord.AllowedMentions = discord.AllowedMentions(everyone=False),
+            *args, **kwargs):
         """
         Args:
             config_file (str, optional): The path to the config file for the bot.
@@ -162,6 +166,10 @@ class Bot(commands.AutoShardedBot):
         async def send_button_msg_prop(messagable, *args, **kwargs) -> discord.Message:
             return await self._send_button_message(messagable, *args, **kwargs)
 
+        async def add_reactions_prop(message, *reactions):
+            for r in reactions:
+                await message.add_reaction(r)
+
         async def edit_button_msg_prop(*args, **kwargs):
             return await self._edit_button_message(*args, **kwargs)
 
@@ -172,6 +180,7 @@ class Bot(commands.AutoShardedBot):
             return await message.edit(components=None)
 
         Messageable.send = send_button_msg_prop
+        discord.Message.add_reactions = add_reactions_prop
         discord.Message.edit = edit_button_msg_prop
         discord.Message.wait_for_button_click = wait_for_button_prop
         discord.Message.clear_components = clear_components_msg_prop
@@ -277,8 +286,10 @@ class Bot(commands.AutoShardedBot):
             return None
 
     def get_invite_link(
-            self, *, base:str=None, client_id:int=None, scope:str='bot', response_type:str=None, redirect_uri:str=None,
-            guild_id:int=None, permissions:discord.Permissions=discord.Permissions.none(), enabled:bool=None) -> str:
+            self, *, base: str = None, client_id: int = None, scope: str = 'bot',
+            response_type: str = None, redirect_uri: str = None,
+            guild_id: int = None, permissions: discord.Permissions = discord.Permissions.none(),
+            enabled: bool = None) -> str:
         """
         Gets the invite link for the bot, with permissions all set properly.
 
@@ -335,7 +346,7 @@ class Bot(commands.AutoShardedBot):
         self._upgrade_chat = UpgradeChat(self.config["upgrade_chat"]["client_id"], self.config["upgrade_chat"]["client_secret"])
         return self._upgrade_chat
 
-    async def get_user_topgg_vote(self, user_id:int) -> bool:
+    async def get_user_topgg_vote(self, user_id: int) -> bool:
         """
         Returns whether or not the user has voted on Top.gg. If there's no Top.gg token provided then this will always return `False`.
         This method doesn't handle timeouts; you are expected to implement them yourself.
@@ -359,7 +370,7 @@ class Bot(commands.AutoShardedBot):
         # Return
         return data.get("voted", False)
 
-    def get_event_webhook(self, event_name:str) -> typing.Optional[discord.Webhook]:
+    def get_event_webhook(self, event_name: str) -> typing.Optional[discord.Webhook]:
         """
         Get a :class:`discord.Webhook` object based on the keys in the bot's config.
         """
@@ -413,8 +424,8 @@ class Bot(commands.AutoShardedBot):
         return self.application_id
 
     async def add_delete_button(
-            self, message:discord.Message, valid_users:typing.List[discord.User]=None, *,
-            delete:typing.List[discord.Message]=None, timeout=60.0, wait:bool=False) -> None:
+            self, message: discord.Message, valid_users: typing.List[discord.User] = None, *,
+            delete: typing.List[discord.Message] = None, timeout: float = 60.0, wait: bool = False) -> None:
         """
         Adds a delete button to the given message.
 
@@ -493,7 +504,7 @@ class Bot(commands.AutoShardedBot):
         except Exception:
             return  # Ah well
 
-    def set_footer_from_config(self, embed:discord.Embed) -> None:
+    def set_footer_from_config(self, embed: discord.Embed) -> None:
         """
         Sets a footer on the given embed based on the items in the bot's config.
         """
@@ -520,13 +531,15 @@ class Bot(commands.AutoShardedBot):
             return v
         return v[0]
 
-    async def create_message_log(self, messages:typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]) -> str:
+    async def create_message_log(
+            self, messages: typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]) -> str:
         """
         Creates and returns an HTML log of all of the messages provided. This is an API method, and may return an asyncio HTTP
         error.
 
         Args:
-            messages (typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]): The messages you want to create into a log.
+            messages (typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]): The messages
+                you want to create into a log.
 
         Returns:
             str: The HTML for a log file.
@@ -578,7 +591,7 @@ class Bot(commands.AutoShardedBot):
         async with self.session.post("https://voxelfox.co.uk/discord/chatlog", json=data) as r:
             return await r.text()
 
-    async def create_global_application_command(self, command:interactions.ApplicationCommand) -> None:
+    async def create_global_application_command(self, command: interactions.ApplicationCommand) -> None:
         """
         Add a global slash command for the bot.
         """
@@ -590,7 +603,8 @@ class Bot(commands.AutoShardedBot):
         )
         return await self.http.request(r, json=command.to_json())
 
-    async def create_guild_application_command(self, guild:discord.Guild, command:interactions.ApplicationCommand) -> None:
+    async def create_guild_application_command(
+            self, guild: discord.Guild, command: interactions.ApplicationCommand) -> None:
         """
         Add a guild-level slash command for the bot.
         """
@@ -602,7 +616,8 @@ class Bot(commands.AutoShardedBot):
         )
         return await self.http.request(r, json=command.to_json())
 
-    async def bulk_create_global_application_commands(self, commands:typing.List[interactions.ApplicationCommand]) -> None:
+    async def bulk_create_global_application_commands(
+            self, commands: typing.List[interactions.ApplicationCommand]) -> None:
         """
         Bulk add a global slash command for the bot.
         """
@@ -614,7 +629,8 @@ class Bot(commands.AutoShardedBot):
         )
         return await self.http.request(r, json=[i.to_json() for i in commands])
 
-    async def bulk_create_guild_application_commands(self, guild:discord.Guild, commands:typing.List[interactions.ApplicationCommand]) -> None:
+    async def bulk_create_guild_application_commands(
+            self, guild: discord.Guild, commands: typing.List[interactions.ApplicationCommand]) -> None:
         """
         Bulk add a guild-level slash command for the bot.
         """
@@ -639,7 +655,7 @@ class Bot(commands.AutoShardedBot):
         data = await self.http.request(r)
         return [interactions.ApplicationCommand.from_data(i) for i in data]
 
-    async def get_guild_application_commands(self, guild:discord.Guild) -> typing.List[interactions.ApplicationCommand]:
+    async def get_guild_application_commands(self, guild: discord.Guild) -> typing.List[interactions.ApplicationCommand]:
         """
         Add a guild-level slash command for the bot.
         """
@@ -652,7 +668,7 @@ class Bot(commands.AutoShardedBot):
         data = await self.http.request(r)
         return [interactions.ApplicationCommand.from_data(i) for i in data]
 
-    async def delete_global_application_command(self, command:interactions.ApplicationCommand) -> None:
+    async def delete_global_application_command(self, command: interactions.ApplicationCommand) -> None:
         """
         Remove a global slash command for the bot.
         """
@@ -664,7 +680,8 @@ class Bot(commands.AutoShardedBot):
         )
         return await self.http.request(r)
 
-    async def delete_guild_application_command(self, guild:discord.Guild, command:interactions.ApplicationCommand) -> None:
+    async def delete_guild_application_command(
+            self, guild: discord.Guild, command: interactions.ApplicationCommand) -> None:
         """
         Remove a guild-level slash command for the bot.
         """
@@ -741,7 +758,7 @@ class Bot(commands.AutoShardedBot):
             else:
                 self.logger.info(f' * {i}... success')
 
-    async def set_default_presence(self, shard_id:int=None) -> None:
+    async def set_default_presence(self, shard_id: int = None) -> None:
         """
         Sets the default presence for the bot as appears in the config file.
 
@@ -792,7 +809,7 @@ class Bot(commands.AutoShardedBot):
         # Reset cache items that might need updating
         self._upgrade_chat = None
 
-    async def login(self, token:str=None, *args, **kwargs):
+    async def login(self, token: str = None, *args, **kwargs):
         """:meta private:"""
 
         try:
@@ -803,7 +820,7 @@ class Bot(commands.AutoShardedBot):
                 self.logger.critical(f"Cloudflare rate limit reached - {json.dumps(headers)}")
             raise
 
-    async def start(self, token:str=None, *args, **kwargs):
+    async def start(self, token: str = None, *args, **kwargs):
         """:meta private:"""
 
         if self.config.get('database', {}).get('enabled', False):
@@ -840,8 +857,10 @@ class Bot(commands.AutoShardedBot):
         return await super().invoke(ctx)
 
     def get_context_message(
-            self, messageable, content:str, *, embed:discord.Embed=None, file:discord.File=None, embeddify:bool=None,
-            image_url:str=None, embeddify_file:bool=True, **kwargs) -> typing.Tuple[str, discord.Embed]:
+            self, messageable, content: str, *, embed: discord.Embed = None,
+            file: discord.File = None, embeddify: bool = None,
+            image_url: str = None, embeddify_file: bool = True,
+            **kwargs) -> typing.Tuple[str, discord.Embed]:
 
         if embeddify is None and image_url is not None:
             embeddify = True
@@ -908,10 +927,14 @@ class Bot(commands.AutoShardedBot):
         return content, embed
 
     async def _send_button_message(
-            self, messageable, content=None, *, tts=False, embed=None, file=None,
-            files=None, delete_after=None, nonce=None, allowed_mentions=None,
-            reference=None, mention_author=None, components=None, ephemeral=False,
-            embeddify=None, image_url=None, embeddify_file=True):
+            self, messageable, content: str = None, *, tts: bool = False,
+            embed: discord.Embed = None, file: discord.File = None,
+            files: typing.List[discord.File] = None, delete_after: float = None,
+            nonce: str = None, allowed_mentions: discord.AllowedMentions = None,
+            reference: discord.MessageReference = None, mention_author: bool = None,
+            components: interactions.components.MessageComponents = None,
+            ephemeral: bool = False, embeddify: bool = None,
+            image_url: bool = None, embeddify_file: bool = True):
         """
         An alternative send method so that we can add components to messages.
         """

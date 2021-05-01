@@ -104,6 +104,10 @@ class MessageComponents(ComponentHolder):
 
 
 class ActionRow(ComponentHolder):
+    """
+    The main UI component for adding and ordering components on Discord
+    messages.
+    """
 
     def to_dict(self):
         return {

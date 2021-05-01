@@ -10,7 +10,7 @@ import yarl
 from .get_avatar_url import get_avatar_url
 
 
-def get_discord_login_url(request:Request, redirect_uri:str=None) -> str:
+def get_discord_login_url(request: Request, redirect_uri: str = None) -> str:
     """
     Get a valid URL for a user to use to login to the website.
 
@@ -39,7 +39,7 @@ def get_discord_login_url(request:Request, redirect_uri:str=None) -> str:
     return 'https://discordapp.com/api/oauth2/authorize?' + urlencode(parameters)
 
 
-async def process_discord_login(request:Request) -> None:
+async def process_discord_login(request: Request) -> None:
     """
     Process the login from Discord and store relevant data in the session.
 
@@ -104,7 +104,7 @@ async def process_discord_login(request:Request) -> None:
         await get_user_info_from_session(request, refresh=True)
 
 
-async def get_user_info_from_session(request:Request, *, refresh:bool=False):
+async def get_user_info_from_session(request: Request, *, refresh: bool = False):
     """Get the user's info"""
 
     session_storage = await aiohttp_session.get_session(request)
@@ -127,7 +127,9 @@ async def get_user_info_from_session(request:Request, *, refresh:bool=False):
     return user_info
 
 
-async def get_access_token_from_session(request:Request, *, refresh_if_expired:bool=True, refresh:bool=False) -> str:
+async def get_access_token_from_session(
+        request: Request, *, refresh_if_expired: bool = True,
+        refresh: bool = False) -> str:
     """
     Get the access token for a given user.
     """
@@ -176,7 +178,7 @@ async def get_access_token_from_session(request:Request, *, refresh_if_expired:b
     return updated_token_info['access_token']
 
 
-async def get_user_guilds_from_session(request:Request):
+async def get_user_guilds_from_session(request: Request):
     """
     Process the login from Discord and store relevant data in the session.
     """
@@ -203,7 +205,7 @@ async def get_user_guilds_from_session(request:Request):
     return guild_info
 
 
-async def add_user_to_guild_from_session(request:Request, bot_index:str, guild_id:int) -> bool:
+async def add_user_to_guild_from_session(request: Request, bot_index: str, guild_id: int) -> bool:
     """
     Adds the user to the given guild (if the correct scopes were previously provided)
     Returns a boolean of whether or not that user was added (or was already in the guild) successfully.

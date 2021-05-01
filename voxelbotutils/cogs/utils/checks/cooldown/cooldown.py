@@ -29,28 +29,28 @@ class CooldownMapping(commands.CooldownMapping):
 
         return super().valid
 
-    def _bucket_key(self, message:discord.Message) -> typing.Optional[int]:
+    def _bucket_key(self, message: discord.Message) -> typing.Optional[int]:
         """
         Gets the key for the given cooldown mapping, depending on the type of the cooldown.
         """
 
         return super()._bucket_key(message)
 
-    def get_bucket(self, message:discord.Message, current:float=None) -> commands.Cooldown:
+    def get_bucket(self, message: discord.Message, current: float = None) -> commands.Cooldown:
         """
         Gives you the applied cooldown for a message, which you can use to work out whether to run the command or not.
         """
 
         return super().get_bucket(message, current)
 
-    def update_rate_limit(self, message:discord.Message, current:float=None) -> None:
+    def update_rate_limit(self, message: discord.Message, current: float = None) -> None:
         """
         Updates the rate limit for a given message.
         """
 
         return super().update_rate_limit(message, current)
 
-    def __call__(self, original:commands.Cooldown):
+    def __call__(self, original: commands.Cooldown):
         """
         Runs the original init method.
 
@@ -71,7 +71,7 @@ class GroupedCooldownMapping(CooldownMapping):
 
     grouped_cache = grouped_cooldown_mapping_cache
 
-    def __init__(self, key:str):
+    def __init__(self, key: str):
         self.group_cache_key = key
 
     @property
@@ -94,7 +94,7 @@ class Cooldown(commands.Cooldown):
     _copy_kwargs = ()  # The attrs that are passed into kwargs when copied; error and mapping are always copied
     __slots__ = ('rate', 'per', 'type', 'error', 'mapping', '_window', '_tokens', '_last')
 
-    def __init__(self, *, error=None, mapping:CooldownMapping=None):
+    def __init__(self, *, error: commands.CommandOnCooldown = None, mapping: CooldownMapping = None):
         """
         Args:
             error (None, optional): The error instance to be raised if the user is on cooldown.
@@ -114,7 +114,7 @@ class Cooldown(commands.Cooldown):
 
         return True
 
-    def get_tokens(self, current:float=None) -> int:
+    def get_tokens(self, current: float = None) -> int:
         """Gets the number of command calls that can still be made before hitting the rate limit
 
         Args:
@@ -126,7 +126,7 @@ class Cooldown(commands.Cooldown):
 
         return super().get_tokens(current)
 
-    def update_rate_limit(self, current:float=None) -> typing.Optional[int]:
+    def update_rate_limit(self, current: float = None) -> typing.Optional[int]:
         """
         Updates the rate limit for the command, as it has now been called.
 
@@ -139,7 +139,7 @@ class Cooldown(commands.Cooldown):
 
         return super().update_rate_limit(current)
 
-    def get_remaining_cooldown(self, current:float=None) -> typing.Optional[float]:
+    def get_remaining_cooldown(self, current: float = None) -> typing.Optional[float]:
         """
         Gets the remaining rate limit for the command.
         """
@@ -166,7 +166,7 @@ class Cooldown(commands.Cooldown):
         cooldown = cooldown(rate=self.rate, per=self.per, type=self.type)
         return cooldown
 
-    def __call__(self, rate:float, per:int, type:commands.BucketType) -> 'Cooldown':
+    def __call__(self, rate: float, per: int, type: commands.BucketType) -> 'Cooldown':
         """
         Runs the original init method. MUST return self.
 
@@ -197,7 +197,9 @@ class NoRaiseCooldown(Cooldown):
     default_cooldown_error = NoRaiseCommandOnCooldown
 
 
-def cooldown(rate:int, per:int, type:commands.BucketType=commands.BucketType.default, *, cls:commands.Cooldown=None) -> typing.Callable:
+def cooldown(
+        rate: int, per: int, type: commands.BucketType = commands.BucketType.default, *,
+        cls: commands.Cooldown = None) -> typing.Callable:
     """
     Args:
         rate (int): How many times this command can be run.

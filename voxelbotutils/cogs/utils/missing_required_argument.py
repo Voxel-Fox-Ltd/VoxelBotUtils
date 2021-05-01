@@ -10,5 +10,5 @@ class MissingRequiredArgumentString(commands.MissingRequiredArgument):
         param (str): The parameter that was missing from the command.
     """
 
-    def __init__(self, param:str):
+    def __init__(self, param: str):
         self.param: str = param
