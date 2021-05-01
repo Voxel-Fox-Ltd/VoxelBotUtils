@@ -70,7 +70,7 @@ class InteractionHandler(utils.Cog):
                 self.logger.debug("Invoking interaction context for command %s" % (ctx.command.name))
             else:
                 self.logger.warning("No command found for interaction invoker %s" % (ctx.invoked_with))
-            ctx._send_interaction_response_callback()
+            # ctx._send_interaction_response_callback()
             await self.bot.invoke(ctx)
             return
 
@@ -79,7 +79,7 @@ class InteractionHandler(utils.Cog):
             clicked_button_payload = utils.interactions.components.ButtonInteractionPayload.from_payload(
                 payload['d'], self.bot._connection,
             )
-            clicked_button_payload._send_interaction_response_callback()
+            # clicked_button_payload._send_interaction_response_callback()
             self.bot.dispatch("button_click", clicked_button_payload)
             return
 
