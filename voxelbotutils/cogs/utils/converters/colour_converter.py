@@ -823,11 +823,11 @@ class ColourConverter(commands.ColourConverter):
     COLOURS_BY_NAME = COLOURS_BY_NAME
     COLOURS_BY_VALUE = COLOURS_BY_VALUE
 
-    def __init__(self, *, allow_custom_colour_names:bool=True, allow_default_colours:bool=True):
+    def __init__(self, *, allow_custom_colour_names: bool = True, allow_default_colours: bool = True):
         self.allow_custom_colour_names = allow_custom_colour_names
         self.allow_default_colours = allow_default_colours
 
-    async def convert(self, ctx, argument):
+    async def convert(self, ctx: commands.Context, argument: str):
         if self.allow_custom_colour_names:
             v = COLOURS_BY_NAME.get(argument.lower().strip())
             if v:

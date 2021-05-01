@@ -13,7 +13,7 @@ def requires_login():
         """An inner wrapper so I can get args at the outer level"""
 
         @functools.wraps(func)
-        async def wrapper(request:Request):
+        async def wrapper(request: Request):
             """This is the wrapper that does all the heavy lifting"""
 
             # See if we have token info

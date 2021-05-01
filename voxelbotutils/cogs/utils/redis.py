@@ -17,13 +17,13 @@ class RedisConnection(object):
     logger: logging.Logger = None  # Set as a child of bot.logger
     lock_manager: aioredlock.Aioredlock = None
 
-    def __init__(self, connection:aioredis.RedisConnection=None):
+    def __init__(self, connection: aioredis.RedisConnection=None):
         """:meta private:"""
 
         self.conn = connection
 
     @classmethod
-    async def create_pool(cls, config:dict) -> None:
+    async def create_pool(cls, config: dict) -> None:
         """
         Creates and connects the pool object.
 
@@ -60,10 +60,10 @@ class RedisConnection(object):
         self.conn = v.conn
         return self
 
-    async def __aexit__(self, exc_type, exc, tb):
+    async def __aexit__(self, *args, **kwargs):
         await self.disconnect()
 
-    async def publish(self, channel:str, json:dict) -> None:
+    async def publish(self, channel: str, json: dict) -> None:
         """
         Publishes some JSON to a given redis channel.
 
@@ -75,7 +75,7 @@ class RedisConnection(object):
         self.logger.debug(f"Publishing JSON to channel {channel}: {json!s}")
         return await self.conn.publish_json(channel, json)
 
-    async def publish_str(self, channel:str, message:str) -> None:
+    async def publish_str(self, channel: str, message: str) -> None:
         """
         Publishes a message to a given redis channel.
 
@@ -87,7 +87,7 @@ class RedisConnection(object):
         self.logger.debug(f"Publishing message to channel {channel}: {message}")
         return await self.conn.publish(channel, message)
 
-    async def set(self, key:str, value:str) -> None:
+    async def set(self, key: str, value: str) -> None:
         """
         Sets a key/value pair in the redis DB.
 
@@ -99,7 +99,7 @@ class RedisConnection(object):
         self.logger.debug(f"Setting Redis key:value pair with {key}:{value}")
         return await self.conn.set(key, value)
 
-    async def get(self, key:str) -> str:
+    async def get(self, key: str) -> str:
         """
         Grabs a value from the Redis DB given a key.
 

@@ -15,7 +15,7 @@ class BooleanConverter(commands.Converter):
     ]
 
     @classmethod
-    async def add_tick_emojis(cls, message:discord.Message):
+    async def add_tick_emojis(cls, message: discord.Message):
         """
         Add boolean reactions to the given message.
         """
@@ -24,7 +24,7 @@ class BooleanConverter(commands.Converter):
             await message.add_reaction(e)
 
     @classmethod
-    def add_tick_emojis_non_async(cls, message:discord.Message):
+    def add_tick_emojis_non_async(cls, message: discord.Message):
         """
         Add boolean reactions to the given message as a non-awaitable.
         """

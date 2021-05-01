@@ -15,7 +15,7 @@ def bot_is_ready():
         BotNotReady: If the bot isn't yet marked as ready.
     """
 
-    async def predicate(ctx:commands.Context):
+    async def predicate(ctx: commands.Context):
         if ctx.bot.is_ready() and (ctx.bot.startup_method is None or ctx.bot.startup_method.done()):
             return True
         raise BotNotReady("The bot isn't marked as ready to process commands yet - please wait a minute or so.")

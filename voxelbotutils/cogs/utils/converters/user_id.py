@@ -10,7 +10,7 @@ class UserID(int):
     """
 
     @classmethod
-    async def convert(cls, ctx:commands.Context, value:str) -> int:
+    async def convert(cls, ctx: commands.Context, value: str) -> int:
         """
         Converts the given value to a valid user ID.
         """

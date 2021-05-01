@@ -10,7 +10,7 @@ class RoleBasedCooldown(Cooldown):
 
     _copy_kwargs = ()
 
-    def __init__(self, tiers:dict, **kwargs):
+    def __init__(self, tiers: dict, **kwargs):
         """
         Args:
             tiers (dict): The dictionary of `{role_id: seconds}` that should be used for this cooldown.
@@ -19,7 +19,7 @@ class RoleBasedCooldown(Cooldown):
         super().__init__(**kwargs)
         self.tier_cooldowns = tiers  # RoleID: CooldownSeconds
 
-    def predicate(self, ctx:commands.Context):
+    def predicate(self, ctx: commands.Context):
         """
         Update the cooldown based on the given guild member.
         """

@@ -4,7 +4,7 @@ from discord.ext import commands
 class EnumConverter(object):
 
     @staticmethod
-    def create_type(self, *valid_inputs, case_insensitive:bool=False):
+    def create_type(self, *valid_inputs, case_insensitive: bool = False):
         """
         Create a converter that only lets users give a certain range of inputs.
         """

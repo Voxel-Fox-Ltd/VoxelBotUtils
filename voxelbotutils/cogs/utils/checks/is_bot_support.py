@@ -19,7 +19,7 @@ def is_bot_support():
         NotBotSupport: If the given user isn't a member of the bot's support team.
     """
 
-    async def predicate(ctx:commands.Context):
+    async def predicate(ctx: commands.Context):
         if ctx.author.id in ctx.bot.owner_ids:
             return True
         support_guild = await ctx.bot.fetch_support_guild()

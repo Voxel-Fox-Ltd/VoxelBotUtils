@@ -14,14 +14,15 @@ class DatabaseConnection(object):
     logger: logging.Logger = None
     __slots__ = ('conn', 'transaction', 'is_active',)
 
-    def __init__(self, connection:asyncpg.Connection=None, transaction:asyncpg.transaction.Transaction=None):
+    def __init__(self, connection: asyncpg.Connection = None, transaction: asyncpg.transaction.Transaction = None):
         """:meta private:"""
+
         self.conn = connection
         self.transaction = transaction
         self.is_active = False
 
     @classmethod
-    async def create_pool(cls, config:dict) -> None:
+    async def create_pool(cls, config: dict) -> None:
         """
         Creates the database pool and plonks it in :attr:`DatabaseConnection.pool`.
 
@@ -90,7 +91,7 @@ class DatabaseConnection(object):
     async def __aexit__(self, exc_type, exc, tb):
         await self.disconnect()
 
-    async def __call__(self, sql:str, *args) -> typing.Union[typing.List[dict], None]:
+    async def __call__(self, sql: str, *args) -> typing.Union[typing.List[dict], None]:
         """
         Runs a line of SQL and returns a list, if things are expected back, or None, if nothing of interest is happening.
 
@@ -126,7 +127,7 @@ class DatabaseConnection(object):
             return []
         return None
 
-    async def execute_many(self, sql:str, *args) -> None:
+    async def execute_many(self, sql: str, *args) -> None:
         """
         Runs an executemany query.
 
@@ -139,7 +140,9 @@ class DatabaseConnection(object):
         await self.conn.executemany(sql, args)
         return None
 
-    async def copy_records_to_table(self, table_name:str, *, records:typing.List[typing.Any], columns:typing.Tuple[str]=None, timeout:float=None) -> str:
+    async def copy_records_to_table(
+            self, table_name: str, *, records: typing.List[typing.Any],
+            columns: typing.Tuple[str] = None, timeout: float = None) -> str:
         """
         Copies a series of records to a given table.
 

@@ -7,7 +7,7 @@ import discord
 from .runner import run_bot, run_website
 
 
-def create_file(*path, content:str=None, throw_error:bool=False):
+def create_file(*path, content: str = None):
     joined_folder_path = pathlib.Path("./").joinpath(*path[:-1])
     joined_file_path = pathlib.Path("./").joinpath(*path)
     joined_folder_path.mkdir(parents=True, exist_ok=True)
@@ -71,7 +71,9 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     return parser
 
 
-def check_config_value(base_config_key:typing.List[str], base_config_value:typing.Any, compare_config_value:typing.Any) -> None:
+def check_config_value(
+        base_config_key: typing.List[str], base_config_value: typing.Any,
+        compare_config_value: typing.Any) -> None:
     """
     Recursively checks a config item to see if it's valid against a base config item
     """
@@ -99,19 +101,10 @@ def check_config_value(base_config_key:typing.List[str], base_config_value:typin
     return
 
 
-def mess_with_default_dpy():
-    """
-    We want to fuck up the default D.py library to add things that are important to us, but we don't want to
-    fork the whole thing.
-    """
-
-    async def add_reactions_callback(message, *reactions):
-        for r in reactions:
-            await message.add_reaction(r)
-    discord.Message.add_reactions = add_reactions_callback
-
-
 def main():
+    """
+    The main method for running all of vbu.
+    """
 
     # Wew let's see if we want to run a bot
     parser = get_default_program_arguments()
@@ -122,66 +115,26 @@ def main():
         config_type = args.config_type[0]
         from . import config
         if config_type in ["website", "all"]:
-            website_frontend_file_content = (
-                "from aiohttp.web import HTTPFound, Request, Response, RouteTableDef\n"
-                "from voxelbotutils import web as webutils\n"
-                "import aiohttp_session\n"
-                "import discord\n"
-                "from aiohttp_jinja2 import template\n\n\n"
-                "routes = RouteTableDef()\n"
-            )
-            website_backend_file_content = website_frontend_file_content + (
-                "\n\n@routes.get('/login_processor')\n"
-                "async def login_processor(request:Request):\n"
-                '    """\n'
-                '    Page the discord login redirects the user to when successfully logged in with Discord.\n'
-                '    """\n\n'
-                "    v = await webutils.process_discord_login(request)\n"
-                "    if isinstance(v, Response):\n"
-                "        # return v\n"
-                "        return HTTPFound('/')\n"
-                "    session = await aiohttp_session.get_session(request)\n"
-                "    return HTTPFound(location=session.pop('redirect_on_login', '/'))\n"
-                "\n\n@routes.get('/logout')\n"
-                "async def logout(request:Request):\n"
-                '    """\n'
-                "    Destroy the user's login session.\n"
-                '    """\n\n'
-                "    session = await aiohttp_session.get_session(request)\n"
-                "    session.invalidate()\n"
-                "    return HTTPFound(location='/')\n"
-                "\n\n@routes.get('/login')\n"
-                "async def login(request:Request):\n"
-                '    """\n'
-                "    Direct the user to the bot's Oauth login page.\n"
-                '    """\n\n'
-                '    return HTTPFound(location=webutils.get_discord_login_url(request, "/login_processor"))\n'
-            ).replace("from aiohttp_jinja2 import template\n", "")
-            create_file("config", "website.toml", content=config.web_config_file.lstrip(), throw_error=True)
+            create_file("config", "website.toml", content=config.web_config_file.lstrip())
             create_file("config", "website.example.toml", content=config.web_config_file.lstrip())
             create_file("config", "database.pgsql", content=config.database_file.lstrip())
             create_file("run_website.bat", content="py -m voxelbotutils run-website .\n")
             create_file("run_website.sh", content="python3 -m voxelbotutils run-website .\n")
             create_file(".gitignore", content="__pycache__/\nconfig/config.toml\nconfig/website.toml\n")
             create_file("requirements.txt", content="voxelbotutils[web]\n")
-            create_file("website", "frontend.py", content=website_frontend_file_content)
-            create_file("website", "backend.py", content=website_backend_file_content)
+            create_file("website", "frontend.py", content=config.website_frontend_content.lstrip())
+            create_file("website", "backend.py", content=config.website_backend_content.lstri())
             create_file("website", "static", ".gitkeep", content="\n")
             create_file("website", "templates", ".gitkeep", content="\n")
             print("Created website config file.")
         if config_type in ["bot", "all"]:
-            create_file("config", "config.toml", content=config.config_file.lstrip(), throw_error=True)
+            create_file("config", "config.toml", content=config.config_file.lstrip())
             create_file("config", "config.example.toml", content=config.config_file.lstrip())
             create_file("config", "database.pgsql", content=config.database_file.lstrip())
             create_file("cogs", "ping_command.py", content=config.cog_example.lstrip())
             create_file("run_bot.bat", content="py -m voxelbotutils run-bot .\n")
             create_file("run_bot.sh", content="python3 -m voxelbotutils run-bot .\n")
-            create_file("run_bot.py", content="""#!/usr/bin/env python
-import voxelbotutils.__main__
-parser = voxelbotutils.__main__.get_default_program_arguments()
-args = parser.parse_args(['run-bot', '.'])
-voxelbotutils.runner.run_bot(args)
-""")
+            create_file("run_bot.py", content=config.run_bot_python_file.lstrip())
             create_file(".gitignore", content="__pycache__/\nconfig/config.toml\nconfig/website.toml\n")
             create_file("requirements.txt", content="voxelbotutils\n")
             print("Created bot config file.")
@@ -209,8 +162,7 @@ voxelbotutils.runner.run_bot(args)
         exit(1)
 
     # Run things
-    mess_with_default_dpy()
-    if args.subcommand == "run-bot":
+    elif args.subcommand == "run-bot":
         run_bot(args)
     elif args.subcommand == "run-website":
         run_website(args)

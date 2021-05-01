@@ -9,12 +9,11 @@ class Embed(discord.Embed):
     that I tend to do with them.
     """
 
-    def __init__(self, *args, use_random_colour:bool=False, **kwargs):
+    def __init__(self, use_random_colour: bool = False, **kwargs):
         """
         Args:
-            *args: Default args that go do `discord.Embed`.
             use_random_colour (bool, optional): Whether or not to automatically use a random colour.
-            **kwargs: Default args that go do `discord.Embed`.
+            **kwargs: Default args that go do :class:`discord.Embed`.
         """
 
         super().__init__(*args, **kwargs)
@@ -41,7 +40,7 @@ class Embed(discord.Embed):
         self.colour = random.randint(0, 0xffffff)
         return self
 
-    def set_footer(self, text:str, *args, **kwargs) -> 'Embed':
+    def set_footer(self, text: str, *args, **kwargs) -> 'Embed':
         """
         Sets the footer of the embed.
 
@@ -71,7 +70,7 @@ class Embed(discord.Embed):
         super().set_image(url=url)
         return self
 
-    def set_thumbnail(self, url:str) -> 'Embed':
+    def set_thumbnail(self, url: str) -> 'Embed':
         """
         Sets the thumbnail of the embed.
 
@@ -85,7 +84,7 @@ class Embed(discord.Embed):
         super().set_thumbnail(url=url)
         return self
 
-    def set_author_to_user(self, user:discord.User, use_nick:bool = False) -> 'Embed':
+    def set_author_to_user(self, user: discord.User, use_nick: bool = False) -> 'Embed':
         """
         Sets the author of the embed to a given Discord user.
 
@@ -104,7 +103,7 @@ class Embed(discord.Embed):
         super().set_author(name=name, icon_url=user.avatar_url)
         return self
 
-    def add_field(self, name:str, value:str, inline:bool=True) -> 'Embed':
+    def add_field(self, name: str, value: str, inline: bool = True) -> 'Embed':
         """
         Adds a field to the embed without using kwargs.
 
@@ -120,7 +119,7 @@ class Embed(discord.Embed):
         super().add_field(name=name, value=value, inline=inline)
         return self
 
-    def get_field_by_key(self, key:str) -> dict:
+    def get_field_by_key(self, key: str) -> dict:
         """
         Return the data from a field given its key
 
@@ -139,7 +138,9 @@ class Embed(discord.Embed):
                 return {'name': field.name, 'value': field.value, 'inline': field.inline}
         raise KeyError("Key not found in embed")
 
-    def edit_field_by_index(self, index:int, *, name:str=None, value:str=None, inline:bool=None) -> 'Embed':
+    def edit_field_by_index(
+            self, index: int, *, name: str = None, value: str = None,
+            inline: bool = None) -> 'Embed':
         """
         Edit a field in the embed using its index.
 
@@ -160,7 +161,9 @@ class Embed(discord.Embed):
         super().set_field_at(index, name=new_name, value=new_value, inline=new_inline)
         return self
 
-    def edit_field_by_key(self, key:str, *, name:str=None, value:str=None, inline:bool=None) -> 'Embed':
+    def edit_field_by_key(
+            self, key: str, *, name: str = None, value: str = None,
+            inline: bool = None) -> 'Embed':
         """
         Edit a field in the embed using its name as a key.
 
@@ -183,7 +186,7 @@ class Embed(discord.Embed):
         raise KeyError("Key not found in embed")
 
     @classmethod
-    def from_native(cls, embed:discord.Embed):
+    def from_native(cls, embed: discord.Embed):
         """
         Upgrade a native embed into a VBU embed.
         """

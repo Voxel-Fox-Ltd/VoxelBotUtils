@@ -47,8 +47,10 @@ class _FakeStatsdConnection(object):
 
 class StatsdConnection(object):
     """
-    A helper class to wrap around an :class:`aiodogstatsd.Client` object so as to make it a little easier to use.
-    Statsd is unique in my wrapper utils in that it'll fail silently if there's no connection to be made.
+    A helper class to wrap around an :class:`aiodogstatsd.Client` object so
+    as to make it a little easier to use.
+    Statsd is unique in my wrapper utils in that it'll fail
+    silently if there's no connection to be made.
     """
 
     config: dict = None
@@ -97,27 +99,21 @@ class StatsdConnection(object):
         await self.disconnect()
 
     def increment(self, event, *args, **kwargs):
-        self.logger.debug(f"Pinging statsd increment for event {event}")
         return self.conn.increment(event, *args, **kwargs)
 
     def decrement(self, event, *args, **kwargs):
-        self.logger.debug(f"Pinging statsd decrement for event {event}")
         return self.conn.decrement(event, *args, **kwargs)
 
     def gauge(self, event, *args, **kwargs):
-        self.logger.debug(f"Pinging statsd gauge for event {event}")
         return self.conn.gauge(event, *args, **kwargs)
 
     def histogram(self, event, *args, **kwargs):
-        self.logger.debug(f"Pinging statsd histogram for event {event}")
         return self.conn.histogram(event, *args, **kwargs)
 
     def distribution(self, event, *args, **kwargs):
-        self.logger.debug(f"Pinging statsd distribution for event {event}")
         return self.conn.distribution(event, *args, **kwargs)
 
     def timing(self, event, *args, **kwargs):
-        self.logger.debug(f"Pinging statsd timing for event {event}")
         return self.conn.timing(event, *args, **kwargs)
 
     @property
