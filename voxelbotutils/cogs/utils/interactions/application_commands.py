@@ -121,7 +121,7 @@ class InteractionMessage(discord.Message):
         self._edited_timestamp = None
         self.type = discord.MessageType.default
         self.pinned = False
-        self.flags = MessageFlags._from_value(0)
+        self.flags = discord.MessageFlags._from_value(0)
         self.mention_everyone = False
         self.tts = False
         self.content = content
