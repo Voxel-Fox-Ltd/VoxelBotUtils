@@ -23,7 +23,8 @@ from .redis import RedisConnection
 from .statsd import StatsdConnection
 from .analytics_log_handler import AnalyticsLogHandler
 from .upgrade_chat import UpgradeChat
-from . import interactions, MessageComponents
+from .interactions.components import MessageComponents
+from . import interactions
 from .. import all_packages as all_vfl_package_names
 
 
