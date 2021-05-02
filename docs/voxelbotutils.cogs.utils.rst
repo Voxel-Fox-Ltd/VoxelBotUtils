@@ -23,10 +23,8 @@ Command
 -----------------------------------------------
 
 .. autoclass:: voxelbotutils.Command
-   :no-special-members:
 
 .. autoclass:: voxelbotutils.Group
-   :no-special-members:
 
 Context
 -----------------------------------------------

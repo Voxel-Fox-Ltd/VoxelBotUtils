@@ -30,7 +30,7 @@ from .. import all_packages as all_vfl_package_names
 
 def get_prefix(bot, message: discord.Message):
     """
-    Gives the prefix for the bot - override this to make guild-specific prefixes.
+    Get the guild prefix for the bot given the message that should be invoking a command.
     """
 
     # Default prefix for DMs
@@ -75,8 +75,33 @@ class RouteV8(discord.http.Route):
 
 class Bot(commands.AutoShardedBot):
     """
-    A child of discord.ext.commands.AutoShardedBot to make things a little easier when
-    doing my own stuff.
+    A bot class that inherits from :class:`discord.ext.commands.AutoShardedBot`, detailing more VoxelBotUtils
+    functions, as well as changing some of the default Discord.py library behaviour.
+
+    Attributes:
+        logger (logging.Logger): A logger instance for the bot.
+        config (dict): The :class:`config<BotConfig>` for the bot.
+        session (aiohttp.ClientSession): A session instance that you can use to make web requests.
+        application_id (int): The ID of this bot application.
+        database (DatabaseConnection): The database connector, as connected using the data
+            from your :class:`config file<BotConfig.database>`.
+        redis (RedisConnection): The redis connector, as connected using the data from your
+            :class:`config file<BotConfig.redis>`.
+        stats (StatsdConnection): The stats connector, as connected using the data from your
+            :class:`config file<BotConfig.statsd>`. May not be authenticated, but will fail silently
+            if not.
+        startup_method (asyncio.Task): The task that's run when the bot is starting up.
+        guild_settings (dict): A dictionary from the `guild_settings` Postgres table.
+        user_settings (dict): A dictionary from the `user_settings` Postgres table.
+        user_agent (str): The user agent that the bot should use for web requests as set in the
+            :attr:`config file<BotConfig.user_agent>`. This isn't used automatically anywhere,
+            so it just here as a provided convenience.
+        upgrade_chat (UpgradeChat): An UpgradeChat connector instance using the oauth information
+            provided in your :class:`config file<BotConfig.upgrade_chat>`.
+        clean_prefix (str): The default prefix for the bot.
+        owner_ids (typing.List[int]): A list of the owners from the :attr:`config file<BotConfig.owners>`.
+        embeddify (bool): Whether or not messages should be embedded by default, as set in the
+            :attr:`config file<BotConfig.embed.enabled>`.
     """
 
     def __init__(
@@ -88,15 +113,16 @@ class Bot(commands.AutoShardedBot):
             *args, **kwargs):
         """
         Args:
-            config_file (str, optional): The path to the config file for the bot.
+            config_file (str, optional): The path to the :class:`config file<BotConfig>` for the bot.
             logger (logging.Logger, optional): The logger object that the bot should use.
             activity (discord.Activity, optional): The default activity of the bot.
             status (discord.Status, optional): The default status of the bot.
             case_insensitive (bool, optional): Whether or not commands are case insensitive.
-            intents (discord.Intents, optional): The default intents for the bot.
+            intents (discord.Intents, optional): The default intents for the bot. Unless subclassed, the
+                intents to use will be read from your :class:`config file<BotConfig.intents>`.
             allowed_mentions (discord.AllowedMentions, optional): The default allowed mentions for the bot.
-            *args: The default args that are sent to the `discord.ext.commands.Bot` object.
-            **kwargs: The default args that are sent to the `discord.ext.commands.Bot` object.
+            *args: The default args that are sent to the :class:`discord.ext.commands.Bot` object.
+            **kwargs: The default args that are sent to the :class:`discord.ext.commands.Bot` object.
         """
 
         # Store the config file for later
@@ -106,10 +132,11 @@ class Bot(commands.AutoShardedBot):
         self.reload_config()
 
         # Let's work out our intents
-        if self.config.get('intents', {}):
-            intents = discord.Intents(**self.config.get('intents', {}))
-        else:
-            intents = discord.Intents(guilds=True, guild_messages=True, dm_messages=True)
+        if not intents:
+            if self.config.get('intents', {}):
+                intents = discord.Intents(**self.config.get('intents', {}))
+            else:
+                intents = discord.Intents(guilds=True, guild_messages=True, dm_messages=True)
 
         # Get our max messages
         cached_messages = self.config.get('cached_messages', 1_000)
@@ -193,7 +220,9 @@ class Bot(commands.AutoShardedBot):
 
     async def startup(self):
         """
-        Clears all the bot's caches and fills them from a DB read
+        Clears the custom caches for the bot (:attr:`guild_settings` and :attr:`user_settings`),
+        re-reads the database tables for each of those items, and calls the
+        :func:`voxelbotutils.Cog.cache_setup` method in each of the cogs again.
         """
 
         try:
@@ -204,7 +233,7 @@ class Bot(commands.AutoShardedBot):
 
     async def _startup(self):
         """
-        Runs the actual db stuff so I can wrap it in a try
+        Runs all of the actual db stuff.
         """
 
         # Remove caches
@@ -258,7 +287,9 @@ class Bot(commands.AutoShardedBot):
         await db.disconnect()
 
     async def _run_sql_exit_on_error(self, db, sql, *args):
-        """Get data form a table, exiting if it can't"""
+        """
+        Get data from a table, and exit if we get an error.
+        """
 
         try:
             return await db(sql, *args)
@@ -267,21 +298,30 @@ class Bot(commands.AutoShardedBot):
             exit(1)
 
     async def _get_all_table_data(self, db, table_name):
-        """Get all data from a table"""
+        """
+        Select all from a table given its name.
+        """
 
         return await self._run_sql_exit_on_error(db, "SELECT * FROM {0}".format(table_name))
 
     async def _get_list_table_data(self, db, table_name, key):
-        """Get all data from a table"""
+        """
+        Select all from a table given its name and a `key=key` check.
+        """
 
         return await self._run_sql_exit_on_error(db, "SELECT * FROM {0} WHERE key=$1".format(table_name), key)
 
     async def fetch_support_guild(self) -> typing.Optional[discord.Guild]:
         """
-        Fetch the support guild based on the config from the API.
+        Get the support guild as set in the bot's :attr:`config file<BotConfig.support_guild_id>`.
+
+        Returns:
+            typing.Optional[discord.Guild]: The guild instance. Will be `None` if a guild ID has not been
+                provided, or cannot be found.
         """
 
         try:
+            assert self.config['support_guild_id']
             return self.get_guild(self.config['support_guild_id']) or await self.fetch_guild(self.config['support_guild_id'])
         except Exception:
             return None
@@ -292,14 +332,20 @@ class Bot(commands.AutoShardedBot):
             guild_id: int = None, permissions: discord.Permissions = discord.Permissions.none(),
             enabled: bool = None) -> str:
         """
-        Gets the invite link for the bot, with permissions all set properly.
+        Generate an invite link for the bot.
 
         Args:
+            base (str, optional): The base URL that should be used for the invite command. For almost all
+                cases, the default of `https://discord.com/oauth2/authorize` is probably fine.
+            client_id (int, optional): The client ID that the invite command should use. Uses the passed
+                argument, then :attr:`the config's<BotConfig.oauth.client_id>` set client ID, and then the bot's
+                ID if nothing is found.
             scope (str, optional): The scope for the invite link.
             response_type (str, optional): The response type of the invite link.
             redirect_uri (str, optional): The redirect URI for the invite link.
             guild_id (int, optional): The guild ID that the invite link should default to.
-            **kwargs: The permissions that should be attached to the invite link - passed directly to `discord.Permissions`.
+            permissions (discord.Permissions, optional): A permissions object that should be used to make
+                the permissions on the invite.
 
         Returns:
             str: The URL for the invite.
@@ -330,6 +376,8 @@ class Bot(commands.AutoShardedBot):
 
     @property
     def user_agent(self):
+        """:meta private:"""
+
         if self.user is None:
             return self.config.get("user_agent", (
                 f"DiscordBot (Discord.py discord bot https://github.com/Rapptz/discord.py) "
@@ -342,6 +390,8 @@ class Bot(commands.AutoShardedBot):
 
     @property
     def upgrade_chat(self):
+        """:meta private:"""
+
         if self._upgrade_chat:
             return self._upgrade_chat
         self._upgrade_chat = UpgradeChat(self.config["upgrade_chat"]["client_id"], self.config["upgrade_chat"]["client_secret"])
@@ -349,8 +399,16 @@ class Bot(commands.AutoShardedBot):
 
     async def get_user_topgg_vote(self, user_id: int) -> bool:
         """
-        Returns whether or not the user has voted on Top.gg. If there's no Top.gg token provided then this will always return `False`.
-        This method doesn't handle timeouts; you are expected to implement them yourself.
+        Returns whether or not the user has voted on Top.gg. If there's no Top.gg token
+        provided in your :attr:`config file<BotConfig.bot_listing_api_keys.topgg_token>`
+        then this will always return `False`. This method doesn't handle timeouts or
+        errors in their API (such as outages); you are expected to handle them yourself.
+
+        Args:
+            user_id (int): The ID of the user you want to check.
+
+        Returns:
+            bool: Whether or not that user has registered a vote on Top.gg.
         """
 
         # Make sure there's a token provided
@@ -373,7 +431,14 @@ class Bot(commands.AutoShardedBot):
 
     def get_event_webhook(self, event_name: str) -> typing.Optional[discord.Webhook]:
         """
-        Get a :class:`discord.Webhook` object based on the keys in the bot's config.
+        Get a :class:`discord.Webhook` object based on the keys in the
+        :class:`bot's config<BotSettings.event_webhooks>`.
+
+        Args:
+            event_name (str): The name of the event you want to get a webhook for.
+
+        Returns:
+            typing.Optional[discord.Webhook]: A webhook instance pointing to the URL as given.
         """
 
         # First we're gonna use the legacy way of event webhooking, which is to say: it's just in the config
@@ -424,21 +489,21 @@ class Bot(commands.AutoShardedBot):
         self._connection.application_id = app.id
         return self.application_id
 
-    async def add_delete_button(
+    async def add_delete_reaction(
             self, message: discord.Message, valid_users: typing.List[discord.User] = None, *,
             delete: typing.List[discord.Message] = None, timeout: float = 60.0, wait: bool = False) -> None:
         """
-        Adds a delete button to the given message.
+        Adds a delete reaction to the given message.
 
         Args:
-            message (discord.Message): The message you want to add a delete button to.
-            valid_users (typing.List[discord.User], optional): The users who have permission to use the message's delete button.
-            delete (typing.List[discord.Message], optional): The messages that should be deleted on clicking the delete button.
-            timeout (float, optional): How long the delete button should persist for.
-            wait (bool, optional): Whether or not to block (via async) until the delete button is pressed.
+            message (discord.Message): The message you want to add a delete reaction to.
+            valid_users (typing.List[discord.User], optional): The users who have permission to use the message's delete reaction.
+            delete (typing.List[discord.Message], optional): The messages that should be deleted on clicking the delete reaction.
+            timeout (float, optional): How long the delete reaction should persist for.
+            wait (bool, optional): Whether or not to block (via async) until the delete reaction is pressed.
 
         Raises:
-            discord.HTTPException: The bot was unable to add a delete button to the message.
+            discord.HTTPException: The bot was unable to add a delete reaction to the message.
         """
 
         # See if we want to make this as a task or not
@@ -507,7 +572,11 @@ class Bot(commands.AutoShardedBot):
 
     def set_footer_from_config(self, embed: discord.Embed) -> None:
         """
-        Sets a footer on the given embed based on the items in the bot's config.
+        Sets a footer on the given embed based on the items in the
+        :attr:`bot's config<BotConfig.embed.footer>`.
+
+        Args:
+            embed (discord.Embed): The embed that you want to set a footer on.
         """
 
         pool = []
@@ -535,12 +604,12 @@ class Bot(commands.AutoShardedBot):
     async def create_message_log(
             self, messages: typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]) -> str:
         """
-        Creates and returns an HTML log of all of the messages provided. This is an API method, and may return an asyncio HTTP
-        error.
+        Creates and returns an HTML log of all of the messages provided. This is an API method, and may
+        raise an asyncio HTTP error.
 
         Args:
-            messages (typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]): The messages
-                you want to create into a log.
+            messages (typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]):
+                The messages you want to create into a log.
 
         Returns:
             str: The HTML for a log file.
@@ -595,6 +664,9 @@ class Bot(commands.AutoShardedBot):
     async def create_global_application_command(self, command: interactions.ApplicationCommand) -> None:
         """
         Add a global slash command for the bot.
+
+        Args:
+            command (interactions.ApplicationCommand): The command that you want to add.
         """
 
         application_id = await self.get_application_id()
@@ -608,6 +680,10 @@ class Bot(commands.AutoShardedBot):
             self, guild: discord.Guild, command: interactions.ApplicationCommand) -> None:
         """
         Add a guild-level slash command for the bot.
+
+        Args:
+            guild (discord.Guild): The guild you want to add the command to.
+            command (interactions.ApplicationCommand): The command you want to add.
         """
 
         application_id = await self.get_application_id()
@@ -621,6 +697,10 @@ class Bot(commands.AutoShardedBot):
             self, commands: typing.List[interactions.ApplicationCommand]) -> None:
         """
         Bulk add a global slash command for the bot.
+
+        Args:
+            commands (typing.List[interactions.ApplicationCommand]): The list of commands
+                you want to add.
         """
 
         application_id = await self.get_application_id()
@@ -634,6 +714,11 @@ class Bot(commands.AutoShardedBot):
             self, guild: discord.Guild, commands: typing.List[interactions.ApplicationCommand]) -> None:
         """
         Bulk add a guild-level slash command for the bot.
+
+        Args:
+            guild (discord.Guild): The guild you want to add the command to.
+            commands (typing.List[interactions.ApplicationCommand]): The list of commands
+                you want to add.
         """
 
         application_id = await self.get_application_id()
@@ -646,6 +731,9 @@ class Bot(commands.AutoShardedBot):
     async def get_global_application_commands(self) -> typing.List[interactions.ApplicationCommand]:
         """
         Add a global slash command for the bot.
+
+        Returns:
+            typing.List[interactions.ApplicationCommand]: A list of commands that have been added.
         """
 
         application_id = await self.get_application_id()
@@ -659,6 +747,12 @@ class Bot(commands.AutoShardedBot):
     async def get_guild_application_commands(self, guild: discord.Guild) -> typing.List[interactions.ApplicationCommand]:
         """
         Add a guild-level slash command for the bot.
+
+        Args:
+            guild (discord.Guild): The guild you want to get commands for.
+
+        Returns:
+            typing.List[interactions.ApplicationCommand]: A list of commands that have been added.
         """
 
         application_id = await self.get_application_id()
@@ -672,6 +766,9 @@ class Bot(commands.AutoShardedBot):
     async def delete_global_application_command(self, command: interactions.ApplicationCommand) -> None:
         """
         Remove a global slash command for the bot.
+
+        Args:
+            command (interactions.ApplicationCommand): The command that you want to remove.
         """
 
         application_id = await self.get_application_id()
@@ -685,6 +782,10 @@ class Bot(commands.AutoShardedBot):
             self, guild: discord.Guild, command: interactions.ApplicationCommand) -> None:
         """
         Remove a guild-level slash command for the bot.
+
+        Args:
+            guild (discord.Guild): The guild that you want to remove the command on.
+            command (interactions.ApplicationCommand): The command that you want to remove.
         """
 
         application_id = await self.get_application_id()
@@ -723,7 +824,8 @@ class Bot(commands.AutoShardedBot):
         Gets a list of filenames of all the loadable cogs.
 
         Returns:
-            typing.List[str]: A list of the extensions found in the cogs/ folder, as well as the cogs included with the library.
+            typing.List[str]: A list of the extensions found in the cogs/ folder,
+                as well as the cogs included with VoxelBotUtils.
         """
 
         ext = glob.glob('cogs/[!_]*.py')
@@ -761,7 +863,7 @@ class Bot(commands.AutoShardedBot):
 
     async def set_default_presence(self, shard_id: int = None) -> None:
         """
-        Sets the default presence for the bot as appears in the config file.
+        Sets the default presence for the bot as appears in the :class:`config file<BotConfig.presence>`.
 
         Args:
             shard_id (int, optional): The shard to set the presence for.
@@ -862,6 +964,10 @@ class Bot(commands.AutoShardedBot):
             file: discord.File = None, embeddify: bool = None,
             image_url: str = None, embeddify_file: bool = True,
             **kwargs) -> typing.Tuple[str, discord.Embed]:
+        """
+        Takes a set of messageable content and outputs a string/Embed tuple that can be pushed
+        into a messageable object.
+        """
 
         if embeddify is None and image_url is not None:
             embeddify = True
@@ -892,7 +998,10 @@ class Bot(commands.AutoShardedBot):
             return content, embed
 
         # No current embed, and we _want_ to embed it? Alright!
-        embed = discord.Embed(description=content, colour=random.randint(1, 0xffffff) or self.config.get('embed', dict()).get('colour', 0))
+        embed = discord.Embed(
+            description=content,
+            colour=random.randint(1, 0xffffff) or self.config.get('embed', dict()).get('colour', 0),
+        )
         self.set_footer_from_config(embed)
 
         # Set image
@@ -938,6 +1047,8 @@ class Bot(commands.AutoShardedBot):
             image_url: bool = None, embeddify_file: bool = True):
         """
         An alternative send method so that we can add components to messages.
+
+        :meta private:
         """
 
         # Work out where we want to send to
@@ -1083,6 +1194,8 @@ class Bot(commands.AutoShardedBot):
     async def _edit_button_message(self, message, **fields):
         """
         An alternative message edit method so we can edit components onto messages.
+
+        :meta private:
         """
 
         # Make the contet
@@ -1172,6 +1285,8 @@ class Bot(commands.AutoShardedBot):
     async def _wait_for_button_message(self, message, *, check=None, timeout=None):
         """
         Wait for an interaction on a button.
+
+        :meta private:
         """
 
         message_check = lambda payload: payload.message.id == message.id
