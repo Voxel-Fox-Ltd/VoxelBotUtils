@@ -78,3 +78,11 @@ html_css_files = [
 ]
 master_doc = 'index'
 needs_sphinx = "2.0"
+
+# Add some things to the start of the file so we can nicely inherit stuff from the D.py docs
+rst_prolog = """
+.. |coro| replace:: This function is a |coroutine_link|_.
+.. |maybecoro| replace:: This function *could be a* |coroutine_link|_.
+.. |coroutine_link| replace:: *coroutine*
+.. _coroutine_link: https://docs.python.org/3/library/asyncio-task.html#coroutine
+"""
