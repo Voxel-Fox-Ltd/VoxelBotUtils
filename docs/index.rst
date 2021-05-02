@@ -12,4 +12,4 @@ Documentation Contents
    :maxdepth: 1
 
    gettingstarted
-   voxelbotutils
+   apireference
