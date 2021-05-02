@@ -9,7 +9,21 @@ import aioredlock
 
 class RedisConnection(object):
     """
-    A wrapper for an :class:`aioredis.Redis` object.
+    A wrapper for an :class:`aioredis.Redis` object, provided in your bot object
+    at :attr:`Bot.redis` for your convenience. Implemented are setter and getter methods
+    for the redis database, as well as publish and subscribe via a decorator:
+
+    ::
+
+        # In a command
+        async with bot.redis() as re:
+            await re.publish("channel_name", {"foo": "bar"})
+            await re.publish_str("channel_two", "baz")
+
+        # In a cog
+        @voxelbotutils.redis_channel_handler("channel_name")
+        async def handler(self, payload):
+            self.logger.info(payload)
     """
 
     config: dict = None

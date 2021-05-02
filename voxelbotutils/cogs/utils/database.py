@@ -6,7 +6,32 @@ import asyncpg
 
 class DatabaseConnection(object):
     """
-    A helper class to wrap around an :class:`asyncpg.Connection` object.
+    A helper class to wrap around an :class:`asyncpg.Connection` object. This class is
+    written so you don't need to interface with asyncpg directly (though you can if you
+    want by using the :attr:`conn` attribute), and can be easily accessed via the :attr:`Bot.database`
+    attribute.
+
+    ::
+
+        # The database can be used via context
+        async with bot.database() as db:
+            values = await db("SELECT user_id FROM user_settings WHERE enabled=$1", True)
+        for row in values:
+            print(row['user_id'])
+
+        # Or you can get a connection object that you can pass around
+        db = await bot.database.get_connection()
+        await db("DELETE FROM user_settings")
+        await db.disconnect()
+
+        # And transactions are also available
+        async with bot.database() as db:
+            await db.start_transaction()
+            await db("DELETE FROM guild_settings")
+            await db.commit_transaction()
+
+    Attributes:
+        conn (asyncpg.Connection): The asyncpg connection object that we use internally.
     """
 
     config: dict = None
@@ -27,7 +52,8 @@ class DatabaseConnection(object):
         Creates the database pool and plonks it in :attr:`DatabaseConnection.pool`.
 
         Args:
-            config (dict): The configuration for the dictionary, passed directly to :func:`asyncpg.create_pool` as kwargs.
+            config (dict): The configuration for the dictionary, passed directly to
+                :func:`asyncpg.create_pool` as kwargs.
         """
 
         cls.config = config.copy()
@@ -91,7 +117,7 @@ class DatabaseConnection(object):
     async def __aexit__(self, exc_type, exc, tb):
         await self.disconnect()
 
-    async def __call__(self, sql: str, *args) -> typing.Union[typing.List[dict], None]:
+    async def __call__(self, sql: str, *args) -> typing.List[dict]:
         """
         Runs a line of SQL and returns a list, if things are expected back, or None, if nothing of interest is happening.
 
@@ -153,7 +179,7 @@ class DatabaseConnection(object):
             timeout (float, optional): The timeout for the copy command.
 
         Returns:
-            str: The COPY status string
+            str: The COPY status string.
         """
 
         return await self.conn.copy_records_to_table(

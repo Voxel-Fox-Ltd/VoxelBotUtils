@@ -18,7 +18,9 @@ class Cog(OriginalCog):
         logger (logging.Logger): The logger that's assigned to the cog instance. This will be used
             for logging command calls, even if you choose not to use it yourself.
         qualified_name (str): The human-readable name for the cog.
+
             ::
+
                 class MyCog(voxelbotutils.Cog): pass
                 c = MyCog(bot)
                 c.qualified_name  # "My Cog"

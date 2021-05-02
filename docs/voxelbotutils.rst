@@ -4,7 +4,6 @@ API Reference
 .. toctree::
    :maxdepth: 4
 
-   voxelbotutils.runner
    voxelbotutils.cogs.utils
    voxelbotutils.cogs.utils.checks
    voxelbotutils.cogs.utils.converters

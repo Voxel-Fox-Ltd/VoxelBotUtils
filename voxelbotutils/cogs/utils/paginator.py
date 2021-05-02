@@ -11,7 +11,28 @@ from .context_embed import Embed
 
 class Paginator(object):
     """
-    A helper class for paginating sets of data.
+    An automatic paginator util that takes a list and listens for reactions on a message
+    to change the content.
+
+    ::
+
+        # Items will automatically be cast to strings and joined
+        my_list = list(range(30))
+        p = voxelbotutils.Paginator(my_list, per_page=5)
+        await p.start(ctx, timeout=15)
+
+        # Alternatively you can give a function, which can return a string, an embed, or a dict
+        # that gets unpacked directly into the message's edit method
+        def my_formatter(menu, items):
+            output = []
+            for i in items:
+                output.append(f"The {i}th item")
+            output_string = "\\n".join(output)
+            embed = voxelbotutils.Embed(description=output_string)
+            embed.set_footer(f"Page {menu.current_page + 1}/{menu.max_pages}")
+
+        p = voxelbotutils.Paginator(my_list, formatter=my_formatter)
+        await p.start(ctx)
     """
 
     def __init__(
@@ -30,7 +51,7 @@ class Paginator(object):
             per_page (int, optional): The number of items that appear on each page. This argument only works for sequences
             formatter (typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]], optional): A
                 function taking the paginator instance and a list of things to display, returning a dictionary of kwargs that get passed
-                directly into a `Message.edit`.
+                directly into a :func:`discord.Message.edit`.
         """
         self.data = data
         self.per_page = per_page
@@ -64,7 +85,8 @@ class Paginator(object):
 
         Args:
             ctx (commands.Context): The context instance for the called command.
-            timeout (float, optional): How long you should wait between getting a reaction and timing out.
+            timeout (float, optional): How long you should wait between getting a reaction
+                and timing out.
         """
 
         # Set our initial values
