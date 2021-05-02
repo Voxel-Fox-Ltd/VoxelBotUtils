@@ -31,17 +31,35 @@ class InvalidTimeDuration(commands.BadArgument):
 class TimeValue(object):
     """
     An object that nicely converts an integer value into an easily readable string.
+    This util is also available as an argument converter for your commands,
+    though it can be used outide of being a converter as well via use of the :func:`parse`
+    method.
+
+    ::
+
+        >>> value = voxelbotutils.TimeValue(606)
+        >>> value.clean
+        '10m6s'
+        >>> value.clean_spaced
+        '10m 6s'
+        >>> value = voxelbotutils.TimeValue.parse('10m6s')
+        >>> value.duration
+        606
+
+    Note:
+        This does not support partial seconds, and can only support a max of *about* 68 years
+        (2^31 seconds).
 
     Attributes:
         duration (int): The entire duration, in seconds, of the timevalue object.
-        years (int): The number of years that the timevalue object represents.
-        days (int): The number of days that the timevalue object represents.
-        hours (int): The number of hours that the timevalue object represents.
-        minutes (int): The number of minutes that the timevalue object represents.
-        seconds (int): The number of seconds that the timevalue object represents.
-        clean_spaced (str): A string form of the timevalue object in form "10 hours 3 minutes".
-        clean_full (str): A string form of the timevalue object in form "10h 3m".
-        clean (str): A string form of the timevalue object in form "10h3m".
+        years (int): The number of years that the object represents.
+        days (int): The number of days that the object represents.
+        hours (int): The number of hours that the object represents.
+        minutes (int): The number of minutes that the object represents.
+        seconds (int): The number of seconds that the object represents.
+        clean_spaced (str): A string form of the object in form "10 hours 3 minutes".
+        clean_full (str): A string form of the object in form "10h 3m".
+        clean (str): A string form of the object in form "10h3m".
         delta (datetime.timedelta): A timedelta for the entire timevalue object.
     """
 

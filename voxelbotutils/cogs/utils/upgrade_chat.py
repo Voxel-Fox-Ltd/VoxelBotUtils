@@ -9,6 +9,12 @@ import aiohttp
 class UpgradeChatInterval(enum.Enum):
     """
     A subscription interval enum for Upgrade.Chat role subscriptions.
+
+    Attributes:
+        day
+        week
+        month
+        year
     """
 
     day = enum.auto()
@@ -20,6 +26,10 @@ class UpgradeChatInterval(enum.Enum):
 class UpgradeChatItemType(enum.Enum):
     """
     An item type enum to allow you to query the Upgrade.Chat API.
+
+    Attributes:
+        UPGRADE
+        SHOP
     """
 
     UPGRADE = enum.auto()
@@ -29,6 +39,10 @@ class UpgradeChatItemType(enum.Enum):
 class UpgradeChatProductType(enum.Enum):
     """
     A product type enum for internal responses from the Upgrade.Chat API - this is not for querying with.
+
+    Attributes:
+        DISCORD_ROLE
+        SHOP_PRODUCT
     """
 
     DISCORD_ROLE = enum.auto()
@@ -38,6 +52,10 @@ class UpgradeChatProductType(enum.Enum):
 class UpgradeChatPaymentProcessor(enum.Enum):
     """
     A payment processor enum for Upgrade.Chat purchases.
+
+    Attributes:
+        PAYPAL
+        STRIPE
     """
 
     PAYPAL = enum.auto()
@@ -47,6 +65,10 @@ class UpgradeChatPaymentProcessor(enum.Enum):
 class UpgradeChatUser(object):
     """
     A user object from the UpgradeChat API.
+
+    Attributes:
+        discord_id (int): The ID of the user.
+        username (str): The uername of the user.
     """
 
     def __init__(self, discord_id: str, username: str):
@@ -60,6 +82,29 @@ class UpgradeChatUser(object):
 class UpgradeChatProduct(object):
     """
     A product from the UpgradeChat API.
+
+    Attributes:
+        uuid (str): The UUID of the product.
+        checkout_uri (str): The checkout link.
+        name (str): The name of the product.
+        account_id (int): The ID of the account that the product is attached to.
+        price (float): The price of the product.
+        interval (UpgradeChatInterval): How often the product is billed at.
+        interval_count (int): How many times the product will be billed for.
+        free_trial_length (int): The number of days that the product is free.
+        description (str): The description for the product.
+        image_link (str): The URL of the image that the product uses.
+        variable_price (bool): Whether or not the price is variable.
+        is_time_limited (bool): Whether or not the product is only available for a given amount of
+            time.
+        limited_inventory (bool): Whether or not the product has a limited inventory.
+        available_stock (int): How many of the product is still available.
+        shippable (bool): Whether or not the product is shippable.
+        paymentless_trial (bool): Whether or not the trial period for this product is paymentless.
+        product_types (typing.List[UpgradeChatProductType]): The types attached to this product.
+        created (datetime.datetime): When this product was created.
+        updated (datetime.datetime): When this product was updated.
+        deleted (datetime.datetime, optional): When this product was deleted.
     """
 
     def __init__(
@@ -112,6 +157,19 @@ class UpgradeChatProduct(object):
 class UpgradeChatOrderItem(object):
     """
     An order item from the UpgradeChat API.
+
+    Attributes:
+        price (float): The price of the item.
+        quantity (int): The amount of the item that was purchased.
+        interval (UpgradeChatInterval): The interval that the item is billed at.
+        interval_count (int): The number of times that the user will be billed.
+        free_trial_length (int): The length of the free trial available with the item.
+        is_time_limited (bool): Whether or not the item is time-limited.
+        product (dict): The product payload.
+        discord_roles (typing.List[dict]): A list of Discord roles that are attached to this order item.
+        product_types (typing.List[UpgradeChatProductType]): A list of product types that this order item is.
+        payment_processor (UpgradeChatPaymentProcessor): The payment processor used to purchase this item.
+        payment_processor_record_id (str): The record ID that the payment processor used for this purchase.
     """
 
     def __init__(
@@ -155,6 +213,26 @@ class UpgradeChatOrderItem(object):
 class UpgradeChatOrder(object):
     """
     An order object from the UpgradeChat API.
+
+    Attributes:
+        uuid (str): The UUID of the order
+        id (str): The ID of the order.
+        purchased_at (datetime.datetime): A timestamp of when the order was placed.
+        user (UpgradeChatUser): The user who placed the order.
+        subtotal (float): A subtotal of the items at checkout.
+        discount (float): The discount applied to the items.
+        total (float): The total that the user paid.
+        type (UpgradeChatItemType): The type of item that was ordered.
+        is_subscription (bool): Whether or not the order was a subscription.
+        cancelled_at (datetime.datetime): The time when the order was cancelled
+        order_items (typing.List[UpgradeChatOrderItem]): A list of items that were included in the order.
+        created (datetime.datetime): When the order was created.
+        updated (datetime.datetime): When the order was last updated.
+        deleted (datetime.datetime, optional): When the order was deleted.
+        payment_processor (UpgradeChatPaymentProcessor, optional): The payment processor for the order.
+        payment_processor_record_id (str, optional): The record ID that the payment processor used.
+        order_item_names (typing.List[str]): A list of item names that were ordered.
+        order_item_uuids (typing.List[str]): A list of item UUIDs that were ordered.
     """
 
     def __init__(
@@ -211,12 +289,18 @@ class UpgradeChatOrder(object):
 
 class UpgradeChat(object):
     """
-    A wrapper around the UpgradeChat API.
+    A wrapper around the UpgradeChat v1 API.
     """
 
     BASE = "https://api.upgrade.chat/v1/{endpoint}"
 
     def __init__(self, client_id: str, client_secret: str):
+        """
+        Args:
+            client_id (str): A valid client ID from your account.
+            client_secret (str): A valid client secret from your account.
+        """
+
         self.client_id = client_id
         self.client_secret = client_secret
         self._basic_auth_token = b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
@@ -225,13 +309,16 @@ class UpgradeChat(object):
     async def get_access_token(self) -> str:
         """
         Get an access token from their Oauth endpoint.
+
+        Returns:
+            str: The aquired access token.
         """
 
         # See if we need to bother with a new token
         refresh = None
         if self._access_token is not None:
             token, refresh, expiry = self._access_token
-            if expiry > (dt.utcnow() - timedelta(seconds=30)):
+            if expiry > (datetime.datetime.utcnow() - timedelta(seconds=30)):
                 pass
             else:
                 return token
@@ -265,7 +352,12 @@ class UpgradeChat(object):
         Args:
             limit (int, optional): The number of responses to get.
             offset (int, optional): The offset that you want to get.
-            discord_id (int, optional): The ID of the Discord user that you want to look up
+            discord_id (int, optional): The ID of the Discord user that you want to look up.
+            type (typing.Union[UpgradeChatItemType, str], optional): The item type that you want to search for.
+
+        Warning:
+            This method does *not* raise an error when failing to get an access token or failing to access
+            the Upgrade.Chat API - it will only return an empty list.
 
         Returns:
             typing.List[UpgradeChatOrder]: A list of purchases that the user has made.

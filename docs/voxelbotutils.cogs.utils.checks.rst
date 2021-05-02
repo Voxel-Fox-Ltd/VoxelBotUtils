@@ -1,14 +1,6 @@
 Checks
 =======================================
 
-Cooldowns
---------------------
-
-.. toctree::
-   :maxdepth: 4
-
-   voxelbotutils.cogs.utils.checks.cooldown
-
 checks.is\_config\_set
 ------------------------------------------------------
 
@@ -43,3 +35,10 @@ checks.is\_upgrade\_chat\_purchaser
 ----------------------------------------------------
 
 .. autofunction:: voxelbotutils.checks.is_upgrade_chat_purchaser
+
+Cooldowns
+--------------------
+
+.. toctree::
+
+   voxelbotutils.cogs.utils.checks.cooldown
