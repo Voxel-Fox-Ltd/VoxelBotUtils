@@ -156,12 +156,12 @@ checks.is\_voter
 .. autofunction:: voxelbotutils.checks.is_voter
 
 checks.is\_upgrade\_chat\_subscriber
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: voxelbotutils.checks.is_upgrade_chat_subscriber
 
 checks.is\_upgrade\_chat\_purchaser
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: voxelbotutils.checks.is_upgrade_chat_purchaser
 
@@ -189,14 +189,9 @@ cooldown.GroupedCooldownMapping
 .. autoclass:: voxelbotutils.cooldown.GroupedCooldownMapping
 
 cooldown.CooldownWithChannelExemptions
-"""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""
 
 .. autoclass:: voxelbotutils.cooldown.CooldownWithChannelExemptions
-
-cooldown.RoleBasedCooldown
-"""""""""""""""""""""""""""""""""""
-
-.. autoclass:: voxelbotutils.cooldown.RoleBasedCooldown
 
 cooldown.RoleBasedCooldown
 """""""""""""""""""""""""""""""""""
@@ -306,7 +301,7 @@ Errors
 errors.ConfigNotSet
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: voxelbotutils.errors.ConfigNotSet
+.. autoexception:: voxelbotutils.errors.ConfigNotSet
 
     This is a subclass of :class:`discord.ext.commands.DisabledCommand` raised exclusively by the
     :func:`is\_config\_set<voxelbotutils.checks.is\_config\_set>` check. For normal users, this should just say
@@ -315,56 +310,56 @@ errors.ConfigNotSet
 errors.InvokedMetaCommand
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: voxelbotutils.errors.InvokedMetaCommand
+.. autoexception:: voxelbotutils.errors.InvokedMetaCommand
 
 errors.BotNotReady
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: voxelbotutils.errors.BotNotReady
+.. autoexception:: voxelbotutils.errors.BotNotReady
 
 errors.IsNotVoter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: voxelbotutils.errors.IsNotVoter
+.. autoexception:: voxelbotutils.errors.IsNotVoter
 
 errors.NotBotSupport
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: voxelbotutils.errors.NotBotSupport
+.. autoexception:: voxelbotutils.errors.NotBotSupport
     :no-special-members:
 
 errors.IsSlashCommand
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: voxelbotutils.errors.IsSlashCommand
+.. autoexception:: voxelbotutils.errors.IsSlashCommand
 
 errors.IsNotSlashCommand
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: voxelbotutils.errors.IsNotSlashCommand
+.. autoexception:: voxelbotutils.errors.IsNotSlashCommand
 
 errors.MissingRequiredArgumentString
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: voxelbotutils.errors.MissingRequiredArgumentString
+.. autoexception:: voxelbotutils.errors.MissingRequiredArgumentString
     :no-special-members:
 
 errors.InvalidTimeDuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: voxelbotutils.errors.InvalidTimeDuration
+.. autoexception:: voxelbotutils.errors.InvalidTimeDuration
     :no-special-members:
 
 errors.IsNotUpgradeChatPurchaser
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: voxelbotutils.errors.IsNotUpgradeChatPurchaser
+.. autoexception:: voxelbotutils.errors.IsNotUpgradeChatPurchaser
     :no-special-members:
 
 errors.IsNotUpgradeChatSubscriber
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: voxelbotutils.errors.IsNotUpgradeChatSubscriber
+.. autoexception:: voxelbotutils.errors.IsNotUpgradeChatSubscriber
     :no-special-members:
 
 Websites
