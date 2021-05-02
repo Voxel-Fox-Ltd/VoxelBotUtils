@@ -10,7 +10,15 @@ from .custom_cog import Cog
 
 class Command(commands.Command):
     """
-    A custom command object for wrapping our commands with.
+    A custom command class subclassing :class:`discord.ext.commands.Command` so that we can add
+    some more attirbutes to it. Unlike normal Discord.py, the :attr:`cooldown_after_parsing` attribute
+    is set to `True` by default.
+
+    Attributes:
+        locally_handled_errors (typing.List[discord.ext.commands.CommandError]): A list of errors
+            that are handled by the command's :func:`on_error` method before being passed onto
+            the main bot's error handler.
+        add_slash_command (bool): Whether or not this command should be added as a slash command.
     """
 
     def __init__(self, *args, **kwargs):

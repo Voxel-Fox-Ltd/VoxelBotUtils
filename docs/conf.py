@@ -34,6 +34,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     # "sphinx.ext.linkcode",
     # "sphinx.ext.viewcode",
+    "sphinx.ext.autosectionlabel",
 ]
 
 autodoc_default_options = {
@@ -75,7 +76,5 @@ html_static_path = ['static']
 html_css_files = [
     ('custom_css.css', {'priority': 100}),
 ]
-
 master_doc = 'index'
-
 needs_sphinx = "2.0"
