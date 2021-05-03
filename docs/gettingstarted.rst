@@ -6,7 +6,7 @@
         }
    </style>
 
-Overview
+Getting Started
 ===========================================
 
 Command Line
@@ -16,9 +16,9 @@ There's a few available things from the commandline (CMD) that you can do with V
 
 * :code:`$ voxelbotutils create-config`
 
-   * :code:`$ voxelbotutils create-config bot` - this creates a set of bot config files
-   * :code:`$ voxelbotutils create-config website` - this creates a set of website config files
-   * :code:`$ voxelbotutils create-config all` - this creates a set of all available config files
+   * :code:`bot` - this creates a set of bot config files
+   * :code:`website` - this creates a set of website config files
+   * :code:`all` - this creates a set of all available config files
 
 * :code:`$ voxelbotutils run-bot`
 
@@ -72,7 +72,7 @@ Migrating
 
 If you're reading this, you *probably* already have a bot that you want to get using with VoxelBotUtils. Fortunately, migrating is pretty easy. Most base Discord.py classes work by default without alteration, and as such you can just run your existing bot with a VBU config file, and that can be that.
 
-If you really want to get things going, you can change all of your :class:`@commands.command()` lines to :class:`@voxelbotutils.command()`, and any :class:`class MyCog(commands.Cog)` to :class:`class MyCog(voxelbotutils.Cog)`, and everything else should pretty much handle itself.
+If you really want to get things going, you can change all of your :class:`@commands.command()` lines to :class:`@voxelbotutils.command()<voxelbotutils.Command>`, and any :class:`class MyCog(commands.Cog)` to :class:`class MyCog(voxelbotutils.Cog)<voxelbotutils.Cog>`, and everything else should pretty much handle itself.
 
 Getting Started With Websites
 -------------------------------------
