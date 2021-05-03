@@ -6,7 +6,8 @@ from discord.ext import commands
 
 class BooleanConverter(commands.Converter):
     """
-    Converts a given input into a boolean yes/no.
+    Converts the given input into a boolean yes/no, defaulting to "no" if something couldn't be
+    properly converted rather than raising an error.
     """
 
     TICK_EMOJIS = [

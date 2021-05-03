@@ -3,30 +3,36 @@ from discord.ext import commands
 
 class InvokedMetaCommand(commands.CheckFailure):
     """
-    Raised on any command decorated with :func:`voxelfoxutils.checks.meta_command`.
-    This stops users from running commands that we've made for internal use only.
+    Raised on any command decorated with :func:`voxelbotutils.checks.meta_command`.
+    This stops users from running commands that you've made for internal use only, such as
+    settings subcommands or commands that should only be invoked via
+    :func:`discord.ext.commands.Bot.invoke`.
     """
 
 
 def meta_command():
     """
     Stops users from being able to run this command.
-    Should be caught and then reinvoked, or should have :attr:`ctx.invoke_meta` set to `True`.
+    Should be caught and then reinvoked, or should have :attr:`Context.invoke_meta`
+    set to `True`.
 
-    Example:
+    Examples:
 
-        .. code-block:: python
+        ::
 
             @voxelbotutils.command()
             @voxelbotutils.checks.meta_command()
             async def notrunnable(self, ctx, *args):
-                '''This command can't be run by normal users'''
+                '''This command can't be run by normal users, and will fail silently...'''
+
+                await ctx.send('uwu time gamers')
 
             @voxelbotutils.command()
             async def runnable(self, ctx):
-                '''But you can still run the command like this'''
+                '''But you can still run the command like this.'''
+
                 ctx.invoke_meta = True
-                await ctx.invoke(ctx.bot.get_command('notrunnable'), 1, 2, 3)
+                await ctx.invoke(ctx.bot.get_command('notrunnable'))
 
     Raises:
         InvokedMetaCommand: If the command was run without the meta tag being set.

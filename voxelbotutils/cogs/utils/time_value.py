@@ -35,16 +35,18 @@ class TimeValue(object):
     though it can be used outide of being a converter as well via use of the :func:`parse`
     method.
 
-    ::
+    Examples:
 
-        >>> value = voxelbotutils.TimeValue(606)
-        >>> value.clean
-        '10m6s'
-        >>> value.clean_spaced
-        '10m 6s'
-        >>> value = voxelbotutils.TimeValue.parse('10m6s')
-        >>> value.duration
-        606
+        ::
+
+            >>> value = voxelbotutils.TimeValue(606)
+            >>> value.clean
+            '10m6s'
+            >>> value.clean_spaced
+            '10m 6s'
+            >>> value = voxelbotutils.TimeValue.parse('10m6s')
+            >>> value.duration
+            606
 
     Note:
         This does not support partial seconds, and can only support a max of *about* 68 years

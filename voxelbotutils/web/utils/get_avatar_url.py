@@ -1,6 +1,6 @@
 def get_avatar_url(user_info: dict = None):
     """
-    Gets the avatar URL for a user when provided with their user info
+    Gets the avatar URL for a user when provided with their user info.
     If no arguments are provided then the default Discord avatar is given.
     """
 

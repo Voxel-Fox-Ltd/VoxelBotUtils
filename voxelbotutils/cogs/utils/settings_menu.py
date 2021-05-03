@@ -16,7 +16,7 @@ class SettingsMenuConverter(object):
     __slots__ = ('prompt', 'asking_for', 'converter', 'emojis', 'serialize')
 
     def __init__(
-            self, prompt: str, asking_for: str, converter: typing.Union[typing.Callable, commands.Converter],
+            self, prompt: str, converter: typing.Union[typing.Callable, commands.Converter], asking_for: str = 'item',
             emojis: typing.Optional[typing.List[discord.Emoji]] = None,
             serialize_function: typing.Callable[[typing.Any], typing.Any] = lambda x: x):
         self.prompt = prompt
@@ -484,9 +484,67 @@ class SettingsMenuOption(object):
 
 class SettingsMenu(object):
     """
-    A settings menu object for setting up sub-menus or bot settings.
-    Each menu object must be added as its own command, with sub-menus being.
+    A settings menu object for setting up sub-menus or bot settings using reactions.
+    Each menu object must be added as its own command, with sub-menus being
     referred to by string in the MenuItem's action.
+
+    Examples:
+
+        ::
+
+            # We can pull out the settings menu mention method so that we can more easily refer to it in our lambdas.
+            settings_mention = voxelbotutils.SettingsMenuOption.get_guild_settings_mention
+
+            # Make an initial menu.
+            menu = voxelbotutils.SettingsMenu()
+
+            # And now we add some options.
+            menu.add_multiple_options(
+
+                # Every option that's added needs to be an instance of SettingsMenuOption.
+                voxelbotutils.SettingsMenuOption(
+
+                    # The first argument is the context, always.
+                    ctx=ctx,
+
+                    # Display is either a string, or a function that takes context as an argument to *return*
+                    # a string.
+                    display=lambda c: "Set quote channel (currently {0})".format(settings_mention(c, 'quote_channel_id')),
+
+                    # Converter args should be a list of SettingsMenuConverter options if present. These are the questions
+                    # asked to the user to get the relevant information out of them.
+                    converter_args=(
+                        voxelbotutils.SettingsMenuConverter(
+
+                            # Prompt is what's asked to the user
+                            prompt="What do you want to set the quote channel to?",
+
+                            # Converter is either a converter or a function that's run to convert the given argument.
+                            converter=commands.TextChannelConverter,
+                        ),
+                    ),
+
+                    # Callback is a function that's run with the converted information to store the data in a database
+                    # or otherwise.
+                    callback=voxelbotutils.SettingsMenuOption.get_set_guild_settings_callback('guild_settings', 'quote_channel_id'),
+                ),
+
+                # This is an option that calls a subcommand, also running some SettingsMenu code.
+                voxelbotutils.SettingsMenuOption(
+                    ctx=ctx,
+                    display="Set up VC max members",
+                    callback=self.bot.get_command("setup vcmaxmembers"),
+                ),
+            )
+
+            # And now we can run the menu
+            try:
+                await menu.start(ctx)
+                await ctx.send("Done setting up!")
+            except voxelbotutils.errors.InvokedMetaCommand:
+                pass
+
+
     """
 
     TICK_EMOJI = "\N{HEAVY CHECK MARK}"
@@ -499,6 +557,9 @@ class SettingsMenu(object):
     def add_option(self, option: SettingsMenuOption):
         """
         Add an option to the settings list.
+
+        Args:
+            option (SettingsMenuOption): The option that you want to add to the menu.
         """
 
         self.options.append(option)
@@ -506,16 +567,19 @@ class SettingsMenu(object):
     def add_multiple_options(self, *option: SettingsMenuOption):
         """
         Add multiple options to the settings list at once.
+
+        Args:
+            *option (SettingsMenuOption): A list of options that you want to add to the menu.
         """
 
         self.options.extend(option)
 
     def bulk_add_options(self, ctx: commands.Context, *args):
         """
+        :meta private: (deprecated)
+
         Add multiple options to the settings list. Each option is simply thrown into a SettingsMenuOption item
         and then added to the options list.
-
-        :meta private:
         """
 
         for data in args:
@@ -523,12 +587,13 @@ class SettingsMenu(object):
 
     async def start(self, ctx: commands.Context, *, timeout: float = 120, clear_reactions_on_loop: bool = False):
         """
-        Start the menu running.
+        Starts the menu running.
 
         Args:
             ctx (commands.Context): The context object for the called command.
             timeout (float, optional): How long the bot should wait for a reaction.
-            clear_reactions_on_loop (bool, optional): Exactly as it says - when the menu loops, should reactions be cleared? You only need to set this to True if the items in a menu change on loop.
+            clear_reactions_on_loop (bool, optional): Exactly as it says - when the menu loops,
+                should reactions be cleared? You only need to set this to True if the items in a menu change on loop.
         """
 
         message = None
@@ -594,7 +659,9 @@ class SettingsMenu(object):
             ctx (commands.Context): Just so we can set the invoke meta flag.
 
         Returns:
-            typing.Tuple[dict, typing.List[str]]: A tuple of the sendable data for the destination that can be unpacked into a `discord.abc.Messageable.send`, and a list of emoji to add to the message in question.
+            typing.Tuple[dict, typing.List[str]]: A tuple of the sendable data for the destination that
+                can be unpacked into a `discord.abc.Messageable.send`, and a list of emoji
+                to add to the message in question.
         """
 
         ctx.invoke_meta = True
@@ -629,8 +696,7 @@ class SettingsMenu(object):
 
 class SettingsMenuIterable(SettingsMenu):
     """
-    A version of the settings menu for dealing with things like lists and dictionaries
-    that are just straight read/stored in the database.
+    A version of the settings menu for dealing with things like lists and dictionaries.
     """
 
     def __init__(
@@ -718,9 +784,6 @@ class SettingsMenuIterable(SettingsMenu):
         # ]
 
     def get_sendable_data(self, ctx: commands.Context):
-        """
-        Create a list of mentions from the given guild settings key, creating all relevant callbacks.
-        """
 
         # Get the current data
         data_points = ctx.bot.guild_settings[ctx.guild.id][self.cache_key]

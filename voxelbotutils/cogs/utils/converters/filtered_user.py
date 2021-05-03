@@ -2,6 +2,10 @@ from discord.ext import commands
 
 
 class FilteredUser(commands.UserConverter):
+    """
+    A simple :class:`discord.ext.commands.UserConverter` that doesn't allow bots
+    or the author to be passed into the function.
+    """
 
     def __init__(self, *, allow_author: bool = False, allow_bots: bool = False):
         super().__init__()
@@ -18,6 +22,10 @@ class FilteredUser(commands.UserConverter):
 
 
 class FilteredMember(commands.MemberConverter):
+    """
+    A simple :class:`discord.ext.commands.MemberConverter` that doesn't allow bots
+    or the author to be passed into the function.
+    """
 
     def __init__(self, *, allow_author: bool = False, allow_bots: bool = False):
         super().__init__()

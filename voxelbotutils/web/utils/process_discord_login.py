@@ -12,7 +12,8 @@ from .get_avatar_url import get_avatar_url
 
 def get_discord_login_url(request: Request, redirect_uri: str = None) -> str:
     """
-    Get a valid URL for a user to use to login to the website.
+    Returns a login URL for your website based on the oauth information given in
+    your :class:`website config<WebsiteConfig.oauth>`.
 
     Args:
         request (Request): The request from which this command call is coming from.
@@ -41,7 +42,8 @@ def get_discord_login_url(request: Request, redirect_uri: str = None) -> str:
 
 async def process_discord_login(request: Request) -> None:
     """
-    Process the login from Discord and store relevant data in the session.
+    Process a Discord login and store the information in the provided session based off
+    of a callback from your Discord redirect URI.
 
     Args:
         request (Request): The request from which this command call is coming from.
@@ -105,7 +107,9 @@ async def process_discord_login(request: Request) -> None:
 
 
 async def get_user_info_from_session(request: Request, *, refresh: bool = False):
-    """Get the user's info"""
+    """
+    Get the user's info.
+    """
 
     session_storage = await aiohttp_session.get_session(request)
     if refresh is False:
@@ -180,7 +184,7 @@ async def get_access_token_from_session(
 
 async def get_user_guilds_from_session(request: Request):
     """
-    Process the login from Discord and store relevant data in the session.
+    Returns a list of guilds that the user is in based on the request's logged in user.
     """
 
     # Get auth
@@ -207,7 +211,7 @@ async def get_user_guilds_from_session(request: Request):
 
 async def add_user_to_guild_from_session(request: Request, bot_index: str, guild_id: int) -> bool:
     """
-    Adds the user to the given guild (if the correct scopes were previously provided)
+    Adds the user to the given guild (if the correct scopes were previously provided).
     Returns a boolean of whether or not that user was added (or was already in the guild) successfully.
     """
 

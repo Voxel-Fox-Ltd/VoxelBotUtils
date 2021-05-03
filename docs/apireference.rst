@@ -33,6 +33,7 @@ Context
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: voxelbotutils.Context
+   :no-special-members:
 
 DatabaseConnection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -130,40 +131,55 @@ Due to the complexity of interactions (such as slash commands and buttons), they
 Checks
 -------------------------------------------------
 
-checks.is\_config\_set
+checks.is_config_set
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: voxelbotutils.checks.is_config_set
 
-checks.meta\_command
+checks.meta_command
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: voxelbotutils.checks.meta_command
 
-checks.bot\_is\_ready
+checks.bot_is_ready
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: voxelbotutils.checks.bot_is_ready
 
-checks.is\_bot\_support
+checks.is_bot_support
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: voxelbotutils.checks.is_bot_support
 
-checks.is\_voter
+checks.is_voter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: voxelbotutils.checks.is_voter
 
-checks.is\_upgrade\_chat\_subscriber
+checks.is_upgrade_chat_subscriber
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: voxelbotutils.checks.is_upgrade_chat_subscriber
 
-checks.is\_upgrade\_chat\_purchaser
+checks.is_upgrade_chat_purchaser
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: voxelbotutils.checks.is_upgrade_chat_purchaser
+
+checks.is_slash_command
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: voxelbotutils.checks.is_slash_command
+
+checks.is_not_slash_command
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: voxelbotutils.checks.is_not_slash_command
+
+checks.bot_in_guild
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: voxelbotutils.checks.bot_in_guild
 
 Cooldowns
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -173,7 +189,7 @@ cooldown.cooldown
 
 .. autofunction:: voxelbotutils.cooldown.cooldown
 
-cooldown.no\_raise\_cooldown
+cooldown.no_raise_cooldown
 """""""""""""""""""""""""""""""""""
 
 .. autofunction:: voxelbotutils.cooldown.no_raise_cooldown
@@ -182,16 +198,12 @@ cooldown.Cooldown
 """""""""""""""""""""""""""""""""""
 
 .. autoclass:: voxelbotutils.cooldown.Cooldown
+   :exclude-members: __call__
 
 cooldown.GroupedCooldownMapping
 """""""""""""""""""""""""""""""""""
 
 .. autoclass:: voxelbotutils.cooldown.GroupedCooldownMapping
-
-cooldown.CooldownWithChannelExemptions
-""""""""""""""""""""""""""""""""""""""""""""""""""
-
-.. autoclass:: voxelbotutils.cooldown.CooldownWithChannelExemptions
 
 cooldown.RoleBasedCooldown
 """""""""""""""""""""""""""""""""""
@@ -205,95 +217,64 @@ converters.UserID
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: voxelbotutils.converters.UserID
+   :no-special-members:
+   :no-members:
 
 converters.ChannelID
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: voxelbotutils.converters.ChannelID
-
-converters.EnumConverter
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.converters.EnumConverter
+   :no-special-members:
+   :no-members:
 
 converters.BooleanConverter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: voxelbotutils.converters.BooleanConverter
+   :no-special-members:
+   :no-members:
 
 converters.ColourConverter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: voxelbotutils.converters.ColourConverter
-
-    It's just a normal colour converter that has the list of Wikipedia colour names as valid responses.
+   :no-special-members:
+   :no-members:
 
 converters.FilteredUser
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: voxelbotutils.converters.FilteredUser
+   :no-special-members:
+   :no-members:
 
 converters.FilteredMember
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: voxelbotutils.converters.FilteredMember
+   :no-special-members:
+   :no-members:
 
 
 Settings Menus
 ------------------------------------------------------------
 
-Running one of these menus can be a *just a tad* unintuitive, so I'm putting an example on how to use it here.
-
-.. code-block:: python
-
-   # This creates a settings menu object
-   menu = voxelbotutils.SettingsMenu()
-
-   # This is just a shorthand function for getting a ping in the `bot.guild_settings` attr
-   settings_mention = voxelbotutils.SettingsMenuOption.get_guild_settings_mention
-
-   # Now we're gonna add options to our menu
-   menu.add_option(
-      voxelbotutils.SettingsMenuOption(
-         ctx,
-
-         # A function that returns a string to display
-         display=lambda c: "Set setting (currently {0})".format(settings_mention(c, 'setting_id')),
-
-         # A list of SettingsMenuConverter objects that should be used to convert the user inputs
-         converter_args=[
-            voxelbotutils.SettingsMenuConverter(
-               prompt="What do you want to set the channel to?",
-               asking_for="setting channel",
-               converter=commands.TextChannelConverter,
-            )
-         ],
-
-         # A callback that's used to add to the datbase and cache
-         callback=voxelbotutils.SettingsMenuOption.get_set_settings_callback('guild_settings', 'guild_id', 'channel_id'),
-
-         # Whether or not a null value is allowed (ie whether this value can be unset)
-         allow_nullable=True,
-      )
-   )
-
-   # Now we just run the menu
-   await menu.start(ctx)
-
 SettingsMenu
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: voxelbotutils.SettingsMenu
-
-SettingsMenuIterable
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.SettingsMenuIterable
+   :no-special-members:
 
 SettingsMenuOption
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: voxelbotutils.SettingsMenuOption
+
+SettingsMenuIterable
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.SettingsMenuIterable
+   :no-members:
 
 Errors
 -----------------------------------------------
@@ -302,10 +283,6 @@ errors.ConfigNotSet
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoexception:: voxelbotutils.errors.ConfigNotSet
-
-    This is a subclass of :class:`discord.ext.commands.DisabledCommand` raised exclusively by the
-    :func:`is\_config\_set<voxelbotutils.checks.is\_config\_set>` check. For normal users, this should just say
-    that the command is disabled.
 
 errors.InvokedMetaCommand
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -337,6 +314,11 @@ errors.IsNotSlashCommand
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoexception:: voxelbotutils.errors.IsNotSlashCommand
+
+errors.BotNotInGuild
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoexception:: voxelbotutils.errors.BotNotInGuild
 
 errors.MissingRequiredArgumentString
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

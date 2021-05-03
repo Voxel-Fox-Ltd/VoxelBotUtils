@@ -9,16 +9,18 @@ class Embed(discord.Embed):
     D.py uses kwargs, as well as inbuilt random colour generation and setting the author
     field to an instance of a user.
 
-    ::
+    Examples:
 
-        embed = voxelbotutils.Embed(use_random_colour=True)
-        embed.set_author_to_user(bot.get_user(141231597155385344))
+        ::
 
-        # You can also use a with statement if you want to have your
-        # IDE fold the embed code.
-        # There is no other use for the with statement.
-        with embed:
-            embed.set_image("https://example.com/image.png")
+            embed = voxelbotutils.Embed(use_random_colour=True)
+            embed.set_author_to_user(bot.get_user(141231597155385344))
+
+            # You can also use a with statement if you want to have your
+            # IDE fold the embed code.
+            # There is no other use for the with statement.
+            with embed:
+                embed.set_image("https://example.com/image.png")
     """
 
     def __init__(self, *args, use_random_colour: bool = False, **kwargs):

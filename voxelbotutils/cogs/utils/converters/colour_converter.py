@@ -819,6 +819,11 @@ COLOURS_BY_VALUE = {o:i for i, o in COLOURS_BY_NAME.items()}
 
 
 class ColourConverter(commands.ColourConverter):
+    """
+    The normal Discord :class:`discord.ext.commands.ColourConverter` class but it contains a *lot*
+    more colour names, as taken from Wikipedia, the CSS colour set, and a couple of extra ones
+    that I thought were cute.
+    """
 
     COLOURS_BY_NAME = COLOURS_BY_NAME
     COLOURS_BY_VALUE = COLOURS_BY_VALUE
