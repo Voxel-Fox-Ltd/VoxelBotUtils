@@ -3,7 +3,10 @@ import discord
 
 
 class NotBotSupport(commands.MissingRole):
-    """The generic error for the bot failing the :func:`voxelbotutils.checks.is_bot_support` check"""
+    """
+    The generic error for the bot failing the :func:`voxelbotutils.checks.is_bot_support` check -
+    is a subclass of :class:`discord.ext.commands.MissingRole`.
+    """
 
     def __init__(self):
         super().__init__("Bot Support Team")

@@ -12,7 +12,7 @@ class IsNotSlashCommand(commands.DisabledCommand):
 
 
 class BotNotInGuild(commands.DisabledCommand):
-    """Raised when a given command failes the :func:`voxelbotutils.checks.is_slash_command` check."""
+    """Raised when a given command failes the :func:`voxelbotutils.checks.bot_in_guild` check."""
 
 
 def is_slash_command():

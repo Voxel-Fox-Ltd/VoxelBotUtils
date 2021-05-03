@@ -5,7 +5,17 @@ from .cooldown import Cooldown
 
 class RoleBasedCooldown(Cooldown):
     """
-    A cooldown that lets you set a cooldown for a command based on the user's roles.
+    A cooldown that lets you set the cooldown for a command based on the user's roles.
+
+    Example:
+
+        ::
+
+            @voxelbotutils.command()
+            @voxelbotutils.cooldown.cooldown(
+                1, 60, commands.BucketType.user, cls=RoleBasedCooldown({742262426086670347: 5}))
+            async def example(self, ctx):
+                '''This command will have a rate limit of 5 seconds if the user has a role with the ID 742262426086670347.'''
     """
 
     _copy_kwargs = ()

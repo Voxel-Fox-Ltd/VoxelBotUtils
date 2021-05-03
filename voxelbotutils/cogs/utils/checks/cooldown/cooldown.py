@@ -52,6 +52,8 @@ class CooldownMapping(commands.CooldownMapping):
 
     def __call__(self, original: commands.Cooldown):
         """
+        :meta private:
+
         Runs the original init method.
 
         Args:
@@ -68,10 +70,36 @@ grouped_cooldown_mapping_cache = collections.defaultdict(dict)
 
 
 class GroupedCooldownMapping(CooldownMapping):
+    """
+    A grouped cooldown mapping class so that you can easily apply a single cooldown to multiple
+    commands.
+
+    Examples:
+
+        ::
+
+            @voxelbotutils.command()
+            @voxelbotutils.cooldown.cooldown(
+                1, 60, commands.BucketType.user,
+                mapping=voxelbotutils.cooldown.GroupedCooldownMapping("group"))
+            async def commandone(self, ctx):
+                '''These two commands will be subject to the same cooldown.'''
+
+            @voxelbotutils.command()
+            @voxelbotutils.cooldown.cooldown(
+                1, 60, commands.BucketType.user,
+                mapping=voxelbotutils.cooldown.GroupedCooldownMapping("group"))
+            async def commandtwo(self, ctx):
+                '''These two commands will be subject to the same cooldown.'''
+    """
 
     grouped_cache = grouped_cooldown_mapping_cache
 
     def __init__(self, key: str):
+        """
+        Args:
+            key (str): The cooldown key that the commands will be grouped under.
+        """
         self.group_cache_key = key
 
     @property
@@ -85,7 +113,9 @@ class GroupedCooldownMapping(CooldownMapping):
 
 class Cooldown(commands.Cooldown):
     """
-    A class handling the cooldown for an individual user.
+    A class handling the cooldown for an individual user. This is provided as a subclass of
+    :class:`discord.ext.commands.Cooldown` and provides a :func:`predicate` function that you can use
+    to change aspects of a given command's cooldown
     """
 
     default_cooldown_error = commands.CommandOnCooldown
@@ -118,7 +148,8 @@ class Cooldown(commands.Cooldown):
         """Gets the number of command calls that can still be made before hitting the rate limit
 
         Args:
-            current (float, optional): The current time, or now (via `time.time()`). Is _not_ used to update self._last, since the command may not have actually been called.
+            current (float, optional): The current time, or now (via `time.time()`). Is _not_ used to update self._last,
+                since the command may not have actually been called.
 
         Returns:
             int: The number of times this command has been used given the time limit.
@@ -132,9 +163,6 @@ class Cooldown(commands.Cooldown):
 
         Args:
             current (float, optional): The current time, or now (via `time.time()`).
-
-        Returns:
-            typing.Optional[int]: Something
         """
 
         return super().update_rate_limit(current)
@@ -189,10 +217,14 @@ class Cooldown(commands.Cooldown):
 
 
 class NoRaiseCommandOnCooldown(commands.CommandOnCooldown):
-    """A version of :class:`commands.CommandOnCooldown` that doesn't output an error."""
+    """A version of :class:`discord.ext.commands.CommandOnCooldown` that doesn't output an error."""
 
 
 class NoRaiseCooldown(Cooldown):
+    """
+    A version of :class:`Cooldown` that doesn't raise an error if the
+    cooldown fails.
+    """
 
     default_cooldown_error = NoRaiseCommandOnCooldown
 

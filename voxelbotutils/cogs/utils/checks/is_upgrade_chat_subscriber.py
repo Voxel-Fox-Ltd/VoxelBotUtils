@@ -11,20 +11,28 @@ class IsNotUpgradeChatPurchaser(commands.CheckFailure):
 
     def __init__(self, item_names:str):
         self.item_names = item_names
-        super().__init__(f"You need to purchase `{self.item_names[0]}` to use this command - see `{{ctx.clean_prefix}}donate` for more information.")
+        super().__init__(
+            f"You need to purchase `{self.item_names[0]}` to use this command - "
+            f"see `{{ctx.clean_prefix}}donate` for more information."
+        )
 
 
 class IsNotUpgradeChatSubscriber(commands.CheckFailure):
     """The error raised when the user is missing an UpradeChat subscription."""
 
     def __init__(self):
-        super().__init__("You need to be subscribed via Upgrade.Chat to run this command - see `{ctx.clean_prefix}donate` for more information.")
+        super().__init__(
+            "You need to be subscribed via Upgrade.Chat to run this command - "
+            "see `{ctx.clean_prefix}donate` for more information."
+        )
 
 
 def is_upgrade_chat_purchaser(*any_item_names):
     """
     A check to see whether a given user is an UpgradeChat purchaser for *any* of the given item names,
-    adding an `upgrade_chat_items` attribute to the context object with the given purchases.
+    adding an `upgrade_chat_items` attribute to the context object with the given purchases. For example,
+    if you wanted a command to only be runnable if someone purchased the an item called `command_access` via
+    UpgradeChat, your check would be `is_upgrade_chat_purchaser("command_access")`.
 
     Raises:
         IsNotUpgradeChatPurchaser: If the user hasn't purchased the given item.
@@ -69,7 +77,9 @@ def is_upgrade_chat_purchaser(*any_item_names):
 def is_upgrade_chat_subscriber(*any_item_names):
     """
     A check to see whether a given user is an UpgradeChat subscriber for *any* of the given item names,
-    adding an `upgrade_chat_items` attribute to the context object with the given purchases.
+    adding an `upgrade_chat_items` attribute to the context object with the given purchases. For example,
+    if you wanted a command to only be runnable if someone is subscribed to an item called `command_access`
+    via UpgradeChat, your check would be `is_upgrade_chat_subscriber("command_access")`.
 
     Raises:
         IsNotUpgradeChatSubscriber: If the user isn't subscribing to the given item.

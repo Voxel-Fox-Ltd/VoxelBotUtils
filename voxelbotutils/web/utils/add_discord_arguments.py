@@ -4,15 +4,19 @@ import aiohttp_session
 from aiohttp.web import HTTPFound, Request
 
 
-def add_discord_arguments(*, redirect_if_logged_out: str = None, redirect_if_logged_in: str = None):
+def add_discord_arguments(
+        *, redirect_if_logged_out: str = None,
+        redirect_if_logged_in: str = None):
     """
     This function is a wrapper around all routes. It takes the output and
     adds the user info and request to the returning dictionary
     It must be applied before the template decorator.
 
     Args:
-        redirect_if_logged_out (str, optional): A location to direct the user to should they be logged out.
-        redirect_if_logged_in (str, optional): A location to direct the user to should they be logged in already.
+        redirect_if_logged_out (str, optional): A location to direct the user
+            to should they be logged out.
+        redirect_if_logged_in (str, optional): A location to direct the user
+            to if they are logged in already.
     """
 
     def inner_wrapper(func):
