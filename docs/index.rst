@@ -55,3 +55,4 @@ Documentation Contents
 
    gettingstarted
    apireference
+   config-files-directory
