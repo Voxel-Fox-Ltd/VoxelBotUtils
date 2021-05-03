@@ -10,6 +10,18 @@ from .models import DisableableComponent
 
 
 class ButtonStyle(enum.IntEnum):
+    """
+    An enum of the available button styles.
+
+    Attributes:
+        PRIMARY: A blurple button.
+        SECONDARY: A grey button.
+        SUCCESS: A green button.
+        DANGER: A red button.
+        LINK: A button that navigates to a URL, and doesn't
+            dispatch an interaction create payload.
+    """
+
     PRIMARY = 1  # A blurple button
     SECONDARY = 2  # A grey button
     SUCCESS = 3  # A green button
@@ -19,10 +31,11 @@ class ButtonStyle(enum.IntEnum):
 
 class Button(DisableableComponent):
     """
-    A Discord UI button.
+    A button as supported by the Discord UI.
     """
 
     __slots__ = ("label", "style", "custom_id", "emoji", "url", "disabled",)
+    TYPE = 2
 
     def __init__(
             self, label: str, style: ButtonStyle = ButtonStyle.PRIMARY, custom_id: str = None,
@@ -70,7 +83,7 @@ class Button(DisableableComponent):
 
     def to_dict(self) -> dict:
         v = {
-            "type": 2,
+            "type": self.TYPE,
             "label": self.label,
             "style": self.style.value,
             "disabled": self.disabled,
