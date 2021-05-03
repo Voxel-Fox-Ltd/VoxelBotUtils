@@ -10,6 +10,7 @@ import string
 import platform
 import random
 import json
+import sys
 
 import aiohttp
 import discord
@@ -26,6 +27,9 @@ from .upgrade_chat import UpgradeChat
 from .interactions.components import MessageComponents
 from . import interactions
 from .. import all_packages as all_vfl_package_names
+
+
+sys.path.append(".")
 
 
 def get_prefix(bot, message: discord.Message):
