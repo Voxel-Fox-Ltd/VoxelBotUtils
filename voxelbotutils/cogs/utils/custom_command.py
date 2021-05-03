@@ -12,7 +12,14 @@ class Command(commands.Command):
     """
     A custom command class subclassing :class:`discord.ext.commands.Command` so that we can add
     some more attirbutes to it. Unlike normal Discord.py, the :attr:`cooldown_after_parsing` attribute
-    is set to `True` by default.
+    is set to `True` by default. Can be used in a normal :code:`@commands.command`'s `cls` attribute, but easier
+    is to just use this library's :code:`@command`;
+
+    ::
+
+        @voxelbotutils.command()
+        async def example(self, ctx):
+            ...
 
     Attributes:
         locally_handled_errors (typing.List[discord.ext.commands.CommandError]): A list of errors
