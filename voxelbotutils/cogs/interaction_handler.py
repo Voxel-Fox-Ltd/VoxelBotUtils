@@ -76,7 +76,7 @@ class InteractionHandler(utils.Cog):
 
         # See if it was a clicked component
         elif payload['d']['type'] == 3:
-            clicked_button_payload = utils.interactions.components.ButtonInteractionPayload.from_payload(
+            clicked_button_payload = utils.interactions.components.ComponentInteractionPayload.from_payload(
                 payload['d'], self.bot._connection,
             )
             # clicked_button_payload._send_interaction_response_callback()

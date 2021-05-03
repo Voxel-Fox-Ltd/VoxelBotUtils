@@ -122,13 +122,32 @@ UpgradeChatInterval
    :no-special-members:
 
 Interactions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------------------------
 
-Due to the complexity of interactions (such as slash commands and buttons), they've been moved to :ref:`their own page<interactionsmodule>` for the API reference, as well as having :ref:`another page<interactions>` for a basic howto guide.
+Due to the complexity of interactions, also have :ref:`their own page<interactions>` for a basic howto guide.
 
-.. toctree::
+MessageComponents
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-   voxelbotutils.cogs.utils.interactions
+.. autoclass:: voxelbotutils.MessageComponents
+   :exclude-members: to_dict, from_dict
+
+ActionRow
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.ActionRow
+   :exclude-members: to_dict, from_dict
+
+ButtonStyle
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.ButtonStyle
+
+Button
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.Button
+   :exclude-members: to_dict, from_dict
 
 Checks
 -------------------------------------------------
