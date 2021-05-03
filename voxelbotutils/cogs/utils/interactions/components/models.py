@@ -3,7 +3,7 @@ import typing
 
 class BaseComponent(object):
     """
-    A message component for Discord UI interactions.
+    The base message component for Discord UI interactions.
     """
 
     def to_dict(self) -> dict:
@@ -74,7 +74,7 @@ class ComponentHolder(BaseComponent):
 
     def get_component(self, custom_id: str) -> typing.Optional[BaseComponent]:
         """
-        Get a component from the internal :attr:`components` list using its `custom_id` attribute.
+        Get a component from the internal :attr:`components` list using its :attr:`custom_id` attribute.
 
         Args:
             custom_id (str): The ID of the component that you want to find.
@@ -96,7 +96,7 @@ class ComponentHolder(BaseComponent):
 
 class MessageComponents(ComponentHolder):
     """
-    A list of components that are to be added to a message.
+    A set of components that can be added to a message.
     """
 
     def to_dict(self):
@@ -109,8 +109,10 @@ class ActionRow(ComponentHolder):
     messages.
     """
 
+    TYPE = 1
+
     def to_dict(self):
         return {
-            "type": 1,
+            "type": self.TYPE,
             "components": [i.to_dict() for i in self.components],
         }

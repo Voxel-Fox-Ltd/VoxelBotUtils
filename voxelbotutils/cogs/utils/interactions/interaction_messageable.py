@@ -17,6 +17,21 @@ class InteractionTyping(Typing):
 
 
 class InteractionMessageable(Messageable):
+    """
+    A messageable that allows you to send back responses to interaction payloads
+    more easily.
+
+    .. note::
+
+        The interaciton messageable's send method also implements :code:`ephemeral` as a valid kwarg,
+        but for ease of documentation, the send method remains undocumented, as aside from this it is
+        unchanged from the rest of the messageable objects.
+
+    Attributes:
+        component (typing.Optional[BaseComponent]): The component that triggered this interaction.
+            It may be none if the interaction that triggered this wasn't a component, such as when
+            slash commands are used.
+    """
 
     IS_INTERACTION = True
     IS_COMPONENT = False
@@ -33,15 +48,13 @@ class InteractionMessageable(Messageable):
 
         self.component = None  # We'll put the interacted-with component here if we get one
 
-        """
-        If we want to respond before sending a pending response, we can use type 4 - this responds intially with a message.
-            After doing this we want to respond using webhooks rather than the interaction endpoint.
-        While pending we can send a type 5 response - this means that the interaction gets an ack and goes into a pending state.
-            After doing this the first time we want to send an initial response again, and followup messages go to the webhook
-            response endpoint.
-        Buttons have the luxury of a type 6 response - an ack response that doesn't tell the user we're waiting.
-            Button responses can go immediately to the webhook response endpoint after this ack is received.
-        """
+        # If we want to respond before sending a pending response, we can use type 4 - this responds intially with a message.
+        #     After doing this we want to respond using webhooks rather than the interaction endpoint.
+        # While pending we can send a type 5 response - this means that the interaction gets an ack and goes into a pending state.
+        #     After doing this the first time we want to send an initial response again, and followup messages go to the webhook
+        #     response endpoint.
+        # Buttons have the luxury of a type 6 response - an ack response that doesn't tell the user we're waiting.
+        #     Button responses can go immediately to the webhook response endpoint after this ack is received.
 
     async def _get_channel(self):
         """
@@ -86,6 +99,17 @@ class InteractionMessageable(Messageable):
         await InteractionTyping(self).do_typing()
 
     async def ack(self, *, ephemeral: bool = False):
+        """
+        Send an acknowledge payload to Discord for the interaction. The :func:`send` method does this
+        automatically if you haven't called it yourself, but if you're doing a time-intensive operation
+        (anything that takes longer than 5 seconds to send a response), you may want to send the ack
+        yourself so that Discord doesn't discard your interaction.
+
+        Args:
+            ephemeral (bool, optional): Whether or not the ack is visible only to the user calling the
+                command.
+        """
+
         app_id, _, token = await self._get_channel()
         r = discord.http.Route('POST', '/interactions/{app_id}/{token}/callback', app_id=app_id, token=token)
         flags = discord.MessageFlags(ephemeral=ephemeral)

@@ -126,17 +126,27 @@ Interactions
 
 Due to the complexity of interactions, also have :ref:`their own page<interactions howto>` for a basic howto guide.
 
+InteractionMessageable
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.InteractionMessageable
+   :no-members:
+   :no-special-members:
+   :members: ack
+
 MessageComponents
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: voxelbotutils.MessageComponents
    :exclude-members: to_dict, from_dict
+   :show-inheritance:
 
 ActionRow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: voxelbotutils.ActionRow
    :exclude-members: to_dict, from_dict
+   :show-inheritance:
 
 ButtonStyle
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -148,6 +158,8 @@ Button
 
 .. autoclass:: voxelbotutils.Button
    :exclude-members: to_dict, from_dict
+   :inherited-members:
+   :show-inheritance:
 
 Checks
 -------------------------------------------------
