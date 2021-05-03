@@ -26,8 +26,10 @@ Command
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: voxelbotutils.Command
+   :no-special-members:
 
 .. autoclass:: voxelbotutils.Group
+   :no-special-members:
 
 Context
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -336,13 +338,13 @@ errors.IsNotUpgradeChatPurchaser
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoexception:: voxelbotutils.errors.IsNotUpgradeChatPurchaser
-    :no-special-members:
+   :no-special-members:
 
 errors.IsNotUpgradeChatSubscriber
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoexception:: voxelbotutils.errors.IsNotUpgradeChatSubscriber
-    :no-special-members:
+   :no-special-members:
 
 Websites
 ---------------------------------------------------
