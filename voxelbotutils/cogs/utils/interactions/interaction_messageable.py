@@ -31,6 +31,8 @@ class InteractionMessageable(Messageable):
         self._sent_ack_response = False
         self._sent_message_response = False
 
+        self.component = None  # We'll put the interacted-with component here if we get one
+
         """
         If we want to respond before sending a pending response, we can use type 4 - this responds intially with a message.
             After doing this we want to respond using webhooks rather than the interaction endpoint.
