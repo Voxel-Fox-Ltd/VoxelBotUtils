@@ -123,41 +123,41 @@ Bot Config File
 
       .. attribute:: enabled
 
-     .. attribute:: base
+      .. attribute:: base
 
-     .. attribute:: response_type
+      .. attribute:: response_type
 
-     .. attribute:: redirect_uri
+      .. attribute:: redirect_uri
 
-     .. attribute:: client_id
+      .. attribute:: client_id
 
-     .. attribute:: scope
+      .. attribute:: scope
 
-     .. attribute:: permissions
+      .. attribute:: permissions
 
    .. class:: database
 
       .. attribute:: enabled
 
-     .. attribute:: user
+      .. attribute:: user
 
-     .. attribute:: password
+      .. attribute:: password
 
-     .. attribute:: database
+      .. attribute:: database
 
-     .. attribute:: host
+      .. attribute:: host
 
-     .. attribute:: port
+      .. attribute:: port
 
    .. class:: redis
 
       .. attribute:: enabled
 
-     .. attribute:: host
+      .. attribute:: host
 
-     .. attribute:: port
+      .. attribute:: port
 
-     .. attribute:: db
+      .. attribute:: db
 
    .. class:: embed
 
@@ -174,19 +174,19 @@ Bot Config File
 
          .. attribute:: enabled
 
-        .. attribute:: name
+         .. attribute:: name
 
-        .. attribute:: url
+         .. attribute:: url
 
    .. class:: presence
 
       .. attribute:: activity_type
 
-     .. attribute:: text
+      .. attribute:: text
 
-     .. attribute:: status
+      .. attribute:: status
 
-     .. attribute:: include_shard_id
+      .. attribute:: include_shard_id
 
       .. class:: streaming
 
