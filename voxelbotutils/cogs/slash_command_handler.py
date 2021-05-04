@@ -119,18 +119,24 @@ class SlashCommandHandler(utils.Cog):
             safe_arg_type = None
             required = True
 
-            # See if it's one of our common types
-            if arg.annotation in self.COMMAND_TYPE_MAPPER:
-                safe_arg_type = self.COMMAND_TYPE_MAPPER[arg.annotation]
-            elif self.get_non_optional_type(arg.annotation) in self.COMMAND_TYPE_MAPPER:
-                safe_arg_type = self.COMMAND_TYPE_MAPPER[self.get_non_optional_type(arg.annotation)]
+            try:
 
-            # It isn't - let's see if it's a subclass
-            if safe_arg_type is None:
-                for i, o in self.COMMAND_TYPE_MAPPER.items():
-                    if i in arg.annotation.mro()[1:]:
-                        safe_arg_type = o
-                        break
+                # See if it's one of our common types
+                if arg.annotation in self.COMMAND_TYPE_MAPPER:
+                    safe_arg_type = self.COMMAND_TYPE_MAPPER[arg.annotation]
+                elif self.get_non_optional_type(arg.annotation) in self.COMMAND_TYPE_MAPPER:
+                    safe_arg_type = self.COMMAND_TYPE_MAPPER[self.get_non_optional_type(arg.annotation)]
+
+                # It isn't - let's see if it's a subclass
+                if safe_arg_type is None:
+                    for i, o in self.COMMAND_TYPE_MAPPER.items():
+                        if i in arg.annotation.mro()[1:]:
+                            safe_arg_type = o
+                            break
+
+            except Exception:
+                await ctx.send(f"Hit an error converting `{command.qualified_name}` command.")
+                raise
 
             # Make sure the type exists
             if safe_arg_type is None:
