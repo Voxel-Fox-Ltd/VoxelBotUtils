@@ -22,11 +22,11 @@ class ButtonStyle(enum.IntEnum):
             dispatch an interaction create payload.
     """
 
-    PRIMARY = 1  # A blurple button
-    SECONDARY = 2  # A grey button
-    SUCCESS = 3  # A green button
-    DANGER = 4  # A red button
-    LINK = 5  # A button that navigates to a URL
+    PRIMARY = 1
+    SECONDARY = 2
+    SUCCESS = 3
+    DANGER = 4
+    LINK = 5
 
 
 class Button(DisableableComponent):
