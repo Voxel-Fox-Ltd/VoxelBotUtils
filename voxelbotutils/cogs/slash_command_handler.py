@@ -152,7 +152,7 @@ class SlashCommandHandler(utils.Cog):
         if isinstance(command, utils.Group):
             subcommands = list(command.commands)
             valid_subcommands = []
-            for i in self.bot.help_command.filter_commands_classmethod(ctx, subcommands):
+            for i in (await self.bot.help_command.filter_commands_classmethod(ctx, subcommands)):
                 if getattr(i, 'add_slash_command', True):
                     valid_subcommands.append(i)
             for subcommand in valid_subcommands:
@@ -170,7 +170,7 @@ class SlashCommandHandler(utils.Cog):
         slash_commands = []
         commands = list(ctx.bot.commands)
         filtered_commands = []
-        for i in self.bot.help_command.filter_commands_classmethod(ctx, commands):
+        for i in (await self.bot.help_command.filter_commands_classmethod(ctx, commands)):
             if getattr(i, 'add_slash_command', True):
                 filtered_commands.append(i)
         for command in filtered_commands:
@@ -181,7 +181,7 @@ class SlashCommandHandler(utils.Cog):
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
-    async def addinteractioncommands(self, ctx, guild: bool, *, command_name: str = None):
+    async def addinteractioncommands(self, ctx, guild: bool = False, *, command_name: str = None):
         """
         Adds all of the bot's interaction commands to the global interaction handler.
         """
