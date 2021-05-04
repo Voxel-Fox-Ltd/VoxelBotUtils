@@ -140,7 +140,8 @@ class SlashCommandHandler(utils.Cog):
 
             # Make sure the type exists
             if safe_arg_type is None:
-                raise Exception(f"Couldn't add a convert {command.qualified_name} into a slash command")
+                await ctx.send(f"Hit an error converting `{command.qualified_name}` command.")
+                raise Exception(f"Couldn't convert {arg.annotation} into a valid slash command argument type.")
 
             # Say if it's optional
             if arg.default is not inspect._empty or self.is_typing_optional(arg.annotation):
