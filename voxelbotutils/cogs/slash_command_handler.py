@@ -116,24 +116,26 @@ class SlashCommandHandler(utils.Cog):
 
         # Go through its args
         for arg in command.clean_params.values():
-            arg_type = None
+            arg_type = arg.annotation if not self.is_typing_optional(arg.annotation) else self.get_non_optional_type(arg.annotation)
             safe_arg_type = None
             required = True
 
             try:
 
                 # See if it's one of our common types
-                if arg.annotation in self.COMMAND_TYPE_MAPPER:
-                    safe_arg_type = self.COMMAND_TYPE_MAPPER[arg.annotation]
-                elif self.get_non_optional_type(arg.annotation) in self.COMMAND_TYPE_MAPPER:
-                    safe_arg_type = self.COMMAND_TYPE_MAPPER[self.get_non_optional_type(arg.annotation)]
+                if arg_type in self.COMMAND_TYPE_MAPPER:
+                    safe_arg_type = self.COMMAND_TYPE_MAPPER[arg_type]
 
                 # It isn't - let's see if it's a subclass
                 if safe_arg_type is None:
                     for i, o in self.COMMAND_TYPE_MAPPER.items():
-                        if i in arg.annotation.mro()[1:]:
+                        if i in arg_type.mro()[1:]:
                             safe_arg_type = o
                             break
+
+                # It isn't - let's try and get an attr from the class
+                if safe_arg_type is None:
+                    safe_arg_type = getattr(arg_type, "SLASH_COMMAND_ARG_TYPE", None)
 
             except Exception:
                 await ctx.send(f"Hit an error converting `{command.qualified_name}` command.")
@@ -142,7 +144,7 @@ class SlashCommandHandler(utils.Cog):
             # Make sure the type exists
             if safe_arg_type is None:
                 await ctx.send(f"Hit an error converting `{command.qualified_name}` command.")
-                raise Exception(f"Couldn't convert {arg.annotation} into a valid slash command argument type.")
+                raise Exception(f"Couldn't convert {arg_type} into a valid slash command argument type.")
 
             # Say if it's optional
             if arg.default is not inspect._empty or self.is_typing_optional(arg.annotation):
