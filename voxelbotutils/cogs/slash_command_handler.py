@@ -36,6 +36,8 @@ class SlashCommandHandler(utils.Cog):
         utils.TimeValue: utils.interactions.ApplicationCommandOptionType.STRING,
         commands.clean_content: utils.interactions.ApplicationCommandOptionType.STRING,
         discord.Message: utils.interactions.ApplicationCommandOptionType.STRING,
+        discord.Emoji: utils.interactions.ApplicationCommandOptionType.STRING,
+        discord.PartialEmoji: utils.interactions.ApplicationCommandOptionType.STRING,
         str: utils.interactions.ApplicationCommandOptionType.STRING,
         int: utils.interactions.ApplicationCommandOptionType.INTEGER,
         inspect._empty: utils.interactions.ApplicationCommandOptionType.STRING,
