@@ -1,3 +1,5 @@
+import discord
+
 from .models import BaseComponent, DisableableComponent, ComponentHolder, MessageComponents, ActionRow
 from .buttons import ButtonStyle, Button
 from ..interaction_messageable import InteractionMessageable
