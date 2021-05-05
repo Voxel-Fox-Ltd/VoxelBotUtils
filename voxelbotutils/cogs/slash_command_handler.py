@@ -148,7 +148,7 @@ class SlashCommandHandler(utils.Cog):
             if self.is_typing_optional(arg.annotation):
                 arg_type = self.get_non_optional_type(arg.annotation)
                 required = False
-            elif is_typing_union(arg.annotation):
+            elif self.is_typing_union(arg.annotation):
                 arg_type = self.get_union_type(arg.annotation)
             else:
                 arg_type = arg.annotation
