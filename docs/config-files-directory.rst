@@ -439,43 +439,99 @@ Website Config File
 .. class:: WebsiteConfig
 
    .. attribute:: website_base_url
+      :type: str
+
+      The base URL for the website.
 
    .. attribute:: login_url
+      :type: str
+
+      The endpoint on your website that redirects the user to a Discord login page.
 
    .. attribute:: routes
+      :type: list
+
+      A list of route files to load into the bot.
 
    .. attribute:: oauth_scopes
+      :type: list
+
+      A list of Oauth scopes that the Discord login should come loaded in with.
 
    .. class:: discord_bot_configs
+
+      A list of `key: config` pairs that allow the website to interact with bot routes via :code:`request.app[key]`.
 
       .. attribute:: bot
 
    .. class:: oauth
 
+      The information that should be used to process the user's login.
+
       .. attribute:: client_id
+         :type: str
+
+         The client ID for the user login.
 
       .. attribute:: client_secret
+         :type: str
+
+         The client secret for the user login.
 
    .. class:: database
 
+      The configuration for your Postgres connection.
+
       .. attribute:: enabled
+         :type: bool
+
+         Whether or not to connect to the database on startup.
 
       .. attribute:: user
+         :type: str
+
+         The user that you want to connect with,
 
       .. attribute:: password
+         :type: str
+
+         The password of that user.
 
       .. attribute:: database
+         :type: str
+
+         The database that you want to connect to.
 
       .. attribute:: host
+         :type: str
+
+         The host IP/URL that you want to connect to.
 
       .. attribute:: port
+         :type: int
 
-   .. class:: reids
+         The port that your Postgres instance is running on.
+
+   .. class:: redis
+
+      The configuration for you Redis connection.
 
       .. attribute:: enabled
+         :type: bool
+
+         Whether or not to connect to reids on startup.
 
       .. attribute:: host
+         :type: str
+
+         The host IP/URL that you want to connect to.
 
       .. attribute:: port
+         :type: int
+
+         The port that your Redis instance is running on.
 
       .. attribute:: db
+         :type: int
+
+         The database that you want to connect to.
