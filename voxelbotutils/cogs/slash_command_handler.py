@@ -267,7 +267,10 @@ class SlashCommandHandler(utils.Cog):
                     await self.bot.bulk_create_global_application_commands(commands_to_add)
             except discord.HTTPException as e:
                 try:
-                    file = discord.File(io.StringIO(json.dumps(commands_to_add, indent=4)), filename="slash_commands.json")
+                    file = discord.File(
+                        io.StringIO(json.dumps([i.to_json() for i in commands_to_add], indent=4)),
+                        filename="slash_commands.json",
+                    )
                     await ctx.send(file=file)
                 except discord.HTTPException:
                     pass
