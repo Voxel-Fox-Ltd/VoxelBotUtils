@@ -14,6 +14,15 @@ class BaseComponent(object):
 
         raise NotImplementedError()
 
+    def __eq__(self, other) -> bool:
+        """
+        Checks if two components are equal to one another.
+        """
+
+        if not isinstance(other, BaseComponent):
+            raise TypeError("Can't compare {} and {}".format(self.__class__, other.__class__))
+        return self.to_dict() == other.to_dict()
+
 
 class DisableableComponent(BaseComponent):
     """
