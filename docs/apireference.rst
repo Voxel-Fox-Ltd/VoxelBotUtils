@@ -4,11 +4,6 @@ API Reference
 Utils
 ---------------------------------------
 
-Embed
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.Embed
-
 Bot
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -43,11 +38,6 @@ DatabaseConnection
 .. autoclass:: voxelbotutils.DatabaseConnection
    :no-special-members:
 
-Paginator
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.Paginator
-
 RedisConnection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -59,6 +49,17 @@ StatsdConnection
 
 .. autoclass:: voxelbotutils.StatsdConnection
    :no-special-members:
+
+Embed
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.Embed
+   :exclude-members: use_random_color
+
+Paginator
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.Paginator
 
 TimeValue
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
