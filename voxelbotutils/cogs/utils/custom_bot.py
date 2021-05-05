@@ -37,14 +37,17 @@ def get_prefix(bot, message: discord.Message):
     Get the guild prefix for the bot given the message that should be invoking a command.
     """
 
+    # Set out default
+    config_prefix = bot.config.get('default_prefix')
+
     # Default prefix for DMs
     if message.guild is None:
-        prefix = bot.config.get('default_prefix')
+        prefix = config_prefix
 
     # Custom prefix or default prefix
     else:
-        current_prefix = bot.guild_settings[message.guild.id][bot.config.get('guild_settings_prefix_column', 'prefix')]
-        prefix = current_prefix or bot.config.get('default_prefix')
+        guild_prefix = bot.guild_settings[message.guild.id][bot.config.get('guild_settings_prefix_column', 'prefix')]
+        prefix = guild_prefix or config_prefix
 
     # Fuck iOS devices
     if type(prefix) is not list and prefix in ["'", "‘"]:
@@ -52,6 +55,7 @@ def get_prefix(bot, message: discord.Message):
 
     # Listify it
     prefix = [prefix] if isinstance(prefix, str) else prefix
+    prefix = [i for i in prefix if i]
 
     # Make it slightly more case insensitive
     prefix.extend([i.title() for i in prefix if i])
