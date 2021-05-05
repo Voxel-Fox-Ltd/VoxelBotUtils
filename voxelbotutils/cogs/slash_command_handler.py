@@ -70,6 +70,19 @@ class SlashCommandHandler(utils.Cog):
         return annotation.__args__[-1] is type(None)
 
     @staticmethod
+    def is_typing_union(annotation) -> bool:
+        try:
+            if annotation.default is None:
+                return True
+        except AttributeError:
+            pass
+        try:
+            origin = annotation.__origin__
+            return True
+        except AttributeError:
+            return False
+
+    @staticmethod
     def get_non_optional_type(annotation) -> typing.Optional[typing.Any]:
         """
         Gets the optional type out of a `typing.Optional`.
@@ -78,6 +91,19 @@ class SlashCommandHandler(utils.Cog):
         try:
             return annotation.__args__[0]
         except Exception:
+            return None
+
+    @staticmethod
+    def get_union_type(annotation) -> bool:
+        try:
+            if annotation.default is None:
+                return True
+        except AttributeError:
+            pass
+        try:
+            origin = annotation.__origin__
+            return origin[0]
+        except AttributeError:
             return None
 
     async def get_slash_commands(self) -> typing.List[utils.interactions.ApplicationCommand]:
@@ -116,9 +142,16 @@ class SlashCommandHandler(utils.Cog):
 
         # Go through its args
         for arg in command.clean_params.values():
-            arg_type = arg.annotation if not self.is_typing_optional(arg.annotation) else self.get_non_optional_type(arg.annotation)
+            arg_type = None
             safe_arg_type = None
             required = True
+            if self.is_typing_optional(arg.annotation):
+                arg_type = self.get_non_optional_type(arg.annotation)
+                required = False
+            elif is_typing_union(arg.annotation):
+                arg_type = self.get_union_type(arg.annotation)
+            else:
+                arg_type = arg.annotation
 
             try:
 
