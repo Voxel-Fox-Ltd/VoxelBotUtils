@@ -102,7 +102,7 @@ class SlashCommandHandler(utils.Cog):
         except AttributeError:
             pass
         try:
-            origin = annotation.__origin__
+            origin = annotation.__args__
             return origin[0]
         except AttributeError:
             return None
