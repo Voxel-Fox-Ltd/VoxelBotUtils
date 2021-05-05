@@ -124,7 +124,7 @@ UpgradeChatInterval
 Interactions
 ---------------------------------------------------
 
-Due to the complexity of interactions, also have :ref:`their own page<interactions howto>` for a basic howto guide.
+Interactions also have :ref:`their own page<interactions howto>` for a basic integration guide.
 
 InteractionMessageable
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
