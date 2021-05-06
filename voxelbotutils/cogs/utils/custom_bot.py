@@ -879,29 +879,30 @@ class Bot(commands.AutoShardedBot):
 
         # Update presence
         self.logger.info("Setting default bot presence")
-        presence = self.config["presence"]  # Get text
+        presence = self.config.get("presence", {})  # Get presence object
+        activity_type_str = presence.get("activity_type", "online").lower()  # Get the activity type (str)
+        status = getattr(discord.Status, presence.get("status", "online").lower(), discord.Status.online)  # Get the activity type
+        include_shard_id = presence.get("include_shard_id", False)  # Whether or not to include shard IDs
+        activity_type = getattr(discord.ActivityType, activity_type_str, discord.ActivityType.playing)  # The activity type to use
 
         # Update per shard
-        if self.shard_count > 1 and presence.get("include_shard_id", True):
+        for i in self.shard_ids:
 
-            # Go through each shard ID
-            config_text = presence["text"].format(bot=self)
-            for i in self.shard_ids:
-                activity = discord.Activity(
-                    name=f"{config_text} (shard {i})",
-                    type=getattr(discord.ActivityType, presence['activity_type'].lower())
-                )
-                status = getattr(discord.Status, presence["status"].lower())
-                await self.change_presence(activity=activity, status=status, shard_id=i)
+            # Update the config text
+            config_text = presence.get("text", "").format(bot=self).strip()
+            if self.shard_count > 1 and include_shard_id:
+                config_text = f"{config_text} (shard {i})".strip()
+                if config_text == f"(shard {i})":
+                    config_text = f"Shard {i}"
 
-        # Not sharded - just do everywhere
-        else:
-            activity = discord.Activity(
-                name=presence["text"],
-                type=getattr(discord.ActivityType, presence["activity_type"].lower())
-            )
-            status = getattr(discord.Status, presence["status"].lower())
-            await self.change_presence(activity=activity, status=status)
+            # Make an activity object
+            if config_text:
+                activity = discord.Activity(name=config_text, type=activity_type)
+            else:
+                activity = None
+
+            # Update the presence
+            await self.change_presence(activity=activity, status=status, shard_id=i)
 
     def reload_config(self) -> None:
         """
