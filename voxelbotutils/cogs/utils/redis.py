@@ -117,7 +117,7 @@ class RedisConnection(object):
 
     async def get(self, key: str) -> str:
         """
-        Grabs a value from the Redis DB given a key.
+        Gets a value from the Redis DB given a key.
 
         Args:
             key (str): The key that you want to get from the Redis database.
@@ -134,10 +134,10 @@ class RedisConnection(object):
 
     async def mget(self, *keys) -> typing.List[str]:
         """
-        Grabs a value from the redis DB given a key.
+        Gets multiple values from the Redis DB given a list of keys.
 
         Args:
-            key (str): The keys that you want to get from the database.
+            keys (str): The keys that you want to get from the database.
 
         Returns:
             typing.List[str]: The values from the Redis database associated with the given keys.
