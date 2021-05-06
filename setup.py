@@ -68,6 +68,7 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             "voxelbotutils=voxelbotutils.__main__:main",
+            "vbu=voxelbotutils.__main__:main",
         ],
     },
 )
