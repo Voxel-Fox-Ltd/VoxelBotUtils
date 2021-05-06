@@ -24,7 +24,7 @@ def is_slash_command():
     """
 
     async def predicate(ctx):
-        if ctx.is_slash_command:
+        if ctx.IS_INTERACTION:
             return True
         raise IsNotSlashCommand()
     return commands.check(predicate)
@@ -39,7 +39,7 @@ def is_not_slash_command():
     """
 
     async def predicate(ctx):
-        if not ctx.is_slash_command:
+        if not ctx.IS_INTERACTION:
             return True
         raise IsSlashCommand()
     return commands.check(predicate)

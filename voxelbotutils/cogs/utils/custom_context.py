@@ -19,9 +19,12 @@ class Context(commands.Context):
     Attributes:
         original_author_id (int): The ID of the original person to run the command. Persists through
             the bot's `sudo` command, if you want to check the original author.
-        is_slash_command (bool): Whether or not the command was invoked via a slash command.
         clean_prefix (str): A clean version of the prefix that the command was invoked with.
+        IS_INTERACTION (bool): Whether or not the command was invoked via a slash command.
     """
+
+    IS_INTERACTION = False
+    CAN_SEND_EPHEMERAL = False
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
