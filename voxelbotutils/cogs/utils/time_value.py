@@ -59,8 +59,8 @@ class TimeValue(object):
         hours (int): The number of hours that the object represents.
         minutes (int): The number of minutes that the object represents.
         seconds (int): The number of seconds that the object represents.
-        clean_spaced (str): A string form of the object in form "10 hours 3 minutes".
-        clean_full (str): A string form of the object in form "10h 3m".
+        clean_full (str): A string form of the object in form "10 hours 3 minutes".
+        clean_spaced (str): A string form of the object in form "10h 3m".
         clean (str): A string form of the object in form "10h3m".
         delta (datetime.timedelta): A timedelta for the entire timevalue object.
     """
