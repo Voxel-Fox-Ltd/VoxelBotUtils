@@ -36,7 +36,6 @@ class InteractionHandler(utils.Cog):
         ctx = cls(prefix="/", view=view, bot=self.bot, message=fake_message)
         self.logger.debug(f"Made up fake context for interaction command")
         ctx.data = payload
-        ctx.is_slash_command = True
         ctx.original_author_id = fake_message.author.id
         view.skip_string(ctx.prefix)
         invoker = view.get_word()
