@@ -189,7 +189,7 @@ class SlashCommandHandler(utils.Cog):
             # Get the description
             description = f"The {arg.name} that you want to use for the {command.qualified_name} command."
             try:
-                description = command.slash_command_arg_descs[index] or description
+                description = command.argument_descriptions[index] or description
             except IndexError:
                 pass
 
