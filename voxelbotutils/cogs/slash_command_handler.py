@@ -115,7 +115,7 @@ class SlashCommandHandler(utils.Cog):
         """
 
         if self.commands is not None:
-            return self.commands#
+            return self.commands
         r = discord.http.Route("GET", "/applications/{app_id}/commands", app_id=self.bot.application_id)
         data = await self.bot.http.request(r)
         self.commands = [utils.interactions.ApplicationCommand.from_data(i) for i in data]
