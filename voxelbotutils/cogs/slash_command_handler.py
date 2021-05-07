@@ -144,7 +144,7 @@ class SlashCommandHandler(utils.Cog):
             application_command = utils.interactions.ApplicationCommand(**kwargs)
 
         # Go through its args
-        for arg in command.clean_params.values():
+        for index, arg in enumerate(command.clean_params.values()):
             arg_type = None
             safe_arg_type = None
             required = True
@@ -186,10 +186,17 @@ class SlashCommandHandler(utils.Cog):
             if arg.default is not inspect._empty or self.is_typing_optional(arg.annotation):
                 required = False
 
+            # Get the description
+            description = f"The {arg.name} that you want to use for the {command.qualified_name} command."
+            try:
+                description = command.slash_command_arg_descs[index] or description
+            except IndexError:
+                pass
+
             # Add option
             application_command.add_option(utils.interactions.ApplicationCommandOption(
                 name=arg.name,
-                description=f"The {arg.name} that you want to use for the {command.qualified_name} command.",
+                description=description,
                 type=safe_arg_type,
                 required=required,
             ))

@@ -26,6 +26,8 @@ class Command(commands.Command):
             that are handled by the command's :func:`on_error` method before being passed onto
             the main bot's error handler.
         add_slash_command (bool): Whether or not this command should be added as a slash command.
+        argument_descriptions (typing.List[str]): A list of descriptions for the command arguments to
+            be used in slash commands.
     """
 
     def __init__(self, *args, **kwargs):
@@ -35,6 +37,7 @@ class Command(commands.Command):
         self.ignore_checks_in_help: bool = kwargs.get('ignore_checks_in_help', False)
         self.locally_handled_errors: list = kwargs.get('locally_handled_errors', None)
         self.add_slash_command: bool = kwargs.get('add_slash_command', True)
+        self.argument_descriptions: typing.List[str] = kwargs.get('argument_descriptions', list())
 
         # Fix cooldown to be our custom type
         cooldown = self._buckets._cooldown
