@@ -886,7 +886,7 @@ class Bot(commands.AutoShardedBot):
         activity_type = getattr(discord.ActivityType, activity_type_str, discord.ActivityType.playing)  # The activity type to use
 
         # Update per shard
-        for i in self.shard_ids:
+        for i in self.shard_ids or [0]:
 
             # Update the config text
             config_text = presence.get("text", "").format(bot=self).strip()
