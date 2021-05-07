@@ -194,10 +194,18 @@ class ErrorHandler(utils.Cog):
         """
 
         try:
-            return await ctx.send(text, allowed_mentions=discord.AllowedMentions.none())
+            return await ctx.send(
+                text,
+                allowed_mentions=discord.AllowedMentions.none(),
+                ephemeral=ctx.IS_INTERACTION,
+            )
         except discord.Forbidden:
             try:
-                return await ctx.author.send(author_text or text, allowed_mentions=discord.AllowedMentions.none())
+                return await ctx.author.send(
+                    author_text or text,
+                    allowed_mentions=discord.AllowedMentions.none(),
+                    ephemeral=ctx.IS_INTERACTION,
+                )
             except discord.Forbidden:
                 pass
         except discord.NotFound:

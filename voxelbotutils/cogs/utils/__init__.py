@@ -1,7 +1,7 @@
 import re as _re
 from discord.ext import commands as _dpy_commands
 
-from . import checks, converters, errors, interactions
+from . import checks, converters, errors, interactions  # Interactions is only here for backdating
 from .checks import cooldown
 from .context_embed import Embed
 from .custom_bot import Bot
@@ -13,6 +13,7 @@ from .redis import RedisConnection, RedisChannelHandler, redis_channel_handler
 from .statsd import StatsdConnection
 from .time_value import TimeValue
 from .settings_menu import SettingsMenu, SettingsMenuOption, SettingsMenuIterable, SettingsMenuConverter
+from .interactions import ApplicationCommand, ApplicationCommandOption, ApplicationCommandOptionChoice, ApplicationCommandOptionType
 from .upgrade_chat import (
     UpgradeChat, UpgradeChatOrder, UpgradeChatUser, UpgradeChatOrderItem, UpgradeChatInterval, UpgradeChatProduct,
     UpgradeChatItemType, UpgradeChatPaymentProcessor, UpgradeChatProductType,
