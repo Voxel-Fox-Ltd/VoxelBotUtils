@@ -17,7 +17,7 @@ class InteractionHandler(utils.Cog):
 
         # Make a string view
         view = commands.view.StringView(
-            f"/{payload['data']['name']} {' '.join([i['value'] for i in payload['data'].get('options', list())])}"
+            f"/{payload['data']['name']} {' '.join([str(i['value']) for i in payload['data'].get('options', list())])}"
         )
         self.logger.debug(f"Made up fake string for interaction command: {view.buffer}")
 
