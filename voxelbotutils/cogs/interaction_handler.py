@@ -17,7 +17,8 @@ class InteractionHandler(utils.Cog):
 
         # Make a string view
         command_name = payload['data']['name']
-        command_args = [f"﹃{i['value']}﹄" for i in payload['data'].get('options', list())]  # ﹃﹄ are valid quotes for Dpy
+        # command_args = [f"﹃{i['value']}﹄" for i in payload['data'].get('options', list())]  # ﹃﹄ are valid quotes for Dpy
+        command_args = [f"{i['value']}" for i in payload['data'].get('options', list())]  # ﹃﹄ are valid quotes for Dpy
         view = commands.view.StringView(f"/{command_name} {' '.join(command_args)}")
         self.logger.debug(f"Made up fake string for interaction command: {view.buffer}")
 
