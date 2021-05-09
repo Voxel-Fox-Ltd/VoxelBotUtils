@@ -15,10 +15,23 @@ class InteractionHandler(utils.Cog):
         Make a context object from an interaction.
         """
 
+        # command_args = [f"﹃{i['value']}﹄" for i in payload['data'].get('options', list())]  # ﹃﹄ are valid quotes for Dpy
+
+        # Get the arguments from the payload
+        if 'options' in payload['data']:
+            payload_data_options = payload['data']
+            while 'options' in payload_data_options:
+                payload_data_options = payload_data_options['options']
+                if isinstance(payload_data_options, list) and payload_data_options and 'options' in payload_data_options[0]:
+                    payload_data_options = payload_data_options[0]
+                else:
+                    break
+        else:
+            payload_data_options = list()
+
         # Make a string view
         command_name = payload['data']['name']
-        # command_args = [f"﹃{i['value']}﹄" for i in payload['data'].get('options', list())]  # ﹃﹄ are valid quotes for Dpy
-        command_args = [f"{i['value']}" for i in payload['data'].get('options', list())]  # ﹃﹄ are valid quotes for Dpy
+        command_args = [f"{i['value']}" for i in payload_data_options]
         view = commands.view.StringView(f"/{command_name} {' '.join(command_args)}")
         self.logger.debug(f"Made up fake string for interaction command: {view.buffer}")
 
