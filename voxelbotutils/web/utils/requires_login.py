@@ -24,7 +24,7 @@ def requires_login():
                 before = session.get('redirect_on_login')
                 session['redirect_on_login'] = before or str(request.url)
                 root_url = request.app['config']['login_url'].rstrip('/').split('//')[-1]
-                if request.app['config']['login_url'] in request.url:
+                if request.app['config']['login_url'] in str(request.url):
                     session['redirect_on_login'] = '/'
                 return HTTPFound(location=request.app['config']['login_url'])
 
