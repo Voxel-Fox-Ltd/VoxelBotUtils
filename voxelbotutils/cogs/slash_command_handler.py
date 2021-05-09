@@ -250,21 +250,24 @@ class SlashCommandHandler(utils.Cog):
         # Start typing because this takes a while
         async with ctx.typing():
 
-            # Get the commands that currently exist
-            if guild:
-                commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
-            else:
-                commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_global_application_commands()
-            command_json_current = [i.to_json() for i in commands_current]
+            # Remove old slash commands if we're adding all of them as new
+            if command_name is None:
 
-            # See which commands we need to delete
-            commands_to_remove = [i for i in commands_current if i.name not in command_names_to_add]
-            for command in commands_to_remove:
+                # Get the commands that currently exist
                 if guild:
-                    await self.bot.delete_guild_application_command(ctx.guild, command)
+                    commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
                 else:
-                    await self.bot.delete_global_application_command(command)
-                self.logger.info(f"Removed slash command for {command.name}")
+                    commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_global_application_commands()
+                command_json_current = [i.to_json() for i in commands_current]
+
+                # See which commands we need to delete
+                commands_to_remove = [i for i in commands_current if i.name not in command_names_to_add]
+                for command in commands_to_remove:
+                    if guild:
+                        await self.bot.delete_guild_application_command(ctx.guild, command)
+                    else:
+                        await self.bot.delete_global_application_command(command)
+                    self.logger.info(f"Removed slash command for {command.name}")
 
             # Add commands
             try:
