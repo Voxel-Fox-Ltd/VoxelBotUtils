@@ -193,18 +193,19 @@ class ErrorHandler(utils.Cog):
         instead. If it fails that too, it just stays silent.
         """
 
+        ephemeral = ctx.IS_INTERACTION and self.bot.config.get("ephemeral_error_messages", True)
         try:
             return await ctx.send(
                 text,
                 allowed_mentions=discord.AllowedMentions.none(),
-                ephemeral=ctx.IS_INTERACTION,
+                ephemeral=ephemeral,
             )
         except discord.Forbidden:
             try:
                 return await ctx.author.send(
                     author_text or text,
                     allowed_mentions=discord.AllowedMentions.none(),
-                    ephemeral=ctx.IS_INTERACTION,
+                    ephemeral=ephemeral,
                 )
             except discord.Forbidden:
                 pass
