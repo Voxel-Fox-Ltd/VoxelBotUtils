@@ -292,16 +292,8 @@ class SlashCommandHandler(utils.Cog):
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
     async def removeinteractioncommands(self, ctx, guild: bool, *, command_name: str = None):
         """
-        Removes all of the bot's interaction commands from the global interaction handler.
+        Removes the bot's interaction commands from the global interaction handler.
         """
-
-        # Get the commands we want to add
-        ctx.author = ctx.guild.me
-        if command_name:
-            commands_to_add = [await self.convert_into_application_command(ctx, self.bot.get_command(command_name))]
-        else:
-            commands_to_add: typing.List[utils.interactions.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
-        command_names_to_add = [i.name for i in commands_to_add]
 
         # Start typing because this takes a while
         async with ctx.typing():
@@ -311,10 +303,11 @@ class SlashCommandHandler(utils.Cog):
                 commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
             else:
                 commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_global_application_commands()
-            command_json_current = [i.to_json() for i in commands_current]
 
             # See which commands we need to delete
             for command in commands_current:
+                if command_name and command.name != command_name:
+                    continue
                 if guild:
                     await self.bot.delete_guild_application_command(ctx.guild, command)
                 else:
