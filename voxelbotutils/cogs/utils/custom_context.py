@@ -39,6 +39,14 @@ class Context(commands.Context):
 
         return await self.message.add_reaction("\N{OK HAND SIGN}")
 
+    async def ack(self):
+        """
+        An ack method so we can use the same code for slash commands
+        as we do for text commands.
+        """
+
+        pass
+
     @property
     def clean_prefix(self) -> str:
         return self.prefix.replace(
