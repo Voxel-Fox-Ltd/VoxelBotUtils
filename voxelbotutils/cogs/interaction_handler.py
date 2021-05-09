@@ -18,21 +18,22 @@ class InteractionHandler(utils.Cog):
         # command_args = [f"﹃{i['value']}﹄" for i in payload['data'].get('options', list())]  # ﹃﹄ are valid quotes for Dpy
 
         # Get the arguments from the payload
+        command_name = payload['data']['name']
         if 'options' in payload['data']:
             payload_data_options = payload['data']
             while 'options' in payload_data_options:
                 payload_data_options = payload_data_options['options']
                 if isinstance(payload_data_options, list) and payload_data_options and 'options' in payload_data_options[0]:
                     payload_data_options = payload_data_options[0]
+                    command_name += f" {payload_data_options['name']}"
                 else:
                     break
         else:
             payload_data_options = list()
 
         # Make a string view
-        command_name = payload['data']['name']
         command_args = [f"{i['value']}" for i in payload_data_options]
-        view = commands.view.StringView(f"/{command_name} {' '.join(command_args)}")
+        view = commands.view.StringView(f"/{command_name.rstrip()} {' '.join(command_args)}")
         self.logger.debug(f"Made up fake string for interaction command: {view.buffer}")
 
         # Get some objects we can use to make the interaction message
