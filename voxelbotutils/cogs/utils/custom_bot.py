@@ -215,6 +215,11 @@ class Bot(commands.AutoShardedBot):
         async def clear_components_msg_prop(message):
             return await message.edit(components=None)
 
+        async def disable_components_msg_prop(message):
+            components = message.components
+            components.disable_components()
+            return await message.edit(components=components)
+
         Messageable.send = send_button_msg_prop
         discord.Message.add_reactions = add_reactions_prop
         discord.Message.edit = edit_button_msg_prop
@@ -223,6 +228,7 @@ class Bot(commands.AutoShardedBot):
         discord.WebhookMessage.edit = edit_button_msg_prop
         discord.WebhookMessage.wait_for_button_click = wait_for_button_prop
         discord.WebhookMessage.clear_components = clear_components_msg_prop
+        discord.WebhookMessage.disable_components = disable_components_msg_prop
         discord.message.MessageFlags.ephemeral = discord.flags.flag_value(lambda _: 64)
         discord.message.MessageFlags.VALID_FLAGS.update({"ephemeral": 64})
 
@@ -1198,6 +1204,7 @@ class Bot(commands.AutoShardedBot):
             await ret.delete(delay=delete_after)
 
         # Return the created message
+        ret.components = MessageComponents.from_dict(response_data.get("components", list()))
         return ret
 
     async def _edit_button_message(self, message, **fields):
@@ -1286,6 +1293,7 @@ class Bot(commands.AutoShardedBot):
             else:
                 response_data = await message._state.http.edit_message(message.channel.id, message.id, **fields)
             message._update(response_data)
+            message.components = MessageComponents.from_dict(response_data.get("components", list()))
 
         # See if we should delete the message
         if delete_after is not None:
