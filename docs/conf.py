@@ -30,11 +30,11 @@ author = 'Kae Bartlett'
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
-    "sphinx_rtd_theme",
     "sphinx.ext.intersphinx",
     # "sphinx.ext.linkcode",
     # "sphinx.ext.viewcode",
     "sphinx.ext.autosectionlabel",
+    "sphinx_rtd_theme",
 ]
 
 autodoc_default_options = {

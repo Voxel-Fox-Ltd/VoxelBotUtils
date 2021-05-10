@@ -386,7 +386,7 @@ Bot Config File
 
       .. class:: streaming
 
-         A set of information that lets you automatically update the bot's presence when a given user starts streaming on Twitch.tv. You can get client information `from here<https://dev.twitch.tv/console/apps>`_.
+         A set of information that lets you automatically update the bot's presence when a given user starts streaming on Twitch.tv. You can get client information `from here <https://dev.twitch.tv/console/apps>`_.
 
          .. attribute:: twitch_usernames
             :type: list
@@ -405,7 +405,7 @@ Bot Config File
 
    .. class:: upgrade_chat
 
-      A set of information that lets you check for purchases made with Upgrade.Chat. You can get client information `from here<https://upgrade.chat/developers>`_.
+      A set of information that lets you check for purchases made with Upgrade.Chat. You can get client information `from here <https://upgrade.chat/developers>`_.
 
       .. attribute:: client_id
             :type: str

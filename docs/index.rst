@@ -15,7 +15,7 @@ VoxelBotUtils is a library built as an extension for Discord.py to speed up Disc
 * Built-in error handling for all of Discord.py's errors
 * Bot stats posting via StatsD and DataDog
 * A help command that doesn't look like trash
-* :doc:`Interactions handling<interactions>`
+* :doc:`Interactions handling<interactions-howto>`
 
    * Slash commands
    * Buttons
