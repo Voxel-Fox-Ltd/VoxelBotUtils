@@ -103,6 +103,15 @@ class ComponentHolder(BaseComponent):
         return None
 
 
+class MessageComponents(ComponentHolder):
+    """
+    A set of components that can be added to a message.
+    """
+
+    def to_dict(self):
+        return [i.to_dict() for i in self.components]
+
+
 class ActionRow(ComponentHolder):
     """
     The main UI component for adding and ordering components on Discord
@@ -116,28 +125,3 @@ class ActionRow(ComponentHolder):
             "type": self.TYPE,
             "components": [i.to_dict() for i in self.components],
         }
-
-    @classmethod
-    def from_dict(cls, payload: dict):
-        from .buttons import Button
-        type_dict = {
-            2: Button,
-        }
-        return cls(*[type_dict[i['type']].from_dict(i) for i in payload])
-
-
-class MessageComponents(ComponentHolder):
-    """
-    A set of components that can be added to a message.
-    """
-
-    def to_dict(self):
-        return [i.to_dict() for i in self.components]
-
-    @classmethod
-    def from_dict(cls, payload: list):
-        type_dict = {
-            1: ActionRow,
-        }
-        return cls(*[type_dict[i['type']].from_dict(i) for i in payload])
-
