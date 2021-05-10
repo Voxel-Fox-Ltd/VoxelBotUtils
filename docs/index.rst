@@ -56,3 +56,4 @@ Documentation Contents
    gettingstarted
    apireference
    config-files-directory
+   changelog

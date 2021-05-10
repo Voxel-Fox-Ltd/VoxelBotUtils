@@ -64,6 +64,8 @@ Bot Config File
    .. attribute:: ephemeral_error_messages
       :type: bool
 
+      .. versionadded:: 0.3.1
+
       Whether or not error messages triggered by slash commands should be ephemeral or not.
 
    .. class:: event_webhook
