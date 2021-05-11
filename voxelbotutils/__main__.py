@@ -123,7 +123,7 @@ def main():
             create_file(".gitignore", content="__pycache__/\nconfig/config.toml\nconfig/website.toml\n")
             create_file("requirements.txt", content="voxelbotutils[web]\n")
             create_file("website", "frontend.py", content=config.website_frontend_content.lstrip())
-            create_file("website", "backend.py", content=config.website_backend_content.lstri())
+            create_file("website", "backend.py", content=config.website_backend_content.lstrip())
             create_file("website", "static", ".gitkeep", content="\n")
             create_file("website", "templates", ".gitkeep", content="\n")
             print("Created website config file.")
