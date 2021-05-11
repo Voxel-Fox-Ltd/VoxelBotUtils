@@ -41,6 +41,10 @@ Bot Config File
 
       The prefix that the bot should use by default. Can be either a string or a list. The bot will always respond to its user and role mention.
 
+      .. versionchanged:: 0.3.1
+
+         Leaving an empty list or string will mean that the bot only responds to *pings*, and only from people set as *owners*. This is intended for slash-command only bots. If you want a prefix-run bot without specifying a prefix, using a space as a prefix will do this for you.
+
    .. attribute:: support_guild_id
       :type: int
 

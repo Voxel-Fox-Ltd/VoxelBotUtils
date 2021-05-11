@@ -37,8 +37,10 @@ def get_prefix(bot, message: discord.Message):
     Get the guild prefix for the bot given the message that should be invoking a command.
     """
 
-    # Set out default
+    # Set our default
     config_prefix = bot.config.get('default_prefix')
+    if not config_prefix and message.author.id not in bot.owner_ids:
+        return " ".join(random.choices(string.whitespace, k=5))  # random string for a prefix if nothing is set
 
     # Default prefix for DMs
     if message.guild is None:

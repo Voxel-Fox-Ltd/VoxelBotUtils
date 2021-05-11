@@ -10,6 +10,7 @@ Features
 """"""""""""""""""""""""
 
 * Set error text to be ephemeral when using slash commands.
+* Allow bots to be created without a prefix (see :attr:`BotConfig.default_prefix`).
 
 Bugs
 """"""""""""""""""""""""
