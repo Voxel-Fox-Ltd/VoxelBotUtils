@@ -145,6 +145,10 @@ class ErrorHandler(utils.Cog):
             lambda ctx, error: str(error).format(ctx=ctx, error=error)
         ),
         (
+            commands.ConversionError,
+            lambda ctx, error: "I failed to convert that argument - please try again in a few minutes."
+        ),
+        (
             commands.TooManyArguments,
             lambda ctx, error: f"You gave too many arguments to this command - see `{ctx.clean_prefix}help {' '.join(ctx.command.qualified_name.split(' ')[:-1] + [ctx.invoked_with])}`."
         ),

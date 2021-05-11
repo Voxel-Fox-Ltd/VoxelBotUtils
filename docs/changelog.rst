@@ -9,6 +9,8 @@ A human-readable list of changes between versions.
 New Features
 """"""""""""""""""""""""
 
+* Catch :ref:`discord.ext.commands.ConversionError` in the error handler.
+
 Changed Features
 """"""""""""""""""""""""
 
