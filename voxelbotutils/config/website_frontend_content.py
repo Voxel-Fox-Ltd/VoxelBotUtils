@@ -6,11 +6,11 @@ import discord
 from aiohttp_jinja2 import template
 
 
-
 routes = RouteTableDef()
 """
 
 website_backend_content = website_frontend_content.rstrip() + '''
+
 
 @routes.get('/login_processor')
 async def login_processor(request:Request):
