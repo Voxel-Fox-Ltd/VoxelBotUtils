@@ -20,6 +20,7 @@ class PresenceAutoUpdater(utils.Cog):
         self._refresh_token_task = None
         self.twitch_user_ids = {}  # str: str
         self._user_streaming_status = None
+        self._config_embed_footers = None
 
     def cog_unload(self):
         self.presence_auto_update_loop.cancel()
@@ -153,10 +154,17 @@ class PresenceAutoUpdater(utils.Cog):
             # Alright let's set
             await self.bot.set_default_presence()
             self._user_streaming_status = None
+            self.bot.config.setdefault('embed', dict())['footer'] = self._config_embed_footers
+            self._config_embed_footers = None
             return
 
         # Let's set a new streaming activity
         else:
+
+            # Let's change the default embed footer
+            if self._config_embed_footers is None:
+                self._config_embed_footers = self.bot.config.get('embed', dict()).get('footer', list()).copy()
+                self.bot.config.setdefault('embed', dict())['footer'] = [{"text": "Currently live on Twitch!", "amount": 1}]
 
             # We currently aren't streaming
             if self._user_streaming_status is None:
