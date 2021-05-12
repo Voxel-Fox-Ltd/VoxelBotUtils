@@ -67,24 +67,28 @@ def validate_sharding_information(args: argparse.Namespace) -> typing.Optional[t
         typing.List[int]: A list of shard IDs to use with the bot
     """
 
-    if args.shardcount is None:
-        return None
-    else:
-        if args.min is None and args.max is None:
-            args.min = 0
-            args.max = args.shardcount - 1
-        elif type(args.min) == int and type(args.max) == int:
-            pass
-        else:
-            logger.critical("You set a shardcount but not min/max shards")
-            exit(1)
+    # Set up some short vars for us to use
+    set_min_and_max = args.min is not None and args.max is not None
+    set_shardcount = args.shardcount is not None
+
+    # If we haven't said anything, assume one shard
+    if not set_shardcount and not set_min_and_max:
+        args.shardcount = 1
+        return [0]
+
+    # If we haven't set a min or max but we HAVE set a shardcount,
+    # then assume we're using all shards
+    if set_shardcount and not set_min_and_max:
+        args.min = 0
+        args.max = args.shardcount - 1
+
+    # If we gave a min and max but no shardcount, that's just invalid
+    if set_min_and_max and not set_shardcount:
+        logger.critical("You set a min/max shard amount but no shard count")
+        exit(1)
+
+    # Work out the shard IDs to launch with
     shard_ids = list(range(args.min, args.max + 1))
-    if args.shardcount is None and (args.min or args.max):
-        logger.critical("You set a min/max shard handler but no shard count")
-        exit(1)
-    if args.shardcount is not None and not (args.min is not None and args.max is not None):
-        logger.critical("You set a shardcount but not min/max shards")
-        exit(1)
     return shard_ids
 
 
