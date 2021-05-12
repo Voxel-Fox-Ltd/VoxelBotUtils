@@ -3,6 +3,22 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.3.2
+--------------------------------------
+
+New Features
+""""""""""""""""""""""""
+
+Changed Features
+""""""""""""""""""""""""
+
+* If embeds are enabled, the footer of embeds will be changed to "currently live on Twitch" when the stream presence is set.
+
+Bugs Fixed
+""""""""""""""""""""""""
+
+* Fix typo when creating website config.
+
 0.3.1
 --------------------------------------
 
