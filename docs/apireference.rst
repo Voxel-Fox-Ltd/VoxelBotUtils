@@ -396,6 +396,15 @@ web.requires_login
 
 .. autofunction:: voxelbotutils.web.requires_login
 
+   .. seealso:: :func:`voxelbotutils.web.is_logged_in`
+
+web.is_logged_in
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: voxelbotutils.web.is_logged_in
+
+   .. seealso:: :func:`voxelbotutils.web.requires_login`
+
 web.get_discord_login_url
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

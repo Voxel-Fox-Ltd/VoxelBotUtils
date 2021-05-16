@@ -4,6 +4,17 @@ import aiohttp_session
 from aiohttp.web import HTTPFound, Request
 
 
+async def is_logged_in(request: Request):
+    """
+    Returns whether or not the user for the given request is logged in.
+    """
+
+    session = await aiohttp_session.get_session(request)
+    if session.new or session.get('logged_in', False) is False:
+        return False
+    return True
+
+
 def requires_login():
     """
     Using this wrapper on a route means that the user needs to be logged in to see the page.
