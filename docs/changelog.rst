@@ -9,6 +9,8 @@ A human-readable list of changes between versions.
 New Features
 """"""""""""""""""""""""
 
+* The bot's startup logger line now includes the recommended number of shards that you should launch with.
+
 Changed Features
 """"""""""""""""""""""""
 
