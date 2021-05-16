@@ -13,11 +13,14 @@ Changed Features
 """"""""""""""""""""""""
 
 * If embeds are enabled, the footer of embeds will be changed to "currently live on Twitch" when the stream presence is set.
+* If no permissions are given for :func:`voxelbotutils.Bot.get_invite_link`, the :attr:`bot's config<BotConfig.oauth.permissions>` will be used.
 
 Bugs Fixed
 """"""""""""""""""""""""
 
 * Fix typo when creating website config.
+* Fix the sharding information for when no arguments are set.
+* Fix access token refreshing in :class:`voxelbotutils.UpgradeChat`.
 
 0.3.1
 --------------------------------------
@@ -25,7 +28,7 @@ Bugs Fixed
 New Features
 """"""""""""""""""""""""
 
-* Catch :ref:`discord.ext.commands.ConversionError` in the error handler.
+* Catch :class:`discord.ext.commands.ConversionError` in the error handler.
 
 Changed Features
 """"""""""""""""""""""""
