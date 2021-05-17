@@ -49,7 +49,10 @@ class ComponentInteractionPayload(InteractionMessageable):
         channel, guild = state._get_guild_channel(data)
         v.channel = channel
         v.guild = guild
-        v.message = discord.Message(channel=channel, data=data['message'], state=state)
+        try:
+            v.message = discord.Message(channel=channel, data=data['message'], state=state)
+        except KeyError:
+            v.message = None
         if guild:
             v.user = discord.Member(data=data['member'], guild=guild, state=state)
         else:
