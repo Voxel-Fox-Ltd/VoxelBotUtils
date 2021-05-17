@@ -364,7 +364,7 @@ class Bot(commands.AutoShardedBot):
         # Make sure our permissions is a valid object
         permissions_object = discord.Permissions()
         if permissions is None:
-            permissions = self.config.get("config", dict()).get("permissions", list())
+            permissions = self.config.get("oauth", dict()).get("permissions", list())
         if isinstance(permissions, (list, set, tuple)):
             for p in permissions:
                 setattr(permissions_object, p, True)
