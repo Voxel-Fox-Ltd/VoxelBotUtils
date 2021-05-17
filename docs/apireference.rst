@@ -7,6 +7,10 @@ Utils
 Bot
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. autoclass:: voxelbotutils.MinimalBot
+   :exclude-members: close, invoke, login, start, __init__
+   :no-inherited-members:
+
 .. autoclass:: voxelbotutils.Bot
    :exclude-members: close, invoke, login, start
    :no-inherited-members:

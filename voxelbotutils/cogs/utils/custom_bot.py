@@ -83,9 +83,523 @@ class RouteV8(discord.http.Route):
     BASE = 'https://discord.com/api/v8'
 
 
-class Bot(commands.AutoShardedBot):
+class MinimalBot(commands.AutoShardedBot):
     """
-    A bot class that inherits from :class:`discord.ext.commands.AutoShardedBot`, detailing more VoxelBotUtils
+    A minimal version of the VoxelBotUtils bot that inherits from :class:`discord.ext.commands.AutoShardedBot`
+    but gives new VBU features.
+    """
+
+    def __init__(self, *args, **kwargs):
+
+        # Make sure we init the bot
+        super().__init__(*args, **kwargs)
+
+        # Mess with the default D.py message send and edit methods
+        async def send_button_msg_prop(messagable, *args, **kwargs) -> discord.Message:
+            return await self._send_button_message(messagable, *args, **kwargs)
+
+        async def add_reactions_prop(message, *reactions):
+            for r in reactions:
+                await message.add_reaction(r)
+
+        async def edit_button_msg_prop(*args, **kwargs):
+            return await self._edit_button_message(*args, **kwargs)
+
+        async def wait_for_button_prop(*args, **kwargs):
+            return await self._wait_for_button_message(*args, **kwargs)
+
+        async def clear_components_msg_prop(message):
+            return await message.edit(components=None)
+
+        Messageable.send = send_button_msg_prop
+        discord.Message.add_reactions = add_reactions_prop
+        discord.Message.edit = edit_button_msg_prop
+        discord.Message.wait_for_button_click = wait_for_button_prop
+        discord.Message.clear_components = clear_components_msg_prop
+        discord.WebhookMessage.edit = edit_button_msg_prop
+        discord.WebhookMessage.wait_for_button_click = wait_for_button_prop
+        discord.WebhookMessage.clear_components = clear_components_msg_prop
+        discord.message.MessageFlags.ephemeral = discord.flags.flag_value(lambda _: 64)
+        discord.message.MessageFlags.VALID_FLAGS.update({"ephemeral": 64})
+
+    async def create_message_log(
+            self, messages: typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]) -> str:
+        """
+        Creates and returns an HTML log of all of the messages provided. This is an API method, and may
+        raise an asyncio HTTP error.
+
+        Args:
+            messages (typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]):
+                The messages you want to create into a log.
+
+        Returns:
+            str: The HTML for a log file.
+        """
+
+        # Let's flatten the messages if we need to
+        if isinstance(messages, discord.iterators.HistoryIterator):
+            messages = await messages.flatten()
+
+        # Create the data we're gonna send
+        data = {
+            "channel_name": messages[0].channel.name,
+            "category_name": messages[0].channel.category.name,
+            "guild_name": messages[0].guild.name,
+            "guild_icon_url": str(messages[0].guild.icon_url),
+        }
+        data_authors = {}
+        data_messages = []
+
+        # Get the data from the server
+        for message in messages:
+            for user in message.mentions + [message.author]:
+                data_authors[user.id] = {
+                    "username": user.name,
+                    "discriminator": user.discriminator,
+                    "avatar_url": str(user.avatar_url),
+                    "bot": user.bot,
+                    "display_name": user.display_name,
+                    "color": user.colour.value,
+                }
+            message_data = {
+                "id": message.id,
+                "content": message.content,
+                "author_id": message.author.id,
+                "timestamp": int(message.created_at.timestamp()),
+                "attachments": [str(i.url) for i in message.attachments],
+            }
+            embeds = []
+            for i in message.embeds:
+                embed_data = i.to_dict()
+                if i.timestamp:
+                    embed_data.update({'timestamp': i.timestamp.timestamp()})
+                embeds.append(embed_data)
+            message_data.update({'embeds': embeds})
+            data_messages.append(message_data)
+
+        # Send data to the API
+        data.update({"users": data_authors, "messages": data_messages[::-1]})
+        async with self.session.post("https://voxelfox.co.uk/discord/chatlog", json=data) as r:
+            return await r.text()
+
+    async def create_global_application_command(self, command: interactions.ApplicationCommand) -> None:
+        """
+        Add a global slash command for the bot.
+
+        Args:
+            command (interactions.ApplicationCommand): The command that you want to add.
+        """
+
+        application_id = await self.get_application_id()
+        r = RouteV8(
+            'POST', '/applications/{application_id}/commands',
+            application_id=application_id,
+        )
+        return await self.http.request(r, json=command.to_json())
+
+    async def create_guild_application_command(
+            self, guild: discord.Guild, command: interactions.ApplicationCommand) -> None:
+        """
+        Add a guild-level slash command for the bot.
+
+        Args:
+            guild (discord.Guild): The guild you want to add the command to.
+            command (interactions.ApplicationCommand): The command you want to add.
+        """
+
+        application_id = await self.get_application_id()
+        r = RouteV8(
+            'POST', '/applications/{application_id}/guilds/{guild_id}/commands',
+            application_id=application_id, guild_id=guild.id,
+        )
+        return await self.http.request(r, json=command.to_json())
+
+    async def bulk_create_global_application_commands(
+            self, commands: typing.List[interactions.ApplicationCommand]) -> None:
+        """
+        Bulk add a global slash command for the bot.
+
+        Args:
+            commands (typing.List[interactions.ApplicationCommand]): The list of commands
+                you want to add.
+        """
+
+        application_id = await self.get_application_id()
+        r = RouteV8(
+            'PUT', '/applications/{application_id}/commands',
+            application_id=application_id,
+        )
+        return await self.http.request(r, json=[i.to_json() for i in commands])
+
+    async def bulk_create_guild_application_commands(
+            self, guild: discord.Guild, commands: typing.List[interactions.ApplicationCommand]) -> None:
+        """
+        Bulk add a guild-level slash command for the bot.
+
+        Args:
+            guild (discord.Guild): The guild you want to add the command to.
+            commands (typing.List[interactions.ApplicationCommand]): The list of commands
+                you want to add.
+        """
+
+        application_id = await self.get_application_id()
+        r = RouteV8(
+            'PUT', '/applications/{application_id}/guilds/{guild_id}/commands',
+            application_id=application_id, guild_id=guild.id,
+        )
+        return await self.http.request(r, json=[i.to_json() for i in commands])
+
+    async def get_global_application_commands(self) -> typing.List[interactions.ApplicationCommand]:
+        """
+        Add a global slash command for the bot.
+
+        Returns:
+            typing.List[interactions.ApplicationCommand]: A list of commands that have been added.
+        """
+
+        application_id = await self.get_application_id()
+        r = RouteV8(
+            'GET', '/applications/{application_id}/commands',
+            application_id=application_id,
+        )
+        data = await self.http.request(r)
+        return [interactions.ApplicationCommand.from_data(i) for i in data]
+
+    async def get_guild_application_commands(self, guild: discord.Guild) -> typing.List[interactions.ApplicationCommand]:
+        """
+        Add a guild-level slash command for the bot.
+
+        Args:
+            guild (discord.Guild): The guild you want to get commands for.
+
+        Returns:
+            typing.List[interactions.ApplicationCommand]: A list of commands that have been added.
+        """
+
+        application_id = await self.get_application_id()
+        r = RouteV8(
+            'GET', '/applications/{application_id}/guilds/{guild_id}/commands',
+            application_id=application_id, guild_id=guild.id,
+        )
+        data = await self.http.request(r)
+        return [interactions.ApplicationCommand.from_data(i) for i in data]
+
+    async def delete_global_application_command(self, command: interactions.ApplicationCommand) -> None:
+        """
+        Remove a global slash command for the bot.
+
+        Args:
+            command (interactions.ApplicationCommand): The command that you want to remove.
+        """
+
+        application_id = await self.get_application_id()
+        r = RouteV8(
+            'DELETE', '/applications/{application_id}/commands/{command_id}',
+            application_id=application_id, command_id=command.id,
+        )
+        return await self.http.request(r)
+
+    async def delete_guild_application_command(
+            self, guild: discord.Guild, command: interactions.ApplicationCommand) -> None:
+        """
+        Remove a guild-level slash command for the bot.
+
+        Args:
+            guild (discord.Guild): The guild that you want to remove the command on.
+            command (interactions.ApplicationCommand): The command that you want to remove.
+        """
+
+        application_id = await self.get_application_id()
+        r = RouteV8(
+            'DELETE', '/applications/{application_id}/guilds/{guild_id}/commands/{command_id}',
+            application_id=application_id, guild_id=guild.id, command_id=command.id,
+        )
+        return await self.http.request(r)
+
+    async def get_context(self, message, *, cls=Context) -> 'discord.ext.commands.Context':
+        """
+        Create a new context object using the utils' Context.
+
+        :meta private:
+        """
+
+        return await super().get_context(message, cls=cls)
+
+    def get_context_message(self, channel, content, embed, *args, **kwargs):
+        """
+        A small base class for us to inherit from so that I don't need to change my
+        send method when it's overridden.
+
+        :meta private:
+        """
+
+        return content, embed
+
+    async def _send_button_message(
+            self, messageable, content: str = None, *, tts: bool = False,
+            embed: discord.Embed = None, file: discord.File = None,
+            files: typing.List[discord.File] = None, delete_after: float = None,
+            nonce: str = None, allowed_mentions: discord.AllowedMentions = None,
+            reference: discord.MessageReference = None, mention_author: bool = None,
+            components: MessageComponents = None,
+            ephemeral: bool = False, embeddify: bool = None,
+            image_url: bool = None, embeddify_file: bool = True):
+        """
+        An alternative send method so that we can add components to messages.
+
+        :meta private:
+        """
+
+        # Work out where we want to send to
+        channel = await messageable._get_channel()
+        content, embed = self.get_context_message(
+            channel, content=content, embed=embed, file=file, embeddify=embeddify,
+            image_url=image_url, embeddify_file=embeddify_file,
+        )
+        state = self._connection
+        lock = getattr(messageable, "_send_interaction_response_lock", asyncio.Lock())
+        await lock.acquire()
+
+        # Work out the main content
+        content = str(content) if content is not None else None
+        if embed is not None:
+            embed = embed.to_dict()
+
+        # Work out our allowed mentions
+        if allowed_mentions is not None:
+            if state.allowed_mentions is not None:
+                allowed_mentions = state.allowed_mentions.merge(allowed_mentions).to_dict()
+            else:
+                allowed_mentions = allowed_mentions.to_dict()
+        else:
+            allowed_mentions = state.allowed_mentions and state.allowed_mentions.to_dict()
+
+        # Work out our message references
+        if mention_author is not None:
+            allowed_mentions = allowed_mentions or AllowedMentions().to_dict()
+            allowed_mentions['replied_user'] = bool(mention_author)
+        if reference is not None:
+            try:
+                reference = reference.to_message_reference_dict()
+            except AttributeError:
+                raise InvalidArgument('reference parameter must be Message or MessageReference') from None
+
+        # Make sure the files are valid
+        if file is not None and files is not None:
+            raise InvalidArgument('cannot pass both file and files parameter to send()')
+        if file:
+            files = [file]
+        if files and len(files) > 10:
+            raise InvalidArgument('files parameter must be a list of up to 10 elements')
+        elif files and not all(isinstance(file, discord.File) for file in files):
+            raise InvalidArgument('files parameter must be a list of File')
+
+        # Fix up the components
+        if components:
+            if not isinstance(components, MessageComponents):
+                raise TypeError(f"Components kwarg must be of type {MessageComponents}")
+            components = components.to_dict()
+
+        # Get our playload data
+        if isinstance(channel, (list, tuple)):
+            if not messageable._sent_ack_response:  # Sent no responses - send an ack
+                await messageable.ack(ephemeral=ephemeral)
+            if messageable.ACK_IS_EDITABLE and messageable._sent_ack_response and not messageable._sent_message_response:  # Sent an ack that we should edit
+                r = discord.http.Route('PATCH', '/webhooks/{app_id}/{token}/messages/@original', app_id=channel[1], token=channel[2])
+            else:  # Sent an ack and a response, or sent an ack with no editable original message
+                r = discord.http.Route('POST', '/webhooks/{app_id}/{token}', app_id=channel[1], token=channel[2])
+        else:
+            r = discord.http.Route('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
+        payload = {}
+        if content:
+            payload['content'] = content
+        if tts:
+            payload['tts'] = True
+        if embed:
+            if r.path.startswith('/webhooks'):
+                payload['embeds'] = [embed]
+            else:
+                payload['embed'] = embed
+        if nonce:
+            payload['nonce'] = nonce
+        if allowed_mentions:
+            payload['allowed_mentions'] = allowed_mentions
+        if reference:
+            payload['message_reference'] = reference
+        if components:
+            payload['components'] = components
+        if ephemeral:
+            if not getattr(messageable, "CAN_SEND_EPHEMERAL", False):
+                raise ValueError("Cannot send ephemeral messages with type {0.__class__}".format(messageable))
+            payload['flags'] = discord.message.MessageFlags(ephemeral=True).value
+
+        # Send the HTTP requests, including files
+        if files is not None:
+            form = []
+            form.append({'name': 'payload_json', 'value': discord.utils.to_json(payload)})
+            try:
+                if len(files) == 1:
+                    file = files[0]
+                    form.append(
+                        {
+                            'name': 'file', 'value': file.fp,
+                            'filename': file.filename, 'content_type': 'application/octet-stream',
+                        }
+                    )
+                else:
+                    for index, file in enumerate(files):
+                        form.append(
+                            {
+                                'name': f'file{index}', 'value': file.fp,
+                                'filename': file.filename, 'content_type': 'application/octet-stream',
+                            }
+                        )
+                response_data = await self.http.request(r, form=form, files=files)
+            finally:
+                for f in files:
+                    f.close()
+        else:
+            # if getattr(messageable, "_sent_ack_response", True):
+            #     response_data = await self.http.request(r, json=payload)
+            # else:
+            #     response_data = await self.http.request(r, json={"type": 4, "data": payload})
+            response_data = await self.http.request(r, json=payload)
+        try:
+            messageable._sent_ack_response = True
+        except AttributeError:
+            pass
+        try:
+            messageable._sent_message_response = True
+        except AttributeError:
+            pass
+
+        # Make the message object
+        if isinstance(channel, (list, tuple)):
+            webhook = discord.Webhook.partial(channel[1], channel[2], adapter=discord.AsyncWebhookAdapter(session=self.session))
+            webhook._state = self._connection
+            partial_webhook_state = discord.webhook._PartialWebhookState(webhook._adapter, webhook, parent=webhook._state)
+            ret = discord.WebhookMessage(data=response_data, state=partial_webhook_state, channel=webhook.channel)
+        else:
+            ret = state.create_message(channel=channel, data=response_data)
+
+        # See if we want to delete the message
+        lock.release()
+        if delete_after is not None:
+            await ret.delete(delay=delete_after)
+
+        # Return the created message
+        return ret
+
+    async def _edit_button_message(self, message, **fields):
+        """
+        An alternative message edit method so we can edit components onto messages.
+
+        :meta private:
+        """
+
+        # Make the contet
+        try:
+            content = fields['content']
+        except KeyError:
+            pass
+        else:
+            if content is not None:
+                fields['content'] = str(content)
+
+        # Make the embeds
+        try:
+            embed = fields['embed']
+        except KeyError:
+            pass
+        else:
+            if embed is not None:
+                if isinstance(message, discord.WebhookMessage):
+                    fields['embeds'] = [embed.to_dict()]
+                else:
+                    fields['embed'] = embed.to_dict()
+
+        # Make the components
+        try:
+            components = fields['components']
+        except KeyError:
+            pass
+        else:
+            if components is not None:
+                if not isinstance(components, MessageComponents):
+                    raise TypeError(f"Components kwarg must be of type {MessageComponents}")
+                fields['components'] = components.to_dict()
+
+        # Make the supress flag
+        try:
+            suppress = fields.pop('suppress')
+        except KeyError:
+            pass
+        else:
+            flags = discord.message.MessageFlags._from_value(message.flags.value)
+            flags.suppress_embeds = suppress
+            fields['flags'] = flags.value
+
+        # See if we should delete the message
+        delete_after = fields.pop('delete_after', None)
+
+        # Make the allowed mentions
+        try:
+            allowed_mentions = fields.pop('allowed_mentions')
+        except KeyError:
+            if message._state.allowed_mentions is not None:
+                fields['allowed_mentions'] = message._state.allowed_mentions.to_dict()
+        else:
+            if allowed_mentions is not None:
+                if message._state.allowed_mentions is not None:
+                    allowed_mentions = message._state.allowed_mentions.merge(allowed_mentions).to_dict()
+                else:
+                    allowed_mentions = allowed_mentions.to_dict()
+                fields['allowed_mentions'] = allowed_mentions
+
+        # Make the attachments
+        try:
+            attachments = fields.pop('attachments')
+        except KeyError:
+            pass
+        else:
+            fields['attachments'] = [a.to_dict() for a in attachments]
+
+        # Edit the message
+        if fields:
+            if isinstance(message, discord.WebhookMessage):
+                r = discord.http.Route(
+                    'PATCH', '/webhooks/{app_id}/{token}/messages/{message_id}',
+                    app_id=message._state._webhook.id, token=message._state._webhook.token,
+                    message_id=message.id,
+                )
+                response_data = await self.http.request(r, json=fields)
+            else:
+                response_data = await message._state.http.edit_message(message.channel.id, message.id, **fields)
+            message._update(response_data)
+
+        # See if we should delete the message
+        if delete_after is not None:
+            await message.delete(delay=delete_after)
+
+    async def _wait_for_button_message(self, message, *, check=None, timeout=None):
+        """
+        Wait for an interaction on a button.
+
+        :meta private:
+        """
+
+        message_check = lambda payload: payload.message.id == message.id
+        if check:
+            original_check = check
+            check = lambda payload: original_check(payload) and message_check(payload)
+        else:
+            check = message_check
+        return await self.wait_for("button_click", check=check, timeout=timeout)
+
+
+class Bot(MinimalBot):
+    """
+    A bot class that inherits from :class:`voxelbotutils.MinimalBot`, detailing more VoxelBotUtils
     functions, as well as changing some of the default Discord.py library behaviour.
 
     Attributes:
@@ -199,34 +713,6 @@ class Bot(commands.AutoShardedBot):
         # Here's the storage for cached stuff
         self.guild_settings = collections.defaultdict(lambda: copy.deepcopy(self.DEFAULT_GUILD_SETTINGS))
         self.user_settings = collections.defaultdict(lambda: copy.deepcopy(self.DEFAULT_USER_SETTINGS))
-
-        # Mess with the default D.py message send and edit methods
-        async def send_button_msg_prop(messagable, *args, **kwargs) -> discord.Message:
-            return await self._send_button_message(messagable, *args, **kwargs)
-
-        async def add_reactions_prop(message, *reactions):
-            for r in reactions:
-                await message.add_reaction(r)
-
-        async def edit_button_msg_prop(*args, **kwargs):
-            return await self._edit_button_message(*args, **kwargs)
-
-        async def wait_for_button_prop(*args, **kwargs):
-            return await self._wait_for_button_message(*args, **kwargs)
-
-        async def clear_components_msg_prop(message):
-            return await message.edit(components=None)
-
-        Messageable.send = send_button_msg_prop
-        discord.Message.add_reactions = add_reactions_prop
-        discord.Message.edit = edit_button_msg_prop
-        discord.Message.wait_for_button_click = wait_for_button_prop
-        discord.Message.clear_components = clear_components_msg_prop
-        discord.WebhookMessage.edit = edit_button_msg_prop
-        discord.WebhookMessage.wait_for_button_click = wait_for_button_prop
-        discord.WebhookMessage.clear_components = clear_components_msg_prop
-        discord.message.MessageFlags.ephemeral = discord.flags.flag_value(lambda _: 64)
-        discord.message.MessageFlags.VALID_FLAGS.update({"ephemeral": 64})
 
     async def startup(self):
         """
@@ -613,200 +1099,6 @@ class Bot(commands.AutoShardedBot):
             return v
         return v[0]
 
-    async def create_message_log(
-            self, messages: typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]) -> str:
-        """
-        Creates and returns an HTML log of all of the messages provided. This is an API method, and may
-        raise an asyncio HTTP error.
-
-        Args:
-            messages (typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]):
-                The messages you want to create into a log.
-
-        Returns:
-            str: The HTML for a log file.
-        """
-
-        # Let's flatten the messages if we need to
-        if isinstance(messages, discord.iterators.HistoryIterator):
-            messages = await messages.flatten()
-
-        # Create the data we're gonna send
-        data = {
-            "channel_name": messages[0].channel.name,
-            "category_name": messages[0].channel.category.name,
-            "guild_name": messages[0].guild.name,
-            "guild_icon_url": str(messages[0].guild.icon_url),
-        }
-        data_authors = {}
-        data_messages = []
-
-        # Get the data from the server
-        for message in messages:
-            for user in message.mentions + [message.author]:
-                data_authors[user.id] = {
-                    "username": user.name,
-                    "discriminator": user.discriminator,
-                    "avatar_url": str(user.avatar_url),
-                    "bot": user.bot,
-                    "display_name": user.display_name,
-                    "color": user.colour.value,
-                }
-            message_data = {
-                "id": message.id,
-                "content": message.content,
-                "author_id": message.author.id,
-                "timestamp": int(message.created_at.timestamp()),
-                "attachments": [str(i.url) for i in message.attachments],
-            }
-            embeds = []
-            for i in message.embeds:
-                embed_data = i.to_dict()
-                if i.timestamp:
-                    embed_data.update({'timestamp': i.timestamp.timestamp()})
-                embeds.append(embed_data)
-            message_data.update({'embeds': embeds})
-            data_messages.append(message_data)
-
-        # Send data to the API
-        data.update({"users": data_authors, "messages": data_messages[::-1]})
-        async with self.session.post("https://voxelfox.co.uk/discord/chatlog", json=data) as r:
-            return await r.text()
-
-    async def create_global_application_command(self, command: interactions.ApplicationCommand) -> None:
-        """
-        Add a global slash command for the bot.
-
-        Args:
-            command (interactions.ApplicationCommand): The command that you want to add.
-        """
-
-        application_id = await self.get_application_id()
-        r = RouteV8(
-            'POST', '/applications/{application_id}/commands',
-            application_id=application_id,
-        )
-        return await self.http.request(r, json=command.to_json())
-
-    async def create_guild_application_command(
-            self, guild: discord.Guild, command: interactions.ApplicationCommand) -> None:
-        """
-        Add a guild-level slash command for the bot.
-
-        Args:
-            guild (discord.Guild): The guild you want to add the command to.
-            command (interactions.ApplicationCommand): The command you want to add.
-        """
-
-        application_id = await self.get_application_id()
-        r = RouteV8(
-            'POST', '/applications/{application_id}/guilds/{guild_id}/commands',
-            application_id=application_id, guild_id=guild.id,
-        )
-        return await self.http.request(r, json=command.to_json())
-
-    async def bulk_create_global_application_commands(
-            self, commands: typing.List[interactions.ApplicationCommand]) -> None:
-        """
-        Bulk add a global slash command for the bot.
-
-        Args:
-            commands (typing.List[interactions.ApplicationCommand]): The list of commands
-                you want to add.
-        """
-
-        application_id = await self.get_application_id()
-        r = RouteV8(
-            'PUT', '/applications/{application_id}/commands',
-            application_id=application_id,
-        )
-        return await self.http.request(r, json=[i.to_json() for i in commands])
-
-    async def bulk_create_guild_application_commands(
-            self, guild: discord.Guild, commands: typing.List[interactions.ApplicationCommand]) -> None:
-        """
-        Bulk add a guild-level slash command for the bot.
-
-        Args:
-            guild (discord.Guild): The guild you want to add the command to.
-            commands (typing.List[interactions.ApplicationCommand]): The list of commands
-                you want to add.
-        """
-
-        application_id = await self.get_application_id()
-        r = RouteV8(
-            'PUT', '/applications/{application_id}/guilds/{guild_id}/commands',
-            application_id=application_id, guild_id=guild.id,
-        )
-        return await self.http.request(r, json=[i.to_json() for i in commands])
-
-    async def get_global_application_commands(self) -> typing.List[interactions.ApplicationCommand]:
-        """
-        Add a global slash command for the bot.
-
-        Returns:
-            typing.List[interactions.ApplicationCommand]: A list of commands that have been added.
-        """
-
-        application_id = await self.get_application_id()
-        r = RouteV8(
-            'GET', '/applications/{application_id}/commands',
-            application_id=application_id,
-        )
-        data = await self.http.request(r)
-        return [interactions.ApplicationCommand.from_data(i) for i in data]
-
-    async def get_guild_application_commands(self, guild: discord.Guild) -> typing.List[interactions.ApplicationCommand]:
-        """
-        Add a guild-level slash command for the bot.
-
-        Args:
-            guild (discord.Guild): The guild you want to get commands for.
-
-        Returns:
-            typing.List[interactions.ApplicationCommand]: A list of commands that have been added.
-        """
-
-        application_id = await self.get_application_id()
-        r = RouteV8(
-            'GET', '/applications/{application_id}/guilds/{guild_id}/commands',
-            application_id=application_id, guild_id=guild.id,
-        )
-        data = await self.http.request(r)
-        return [interactions.ApplicationCommand.from_data(i) for i in data]
-
-    async def delete_global_application_command(self, command: interactions.ApplicationCommand) -> None:
-        """
-        Remove a global slash command for the bot.
-
-        Args:
-            command (interactions.ApplicationCommand): The command that you want to remove.
-        """
-
-        application_id = await self.get_application_id()
-        r = RouteV8(
-            'DELETE', '/applications/{application_id}/commands/{command_id}',
-            application_id=application_id, command_id=command.id,
-        )
-        return await self.http.request(r)
-
-    async def delete_guild_application_command(
-            self, guild: discord.Guild, command: interactions.ApplicationCommand) -> None:
-        """
-        Remove a guild-level slash command for the bot.
-
-        Args:
-            guild (discord.Guild): The guild that you want to remove the command on.
-            command (interactions.ApplicationCommand): The command that you want to remove.
-        """
-
-        application_id = await self.get_application_id()
-        r = RouteV8(
-            'DELETE', '/applications/{application_id}/guilds/{guild_id}/commands/{command_id}',
-            application_id=application_id, guild_id=guild.id, command_id=command.id,
-        )
-        return await self.http.request(r)
-
     @property
     def owner_ids(self) -> list:
         return self.config['owners']
@@ -821,15 +1113,6 @@ class Bot(commands.AutoShardedBot):
             return self.config['embed']['enabled']
         except Exception:
             return False
-
-    async def get_context(self, message, *, cls=Context) -> 'discord.ext.commands.Context':
-        """
-        Create a new context object using the utils' Context.
-
-        :meta private:
-        """
-
-        return await super().get_context(message, cls=cls)
 
     def get_extensions(self) -> typing.List[str]:
         """
@@ -1060,264 +1343,3 @@ class Bot(commands.AutoShardedBot):
 
         # Return information
         return content, embed
-
-    async def _send_button_message(
-            self, messageable, content: str = None, *, tts: bool = False,
-            embed: discord.Embed = None, file: discord.File = None,
-            files: typing.List[discord.File] = None, delete_after: float = None,
-            nonce: str = None, allowed_mentions: discord.AllowedMentions = None,
-            reference: discord.MessageReference = None, mention_author: bool = None,
-            components: MessageComponents = None,
-            ephemeral: bool = False, embeddify: bool = None,
-            image_url: bool = None, embeddify_file: bool = True):
-        """
-        An alternative send method so that we can add components to messages.
-
-        :meta private:
-        """
-
-        # Work out where we want to send to
-        channel = await messageable._get_channel()
-        content, embed = self.get_context_message(
-            channel, content=content, embed=embed, file=file, embeddify=embeddify,
-            image_url=image_url, embeddify_file=embeddify_file,
-        )
-        state = self._connection
-        lock = getattr(messageable, "_send_interaction_response_lock", asyncio.Lock())
-        await lock.acquire()
-
-        # Work out the main content
-        content = str(content) if content is not None else None
-        if embed is not None:
-            embed = embed.to_dict()
-
-        # Work out our allowed mentions
-        if allowed_mentions is not None:
-            if state.allowed_mentions is not None:
-                allowed_mentions = state.allowed_mentions.merge(allowed_mentions).to_dict()
-            else:
-                allowed_mentions = allowed_mentions.to_dict()
-        else:
-            allowed_mentions = state.allowed_mentions and state.allowed_mentions.to_dict()
-
-        # Work out our message references
-        if mention_author is not None:
-            allowed_mentions = allowed_mentions or AllowedMentions().to_dict()
-            allowed_mentions['replied_user'] = bool(mention_author)
-        if reference is not None:
-            try:
-                reference = reference.to_message_reference_dict()
-            except AttributeError:
-                raise InvalidArgument('reference parameter must be Message or MessageReference') from None
-
-        # Make sure the files are valid
-        if file is not None and files is not None:
-            raise InvalidArgument('cannot pass both file and files parameter to send()')
-        if file:
-            files = [file]
-        if files and len(files) > 10:
-            raise InvalidArgument('files parameter must be a list of up to 10 elements')
-        elif files and not all(isinstance(file, discord.File) for file in files):
-            raise InvalidArgument('files parameter must be a list of File')
-
-        # Fix up the components
-        if components:
-            if not isinstance(components, MessageComponents):
-                raise TypeError(f"Components kwarg must be of type {MessageComponents}")
-            components = components.to_dict()
-
-        # Get our playload data
-        if isinstance(channel, (list, tuple)):
-            if not messageable._sent_ack_response:  # Sent no responses - send an ack
-                await messageable.ack(ephemeral=ephemeral)
-            if messageable.ACK_IS_EDITABLE and messageable._sent_ack_response and not messageable._sent_message_response:  # Sent an ack that we should edit
-                r = discord.http.Route('PATCH', '/webhooks/{app_id}/{token}/messages/@original', app_id=channel[1], token=channel[2])
-            else:  # Sent an ack and a response, or sent an ack with no editable original message
-                r = discord.http.Route('POST', '/webhooks/{app_id}/{token}', app_id=channel[1], token=channel[2])
-        else:
-            r = discord.http.Route('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
-        payload = {}
-        if content:
-            payload['content'] = content
-        if tts:
-            payload['tts'] = True
-        if embed:
-            if r.path.startswith('/webhooks'):
-                payload['embeds'] = [embed]
-            else:
-                payload['embed'] = embed
-        if nonce:
-            payload['nonce'] = nonce
-        if allowed_mentions:
-            payload['allowed_mentions'] = allowed_mentions
-        if reference:
-            payload['message_reference'] = reference
-        if components:
-            payload['components'] = components
-        if ephemeral:
-            if not getattr(messageable, "CAN_SEND_EPHEMERAL", False):
-                raise ValueError("Cannot send ephemeral messages with type {0.__class__}".format(messageable))
-            payload['flags'] = discord.message.MessageFlags(ephemeral=True).value
-
-        # Send the HTTP requests, including files
-        if files is not None:
-            form = []
-            form.append({'name': 'payload_json', 'value': discord.utils.to_json(payload)})
-            try:
-                if len(files) == 1:
-                    file = files[0]
-                    form.append(
-                        {
-                            'name': 'file', 'value': file.fp,
-                            'filename': file.filename, 'content_type': 'application/octet-stream',
-                        }
-                    )
-                else:
-                    for index, file in enumerate(files):
-                        form.append(
-                            {
-                                'name': f'file{index}', 'value': file.fp,
-                                'filename': file.filename, 'content_type': 'application/octet-stream',
-                            }
-                        )
-                response_data = await self.http.request(r, form=form, files=files)
-            finally:
-                for f in files:
-                    f.close()
-        else:
-            # if getattr(messageable, "_sent_ack_response", True):
-            #     response_data = await self.http.request(r, json=payload)
-            # else:
-            #     response_data = await self.http.request(r, json={"type": 4, "data": payload})
-            response_data = await self.http.request(r, json=payload)
-        try:
-            messageable._sent_ack_response = True
-        except AttributeError:
-            pass
-        try:
-            messageable._sent_message_response = True
-        except AttributeError:
-            pass
-
-        # Make the message object
-        if isinstance(channel, (list, tuple)):
-            webhook = discord.Webhook.partial(channel[1], channel[2], adapter=discord.AsyncWebhookAdapter(session=self.session))
-            webhook._state = self._connection
-            partial_webhook_state = discord.webhook._PartialWebhookState(webhook._adapter, webhook, parent=webhook._state)
-            ret = discord.WebhookMessage(data=response_data, state=partial_webhook_state, channel=webhook.channel)
-        else:
-            ret = state.create_message(channel=channel, data=response_data)
-
-        # See if we want to delete the message
-        lock.release()
-        if delete_after is not None:
-            await ret.delete(delay=delete_after)
-
-        # Return the created message
-        return ret
-
-    async def _edit_button_message(self, message, **fields):
-        """
-        An alternative message edit method so we can edit components onto messages.
-
-        :meta private:
-        """
-
-        # Make the contet
-        try:
-            content = fields['content']
-        except KeyError:
-            pass
-        else:
-            if content is not None:
-                fields['content'] = str(content)
-
-        # Make the embeds
-        try:
-            embed = fields['embed']
-        except KeyError:
-            pass
-        else:
-            if embed is not None:
-                if isinstance(message, discord.WebhookMessage):
-                    fields['embeds'] = [embed.to_dict()]
-                else:
-                    fields['embed'] = embed.to_dict()
-
-        # Make the components
-        try:
-            components = fields['components']
-        except KeyError:
-            pass
-        else:
-            if components is not None:
-                if not isinstance(components, MessageComponents):
-                    raise TypeError(f"Components kwarg must be of type {MessageComponents}")
-                fields['components'] = components.to_dict()
-
-        # Make the supress flag
-        try:
-            suppress = fields.pop('suppress')
-        except KeyError:
-            pass
-        else:
-            flags = discord.message.MessageFlags._from_value(message.flags.value)
-            flags.suppress_embeds = suppress
-            fields['flags'] = flags.value
-
-        # See if we should delete the message
-        delete_after = fields.pop('delete_after', None)
-
-        # Make the allowed mentions
-        try:
-            allowed_mentions = fields.pop('allowed_mentions')
-        except KeyError:
-            if message._state.allowed_mentions is not None:
-                fields['allowed_mentions'] = message._state.allowed_mentions.to_dict()
-        else:
-            if allowed_mentions is not None:
-                if message._state.allowed_mentions is not None:
-                    allowed_mentions = message._state.allowed_mentions.merge(allowed_mentions).to_dict()
-                else:
-                    allowed_mentions = allowed_mentions.to_dict()
-                fields['allowed_mentions'] = allowed_mentions
-
-        # Make the attachments
-        try:
-            attachments = fields.pop('attachments')
-        except KeyError:
-            pass
-        else:
-            fields['attachments'] = [a.to_dict() for a in attachments]
-
-        # Edit the message
-        if fields:
-            if isinstance(message, discord.WebhookMessage):
-                r = discord.http.Route(
-                    'PATCH', '/webhooks/{app_id}/{token}/messages/{message_id}',
-                    app_id=message._state._webhook.id, token=message._state._webhook.token,
-                    message_id=message.id,
-                )
-                response_data = await self.http.request(r, json=fields)
-            else:
-                response_data = await message._state.http.edit_message(message.channel.id, message.id, **fields)
-            message._update(response_data)
-
-        # See if we should delete the message
-        if delete_after is not None:
-            await message.delete(delay=delete_after)
-
-    async def _wait_for_button_message(self, message, *, check=None, timeout=None):
-        """
-        Wait for an interaction on a button.
-
-        :meta private:
-        """
-
-        message_check = lambda payload: payload.message.id == message.id
-        if check:
-            original_check = check
-            check = lambda payload: original_check(payload) and message_check(payload)
-        else:
-            check = message_check
-        return await self.wait_for("button_click", check=check, timeout=timeout)

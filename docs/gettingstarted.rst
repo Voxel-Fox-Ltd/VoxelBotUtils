@@ -72,7 +72,9 @@ Migrating
 
 If you're reading this, you *probably* already have a bot that you want to get using with VoxelBotUtils. Fortunately, migrating is pretty easy. Most base Discord.py classes work by default without alteration, and as such you can just run your existing bot with a VBU config file, and that can be that.
 
-If you really want to get things going, you can change all of your :class:`@commands.command()` lines to :class:`@voxelbotutils.command()<voxelbotutils.Command>`, and any :class:`class MyCog(commands.Cog)` to :class:`class MyCog(voxelbotutils.Cog)<voxelbotutils.Cog>`, and everything else should pretty much handle itself.
+If you really want to get things going, you can change all of your :code:`@commands.command()` lines to :code:`@voxelbotutils.command()<voxelbotutils.Command>`, and any :code:`class MyCog(commands.Cog)` to :code:`class MyCog(voxelbotutils.Cog)<voxelbotutils.Cog>`, and everything else should pretty much handle itself.
+
+Alternatively, some people want to make as few code changes as possible, using only the VoxelBotUtils utilities. That's available too! If you change your bot instance in your current Discord.py code to use :class:`voxelbotutils.MinimalBot` then everything else is drag and drop as usual. This change is necessary to make use of the changes to Discord.py's :class:`discord.abc.Messageable` (which include buttons and ephemeral messages). If there are certain extensions that you wish to load yourself from VoxelBotUtils, you can do that with :code:`bot.load_extension("voxelbotutils.cogs.[NAME]")`.
 
 Getting Started With Websites
 -------------------------------------
