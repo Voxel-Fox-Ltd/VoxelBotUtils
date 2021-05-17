@@ -59,6 +59,7 @@ class Paginator(object):
             remove_reaction (bool): If True, the paginator will remove a reaction whenever it's added, rather than using
                 the reaction added event and the reaction removed event in the same way. This improves user experience
                 but means slightly more API calls.
+                If the bot doesn't have the manage_messages permission, it will default to the normal behaviour.
         """
         self.data = data
         self.per_page = per_page
@@ -167,10 +168,11 @@ class Paginator(object):
 
             # remove the reaction if applicable
             if self.remove_reaction and payload.event_type == "REACTION_ADD":
-                try:
-                    await ctx.message.remove_reaction(payload.emoji, ctx.author)
-                except discord.Forbidden:
-                    pass
+                if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
+                    try:
+                        await ctx.message.remove_reaction(payload.emoji, ctx.author)
+                    except discord.Forbidden:
+                        pass
 
             # Change the page number based on the reaction
             before_page = self.current_page
