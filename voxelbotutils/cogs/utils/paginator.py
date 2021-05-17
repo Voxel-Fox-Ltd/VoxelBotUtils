@@ -41,7 +41,6 @@ class Paginator(object):
             formatter: typing.Callable[
                 ['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]
             ] = None,
-            # todo: rename?
             remove_reaction: bool = False
     ):
         """
@@ -57,7 +56,9 @@ class Paginator(object):
             formatter (typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]], optional): A
                 function taking the paginator instance and a list of things to display, returning a dictionary of kwargs that get passed
                 directly into a :func:`discord.Message.edit`.
-            remove_reaction (bool): Whether to remove the reaction when a reaction is added.
+            remove_reaction (bool): If True, the paginator will remove a reaction whenever it's added, rather than using
+                the reaction added event and the reaction removed event in the same way. This improves user experience
+                but means slightly more API calls.
         """
         self.data = data
         self.per_page = per_page
