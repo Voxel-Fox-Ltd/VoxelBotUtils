@@ -167,7 +167,7 @@ class Paginator(object):
             # remove the reaction if applicable
             if self.remove_reaction and payload.event_type == "REACTION_ADD":
                 try:
-                    ctx.message.remove_reaction(payload.emoji, ctx.author)
+                    await ctx.message.remove_reaction(payload.emoji, ctx.author)
                 except discord.Forbidden:
                     pass
 
