@@ -939,15 +939,6 @@ class Bot(commands.AutoShardedBot):
     async def start(self, token: str = None, *args, **kwargs):
         """:meta private:"""
 
-        # Get the recommended shard count for this bot
-        recommended_shard_count, _ = await self.http.get_bot_gateway()
-        self.logger.info(f"Recommended shard count for this bot: {recommended_shard_count}")
-        if recommended_shard_count / 2 > self.shard_count:
-            self.logger.warning((
-                f"The shard count for this bot ({self.shard_count}) is significantly "
-                f"lower than the recommended number {recommended_shard_count}."
-            ))
-
         # See if we should run the startup method
         if self.config.get('database', {}).get('enabled', False):
             self.logger.info("Running startup method")
@@ -972,6 +963,15 @@ class Bot(commands.AutoShardedBot):
         self.logger.info("Setting activity to default")
         await self.set_default_presence()
         self.logger.info('Bot loaded.')
+
+        # Get the recommended shard count for this bot
+        recommended_shard_count, _ = await self.http.get_bot_gateway()
+        self.logger.info(f"Recommended shard count for this bot: {recommended_shard_count}")
+        if recommended_shard_count / 2 > self.shard_count:
+            self.logger.warning((
+                f"The shard count for this bot ({self.shard_count}) is significantly "
+                f"lower than the recommended number {recommended_shard_count}."
+            ))
 
     async def invoke(self, ctx):
         """:meta private:"""
