@@ -24,9 +24,9 @@ class ComponentInteractionPayload(InteractionMessageable):
         # Reconstruct the component that was clicked
         clicked_button_id = data['data']['custom_id']
         clicked_button_payload = None
-        for action_row in data['message']['components']:
-            for component in action_row['components']:
-                if component['custom_id'] == clicked_button_id:
+        for action_row in data['message'].get('components', list()):
+            for component in action_row.get('components', list()):
+                if component.get('custom_id', None) == clicked_button_id:
                     clicked_button_payload = component
                     break
             if clicked_button_payload is not None:
@@ -37,6 +37,8 @@ class ComponentInteractionPayload(InteractionMessageable):
         # I'm pretty sure that I need only reconstruct the custom ID or value?? depending
         # on what the other components use, but this works for now, while Buttons are the
         # only interaction.
+        if clicked_button_payload is None:
+            clicked_button_payload = {"custom_id": clicked_button_id}
         clicked_button_object = Button.from_dict(clicked_button_payload)
 
         # Make the response
