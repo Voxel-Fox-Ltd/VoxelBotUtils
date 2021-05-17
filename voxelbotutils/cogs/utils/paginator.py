@@ -38,7 +38,12 @@ class Paginator(object):
     def __init__(
             self, data: typing.Union[typing.Sequence, typing.Generator, typing.Callable[[int], typing.Any]], *,
             per_page: int = 10,
-            formatter: typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]] = None):
+            formatter: typing.Callable[
+                ['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]
+            ] = None,
+            # todo: rename?
+            remove_reaction: bool = False
+    ):
         """
         Args:
             data (typing.Union[typing.Sequence, typing.Generator, typing.Callable[[int], typing.Any]]): The
@@ -52,12 +57,14 @@ class Paginator(object):
             formatter (typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]], optional): A
                 function taking the paginator instance and a list of things to display, returning a dictionary of kwargs that get passed
                 directly into a :func:`discord.Message.edit`.
+            remove_reaction (bool): Whether to remove the reaction when a reaction is added.
         """
         self.data = data
         self.per_page = per_page
         self.formatter = formatter
         if self.formatter is None:
             self.formatter = self.default_list_formatter
+        self.remove_reaction = remove_reaction
         self.current_page = None
         self._page_cache = {}
 
@@ -113,7 +120,6 @@ class Paginator(object):
         # Loop the reaction handler
         last_payload = None
         while True:
-
             # Edit the message with the relevant data
             try:
                 items = await self.get_page(self.current_page)
@@ -157,6 +163,13 @@ class Paginator(object):
             payload = done.pop().result()
             for future in pending:
                 future.cancel()
+
+            # remove the reaction if applicable
+            if self.remove_reaction and payload.event_type == "REACTION_ADD":
+                try:
+                    ctx.message.remove_reaction(payload.emoji, ctx.author)
+                except discord.Forbidden:
+                    pass
 
             # Change the page number based on the reaction
             before_page = self.current_page
