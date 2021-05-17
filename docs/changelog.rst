@@ -24,6 +24,7 @@ Bugs Fixed
 * Fix typo when creating website config.
 * Fix the sharding information for when no arguments are set.
 * Fix access token refreshing in :class:`voxelbotutils.UpgradeChat`.
+* Fix button clicks not working with ephemeral messages.
 
 0.3.1
 --------------------------------------
