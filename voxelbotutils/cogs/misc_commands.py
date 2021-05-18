@@ -44,7 +44,7 @@ class MiscCommands(utils.Cog):
         Gives you information on how to use the bot and what the bot is about.
         """
 
-        await ctx.send(f"<{self.bot.config['command_data']['info']}>", allowed_mentions=discord.AllowedMentions.none())
+        await ctx.send(f"{self.bot.config['command_data']['info']}", allowed_mentions=discord.AllowedMentions.none())
 
     @utils.command(hidden=True, add_slash_command=False)
     @commands.has_permissions(manage_messages=True)
