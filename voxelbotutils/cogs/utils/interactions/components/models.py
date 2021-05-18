@@ -1,4 +1,5 @@
 import typing
+import json
 
 
 class BaseComponent(object):
@@ -22,6 +23,11 @@ class BaseComponent(object):
         if not isinstance(other, BaseComponent):
             raise TypeError("Can't compare {} and {}".format(self.__class__, other.__class__))
         return self.to_dict() == other.to_dict()
+
+    def __hash__(self):
+        """:meta private:"""
+
+        return hash(json.dumps(self.to_dict(), sort_keys=True))
 
 
 class DisableableComponent(BaseComponent):
@@ -56,6 +62,26 @@ class ComponentHolder(BaseComponent):
         """
 
         self.components = list(components)
+
+    def add_component(self, component: BaseComponent):
+        """
+        Adds a component to this holder.
+
+        Args:
+            component (BaseComponent): The component that you want to add.
+        """
+
+        self.components.append(component)
+
+    def remove_component(self, component: BaseComponent):
+        """
+        Removes a component from this holder.
+
+        Args:
+            component (BaseComponent): The component that you want to remove.
+        """
+
+        self.components.remove(component)
 
     def disable_components(self) -> None:
         """
@@ -103,15 +129,6 @@ class ComponentHolder(BaseComponent):
         return None
 
 
-class MessageComponents(ComponentHolder):
-    """
-    A set of components that can be added to a message.
-    """
-
-    def to_dict(self):
-        return [i.to_dict() for i in self.components]
-
-
 class ActionRow(ComponentHolder):
     """
     The main UI component for adding and ordering components on Discord
@@ -125,3 +142,48 @@ class ActionRow(ComponentHolder):
             "type": self.TYPE,
             "components": [i.to_dict() for i in self.components],
         }
+
+
+class MessageComponents(ComponentHolder):
+    """
+    A set of components that can be added to a message.
+    """
+
+    def to_dict(self):
+        return [i.to_dict() for i in self.components]
+
+    @classmethod
+    def boolean_buttons(cls, yes_id: str = None, no_id: str = None):
+        """
+        Return a set of message components with yes/no buttons, ready for use. If provided, the given IDs
+        will be used for the buttons. If not, the button custom IDs will be set to the strings
+        "YES" and "NO".
+
+        Args:
+            yes_id (str, optional): The custom ID of the yes button.
+            no_id (str, optional): The custom ID of the no button.
+        """
+
+        from .buttons import Button, ButtonStyle
+        return cls(
+            ActionRow(
+                utils.Button("Yes", style=utils.ButtonStyle.SUCCESS, custom_id=yes_id or "YES"),
+                utils.Button("No", style=utils.ButtonStyle.DANGER, custom_id=no_id or "NO"),
+            ),
+        )
+
+    @classmethod
+    def add_buttons_with_rows(*buttons: BaseComponent):
+        """
+        Adds a list of buttons, breaking into a new :class:`ActionRow` automatically when it contains 5
+        buttons. This does *not* check that you've added fewer than 5 rows.
+
+        Args:
+            *buttons (BaseComponent): The buttons that you want to have added.
+        """
+
+        v = cls()
+        while buttons:
+            v.add_component(ActionRow(*buttons[:5]))
+            buttons = buttons[:5]
+        return v
