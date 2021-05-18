@@ -12,6 +12,7 @@ New Features
 * Added :class:`voxelbotutils.MinimalBot`.
 * The bot's startup logger line now includes the recommended number of shards that you should launch with.
 * Added the :func:`voxelbotutils.web.is_logged_in` method.
+* Add :code:`version` command to the CLI args.
 
 Changed Features
 """"""""""""""""""""""""

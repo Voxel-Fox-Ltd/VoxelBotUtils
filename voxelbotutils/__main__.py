@@ -38,13 +38,14 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     # LOGLEVEL_CHOICES.extend([i.lower() for i in LOGLEVEL_CHOICES])
 
     # Set up our parsers and subparsers
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(prog="vbu")
     runner_subparser = parser.add_subparsers(dest="subcommand")
     runner_subparser.required = True
     bot_subparser = runner_subparser.add_parser("run-bot")
     website_subparser = runner_subparser.add_parser("run-website")
     create_config_subparser = runner_subparser.add_parser("create-config")
     check_config_subparser = runner_subparser.add_parser("check-config")
+    runner_subparser.add_parser("version")
 
     # Set up the bot arguments
     bot_subparser.add_argument("bot_directory", nargs="?", default=".", help="The directory containing a config and a cogs folder for the bot to run.")
@@ -159,6 +160,12 @@ def main():
             exit(0)
         for key, value in base_config_file.items():
             check_config_value([key], value, compare_config_file.get(key))
+        exit(1)
+
+    # If we just want the version
+    elif args.subcommand == "version":
+        from . import __version__
+        print(f"VoxelBotUtils v{__version__}")
         exit(1)
 
     # Run things
