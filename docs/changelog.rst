@@ -20,6 +20,9 @@ Changed Features
 * If embeds are enabled, the footer of embeds will be changed to "currently live on Twitch" when the stream presence is set.
 * If no permissions are given for :func:`voxelbotutils.Bot.get_invite_link`, the :attr:`bot's config<BotConfig.oauth.permissions>` will be used.
 * Add :code:`remove_reaction` param to the :func:`voxelbotutils.Paginator.start` method.
+* Made all :class:`voxelbotutils.Button` parameters into kwargs, *apart from* name and custom ID, which are positional.
+* Add :func:`voxelbotutils.ComponentHolder.add_component` and :func:`voxelbotutils.ComponentHolder.remove_component` methods.
+* Add :func:`voxelbotutils.MessageComponents.boolean_buttons` :func:`voxelbotutils.MessageComponents.add_buttons_with_rows` methods.
 
 Bugs Fixed
 """"""""""""""""""""""""
