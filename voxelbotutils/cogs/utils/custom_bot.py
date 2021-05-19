@@ -529,6 +529,8 @@ class MinimalBot(commands.AutoShardedBot):
                 if not isinstance(components, MessageComponents):
                     raise TypeError(f"Components kwarg must be of type {MessageComponents}")
                 fields['components'] = components.to_dict()
+            else:
+                fields['components'] = []
 
         # Make the supress flag
         try:
