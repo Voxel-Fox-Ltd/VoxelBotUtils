@@ -515,6 +515,7 @@ class MinimalBot(commands.AutoShardedBot):
             if embed is not None:
                 if isinstance(message, discord.WebhookMessage):
                     fields['embeds'] = [embed.to_dict()]
+                    fields.pop('embed')
                 else:
                     fields['embed'] = embed.to_dict()
 
