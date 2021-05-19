@@ -167,8 +167,8 @@ class MessageComponents(ComponentHolder):
         from .buttons import Button, ButtonStyle
         return cls(
             ActionRow(
-                utils.Button("Yes", style=utils.ButtonStyle.SUCCESS, custom_id=yes_id or "YES"),
-                utils.Button("No", style=utils.ButtonStyle.DANGER, custom_id=no_id or "NO"),
+                Button("Yes", style=ButtonStyle.SUCCESS, custom_id=yes_id or "YES"),
+                Button("No", style=ButtonStyle.DANGER, custom_id=no_id or "NO"),
             ),
         )
 
