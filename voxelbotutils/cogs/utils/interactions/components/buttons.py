@@ -38,7 +38,7 @@ class Button(DisableableComponent):
     TYPE = 2
 
     def __init__(
-            self, label: str, style: ButtonStyle = ButtonStyle.PRIMARY, custom_id: str = None,
+            self, label: str, custom_id: str = None, *, style: ButtonStyle = ButtonStyle.PRIMARY,
             emoji: typing.Union[str, discord.PartialEmoji] = None,
             url: str = None, disabled: bool = False):
         """
