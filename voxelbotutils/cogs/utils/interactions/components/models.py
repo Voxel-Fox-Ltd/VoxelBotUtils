@@ -72,6 +72,7 @@ class ComponentHolder(BaseComponent):
         """
 
         self.components.append(component)
+        return self
 
     def remove_component(self, component: BaseComponent):
         """
@@ -82,6 +83,7 @@ class ComponentHolder(BaseComponent):
         """
 
         self.components.remove(component)
+        return self
 
     def disable_components(self) -> None:
         """
@@ -94,6 +96,7 @@ class ComponentHolder(BaseComponent):
                 i.disable_components()
             elif isinstance(i, DisableableComponent):
                 i.disable()
+        return self
 
     def enable_components(self) -> None:
         """
@@ -106,6 +109,7 @@ class ComponentHolder(BaseComponent):
                 i.enable_components()
             elif isinstance(i, DisableableComponent):
                 i.enable()
+        return self
 
     def get_component(self, custom_id: str) -> typing.Optional[BaseComponent]:
         """
