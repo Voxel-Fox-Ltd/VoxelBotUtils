@@ -497,7 +497,7 @@ class MinimalBot(commands.AutoShardedBot):
         :meta private:
         """
 
-        # Make the contet
+        # Make the content
         try:
             content = fields['content']
         except KeyError:

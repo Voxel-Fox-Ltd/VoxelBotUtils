@@ -417,7 +417,8 @@ class SettingsMenuOption(object):
     @staticmethod
     def get_set_iterable_add_callback(
             table_name: str, column_name: str, cache_key: str, database_key: str,
-            serialize_function: typing.Callable[[typing.Any], str] = None) -> typing.Callable[['SettingsMenu', commands.Context], None]:
+            serialize_function: typing.Callable[[typing.Any], str] = None,
+            original_data_type: type = None) -> typing.Callable[['SettingsMenu', commands.Context], None]:
         """
         Return an async method that takes the data retuend by `convert_prompted_information` and then
         saves it into the database - should be used for the SettingsMenu init. This particular iterable
@@ -469,6 +470,10 @@ class SettingsMenuOption(object):
                         ON CONFLICT (guild_id, {1}, key) DO UPDATE SET value=excluded.value""".format(table_name, column_name),
                         ctx.guild.id, role.id, database_key, value
                     )
+
+                # Set the original value for the cache
+                if original_data_type is not None:
+                    ctx.bot.guild_settings[ctx.guild.id].setdefault(cache_key, original_data_type())
 
                 # Cache the converted value
                 if value:
@@ -757,6 +762,7 @@ class SettingsMenuIterable(SettingsMenu):
             cache_key=cache_key,
             database_key=database_key,
             serialize_function=str if len(self.converters) == 1 else self.converters[1].serialize,
+            original_data_type=list if len(self.converters) == 1 else dict,
         )
         # This default returns an async function which takes the content of the converted values which adds to the db.
         # Callable[
