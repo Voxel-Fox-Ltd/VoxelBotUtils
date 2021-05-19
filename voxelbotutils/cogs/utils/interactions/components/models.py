@@ -173,7 +173,7 @@ class MessageComponents(ComponentHolder):
         )
 
     @classmethod
-    def add_buttons_with_rows(*buttons: BaseComponent):
+    def add_buttons_with_rows(cls, *buttons: BaseComponent):
         """
         Adds a list of buttons, breaking into a new :class:`ActionRow` automatically when it contains 5
         buttons. This does *not* check that you've added fewer than 5 rows.
