@@ -22,7 +22,7 @@ async def login_processor(request: Request):
     if isinstance(v, Response):
         return HTTPFound(location="/")
     session = await aiohttp_session.get_session(request)
-    return HTTPFound(location=session.pop("redirect_on_login", "/""))
+    return HTTPFound(location=session.pop("redirect_on_login", "/"))
 
 
 @routes.get("/logout")
