@@ -189,5 +189,5 @@ class MessageComponents(ComponentHolder):
         v = cls()
         while buttons:
             v.add_component(ActionRow(*buttons[:5]))
-            buttons = buttons[:5]
+            buttons = buttons[5:]
         return v
