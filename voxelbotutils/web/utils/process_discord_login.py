@@ -1,6 +1,7 @@
 import asyncio
 from urllib.parse import urlencode
 from datetime import datetime as dt, timedelta
+import typing
 
 import aiohttp
 import aiohttp_session
@@ -182,7 +183,7 @@ async def get_access_token_from_session(
     return updated_token_info['access_token']
 
 
-async def get_user_guilds_from_session(request: Request):
+async def get_user_guilds_from_session(request: Request) -> typing.List[dict]:
     """
     Returns a list of guilds that the user is in based on the request's logged in user.
     """
@@ -202,7 +203,7 @@ async def get_user_guilds_from_session(request: Request):
         # Loop until success
         async with session.get(guilds_url, headers=headers) as r:
             guild_info = await r.json()
-            if str(r.status)[0] in ['4', '5']:
+            if r.ok:
                 return []  # Missing permissions or server error
 
     # Return guild info
