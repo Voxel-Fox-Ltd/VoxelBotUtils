@@ -203,7 +203,7 @@ async def get_user_guilds_from_session(request: Request) -> typing.List[dict]:
         # Loop until success
         async with session.get(guilds_url, headers=headers) as r:
             guild_info = await r.json()
-            if r.ok:
+            if not r.ok:
                 return []  # Missing permissions or server error
 
     # Return guild info
