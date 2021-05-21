@@ -826,7 +826,7 @@ class Bot(MinimalBot):
             return None
 
     def get_invite_link(
-            self, *, base: str = None, client_id: int = None, scope: str = 'bot',
+            self, *, base: str = None, client_id: int = None, scope: str = None,
             response_type: str = None, redirect_uri: str = None,
             guild_id: int = None, permissions: discord.Permissions = None,
             enabled: bool = None) -> str:
@@ -862,7 +862,7 @@ class Bot(MinimalBot):
         # Make the params for the url
         data = {
             'client_id': client_id or self.config.get('oauth', {}).get('client_id', None) or self.user.id,
-            'scope': scope,
+            'scope': scope or self.config.get('oauth', {}).get('scope', None) or 'bot',
             'permissions': permissions.value,
         }
         if redirect_uri:

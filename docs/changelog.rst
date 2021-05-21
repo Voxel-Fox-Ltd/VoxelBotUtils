@@ -3,6 +3,21 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.3.3
+--------------------------------------
+
+New Features
+""""""""""""""""""""""""
+
+Changed Features
+""""""""""""""""""""""""
+
+
+* If no scopes are given for :func:`voxelbotutils.Bot.get_invite_link`, the :attr:`bot's config<BotConfig.oauth.scopes>` will be used.
+
+Bugs Fixed
+""""""""""""""""""""""""
+
 0.3.2
 --------------------------------------
 
