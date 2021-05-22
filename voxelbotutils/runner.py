@@ -438,7 +438,7 @@ def run_website(args: argparse.Namespace) -> None:
         def get_html(group):
             return (
                 f'<img class="discord_emoji" src="https://cdn.discordapp.com/emojis/{g.group("id")}'
-                f'.{"gif" if g.group("animated") else "png"}" alt="Discord custom emoji: {g.group('name')}" '
+                f'.{"gif" if g.group("animated") else "png"}" alt="Discord custom emoji: {g.group("name")}" '
                 f'style="height: 1em; width: auto;">'
             )
         return re.sub(
