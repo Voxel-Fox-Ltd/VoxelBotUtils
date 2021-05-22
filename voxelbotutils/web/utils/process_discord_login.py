@@ -9,6 +9,7 @@ from aiohttp.web import HTTPFound, Request, json_response
 import yarl
 
 from .get_avatar_url import get_avatar_url
+from .oauth_models import OauthMember
 
 
 def get_discord_login_url(request: Request, redirect_uri: str = None) -> str:
@@ -183,7 +184,7 @@ async def get_access_token_from_session(
     return updated_token_info['access_token']
 
 
-async def get_user_guilds_from_session(request: Request) -> typing.List[dict]:
+async def get_user_guilds_from_session(request: Request) -> typing.List[OauthMember]:
     """
     Returns a list of guilds that the user is in based on the request's logged in user.
     """
@@ -207,7 +208,7 @@ async def get_user_guilds_from_session(request: Request) -> typing.List[dict]:
                 return []  # Missing permissions or server error
 
     # Return guild info
-    return guild_info
+    return [OauthMember(i, session_storage['user_info']) for i in guild_info]
 
 
 async def add_user_to_guild_from_session(request: Request, bot_index: str, guild_id: int) -> bool:
