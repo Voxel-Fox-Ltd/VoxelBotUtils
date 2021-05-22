@@ -184,7 +184,7 @@ async def get_access_token_from_session(
     return updated_token_info['access_token']
 
 
-async def get_user_guilds_from_session(request: Request) -> typing.List[OauthMember]:
+async def get_user_guilds_from_session(request: Request, bot_key: str = "bot") -> typing.List[OauthMember]:
     """
     Returns a list of guilds that the user is in based on the request's logged in user.
     """
@@ -208,7 +208,8 @@ async def get_user_guilds_from_session(request: Request) -> typing.List[OauthMem
                 return []  # Missing permissions or server error
 
     # Return guild info
-    return [OauthMember(i, session_storage['user_info']) for i in guild_info]
+    bot = request.app['bots'].get(bot_key)
+    return [OauthMember(bot, i, session_storage['user_info']) for i in guild_info]
 
 
 async def add_user_to_guild_from_session(request: Request, bot_index: str, guild_id: int) -> bool:
