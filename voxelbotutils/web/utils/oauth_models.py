@@ -14,7 +14,7 @@ class OauthGuild(object):
         self.features: typing.List[str] = guild_data.get("features")
 
     def is_icon_animated(self) -> bool:
-        return self.avatar.startswith("a_")
+        return self.icon.startswith("a_")
 
 
 class OauthUser(object):
