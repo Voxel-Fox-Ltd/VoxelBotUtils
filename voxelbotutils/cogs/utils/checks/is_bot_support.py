@@ -27,7 +27,7 @@ def is_bot_support():
             return True
         support_guild = await ctx.bot.fetch_support_guild()
         if support_guild is None:
-            raise commands.NoPrivateMessage()
+            raise NotBotSupport()
         try:
             member = support_guild.get_member(ctx.author.id) or await support_guild.fetch_member(ctx.author.id)
             if member is None:
