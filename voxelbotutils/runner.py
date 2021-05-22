@@ -402,7 +402,7 @@ def run_website(args: argparse.Namespace) -> None:
         session_setup(app, SimpleCookieStorage(max_age=1_000_000))
     else:
         session_setup(app, ECS(os.urandom(32), max_age=1_000_000))
-    jinja_env = jinja_setup(app, app_key='jinja2_env', loader=FileSystemLoader(os.getcwd() + '/website/templates'))
+    jinja_env = jinja_setup(app, loader=FileSystemLoader(os.getcwd() + '/website/templates'))
 
     # Add our jinja env filters
     def regex_replace(string, find, replace):
