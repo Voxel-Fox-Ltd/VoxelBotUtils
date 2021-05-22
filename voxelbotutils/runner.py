@@ -430,14 +430,24 @@ def run_website(args: argparse.Namespace) -> None:
             '(?:<|(?:&lt;))@!?(?P<userid>\\d{16,23})(?:>|(?:&gt;))',
             lambda g: f'<span class="chatlog__mention">@{get_display_name(g)}</span>',
             string,
-            re.IGNORECASE | re.MULTILINE
+            re.IGNORECASE | re.MULTILINE,
         )
+
+    def display_emojis(string):
+        return re.sub(
+            r"(?P<emoji><(?P<animated>a)?:(?P<name>\w+):(?P<id>\d+)>)",
+            lambda g: r'<span class="discord_emoji" data-id="\g<id>" data-animated="\g<animated>"></span>',
+            string,
+            re.IGNORECASE | re.MULTILINE,
+        )
+
     jinja_env.filters['regex_replace'] = regex_replace
     jinja_env.filters['escape_text'] = escape_text
     jinja_env.filters['timestamp'] = timestamp
     jinja_env.filters['int_to_hex'] = int_to_hex
     jinja_env.filters['markdown'] = to_markdown
     jinja_env.filters['display_mentions'] = display_mentions
+    jinja_env.filters['display_emojis'] = display_emojis
 
     # Add our connections and their loggers
     app['database'] = DatabaseConnection
