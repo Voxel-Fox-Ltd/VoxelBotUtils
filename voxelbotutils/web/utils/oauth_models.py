@@ -17,9 +17,10 @@ class OauthGuild(object):
     def is_icon_animated(self) -> bool:
         return self.icon.startswith("a_")
 
-    async def fetch_guild(self) -> discord.Guild:
+    async def fetch_guild(self, bot=None) -> discord.Guild:
+        bot = bot or self._bot
         try:
-            return await self._bot.fetch_guild(self.id)
+            return await bot.fetch_guild(self.id)
         except discord.HTTPException:
             return None
 
