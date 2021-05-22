@@ -13,6 +13,9 @@ class OauthGuild(object):
         self.owner_id: int = user.id if guild_data.get("owner") else 0
         self.features: typing.List[str] = guild_data.get("features")
 
+    def is_icon_animated(self) -> bool:
+        return self.avatar.startswith("a_")
+
 
 class OauthUser(object):
 
@@ -25,6 +28,9 @@ class OauthUser(object):
         self.public_flags: discord.PublicUserFlags = discord.PublicUserFlags._from_value(user_data.get("public_flags", 0))
         self.locale: str = user_data.get("locale")
         self.mfa_enabled: bool = user_data.get("mfa_enabled", False)
+
+    def is_avatar_animated(self) -> bool:
+        return self.avatar.startswith("a_")
 
 
 class OauthMember(OauthUser):
