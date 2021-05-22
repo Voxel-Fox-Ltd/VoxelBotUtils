@@ -437,9 +437,9 @@ def run_website(args: argparse.Namespace) -> None:
     def display_emojis(string):
         def get_html(group):
             return (
-                f'<img class="discord_emoji" src="https://cdn.discordapp.com/emojis/{g.group("id")}'
-                f'.{"gif" if g.group("animated") else "png"}" alt="Discord custom emoji: {g.group("name")}" '
-                f'style="height: 1em; width: auto;">'
+                f'<img class="discord_emoji" src="https://cdn.discordapp.com/emojis/{group.group("id")}'
+                f'.{"gif" if group.group("animated") else "png"}" alt="Discord custom emoji: '
+                f'{group.group("name")}" style="height: 1em; width: auto;">'
             )
         return re.sub(
             r"(?P<emoji>(?:<|&lt;)(?P<animated>a)?:(?P<name>\w+):(?P<id>\d+)(?:>|&gt;))",
