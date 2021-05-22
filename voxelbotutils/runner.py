@@ -430,13 +430,20 @@ def run_website(args: argparse.Namespace) -> None:
             '(?:<|(?:&lt;))@!?(?P<userid>\\d{16,23})(?:>|(?:&gt;))',
             lambda g: f'<span class="chatlog__mention">@{get_display_name(g)}</span>',
             string,
+            string,
             re.IGNORECASE | re.MULTILINE,
         )
 
     def display_emojis(string):
+        def get_html(group):
+            return (
+                f'<img class="discord_emoji" src="https://cdn.discordapp.com/emojis/{g.group("id")}'
+                f'.{"gif" if g.group("animated") else "png"}" alt="Discord custom emoji: {g.group('name')}" '
+                f'style="height: 1em; width: auto;">'
+            )
         return re.sub(
             r"(?P<emoji>(?:<|&lt;)(?P<animated>a)?:(?P<name>\w+):(?P<id>\d+)(?:>|&gt;))",
-            lambda g: f'<img class="discord_emoji" src="https://cdn.discordapp.com/emojis/{g.group("id")}.{"gif" if g.group("animated") else "png"}" style="height: 1em; width: auto;">',
+            get_html,
             string,
             re.IGNORECASE | re.MULTILINE,
         )
