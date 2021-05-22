@@ -436,7 +436,7 @@ def run_website(args: argparse.Namespace) -> None:
     def display_emojis(string):
         return re.sub(
             r"(?P<emoji>(?:<|&lt;)(?P<animated>a)?:(?P<name>\w+):(?P<id>\d+)(?:>|&gt;))",
-            lambda g: r'<span class="discord_emoji" data-id="\g<id>" data-animated="\g<animated>"></span>',
+            r'<span class="discord_emoji" data-id="\g<id>" data-animated="\g<animated>"></span>',
             string,
             re.IGNORECASE | re.MULTILINE,
         )
