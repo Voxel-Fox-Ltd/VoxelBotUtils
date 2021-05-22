@@ -38,7 +38,7 @@ def get_discord_login_url(request: Request, redirect_uri: str = None) -> str:
         parameters['redirect_uri'] = redirect_uri
     if oauth_scopes:
         parameters['scope'] = ' '.join(oauth_scopes)
-    return 'https://discordapp.com/api/oauth2/authorize?' + urlencode(parameters)
+    return 'https://discordapp.com/api/v6/oauth2/authorize?' + urlencode(parameters)
 
 
 async def process_discord_login(request: Request) -> None:
@@ -85,7 +85,7 @@ async def process_discord_login(request: Request) -> None:
     async with aiohttp.ClientSession(loop=request.loop) as session:
 
         # Get auth
-        token_url = "https://discordapp.com/api/oauth2/token"
+        token_url = "https://discordapp.com/api/v6/oauth2/token"
         async with session.post(token_url, data=data, headers=headers) as r:
             token_info = await r.json()
         if token_info.get('error'):
@@ -115,7 +115,7 @@ async def get_user_info_from_session(request: Request, *, refresh: bool = False)
     session_storage = await aiohttp_session.get_session(request)
     if refresh is False:
         return session_storage['user_info']
-    user_url = "https://discordapp.com/api/users/@me"
+    user_url = "https://discordapp.com/api/v6/users/@me"
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
     }
@@ -169,7 +169,7 @@ async def get_access_token_from_session(
     async with aiohttp.ClientSession(loop=request.loop) as session:
 
         # Get auth
-        token_url = "https://discordapp.com/api/oauth2/token"
+        token_url = "https://discordapp.com/api/v6/oauth2/token"
         async with session.post(token_url, data=data, headers=headers) as r:
             token_info = await r.json()
         if token_info.get('error'):
@@ -198,7 +198,7 @@ async def get_user_guilds_from_session(request: Request) -> typing.List[dict]:
 
     # Make the request
     async with aiohttp.ClientSession(loop=request.loop) as session:
-        guilds_url = "https://discordapp.com/api/users/@me/guilds"
+        guilds_url = "https://discordapp.com/api/v6/users/@me/guilds"
 
         # Loop until success
         async with session.get(guilds_url, headers=headers) as r:
@@ -221,7 +221,7 @@ async def add_user_to_guild_from_session(request: Request, bot_index: str, guild
     user_info = session_storage['user_info']
 
     # Get our headers
-    guild_join_url = f"https://discordapp.com/api/guilds/{guild_id}/members/{user_info['id']}"
+    guild_join_url = f"https://discordapp.com/api/v6/guilds/{guild_id}/members/{user_info['id']}"
     headers = {
         'Authorization': f"Bot {request.app['config']['discord_bots'][bot_index]}"
     }
