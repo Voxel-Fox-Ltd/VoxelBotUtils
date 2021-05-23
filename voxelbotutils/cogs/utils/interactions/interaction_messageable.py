@@ -66,7 +66,6 @@ class InteractionMessageable(Messageable):
         Get the (interaction_id, application_id, token) tuple that's used to send to the webhook necessary.
         """
 
-        await self._wait_until_interaction_sent()
         return (self.data['id'], self._state.application_id, self.data['token'],)
 
     def _send_interaction_response_callback(self):
@@ -81,24 +80,6 @@ class InteractionMessageable(Messageable):
             except Exception:
                 pass
         self._send_interaction_response_task = self._state.loop.create_task(send_callback())
-
-    async def _wait_until_interaction_sent(self):
-        """
-        Waits until the "_sent_interaction_response" attr is set to True before returning.
-        """
-
-        # if getattr(self, "_send_interaction_response_task", None):
-        #     while not self._send_interaction_response_task.done():
-        #         await asyncio.sleep(0.1)
-        #     result = self._send_interaction_response_task.result()
-        #     if 200 <= result.status < 300:
-        #         pass
-        #     else:
-        #         fr = FakeResponse(status=500, reason="Failed to create webhook.")
-        #         raise discord.HTTPException(fr, fr.reason)
-        #     self._send_interaction_response_task = None
-
-        pass
 
     async def trigger_typing(self, *args, **kwargs):
         await InteractionTyping(self).do_typing(sleep_forever=False)
