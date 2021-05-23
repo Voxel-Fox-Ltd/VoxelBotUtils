@@ -10,10 +10,15 @@ FakeResponse = collections.namedtuple("FakeResponse", ["status", "reason"])
 
 class InteractionTyping(Typing):
 
-    async def do_typing(self):
+    async def __aenter__(self):
+        return self.__enter__()
+
+    async def do_typing(self, sleep_forever: bool = True):
         if not self.messageable._sent_ack_response and not self.messageable._sent_message_response:
             async with self.messageable._send_interaction_response_lock:
                 await self.messageable.ack()
+        while sleep_forever:
+            await asyncio.sleep(5)  # Loop forever
 
 
 class InteractionMessageable(Messageable):
@@ -96,7 +101,7 @@ class InteractionMessageable(Messageable):
         pass
 
     async def trigger_typing(self, *args, **kwargs):
-        await InteractionTyping(self).do_typing()
+        await InteractionTyping(self).do_typing(sleep_forever=False)
 
     async def ack(self, *, ephemeral: bool = False):
         """
