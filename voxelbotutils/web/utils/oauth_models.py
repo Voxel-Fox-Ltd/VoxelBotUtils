@@ -4,6 +4,18 @@ import discord
 
 
 class OauthGuild(object):
+    """
+    A guild object from an oauth integration.
+
+    Attributes:
+        id (int): The ID of the guild.
+        name (str): The name of the guild.
+        icon (str): The guild's icon hash.
+        icon_url (discord.Asset): The guild's icon.
+        owner_id (int): The ID of the owner for the guild.
+            This will either be the ID of the authenticated user or `0`.
+        features (typing.List[str]): A list of features that the guild has.sa
+    """
 
     def __init__(self, bot, guild_data, user):
         self.id: int = int(guild_data.get("id"))
@@ -17,7 +29,18 @@ class OauthGuild(object):
     def is_icon_animated(self) -> bool:
         return self.icon.startswith("a_")
 
-    async def fetch_guild(self, bot=None) -> discord.Guild:
+    async def fetch_guild(self, bot=None) -> typing.Optional[discord.Guild]:
+        """
+        Fetch the original :class:`discord.Guild` object from the API using the authentication from the
+        bot given.
+
+        Args:
+            bot: The bot object that you want to use to fetch the guild.
+
+        Returns:
+            typing.Optional[discord.Guild]: The guild instance.
+        """
+
         bot = bot or self._bot
         try:
             return await bot.fetch_guild(self.id)
@@ -26,6 +49,19 @@ class OauthGuild(object):
 
 
 class OauthUser(object):
+    """
+    A user object from an oauth integration.
+
+    Attributes:
+        id (int): The ID of the user.
+        username (str): The user's username.
+        avatar (str): The user's avatar hash.
+        avatar_url (discord.Asset): The user's avatar.
+        discriminator (str): The user's discrimiator.
+        public_flags (discord.PublicUserFlags): The user's public flags.
+        locale (str): The locale of the user.
+        mfa_enabled (bool): Whether or not the user has MFA enabled.
+    """
 
     def __init__(self, user_data):
         self.id: int = int(user_data['id'])
@@ -42,6 +78,21 @@ class OauthUser(object):
 
 
 class OauthMember(OauthUser):
+    """
+    A user object from an oauth integration.
+
+    Attributes:
+        id (int): The ID of the user.
+        username (str): The user's username.
+        avatar (str): The user's avatar hash.
+        avatar_url (discord.Asset): The user's avatar.
+        discriminator (str): The user's discrimiator.
+        public_flags (discord.PublicUserFlags): The user's public flags.
+        locale (str): The locale of the user.
+        mfa_enabled (bool): Whether or not the user has MFA enabled.
+        guild (OauthGuild): The guild object that this member is a part of.
+        guild_permissions (discord.Permissions): The permissions that this member has on the guild.
+    """
 
     def __init__(self, bot, guild_data, user_data):
         super().__init__(user_data)

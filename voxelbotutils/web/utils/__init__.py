@@ -6,3 +6,4 @@ from .process_discord_login import (
     get_user_guilds_from_session, add_user_to_guild_from_session,
 )
 from .web_context import WebContext
+from .oauth_models import OauthGuild, OauthUser, OauthMember

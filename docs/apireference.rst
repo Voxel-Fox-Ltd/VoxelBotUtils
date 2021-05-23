@@ -385,6 +385,24 @@ errors.IsNotUpgradeChatSubscriber
 Websites
 ---------------------------------------------------
 
+web.OauthGuild
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.web.OauthGuild
+   :no-special-members:
+
+web.OauthUser
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.web.OauthUser
+   :no-special-members:
+
+web.OauthMember
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.web.OauthMember
+   :no-special-members:
+
 web.add_discord_arguments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

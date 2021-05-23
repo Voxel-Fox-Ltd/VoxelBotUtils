@@ -3,16 +3,20 @@ Changelog
 
 A human-readable list of changes between versions.
 
-0.3.3
+0.4.0
 --------------------------------------
+
+This update is mainly to deal with breaking changes for the web utilities.
 
 New Features
 """"""""""""""""""""""""
 
+* Added the :class:`voxelbotutils.web.OauthGuild`, :class:`voxelbotutils.web.OauthUser`, and :class:`voxelbotutils.web.OauthMember` classes.
+
 Changed Features
 """"""""""""""""""""""""
 
-
+* Raise :class:`voxelbotutils.errors.NotBotSupport` if the support guild cannot be fetched.
 * If no scopes are given for :func:`voxelbotutils.Bot.get_invite_link`, the :attr:`bot's config<BotConfig.oauth.scopes>` will be used.
 
 Bugs Fixed
