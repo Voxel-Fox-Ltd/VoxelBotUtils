@@ -22,6 +22,8 @@ Changed Features
 Bugs Fixed
 """"""""""""""""""""""""
 
+* Fixed bug when checking for reactions in the settings menus.
+
 0.3.2
 --------------------------------------
 
