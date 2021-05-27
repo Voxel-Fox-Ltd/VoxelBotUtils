@@ -459,10 +459,6 @@ class MinimalBot(commands.AutoShardedBot):
                 for f in files:
                     f.close()
         else:
-            # if getattr(messageable, "_sent_ack_response", True):
-            #     response_data = await self.http.request(r, json=payload)
-            # else:
-            #     response_data = await self.http.request(r, json={"type": 4, "data": payload})
             response_data = await self.http.request(r, json=payload)
         try:
             messageable._sent_ack_response = True
