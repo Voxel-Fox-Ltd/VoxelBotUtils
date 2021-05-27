@@ -60,12 +60,16 @@ class BotSettings(utils.Cog):
         """
 
         # See if they're sure
-        m = await ctx.send(f"This will follow the bot's official updates channel from the support server (`{ctx.clean_prefix}support`). Would you like to continue?")
-        valid_emojis = ["\N{THUMBS UP SIGN}", "\N{THUMBS DOWN SIGN}"]
-        for e in valid_emojis:
-            await m.add_reaction(e)
+        m = await ctx.send(
+            (
+                f"This will follow the bot's official updates channel from the support server "
+                f"(`{ctx.clean_prefix}support`). Would you like to continue?"
+            ),
+            components=utils.MessageComponents.boolean_buttons(),
+        )
         try:
-            reaction, _ = await self.bot.wait_for("reaction_add", check=lambda r, u: str(r.emoji) in valid_emojis and u.id == ctx.author.id and r.message.id == m.id, timeout=120)
+            payload = await m.wait_for_button_click(check=lambda p: p.user.id == ctx.author.id, timeout=120)
+            await payload.ack()
         except asyncio.TimeoutError:
             try:
                 await m.delete()
@@ -74,7 +78,7 @@ class BotSettings(utils.Cog):
             return
 
         # Cancel follow
-        if str(reaction) == "\N{THUMBS DOWN SIGN}":
+        if payload.component.custom_id == "NO":
             return await ctx.send("Alright, cancelling!")
 
         # Get channel
@@ -83,13 +87,13 @@ class BotSettings(utils.Cog):
             channel = self.bot.get_channel(channel_id) or await self.bot.fetch_channel(channel_id)
             assert channel.is_news()
         except Exception:
-            return await ctx.send("I couldn't reach the updates channel!")
+            return await payload.send("I couldn't reach the updates channel!")
 
         # Follow it
         try:
             await channel.follow(destination=ctx.channel)
         except discord.HTTPException as e:
-            return await ctx.send(f"I wasn't able to follow the updates channel - {e}")
+            return await payload.send(f"I wasn't able to follow the updates channel - {e}")
 
         # Output message
         try:
@@ -97,11 +101,7 @@ class BotSettings(utils.Cog):
             await self.bot.wait_for("message", check=check, timeout=5)
         except asyncio.TimeoutError:
             pass
-        try:
-            await m.delete()
-        except discord.HTTPException:
-            pass
-        return await ctx.send("Now following the bot's updates channel!")
+        return await payload.send("Now following the bot's updates channel!")
 
 
 def setup(bot: utils.Bot):
