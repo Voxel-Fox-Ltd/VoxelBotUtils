@@ -133,4 +133,5 @@ class Button(DisableableComponent):
             style=ButtonStyle(data.get("style", ButtonStyle.PRIMARY.value)),
             custom_id=data.get("custom_id"),
             emoji=emoji,
+            disabled=data.get("disabled", False),
         )
