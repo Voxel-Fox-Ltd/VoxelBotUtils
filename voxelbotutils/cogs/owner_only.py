@@ -207,9 +207,6 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         Evaluates some Python code.
         """
 
-        if not content:
-            raise utils.errors.MissingRequiredArgumentString("content")
-
         # Make the environment
         env = {
             'bot': self.bot,
@@ -229,6 +226,8 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
                     content = await r.text()
                 except Exception:
                     pass
+        if not content:
+            raise utils.errors.MissingRequiredArgumentString("content")
 
         # Make code and output string
         content = self._cleanup_code(content)
