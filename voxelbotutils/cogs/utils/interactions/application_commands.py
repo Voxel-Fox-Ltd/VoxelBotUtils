@@ -130,6 +130,7 @@ class InteractionMessage(discord.Message):
         self.nonce = data.get('nonce')
         self.stickers = []
         self.reference = None
+        self.mentions = []
 
         try:
             self._handle_author(data['member']['user'])
