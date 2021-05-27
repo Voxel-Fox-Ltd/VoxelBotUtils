@@ -52,7 +52,7 @@ class ComponentInteractionPayload(InteractionMessageable):
         try:
             v.message = discord.Message(channel=channel, data=data['message'], state=state)
         except KeyError:
-            v.message = discord.Object(int(data['message']['id']))
+            v.message = discord.PartialMessage(channel=channel, id=int(data['message']['id']))
         if guild:
             v.user = discord.Member(data=data['member'], guild=guild, state=state)
         else:
