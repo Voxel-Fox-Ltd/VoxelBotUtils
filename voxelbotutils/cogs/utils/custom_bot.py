@@ -83,6 +83,35 @@ class RouteV8(discord.http.Route):
     BASE = 'https://discord.com/api/v8'
 
 
+_original_message = discord.Message
+_original_webhook_message = discord.WebhookMessage
+
+
+class ComponentMessage(_original_message):
+
+    __slots__ = _original_message.__slots__ + ("components",)
+
+    def __init__(self, *, state, channel, data):
+        self.components = MessageComponents.from_dict(data.get("components", list()))
+        super().__init__(state=state, channel=channel, data=data)
+
+    async def wait_for_component_interaction(self, *args, **kwargs):
+        pass
+
+    async def clear_components(self, *args, **kwargs):
+        pass
+
+    async def disable_components(self, *args, **kwargs):
+        pass
+
+    async def enable_components(self, *args, **kwargs):
+        pass
+
+
+class ComponentWebhookMessage(ComponentMessage, _original_webhook_message):
+    pass
+
+
 class MinimalBot(commands.AutoShardedBot):
     """
     A minimal version of the VoxelBotUtils bot that inherits from :class:`discord.ext.commands.AutoShardedBot`
@@ -111,16 +140,33 @@ class MinimalBot(commands.AutoShardedBot):
         async def clear_components_msg_prop(message):
             return await message.edit(components=None)
 
+        async def disable_components_msg_prop(message):
+            return await message.edit(components=message.components.disable_components())
+
+        async def enable_components_msg_prop(message):
+            return await message.edit(components=message.components.enable_components())
+
+        discord.Message = ComponentMessage
+        discord.WebhookMessage = ComponentWebhookMessage
         Messageable.send = send_button_msg_prop
-        discord.Message.add_reactions = add_reactions_prop
-        discord.Message.edit = edit_button_msg_prop
-        discord.Message.wait_for_button_click = wait_for_button_prop
-        discord.Message.clear_components = clear_components_msg_prop
-        discord.WebhookMessage.edit = edit_button_msg_prop
-        discord.WebhookMessage.wait_for_button_click = wait_for_button_prop
-        discord.WebhookMessage.clear_components = clear_components_msg_prop
         discord.message.MessageFlags.ephemeral = discord.flags.flag_value(lambda _: 64)
         discord.message.MessageFlags.VALID_FLAGS.update({"ephemeral": 64})
+
+        discord.Message.add_reactions = add_reactions_prop
+
+        discord.Message.edit = edit_button_msg_prop
+        discord.Message.wait_for_button_click = wait_for_button_prop
+        discord.Message.wait_for_component_interaction = wait_for_button_prop
+        discord.Message.clear_components = clear_components_msg_prop
+        discord.Message.disable_components = disable_components_msg_prop
+        discord.Message.enable_components = enable_components_msg_prop
+
+        discord.WebhookMessage.edit = edit_button_msg_prop
+        discord.WebhookMessage.wait_for_button_click = wait_for_button_prop
+        discord.WebhookMessage.wait_for_component_interaction = wait_for_button_prop
+        discord.WebhookMessage.clear_components = clear_components_msg_prop
+        discord.WebhookMessage.disable_components = disable_components_msg_prop
+        discord.WebhookMessage.enable_components = enable_components_msg_prop
 
     async def create_message_log(
             self, messages: typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]) -> str:
@@ -593,7 +639,10 @@ class MinimalBot(commands.AutoShardedBot):
             check = lambda payload: original_check(payload) and message_check(payload)
         else:
             check = message_check
-        return await self.wait_for("button_click", check=check, timeout=timeout)
+        return await self.wait_for("component_interaction", check=check, timeout=timeout)
+
+
+_ = MinimalBot("!")  # Make a bot object here just so that we can mess with D.py by default
 
 
 class Bot(MinimalBot):

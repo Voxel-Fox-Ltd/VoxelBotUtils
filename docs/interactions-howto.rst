@@ -45,11 +45,11 @@ Then for all button types other than :attr:`ButtonStyle.LINK`, you can get notif
 
 .. code-block:: python
 
-   p = await m.wait_for_button_click()
+   p = await m.wait_for_component_interaction()
 
 .. note::
 
-   The :func:`wait_for_button_click` function takes the same parameters as :func:`discord.Client.wait_for`.
+   The :func:`wait_for_component_interaction` function takes the same parameters as :func:`discord.Client.wait_for`.
 
 After that, you can work out which of your buttons the user clicked on and take action based on that, sending back to the button payload so as to complete the interaction.
 

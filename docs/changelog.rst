@@ -12,12 +12,16 @@ New Features
 """"""""""""""""""""""""
 
 * Added the :class:`voxelbotutils.web.OauthGuild`, :class:`voxelbotutils.web.OauthUser`, and :class:`voxelbotutils.web.OauthMember` classes.
+* The :class:`discord.Message` and :class:`discord.WebhookMessage` objects have been replaced with subclasses that include message components.
+* Added :class:`voxelbotutils.SelectMenu` and related objects.
+* Message objects now have :code:`enable_components` and :code:`disable_components` methods.
 
 Changed Features
 """"""""""""""""""""""""
 
 * Raise :class:`voxelbotutils.errors.NotBotSupport` if the support guild cannot be fetched.
 * If no scopes are given for :func:`voxelbotutils.Bot.get_invite_link`, the :attr:`bot's config<BotConfig.oauth.scopes>` will be used.
+* Messages have had :code:`wait_for_button_click` renamed to :code:`wait_for_component_interaction`. The former still exists for now, but will be removed in a future version.
 
 Bugs Fixed
 """"""""""""""""""""""""

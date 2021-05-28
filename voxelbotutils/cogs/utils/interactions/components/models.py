@@ -1,6 +1,23 @@
 import typing
 import json
 
+import discord
+
+
+def get_partial_emoji(emoji: typing.Union[str, discord.PartialEmoji]) -> discord.PartialEmoji:
+    if isinstance(emoji, str):
+        match = re.match(r'<(a?):([a-zA-Z0-9\_]+):([0-9]+)>$', emoji)
+        if match:
+            emoji_animated = bool(match.group(1))
+            emoji_name = match.group(2)
+            emoji_id = int(match.group(3))
+            emoji = discord.PartialEmoji(
+                name=emoji_name,
+                animated=emoji_animated,
+                id=emoji_id,
+            )
+    return emoji
+
 
 class BaseComponent(object):
     """
@@ -11,6 +28,14 @@ class BaseComponent(object):
         """
         Convert the current component object into a dictionary that we can
         send to Discord as a payload.
+        """
+
+        raise NotImplementedError()
+
+    @classmethod
+    def from_dict(cls, data):
+        """
+        Convert a response from the API into an object of this type.
         """
 
         raise NotImplementedError()
@@ -131,63 +156,3 @@ class ComponentHolder(BaseComponent):
                 if i.custom_id == custom_id:
                     return i
         return None
-
-
-class ActionRow(ComponentHolder):
-    """
-    The main UI component for adding and ordering components on Discord
-    messages.
-    """
-
-    TYPE = 1
-
-    def to_dict(self):
-        return {
-            "type": self.TYPE,
-            "components": [i.to_dict() for i in self.components],
-        }
-
-
-class MessageComponents(ComponentHolder):
-    """
-    A set of components that can be added to a message.
-    """
-
-    def to_dict(self):
-        return [i.to_dict() for i in self.components]
-
-    @classmethod
-    def boolean_buttons(cls, yes_id: str = None, no_id: str = None):
-        """
-        Return a set of message components with yes/no buttons, ready for use. If provided, the given IDs
-        will be used for the buttons. If not, the button custom IDs will be set to the strings
-        "YES" and "NO".
-
-        Args:
-            yes_id (str, optional): The custom ID of the yes button.
-            no_id (str, optional): The custom ID of the no button.
-        """
-
-        from .buttons import Button, ButtonStyle
-        return cls(
-            ActionRow(
-                Button("Yes", style=ButtonStyle.SUCCESS, custom_id=yes_id or "YES"),
-                Button("No", style=ButtonStyle.DANGER, custom_id=no_id or "NO"),
-            ),
-        )
-
-    @classmethod
-    def add_buttons_with_rows(cls, *buttons: BaseComponent):
-        """
-        Adds a list of buttons, breaking into a new :class:`ActionRow` automatically when it contains 5
-        buttons. This does *not* check that you've added fewer than 5 rows.
-
-        Args:
-            *buttons (BaseComponent): The buttons that you want to have added.
-        """
-
-        v = cls()
-        while buttons:
-            v.add_component(ActionRow(*buttons[:5]))
-            buttons = buttons[5:]
-        return v

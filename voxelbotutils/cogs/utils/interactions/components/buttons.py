@@ -6,7 +6,7 @@ import re
 
 import discord
 
-from .models import DisableableComponent
+from .models import DisableableComponent, get_partial_emoji
 
 
 class ButtonStyle(enum.IntEnum):
@@ -36,6 +36,7 @@ class Button(DisableableComponent):
 
     __slots__ = ("label", "style", "custom_id", "emoji", "url", "disabled",)
     TYPE = 2
+    WIDTH = 1
 
     def __init__(
             self, label: str, custom_id: str = None, *, style: ButtonStyle = ButtonStyle.PRIMARY,
@@ -62,18 +63,7 @@ class Button(DisableableComponent):
         self.label = label
         self.style = style
         self.custom_id = custom_id or str(uuid.uuid1())
-        self.emoji = emoji
-        if isinstance(emoji, str):
-            match = re.match(r'<(a?):([a-zA-Z0-9\_]+):([0-9]+)>$', emoji)
-            if match:
-                emoji_animated = bool(match.group(1))
-                emoji_name = match.group(2)
-                emoji_id = int(match.group(3))
-                self.emoji = discord.PartialEmoji(
-                    name=emoji_name,
-                    animated=emoji_animated,
-                    id=emoji_id,
-                )
+        self.emoji = get_partial_emoji(emoji)
         self.url = url
         self.disabled = disabled
         if url is None and self.style == ButtonStyle.LINK:

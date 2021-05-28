@@ -1,6 +1,7 @@
 import discord
 
-from .models import BaseComponent, DisableableComponent, ComponentHolder, MessageComponents, ActionRow
+from .models import BaseComponent, DisableableComponent, ComponentHolder
+from .action_row import MessageComponents, ActionRow, component_types
 from .buttons import ButtonStyle, Button
 from ..interaction_messageable import InteractionMessageable
 
@@ -21,7 +22,7 @@ class ComponentInteractionPayload(InteractionMessageable):
         Construct a response from the gateway payload.
         """
 
-        # Reconstruct the component that was clicked
+        # Try and find the component that was clicked
         clicked_button_id = data['data']['custom_id']
         clicked_button_payload = None
         for action_row in data['message'].get('components', list()):
@@ -32,20 +33,24 @@ class ComponentInteractionPayload(InteractionMessageable):
             if clicked_button_payload is not None:
                 break
 
-        # TODO make this into something more abstract than Button so the code doesn't
-        # need to be changed all too much for other types of interactions.
-        # I'm pretty sure that I need only reconstruct the custom ID or value?? depending
-        # on what the other components use, but this works for now, while Buttons are the
-        # only interaction.
-        if clicked_button_payload is None:
-            clicked_button_payload = {"custom_id": clicked_button_id}
-        clicked_button_object = Button.from_dict(clicked_button_payload)
+        # Get the component type that we want to reconstruct
+        clicked_button_type = BaseComponent
+        if clicked_button_payload:
+            component_model = component_types.get(clicked_button_payload, BaseComponent)
+
+        # And reconstruct that model
+        if clicked_button_type == BaseComponent:
+            clicked_button_object = BaseComponent()
+            clicked_button_object.custom_id = clicked_button_id
+        else:
+            clicked_button_object = clicked_button_type.from_dict(clicked_button_payload)
 
         # Make the response
         v = cls()
-        v.data = data
+        v.data = data  # The raw gateway data
+        v.component = clicked_button_object  # The component that was interacted with
+        v.values = data['data'].get("values", list())  # The values that were sent through with the payload
         v._state = state
-        v.component = clicked_button_object
         channel, guild = state._get_guild_channel(data)
         v.channel = channel
         v.guild = guild

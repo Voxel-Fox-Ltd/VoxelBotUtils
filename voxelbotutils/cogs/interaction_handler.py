@@ -94,7 +94,8 @@ class InteractionHandler(utils.Cog):
                 payload['d'], self.bot._connection,
             )
             # clicked_button_payload._send_interaction_response_callback()
-            self.bot.dispatch("button_click", clicked_button_payload)
+            self.bot.dispatch("button_click", clicked_button_payload)  # DEPRECATED PLEASE DO NOT USE
+            self.bot.dispatch("component_interaction", clicked_button_payload)
             return
 
         # Something that we're unable to handle
