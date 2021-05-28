@@ -87,29 +87,29 @@ _original_message = discord.Message
 _original_webhook_message = discord.WebhookMessage
 
 
-class ComponentMessage(_original_message):
+# class ComponentMessage(_original_message):
 
-    __slots__ = _original_message.__slots__ + ("components",)
+#     __slots__ = _original_message.__slots__ + ("components",)
 
-    def __init__(self, *, state, channel, data):
-        self.components = MessageComponents.from_dict(data.get("components", list()))
-        super().__init__(state=state, channel=channel, data=data)
+#     def __init__(self, *, state, channel, data):
+#         self.components = MessageComponents.from_dict(data.get("components", list()))
+#         super().__init__(state=state, channel=channel, data=data)
 
-    async def wait_for_component_interaction(self, *args, **kwargs):
-        pass
+#     async def wait_for_component_interaction(self, *args, **kwargs):
+#         pass
 
-    async def clear_components(self, *args, **kwargs):
-        pass
+#     async def clear_components(self, *args, **kwargs):
+#         pass
 
-    async def disable_components(self, *args, **kwargs):
-        pass
+#     async def disable_components(self, *args, **kwargs):
+#         pass
 
-    async def enable_components(self, *args, **kwargs):
-        pass
+#     async def enable_components(self, *args, **kwargs):
+#         pass
 
 
-class ComponentWebhookMessage(ComponentMessage, _original_webhook_message):
-    pass
+# class ComponentWebhookMessage(ComponentMessage, _original_webhook_message):
+#     pass
 
 
 class MinimalBot(commands.AutoShardedBot):
@@ -146,8 +146,6 @@ class MinimalBot(commands.AutoShardedBot):
         async def enable_components_msg_prop(message):
             return await message.edit(components=message.components.enable_components())
 
-        discord.Message = ComponentMessage
-        discord.WebhookMessage = ComponentWebhookMessage
         Messageable.send = send_button_msg_prop
         discord.message.MessageFlags.ephemeral = discord.flags.flag_value(lambda _: 64)
         discord.message.MessageFlags.VALID_FLAGS.update({"ephemeral": 64})
@@ -167,6 +165,23 @@ class MinimalBot(commands.AutoShardedBot):
         discord.WebhookMessage.clear_components = clear_components_msg_prop
         discord.WebhookMessage.disable_components = disable_components_msg_prop
         discord.WebhookMessage.enable_components = enable_components_msg_prop
+
+        # ComponentMessage.edit = edit_button_msg_prop
+        # ComponentMessage.wait_for_button_click = wait_for_button_prop
+        # ComponentMessage.wait_for_component_interaction = wait_for_button_prop
+        # ComponentMessage.clear_components = clear_components_msg_prop
+        # ComponentMessage.disable_components = disable_components_msg_prop
+        # ComponentMessage.enable_components = enable_components_msg_prop
+
+        # ComponentWebhookMessage.edit = edit_button_msg_prop
+        # ComponentWebhookMessage.wait_for_button_click = wait_for_button_prop
+        # ComponentWebhookMessage.wait_for_component_interaction = wait_for_button_prop
+        # ComponentWebhookMessage.clear_components = clear_components_msg_prop
+        # ComponentWebhookMessage.disable_components = disable_components_msg_prop
+        # ComponentWebhookMessage.enable_components = enable_components_msg_prop
+
+        # discord.Message = ComponentMessage
+        # discord.WebhookMessage = ComponentWebhookMessage
 
     async def create_message_log(
             self, messages: typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]) -> str:
