@@ -66,7 +66,7 @@ class InteractionMessageable(Messageable):
         Get the (interaction_id, application_id, token) tuple that's used to send to the webhook necessary.
         """
 
-        return (self.data['id'], self._state.application_id, self.data['token'],)
+        return (self.data['id'], self.data['application_id'], self.data['token'],)
 
     def _send_interaction_response_callback(self):
         """

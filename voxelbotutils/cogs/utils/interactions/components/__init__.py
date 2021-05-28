@@ -3,6 +3,7 @@ import discord
 from .models import BaseComponent, DisableableComponent, ComponentHolder
 from .action_row import MessageComponents, ActionRow, component_types
 from .buttons import ButtonStyle, Button
+from .select_menu import SelectOption, SelectMenu
 from ..interaction_messageable import InteractionMessageable
 
 
@@ -36,7 +37,7 @@ class ComponentInteractionPayload(InteractionMessageable):
         # Get the component type that we want to reconstruct
         clicked_button_type = BaseComponent
         if clicked_button_payload:
-            component_model = component_types.get(clicked_button_payload, BaseComponent)
+            component_model = component_types.get(clicked_button_payload['type'], BaseComponent)
 
         # And reconstruct that model
         if clicked_button_type == BaseComponent:
