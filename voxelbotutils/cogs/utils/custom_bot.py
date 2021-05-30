@@ -87,29 +87,29 @@ _original_message = discord.Message
 _original_webhook_message = discord.WebhookMessage
 
 
-# class ComponentMessage(_original_message):
+class ComponentMessage(_original_message):
 
-#     __slots__ = _original_message.__slots__ + ("components",)
+    __slots__ = _original_message.__slots__ + ("components",)
 
-#     def __init__(self, *, state, channel, data):
-#         self.components = MessageComponents.from_dict(data.get("components", list()))
-#         super().__init__(state=state, channel=channel, data=data)
+    def __init__(self, *, state, channel, data):
+        self.components = MessageComponents.from_dict(data.get("components", list()))
+        super().__init__(state=state, channel=channel, data=data)
 
-#     async def wait_for_component_interaction(self, *args, **kwargs):
-#         pass
+    async def wait_for_component_interaction(self, *args, **kwargs):
+        pass
 
-#     async def clear_components(self, *args, **kwargs):
-#         pass
+    async def clear_components(self, *args, **kwargs):
+        pass
 
-#     async def disable_components(self, *args, **kwargs):
-#         pass
+    async def disable_components(self, *args, **kwargs):
+        pass
 
-#     async def enable_components(self, *args, **kwargs):
-#         pass
+    async def enable_components(self, *args, **kwargs):
+        pass
 
 
-# class ComponentWebhookMessage(ComponentMessage, _original_webhook_message):
-#     pass
+class ComponentWebhookMessage(ComponentMessage, _original_webhook_message):
+    pass
 
 
 class MinimalBot(commands.AutoShardedBot):
@@ -166,22 +166,10 @@ class MinimalBot(commands.AutoShardedBot):
         discord.WebhookMessage.disable_components = disable_components_msg_prop
         discord.WebhookMessage.enable_components = enable_components_msg_prop
 
-        # ComponentMessage.edit = edit_button_msg_prop
-        # ComponentMessage.wait_for_button_click = wait_for_button_prop
-        # ComponentMessage.wait_for_component_interaction = wait_for_button_prop
-        # ComponentMessage.clear_components = clear_components_msg_prop
-        # ComponentMessage.disable_components = disable_components_msg_prop
-        # ComponentMessage.enable_components = enable_components_msg_prop
+        discord.PartialMessage.edit = edit_button_msg_prop
 
-        # ComponentWebhookMessage.edit = edit_button_msg_prop
-        # ComponentWebhookMessage.wait_for_button_click = wait_for_button_prop
-        # ComponentWebhookMessage.wait_for_component_interaction = wait_for_button_prop
-        # ComponentWebhookMessage.clear_components = clear_components_msg_prop
-        # ComponentWebhookMessage.disable_components = disable_components_msg_prop
-        # ComponentWebhookMessage.enable_components = enable_components_msg_prop
-
-        # discord.Message = ComponentMessage
-        # discord.WebhookMessage = ComponentWebhookMessage
+        discord.Message = ComponentMessage
+        discord.WebhookMessage = ComponentWebhookMessage
 
     async def create_message_log(
             self, messages: typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]) -> str:
@@ -437,23 +425,23 @@ class MinimalBot(commands.AutoShardedBot):
 
         # Work out our message references
         if mention_author is not None:
-            allowed_mentions = allowed_mentions or AllowedMentions().to_dict()
+            allowed_mentions = allowed_mentions or discord.AllowedMentions().to_dict()
             allowed_mentions['replied_user'] = bool(mention_author)
         if reference is not None:
             try:
                 reference = reference.to_message_reference_dict()
             except AttributeError:
-                raise InvalidArgument('reference parameter must be Message or MessageReference') from None
+                raise discord.InvalidArgument('reference parameter must be Message or MessageReference') from None
 
         # Make sure the files are valid
         if file is not None and files is not None:
-            raise InvalidArgument('cannot pass both file and files parameter to send()')
+            raise discord.InvalidArgument('cannot pass both file and files parameter to send()')
         if file:
             files = [file]
         if files and len(files) > 10:
-            raise InvalidArgument('files parameter must be a list of up to 10 elements')
+            raise discord.InvalidArgument('files parameter must be a list of up to 10 elements')
         elif files and not all(isinstance(file, discord.File) for file in files):
-            raise InvalidArgument('files parameter must be a list of File')
+            raise discord.InvalidArgument('files parameter must be a list of File')
 
         # Fix up the components
         if components:
