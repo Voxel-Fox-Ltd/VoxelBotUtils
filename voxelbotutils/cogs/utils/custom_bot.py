@@ -1141,7 +1141,11 @@ class Bot(MinimalBot):
                 pool.append(safe_data.copy())
         if not pool:
             return
-        embed.set_footer(**random.choice(pool), icon_url=self.user.avatar_url)
+        try:
+            avatar_url = self.user.avatar_url
+        except AttributeError:
+            avatar_url = embed.Empty
+        embed.set_footer(**random.choice(pool), icon_url=avatar_url)
 
     @property
     def clean_prefix(self):
