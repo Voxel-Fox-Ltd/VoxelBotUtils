@@ -645,9 +645,6 @@ class MinimalBot(commands.AutoShardedBot):
         return await self.wait_for("component_interaction", check=check, timeout=timeout)
 
 
-_ = MinimalBot("!")  # Make a bot object here just so that we can mess with D.py by default
-
-
 class Bot(MinimalBot):
     """
     A bot class that inherits from :class:`voxelbotutils.MinimalBot`, detailing more VoxelBotUtils
