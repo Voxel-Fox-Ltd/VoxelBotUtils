@@ -281,7 +281,8 @@ class SlashCommandHandler(utils.Cog):
                         io.StringIO(json.dumps([i.to_json() for i in commands_to_add], indent=4)),
                         filename="slash_commands.json",
                     )
-                    await ctx.send(str(e), file=file)
+                    error_text = await e.response.json()
+                    await ctx.send(f"```json\n{json.dmups(error_text, indent=4)}```", file=file)
                 except discord.HTTPException:
                     pass
                 raise
