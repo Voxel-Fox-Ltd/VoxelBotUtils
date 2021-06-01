@@ -102,7 +102,7 @@ class Command(commands.Command):
         ctx.command = self
 
         if not await self.can_run(ctx):
-            raise CheckFailure('The check functions for command {0.qualified_name} failed.'.format(self))
+            raise commands.CheckFailure('The check functions for command {0.qualified_name} failed.'.format(self))
 
         if self._max_concurrency is not None:
             await self._max_concurrency.acquire(ctx)
