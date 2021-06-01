@@ -190,7 +190,7 @@ class SlashCommandHandler(utils.Cog):
             description = f"The {arg.name} that you want to use for the {command.qualified_name} command."
             try:
                 description = command.argument_descriptions[index] or description
-            except IndexError:
+            except (AttributeError, IndexError):
                 pass
 
             # Add option
@@ -281,7 +281,7 @@ class SlashCommandHandler(utils.Cog):
                         io.StringIO(json.dumps([i.to_json() for i in commands_to_add], indent=4)),
                         filename="slash_commands.json",
                     )
-                    await ctx.send(file=file)
+                    await ctx.send(str(e), file=file)
                 except discord.HTTPException:
                     pass
                 raise
