@@ -285,7 +285,7 @@ class SlashCommandHandler(utils.Cog):
                     await ctx.send(f"```json\n{json.dmups(error_text, indent=4)}```", file=file)
                 except discord.HTTPException:
                     pass
-                raise
+                return
 
         # And we done
         await ctx.reply("Done.", embeddify=False)
