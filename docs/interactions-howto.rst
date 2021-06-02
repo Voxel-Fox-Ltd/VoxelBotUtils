@@ -51,6 +51,10 @@ Then for all button types other than :attr:`ButtonStyle.LINK`, you can get notif
 
    The :func:`wait_for_component_interaction` function takes the same parameters as :func:`discord.Client.wait_for`.
 
+.. warning::
+
+   The :func:`wait_for_component_interaction` function will only work with the first :class:`voxelbotutils.MinimalBot` instance you create. If you are using multiple bot instances in the same script, use :func:`discord.Client.wait_for` as normal.
+
 After that, you can work out which of your buttons the user clicked on and take action based on that, sending back to the button payload so as to complete the interaction.
 
 .. code-block:: python

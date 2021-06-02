@@ -22,11 +22,18 @@ Changed Features
 * Raise :class:`voxelbotutils.errors.NotBotSupport` if the support guild cannot be fetched.
 * If no scopes are given for :func:`voxelbotutils.Bot.get_invite_link`, the :attr:`bot's config<BotConfig.oauth.scopes>` will be used.
 * Messages have had :code:`wait_for_button_click` renamed to :code:`wait_for_component_interaction`. The former still exists for now, but will be removed in a future version.
+* :class:`voxelbotutils.Paginator` now uses buttons instead of reactions.
+* :class:`voxelbotutils.Button` instances will now allow a label to be empty if an emoji is set.
+* Components will now give you a :class:`discord.PartialMessage` instance if the message was not included in the interaction payload.
 
 Bugs Fixed
 """"""""""""""""""""""""
 
 * Fixed bug when checking for reactions in the settings menus.
+* Fixed a bug in the stats command for Python versions 3.9+.
+* Add a missing module in the custom command object.
+* Fix bug where file content would not be read in the ev command.
+* Fix AttributeError when getting user mentions in slash commands.
 
 0.3.2
 --------------------------------------
