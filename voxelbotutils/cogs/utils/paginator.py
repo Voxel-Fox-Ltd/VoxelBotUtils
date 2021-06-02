@@ -1,12 +1,12 @@
 import typing
 import asyncio
-import random
 import inspect
 
 import discord
 from discord.ext import commands
 
 from .context_embed import Embed
+from .interactions.components import MessageComponents, Button, ButtonStyle, ActionRow
 
 
 class Paginator(object):
@@ -41,8 +41,7 @@ class Paginator(object):
             formatter: typing.Callable[
                 ['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]
             ] = None,
-            remove_reaction: bool = False
-    ):
+            remove_reaction: bool = False):
         """
         Args:
             data (typing.Union[typing.Sequence, typing.Generator, typing.Callable[[int], typing.Any]]): The
@@ -56,17 +55,12 @@ class Paginator(object):
             formatter (typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]], optional): A
                 function taking the paginator instance and a list of things to display, returning a dictionary of kwargs that get passed
                 directly into a :func:`discord.Message.edit`.
-            remove_reaction (bool): If True, the paginator will remove a reaction whenever it's added, rather than using
-                the reaction added event and the reaction removed event in the same way. This improves user experience
-                but means slightly more API calls.
-                If the bot doesn't have the manage_messages permission, it will default to the normal behaviour.
         """
         self.data = data
         self.per_page = per_page
         self.formatter = formatter
         if self.formatter is None:
             self.formatter = self.default_list_formatter
-        self.remove_reaction = remove_reaction
         self.current_page = None
         self._page_cache = {}
 
@@ -106,101 +100,98 @@ class Paginator(object):
         message = await ctx.send("Menu loading...")
 
         # Add the emojis if there's more than one page
-        valid_emojis = [
-            "\N{BLACK LEFT-POINTING DOUBLE TRIANGLE}",
-            "\N{LEFTWARDS BLACK ARROW}",
-            "\N{BLACK SQUARE FOR STOP}",
-            "\N{BLACK RIGHTWARDS ARROW}",
-        ]
-        if self._data_is_iterable:
-            valid_emojis.append("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}")
-            valid_emojis.append("\N{INPUT SYMBOL FOR NUMBERS}")
-        add_emoji_tasks = []
-        if self._data_is_iterable is False or self.max_pages > 1:
-            add_emoji_tasks = [ctx.bot.loop.create_task(message.add_reaction(e)) for e in valid_emojis]
+        components = MessageComponents(
+            ActionRow(
+                Button(custom_id="START", emoji="\N{BLACK LEFT-POINTING DOUBLE TRIANGLE}"),
+                Button(custom_id="PREVIOUS", emoji="\N{LEFTWARDS BLACK ARROW}"),
+                Button(custom_id="STOP", emoji="\N{BLACK SQUARE FOR STOP}", style=ButtonStyle.DANGER),
+                Button(custom_id="NEXT", emoji="\N{BLACK RIGHTWARDS ARROW}"),
+                Button(custom_id="END", emoji="\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}", disabled=not self._data_is_iterable),
+            )
+        )
 
         # Loop the reaction handler
         last_payload = None
         while True:
-            # Edit the message with the relevant data
+
+            # Get the page data
             try:
                 items = await self.get_page(self.current_page)
             except (KeyError, IndexError):
                 await message.edit(content="There's no data to be shown.")
                 break
+
+            # Format the page data
             payload = self.formatter(self, items)
             if isinstance(payload, discord.Embed):
                 payload = {"embed": payload}
             elif isinstance(payload, str):
                 payload = {"content": payload}
+
+            # Set a default for these things
             payload.setdefault("content", None)
             payload.setdefault("embed", None)
+
+            # Work out what components to show
+            components = MessageComponents(
+                ActionRow(
+                    Button(
+                        custom_id="START",
+                        emoji="\N{BLACK LEFT-POINTING DOUBLE TRIANGLE}",
+                        style=ButtonStyle.SECONDARY,
+                        disabled=self.current_page == 0
+                    ),
+                    Button(
+                        custom_id="PREVIOUS",
+                        emoji="\N{LEFTWARDS BLACK ARROW}",
+                        disabled=self.current_page == 0
+                    ),
+                    Button(
+                        custom_id="STOP",
+                        emoji="\N{BLACK SQUARE FOR STOP}",
+                        style=ButtonStyle.DANGER
+                    ),
+                    Button(
+                        custom_id="NEXT",
+                        emoji="\N{BLACK RIGHTWARDS ARROW}",
+                        disabled=self.current_page == self.max_pages
+                    ),
+                    Button(
+                        custom_id="END",
+                        emoji="\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}",
+                        style=ButtonStyle.SECONDARY,
+                        disabled=self.max_pages == ['?', self.max_pages]
+                    ),
+                )
+            )
+
+            # See if the content is unchanged
             if payload != last_payload:
                 await message.edit(**payload)
-            payload = last_payload
+
+            # See if we want to bother paginating
+            last_payload = payload
             if self.max_pages == 1:
                 return
 
-            # See if we now need to add a new emoji
-            if self.max_pages != "?" and "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}" not in valid_emojis:
-                ctx.bot.loop.create_task(message.add_reaction("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}"))
-                ctx.bot.loop.create_task(message.add_reaction("\N{INPUT SYMBOL FOR NUMBERS}"))
-                valid_emojis.append("\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}")
-                valid_emojis.append("\N{INPUT SYMBOL FOR NUMBERS}")
-
             # Wait for reactions to be added by the user
-            done, pending = None, None
+            component_payload = None
             try:
-                check = lambda p: str(p.emoji) in valid_emojis and p.user_id == ctx.author.id and p.message_id == message.id
-                done, pending = await asyncio.wait([
-                    ctx.bot.wait_for("raw_reaction_add", check=check),
-                    ctx.bot.wait_for("raw_reaction_remove", check=check),
-                ], return_when=asyncio.FIRST_COMPLETED, timeout=timeout)
+                component_payload = await message.wait_for_component_interaction(check=lambda p: p.user.id == ctx.author.id)
+                await component_payload.ack()
             except asyncio.TimeoutError:
                 pass
-            if not done:
-                break
-
-            # See what they reacted with
-            payload = done.pop().result()
-            for future in pending:
-                future.cancel()
-
-            # remove the reaction if applicable
-            if self.remove_reaction and payload.event_type == "REACTION_ADD":
-                if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
-                    try:
-                        await ctx.message.remove_reaction(payload.emoji, ctx.author)
-                    except discord.Forbidden:
-                        pass
 
             # Change the page number based on the reaction
-            before_page = self.current_page
             self.current_page = {
-                "\N{BLACK LEFT-POINTING DOUBLE TRIANGLE}": lambda i: 0,
-                "\N{LEFTWARDS BLACK ARROW}": lambda i: i - 1,
-                "\N{BLACK SQUARE FOR STOP}": lambda i: "STOP",
-                "\N{BLACK RIGHTWARDS ARROW}": lambda i: i + 1,
-                "\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}": lambda i: self.max_pages,
-                "\N{INPUT SYMBOL FOR NUMBERS}": lambda i: "CHANGE",
+                "START": lambda i: 0,
+                "PREVIOUS": lambda i: i - 1,
+                "STOP": lambda i: "STOP",
+                "NEXT": lambda i: i + 1,
+                "END": lambda i: self.max_pages,
             }[str(payload.emoji)](self.current_page)
             if self.current_page == "STOP":
                 break
-
-            # Let the user ask for a page number
-            if self.current_page == "CHANGE":
-                ask_page_number_message = await ctx.send("What page do you want to change to?")
-                try:
-                    check = lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id
-                    change_page_number_message = await ctx.bot.wait_for("message", check=check, timeout=timeout)
-                except asyncio.TimeoutError:
-                    break
-                try:
-                    self.current_page = int(change_page_number_message.content) - 1
-                except ValueError:
-                    self.current_page = before_page
-                ctx.bot.loop.create_task(ask_page_number_message.delete())
-                ctx.bot.loop.create_task(change_page_number_message.delete())
 
             # Make sure the page number is still valid
             if self.max_pages != "?" and self.current_page >= self.max_pages:
@@ -209,9 +200,7 @@ class Paginator(object):
                 self.current_page = 0
 
         # Let us break from the loop
-        for t in add_emoji_tasks:
-            t.cancel()
-        ctx.bot.loop.create_task(message.clear_reactions())
+        ctx.bot.loop.create_task(message.edit(components=components.disable_components()))
 
     async def get_page(self, page_number: int) -> typing.List[typing.Any]:
         """
