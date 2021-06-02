@@ -39,7 +39,7 @@ class Button(DisableableComponent):
     WIDTH = 1
 
     def __init__(
-            self, label: str, custom_id: str = None, *, style: ButtonStyle = ButtonStyle.PRIMARY,
+            self, label: str = None, custom_id: str = None, *, style: ButtonStyle = ButtonStyle.PRIMARY,
             emoji: typing.Union[str, discord.PartialEmoji] = None,
             url: str = None, disabled: bool = False):
         """
@@ -70,6 +70,8 @@ class Button(DisableableComponent):
             raise ValueError("Missing URL for button type of link")
         if url is not None and self.style != ButtonStyle.LINK:
             raise ValueError("Incompatible URL passed for button not of type link")
+        if not label and not emoji:
+            raise ValueError("Both label and emoji cannot be empty")
 
     def to_dict(self) -> dict:
         v = {
