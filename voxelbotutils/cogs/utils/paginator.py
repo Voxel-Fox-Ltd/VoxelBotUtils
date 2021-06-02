@@ -99,17 +99,6 @@ class Paginator(object):
             return
         message = await ctx.send("Menu loading...")
 
-        # Add the emojis if there's more than one page
-        components = MessageComponents(
-            ActionRow(
-                Button(custom_id="START", emoji="\N{BLACK LEFT-POINTING DOUBLE TRIANGLE}"),
-                Button(custom_id="PREVIOUS", emoji="\N{LEFTWARDS BLACK ARROW}"),
-                Button(custom_id="STOP", emoji="\N{BLACK SQUARE FOR STOP}", style=ButtonStyle.DANGER),
-                Button(custom_id="NEXT", emoji="\N{BLACK RIGHTWARDS ARROW}"),
-                Button(custom_id="END", emoji="\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}", disabled=not self._data_is_iterable),
-            )
-        )
-
         # Loop the reaction handler
         last_payload = None
         while True:
@@ -167,7 +156,7 @@ class Paginator(object):
 
             # See if the content is unchanged
             if payload != last_payload:
-                await message.edit(**payload)
+                await message.edit(**payload, components=components)
 
             # See if we want to bother paginating
             last_payload = payload
