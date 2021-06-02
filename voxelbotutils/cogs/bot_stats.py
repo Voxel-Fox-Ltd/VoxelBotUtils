@@ -78,9 +78,13 @@ class BotStats(utils.Cog):
             embed.add_field("Guild Count", f"{len(self.bot.guilds):,}")
         embed.add_field("Shard Count", f"{self.bot.shard_count or 1:,}")
         embed.add_field("Average WS Latency", f"{(self.bot.latency * 1000):.2f}ms")
+        try:
+            all_tasks = asyncio.Task.all_tasks()
+        except AttributeError:
+            all_tasks = asyncio.all_tasks()
         embed.add_field(
             "Coroutines",
-            f"{len([i for i in asyncio.Task.all_tasks() if not i.done()]):,} running, {len(asyncio.Task.all_tasks()):,} total.",
+            f"{len([i for i in all_tasks if not i.done()]):,} running, {len(all_tasks):,} total.",
         )
 
         # Get topgg data
