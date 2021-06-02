@@ -41,19 +41,12 @@ Using buttons has been made pretty simple. First, you send your button to the us
    )
    m = await channel.send("Text is required when sending buttons, unfortunately.", components=components)
 
-Then for all button types other than :attr:`ButtonStyle.LINK`, you can get notified when a user clicks on your button. This is dispatched as a :code:`button_click` event, but for ease-of-use is also implemented into your sendable.
+Then for all button types other than :attr:`ButtonStyle.LINK`, you can get notified when a user clicks on your button. This is dispatched as a :code:`component_interaction` event.
 
 .. code-block:: python
 
-   p = await m.wait_for_component_interaction()
-
-.. note::
-
-   The :func:`wait_for_component_interaction` function takes the same parameters as :func:`discord.Client.wait_for`.
-
-.. warning::
-
-   The :func:`wait_for_component_interaction` function will only work with the first :class:`voxelbotutils.MinimalBot` instance you create. If you are using multiple bot instances in the same script, use :func:`discord.Client.wait_for` as normal.
+   payload = await bot.wait_for("component_interaction", check=lambda p: p.message.id == 123123123123)
+   await payload.ack()
 
 After that, you can work out which of your buttons the user clicked on and take action based on that, sending back to the button payload so as to complete the interaction.
 
@@ -64,3 +57,17 @@ After that, you can work out which of your buttons the user clicked on and take 
       await p.send("You clicked on button 1!", ephemeral=True)
    elif clicked_button == button2:
       await p.send("You clicked on button 2!", ephemeral=True)
+
+Select Menus
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Dropdowns allow the user to select one or more options from a given set.
+
+.. code-block:: python
+
+   button1 = voxelbotutils.Button("Button 1")
+   button2 = voxelbotutils.Button("Button 2")
+   components = voxelbotutils.MessageComponents(
+      voxelbotutils.ActionRow(button1, button2)
+   )
+   m = await channel.send("Text is required when sending buttons, unfortunately.", components=components)
