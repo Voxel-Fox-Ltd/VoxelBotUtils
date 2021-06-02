@@ -149,7 +149,7 @@ class Paginator(object):
                         custom_id="END",
                         emoji="\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}",
                         style=ButtonStyle.SECONDARY,
-                        disabled=self.max_pages == ['?', self.max_pages]
+                        disabled=self.max_pages in ["?", self.max_pages]
                     ),
                 )
             )
@@ -178,7 +178,7 @@ class Paginator(object):
                 "STOP": lambda i: "STOP",
                 "NEXT": lambda i: i + 1,
                 "END": lambda i: self.max_pages,
-            }[str(payload.emoji)](self.current_page)
+            }[str(component_payload.component.custom_id)](self.current_page)
             if self.current_page == "STOP":
                 break
 
