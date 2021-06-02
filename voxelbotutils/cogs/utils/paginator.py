@@ -127,12 +127,12 @@ class Paginator(object):
                     Button(
                         custom_id="START",
                         emoji="\N{BLACK LEFT-POINTING DOUBLE TRIANGLE}",
-                        style=ButtonStyle.SECONDARY,
                         disabled=self.current_page == 0
                     ),
                     Button(
                         custom_id="PREVIOUS",
                         emoji="\N{LEFTWARDS BLACK ARROW}",
+                        style=ButtonStyle.SECONDARY,
                         disabled=self.current_page == 0
                     ),
                     Button(
@@ -143,12 +143,12 @@ class Paginator(object):
                     Button(
                         custom_id="NEXT",
                         emoji="\N{BLACK RIGHTWARDS ARROW}",
+                        style=ButtonStyle.SECONDARY,
                         disabled=self.current_page == self.max_pages
                     ),
                     Button(
                         custom_id="END",
                         emoji="\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}",
-                        style=ButtonStyle.SECONDARY,
                         disabled=self.max_pages in ["?", self.max_pages]
                     ),
                 )
