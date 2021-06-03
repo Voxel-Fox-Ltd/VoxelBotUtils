@@ -173,13 +173,16 @@ class Paginator(object):
                 pass
 
             # Change the page number based on the reaction
-            self.current_page = {
-                "START": lambda i: 0,
-                "PREVIOUS": lambda i: i - 1,
-                "STOP": lambda i: "STOP",
-                "NEXT": lambda i: i + 1,
-                "END": lambda i: self.max_pages,
-            }[str(component_payload.component.custom_id)](self.current_page)
+            if component_payload is None:
+                self.current_page = "STOP"
+            else:
+                self.current_page = {
+                    "START": lambda i: 0,
+                    "PREVIOUS": lambda i: i - 1,
+                    "STOP": lambda i: "STOP",
+                    "NEXT": lambda i: i + 1,
+                    "END": lambda i: self.max_pages,
+                }[str(component_payload.component.custom_id)](self.current_page)
             if self.current_page == "STOP":
                 break
 
