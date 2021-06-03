@@ -167,7 +167,7 @@ class Paginator(object):
             component_payload = None
             try:
                 check = lambda p: p.user.id == ctx.author.id and p.message.id == message.id
-                component_payload = await self.bot.wait_for("component_interaction", check=check, timeout=120)
+                component_payload = await ctx.bot.wait_for("component_interaction", check=check, timeout=120)
                 await component_payload.ack()
             except asyncio.TimeoutError:
                 pass
