@@ -144,7 +144,7 @@ class Paginator(object):
                         custom_id="NEXT",
                         emoji="\N{BLACK RIGHTWARDS ARROW}",
                         style=ButtonStyle.SECONDARY,
-                        disabled=self.current_page == self.max_pages - 1
+                        disabled=self.current_page >= self.max_pages - 1
                     ),
                     Button(
                         custom_id="END",
