@@ -144,12 +144,12 @@ class Paginator(object):
                         custom_id="NEXT",
                         emoji="\N{BLACK RIGHTWARDS ARROW}",
                         style=ButtonStyle.SECONDARY,
-                        disabled=self.current_page == self.max_pages
+                        disabled=self.current_page == self.max_pages - 1
                     ),
                     Button(
                         custom_id="END",
                         emoji="\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}",
-                        disabled=self.max_pages in ["?", self.max_pages]
+                        disabled=self.max_pages in ["?", self.max_pages - 1]
                     ),
                 )
             )
@@ -167,10 +167,10 @@ class Paginator(object):
             component_payload = None
             try:
                 check = lambda p: p.user.id == ctx.author.id and p.message.id == message.id
-                component_payload = await ctx.bot.wait_for("component_interaction", check=check, timeout=120)
+                component_payload = await ctx.bot.wait_for("component_interaction", check=check, timeout=timeout)
                 await component_payload.ack()
             except asyncio.TimeoutError:
-                pass
+                break
 
             # Change the page number based on the reaction
             if component_payload is None:
