@@ -68,7 +68,8 @@ class BotSettings(utils.Cog):
             components=utils.MessageComponents.boolean_buttons(),
         )
         try:
-            payload = await m.wait_for_component_interaction(check=lambda p: p.user.id == ctx.author.id, timeout=120)
+            check = lambda p: p.user.id == ctx.author.id and p.message.id == m.id
+            payload = await self.bot.wait_for("component_interaction", check=check, timeout=120)
             await payload.ack()
         except asyncio.TimeoutError:
             try:

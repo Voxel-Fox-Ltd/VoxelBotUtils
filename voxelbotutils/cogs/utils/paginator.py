@@ -166,7 +166,8 @@ class Paginator(object):
             # Wait for reactions to be added by the user
             component_payload = None
             try:
-                component_payload = await message.wait_for_component_interaction(check=lambda p: p.user.id == ctx.author.id)
+                check = lambda p: p.user.id == ctx.author.id and p.message.id == message.id
+                component_payload = await self.bot.wait_for("component_interaction", check=check, timeout=120)
                 await component_payload.ack()
             except asyncio.TimeoutError:
                 pass

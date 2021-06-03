@@ -153,15 +153,15 @@ class MinimalBot(commands.AutoShardedBot):
         discord.Message.add_reactions = add_reactions_prop
 
         discord.Message.edit = edit_button_msg_prop
-        discord.Message.wait_for_button_click = wait_for_button_prop
-        discord.Message.wait_for_component_interaction = wait_for_button_prop
+        discord.Message.wait_for_button_click = wait_for_button_prop  # deprecated
+        discord.Message.wait_for_component_interaction = wait_for_button_prop  # deprecated
         discord.Message.clear_components = clear_components_msg_prop
         discord.Message.disable_components = disable_components_msg_prop
         discord.Message.enable_components = enable_components_msg_prop
 
         discord.WebhookMessage.edit = edit_button_msg_prop
-        discord.WebhookMessage.wait_for_button_click = wait_for_button_prop
-        discord.WebhookMessage.wait_for_component_interaction = wait_for_button_prop
+        discord.WebhookMessage.wait_for_button_click = wait_for_button_prop  # deprecated
+        discord.WebhookMessage.wait_for_component_interaction = wait_for_button_prop  # deprecated
         discord.WebhookMessage.clear_components = clear_components_msg_prop
         discord.WebhookMessage.disable_components = disable_components_msg_prop
         discord.WebhookMessage.enable_components = enable_components_msg_prop
