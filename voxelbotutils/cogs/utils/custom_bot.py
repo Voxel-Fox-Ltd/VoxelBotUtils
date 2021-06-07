@@ -172,8 +172,8 @@ class MinimalBot(commands.AutoShardedBot):
 
         discord.PartialMessage.edit = edit_button_msg_prop
 
-        discord.Message = ComponentMessage
-        discord.WebhookMessage = ComponentWebhookMessage
+        # discord.Message = ComponentMessage
+        # discord.WebhookMessage = ComponentWebhookMessage
 
     async def create_message_log(
             self, messages: typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]) -> str:
