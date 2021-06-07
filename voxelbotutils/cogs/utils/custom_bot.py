@@ -107,6 +107,10 @@ class ComponentMessage(_original_message):
     async def enable_components(self, *args, **kwargs):
         pass
 
+    @classmethod
+    async def convert(cls, ctx, value):
+        return await commands.MessageConverter().convert(ctx, value)
+
 
 class ComponentWebhookMessage(ComponentMessage, _original_webhook_message):
     pass
