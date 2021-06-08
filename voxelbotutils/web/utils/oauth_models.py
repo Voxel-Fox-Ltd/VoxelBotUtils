@@ -33,7 +33,7 @@ class OauthGuild(object):
         return self.icon_url_as()
 
     def icon_url_as(self, *, format=None, static_format='webp', size=1024):
-        return Asset._from_guild_icon(None, self, format=format, static_format=static_format, size=size)
+        return discord.Asset._from_guild_icon(None, self, format=format, static_format=static_format, size=size)
 
     async def fetch_guild(self, bot=None) -> typing.Optional[discord.Guild]:
         """
@@ -86,7 +86,7 @@ class OauthUser(object):
         return self.avatar_url_as()
 
     def avatar_url_as(self, *, format=None, static_format='webp', size=1024):
-        return Asset._from_avatar(None, self, format=format, static_format=static_format, size=size)
+        return discord.Asset._from_avatar(None, self, format=format, static_format=static_format, size=size)
 
 
 class OauthMember(OauthUser):
