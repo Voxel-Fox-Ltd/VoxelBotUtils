@@ -21,13 +21,19 @@ class OauthGuild(object):
         self.id: int = int(guild_data.get("id"))
         self.name: str = guild_data.get("name")
         self.icon: str = guild_data.get("icon")
-        self.icon_url: discord.Asset = discord.Asset._from_guild_icon(None, self)
         self.owner_id: int = user.id if guild_data.get("owner") else 0
         self.features: typing.List[str] = guild_data.get("features")
         self._bot: discord.Client = bot
 
     def is_icon_animated(self) -> bool:
         return self.icon.startswith("a_")
+
+    @property
+    def icon_url(self):
+        return self.icon_url_as()
+
+    def icon_url_as(self, *, format=None, static_format='webp', size=1024):
+        return Asset._from_guild_icon(None, self, format=format, static_format=static_format, size=size)
 
     async def fetch_guild(self, bot=None) -> typing.Optional[discord.Guild]:
         """
@@ -67,7 +73,6 @@ class OauthUser(object):
         self.id: int = int(user_data['id'])
         self.username: str = user_data.get("username")
         self.avatar: str = user_data.get("avatar")
-        self.avatar_url: discord.Asset = discord.Asset._from_avatar(None, self)
         self.discriminator: str = user_data.get("discriminator")
         self.public_flags: discord.PublicUserFlags = discord.PublicUserFlags._from_value(user_data.get("public_flags", 0))
         self.locale: str = user_data.get("locale")
@@ -75,6 +80,13 @@ class OauthUser(object):
 
     def is_avatar_animated(self) -> bool:
         return self.avatar.startswith("a_")
+
+    @property
+    def avatar_url(self):
+        return self.avatar_url_as()
+
+    def avatar_url_as(self, *, format=None, static_format='webp', size=1024):
+        return Asset._from_avatar(None, self, format=format, static_format=static_format, size=size)
 
 
 class OauthMember(OauthUser):
