@@ -61,6 +61,9 @@ def get_prefix(bot, message: discord.Message):
 
     # Make it slightly more case insensitive
     prefix.extend([i.title() for i in prefix if i])
+    prefix.extend([i.upper() for i in prefix if i])
+    prefix.extend([i.lower() for i in prefix if i])
+    prefix = list(set(prefix))  # Remove those duplicates
 
     # Add spaces for words
     possible_word_prefixes = [i for i in prefix if i and not any([o in i for o in string.punctuation])]
