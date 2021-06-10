@@ -102,6 +102,9 @@ class InteractionMessageable(Messageable):
         await self._state.http.request(r, json={"type": self.ACK_RESPONSE_TYPE, "data": {"flags": flags.value}})
         self._sent_ack_response = True
 
+    async def respond(self, *args, **kwargs):
+        await self.send(*args, wait=False, **kwargs)
+
     def typing(self, *args, **kwargs):
         return InteractionTyping(self)
 

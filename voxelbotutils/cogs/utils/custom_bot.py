@@ -396,7 +396,8 @@ class MinimalBot(commands.AutoShardedBot):
             reference: discord.MessageReference = None, mention_author: bool = None,
             components: MessageComponents = None,
             ephemeral: bool = False, embeddify: bool = None,
-            image_url: bool = None, embeddify_file: bool = True):
+            image_url: bool = None, embeddify_file: bool = True,
+            wait: bool = True):
         """
         An alternative send method so that we can add components to messages.
 
@@ -453,16 +454,34 @@ class MinimalBot(commands.AutoShardedBot):
                 raise TypeError(f"Components kwarg must be of type {MessageComponents}")
             components = components.to_dict()
 
-        # Get our playload data
+        # Send a response if it's an interaction
         if isinstance(channel, (list, tuple)):
-            if not messageable._sent_ack_response:  # Sent no responses - send an ack
+
+            # Sent no responses - send an ack
+            if not messageable._sent_ack_response and wait:
                 await messageable.ack(ephemeral=ephemeral)
-            if messageable.ACK_IS_EDITABLE and messageable._sent_ack_response and not messageable._sent_message_response:  # Sent an ack that we should edit
+
+            # Sent no responses but we don't want a message object back from Discord
+            elif not messageable._sent_ack_response:
+                r = discord.http.Route('POST', '/interactions/{interaction_id}/{token}/callback', app_id=channel[0], token=channel[2])
+
+            # We've sent a response so we're just reset the wait param
+            else:
+                wait = True
+
+            # Sent an ack that we should edit
+            if messageable.ACK_IS_EDITABLE and messageable._sent_ack_response and not messageable._sent_message_response:
                 r = discord.http.Route('PATCH', '/webhooks/{app_id}/{token}/messages/@original', app_id=channel[1], token=channel[2])
-            else:  # Sent an ack and a response, or sent an ack with no editable original message
+
+            # Sent an ack and a response, or sent an ack with no editable original message
+            else:
                 r = discord.http.Route('POST', '/webhooks/{app_id}/{token}', app_id=channel[1], token=channel[2])
+
+        # Send a response if it's a channel
         else:
             r = discord.http.Route('POST', '/channels/{channel_id}/messages', channel_id=channel.id)
+
+        # Build a payload to send
         payload = {}
         if content:
             payload['content'] = content
@@ -512,7 +531,11 @@ class MinimalBot(commands.AutoShardedBot):
                 for f in files:
                     f.close()
         else:
+            if not wait:
+                payload = {"type": 4, "data": payload}
             response_data = await self.http.request(r, json=payload)
+
+        # Set the attributes for the interactions
         try:
             messageable._sent_ack_response = True
         except AttributeError:
@@ -521,6 +544,10 @@ class MinimalBot(commands.AutoShardedBot):
             messageable._sent_message_response = True
         except AttributeError:
             pass
+
+        # See if we want to respond with anything
+        if not wait:
+            return
 
         # Make the message object
         if isinstance(channel, (list, tuple)):
