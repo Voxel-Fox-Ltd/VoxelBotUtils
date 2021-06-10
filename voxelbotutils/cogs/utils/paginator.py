@@ -149,7 +149,7 @@ class Paginator(object):
                     Button(
                         custom_id="END",
                         emoji="\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}",
-                        disabled=self.max_pages != "?" and self.current_page >= self.max_pages - 1,
+                        disabled=self.max_pages == "?" or self.current_page >= self.max_pages - 1,
                     ),
                 )
             )
