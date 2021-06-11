@@ -466,7 +466,7 @@ class MinimalBot(commands.AutoShardedBot):
 
             # Sent no responses but we don't want a message object back from Discord
             elif not messageable._sent_ack_response:
-                r = RouteV8('POST', '/interactions/{interaction_id}/{token}/callback', interaction_id=channel[0], token=channel[2])
+                r = discord.http.Route('POST', '/interactions/{interaction_id}/{token}/callback', interaction_id=channel[0], token=channel[2])
 
             # We've sent a response so we're just reset the wait param
             else:
@@ -491,7 +491,7 @@ class MinimalBot(commands.AutoShardedBot):
         if tts:
             payload['tts'] = True
         if embed:
-            if r.path.startswith('/webhooks'):
+            if r.path.startswith('/webhooks') or r.path.startswith('/interactions'):
                 payload['embeds'] = [embed]
             else:
                 payload['embed'] = embed
@@ -534,8 +534,8 @@ class MinimalBot(commands.AutoShardedBot):
                 for f in files:
                     f.close()
         else:
-            if not wait:
-                payload = {"type": 4, "data": payload}
+            if wait is False:
+                payload = {"type": 4, "data": payload.copy()}
             response_data = await self.http.request(r, json=payload)
 
         # Set the attributes for the interactions
@@ -549,7 +549,7 @@ class MinimalBot(commands.AutoShardedBot):
             pass
 
         # See if we want to respond with anything
-        if not wait:
+        if wait is False:
             return
 
         # Make the message object
