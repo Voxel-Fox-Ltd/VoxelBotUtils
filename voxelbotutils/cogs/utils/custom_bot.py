@@ -466,7 +466,7 @@ class MinimalBot(commands.AutoShardedBot):
 
             # Sent no responses but we don't want a message object back from Discord
             elif not messageable._sent_ack_response:
-                r = discord.http.Route('POST', '/interactions/{interaction_id}/{token}/callback', app_id=channel[0], token=channel[2])
+                r = discord.http.Route('POST', '/interactions/{interaction_id}/{token}/callback', interaction_id=channel[0], token=channel[2])
 
             # We've sent a response so we're just reset the wait param
             else:

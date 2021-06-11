@@ -96,8 +96,8 @@ class InteractionMessageable(Messageable):
                 command.
         """
 
-        app_id, _, token = await self._get_channel()
-        r = discord.http.Route('POST', '/interactions/{app_id}/{token}/callback', app_id=app_id, token=token)
+        interaction_id, _, token = await self._get_channel()
+        r = discord.http.Route('POST', '/interactions/{interaction_id}/{token}/callback', interaction_id=interaction_id, token=token)
         flags = discord.MessageFlags(ephemeral=ephemeral)
         await self._state.http.request(r, json={"type": self.ACK_RESPONSE_TYPE, "data": {"flags": flags.value}})
         self._sent_ack_response = True
