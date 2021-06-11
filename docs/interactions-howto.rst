@@ -3,6 +3,18 @@ Interactions Howto
 
 Interactions such as slash commands and buttons are some sexy lil additions to Discord. As such, you'll probably want to use them. Fortunately, VoxelBotUtils makes this pretty easy. Aside from the howto, there's a :ref:`full API reference<interactions>` on the main API reference page.
 
+Responding to an Interaction
+------------------------------------------
+
+Interactions need to be responded to, or it shows as "this interaction has failed" in the Discord UI. The Discord API supports a few ways of responding, but there are two ways built into VBU:
+
+* :code:`ack` an interaction, and respond later.
+* :code:`respond` to an interaction, and receive no :class:`discord.Message` object back.
+
+Using the :func:`respond` method will send a type 4 response in the backend, which means that you're unable to receive a message object back from the API, but it does allow you to give responses without showing the loading symbol - a use case for this could be an ephemeral message saying "you can't use this button" or suchlike.
+
+The respond method is functionally identical to using :code:`wait=False` on the response's :code:`send` method.
+
 Slash Commands
 ------------------------------------------
 

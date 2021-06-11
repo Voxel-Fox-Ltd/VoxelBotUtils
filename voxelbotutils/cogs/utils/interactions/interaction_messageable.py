@@ -103,6 +103,11 @@ class InteractionMessageable(Messageable):
         self._sent_ack_response = True
 
     async def respond(self, *args, **kwargs):
+        """
+        Send a type 4 response to Discord for the interaction. The :func:`send` method does this for
+        you automatically if you use the :code:`wait=False` kwarg.
+        """
+
         await self.send(*args, wait=False, **kwargs)
 
     def typing(self, *args, **kwargs):

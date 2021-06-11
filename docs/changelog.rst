@@ -15,6 +15,7 @@ New Features
 * The :class:`discord.Message` and :class:`discord.WebhookMessage` objects have been replaced with subclasses that include message components.
 * Added :class:`voxelbotutils.SelectMenu` and related objects.
 * Message objects now have :code:`enable_components` and :code:`disable_components` methods.
+* :class:`voxelbotutils.InteractionMessageable` now has a :func:`respond<voxelbotutils.InteractionMessageable.respond>` method that allows you to give a type 4 response to an interaction.
 
 Changed Features
 """"""""""""""""""""""""

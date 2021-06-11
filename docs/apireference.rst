@@ -144,7 +144,7 @@ InteractionMessageable
 .. autoclass:: voxelbotutils.InteractionMessageable
    :no-members:
    :no-special-members:
-   :members: ack
+   :members: ack, respond
 
 BaseComponent
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

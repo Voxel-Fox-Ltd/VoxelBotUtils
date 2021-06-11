@@ -4,7 +4,7 @@ from discord.ext import commands as _dpy_commands
 from . import checks, converters, errors, interactions  # Interactions is only here for backdating
 from .checks import cooldown
 from .context_embed import Embed
-from .custom_bot import MinimalBot, Bot
+from .custom_bot import MinimalBot, Bot, ComponentMessage
 from .custom_cog import Cog
 from .custom_command import Command, Group, SubcommandGroup
 from .custom_context import Context
