@@ -410,7 +410,7 @@ class MinimalBot(commands.AutoShardedBot):
         # Work out where we want to send to
         channel = await messageable._get_channel()
         content, embed = self.get_context_message(
-            channel, content=content, embed=embed, file=file, embeddify=embeddify,
+            messageable, content=content, embed=embed, file=file, embeddify=embeddify,
             image_url=image_url, embeddify_file=embeddify_file,
         )
         state = self._connection
@@ -466,7 +466,7 @@ class MinimalBot(commands.AutoShardedBot):
 
             # Sent no responses but we don't want a message object back from Discord
             elif not messageable._sent_ack_response:
-                r = discord.http.Route('POST', '/interactions/{interaction_id}/{token}/callback', interaction_id=channel[0], token=channel[2])
+                r = RouteV8('POST', '/interactions/{interaction_id}/{token}/callback', interaction_id=channel[0], token=channel[2])
 
             # We've sent a response so we're just reset the wait param
             else:
