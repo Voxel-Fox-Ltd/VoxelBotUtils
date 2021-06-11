@@ -468,16 +468,12 @@ class MinimalBot(commands.AutoShardedBot):
             elif not messageable._sent_ack_response:
                 r = discord.http.Route('POST', '/interactions/{interaction_id}/{token}/callback', interaction_id=channel[0], token=channel[2])
 
-            # We've sent a response so we're just reset the wait param
-            else:
-                wait = True
-
             # Sent an ack that we should edit
-            if messageable.ACK_IS_EDITABLE and messageable._sent_ack_response and not messageable._sent_message_response:
+            if wait and messageable.ACK_IS_EDITABLE and messageable._sent_ack_response and not messageable._sent_message_response:
                 r = discord.http.Route('PATCH', '/webhooks/{app_id}/{token}/messages/@original', app_id=channel[1], token=channel[2])
 
             # Sent an ack and a response, or sent an ack with no editable original message
-            else:
+            elif wait:
                 r = discord.http.Route('POST', '/webhooks/{app_id}/{token}', app_id=channel[1], token=channel[2])
 
         # Send a response if it's a channel
