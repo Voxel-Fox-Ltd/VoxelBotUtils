@@ -281,7 +281,11 @@ class ErrorHandler(utils.Cog):
         # Ping unhandled errors to the owners and to the event webhook
         error_string = "".join(traceback.format_exception(None, error, error.__traceback__))
         file_handle = io.StringIO(error_string + "\n")
-        error_text = f"Error `{error}` encountered.\nGuild `{ctx.guild.id}`, channel `{ctx.channel.id}`, user `{ctx.author.id}`\n```\n{ctx.message.content}\n```"
+        guild_id = ctx.guild.id if ctx.guild else None
+        error_text = (
+            f"Error `{error}` encountered.\nGuild `{guild_id}`, channel `{ctx.channel.id}`, "
+            f"user `{ctx.author.id}`\n```\n{ctx.message.content}\n```"
+        )
 
         # DM to owners
         if self.bot.config.get('dm_uncaught_errors', False):

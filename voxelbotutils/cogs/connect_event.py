@@ -5,6 +5,24 @@ import discord
 from . import utils
 
 
+def try_id(item):
+    """
+    Try and get the ID from an item, otherwise returning None.
+    """
+
+    try:
+        return item.id
+    except AttributeError:
+        return None
+
+
+def try_username(bot):
+    try:
+        return bot.user.name
+    except Exception:
+        return bot.application_id
+
+
 class ConnectEvent(utils.Cog):
 
     async def send_webhook(self, event_name: str, text: str, username: str, logger: str) -> bool:
@@ -46,7 +64,7 @@ class ConnectEvent(utils.Cog):
         await self.send_webhook(
             "shard_connect",
             f"Shard connect event just pinged for shard ID `{shard_id}` - {dt.utcnow().strftime('%X.%f')}",
-            f"{self.bot.user.name if self.bot.user else application_id} - Shard Connect",
+            f"{try_username(self.bot)} - Shard Connect",
             f"Sent webhook for on_shard_connect event in shard `{shard_id}`",
         )
 
@@ -60,7 +78,7 @@ class ConnectEvent(utils.Cog):
         await self.send_webhook(
             "shard_ready",
             f"Shard ready event just pinged for shard ID `{shard_id}` - {dt.utcnow().strftime('%X.%f')}",
-            f"{self.bot.user.name if self.bot.user else application_id} - Shard Ready",
+            f"{try_username(self.bot)} - Shard Ready",
             f"Sent webhook for on_shard_ready event in shard `{shard_id}`",
         )
 
@@ -74,7 +92,7 @@ class ConnectEvent(utils.Cog):
         await self.send_webhook(
             "bot_ready",
             f"Bot ready event just pinged for instance with shards `{self.bot.shard_ids}` - {dt.utcnow().strftime('%X.%f')}",
-            f"{self.bot.user.name if self.bot.user else application_id} - Ready",
+            f"{try_username(self.bot)} - Ready",
             "Sent webhook for on_ready event",
         )
 
@@ -88,7 +106,7 @@ class ConnectEvent(utils.Cog):
         await self.send_webhook(
             "shard_disconnect",
             f"Shard disconnect event just pinged for shard ID `{shard_id}` - {dt.utcnow().strftime('%X.%f')}",
-            f"{self.bot.user.name if self.bot.user else application_id} - Shard Disconnect",
+            f"{try_username(self.bot)} - Shard Disconnect",
             f"Sent webhook for on_shard_disconnect event in shard `{shard_id}`",
         )
 
@@ -102,7 +120,7 @@ class ConnectEvent(utils.Cog):
         await self.send_webhook(
             "bot_disconnect",
             f"Bot disconnect event just pinged for instance with shards `{self.bot.shard_ids or [0]}` - {dt.utcnow().strftime('%X.%f')}",
-            f"{self.bot.user.name if self.bot.user else application_id} - Disconnect",
+            f"{try_username(self.bot)} - Disconnect",
             "Sent webhook for on_disconnect event",
         )
 
@@ -116,7 +134,7 @@ class ConnectEvent(utils.Cog):
         await self.send_webhook(
             "shard_connect",
             f"Shard resumed event just pinged for shard ID `{shard_id}` - {dt.utcnow().strftime('%X.%f')}",
-            f"{self.bot.user.name if self.bot.user else application_id} - Shard Resumed",
+            f"{try_username(self.bot)} - Shard Resumed",
             f"Sent webhook for on_shard_resumed event in shard `{shard_id}`",
         )
 
@@ -130,7 +148,7 @@ class ConnectEvent(utils.Cog):
         await self.send_webhook(
             "bot_connect",
             f"Bot resumed event just pinged for instance with shards `{self.bot.shard_ids or [0]}` - {dt.utcnow().strftime('%X.%f')}",
-            f"{self.bot.user.name if self.bot.user else application_id} - Resumed",
+            f"{try_username(self.bot)} - Resumed",
             "Sent webhook for on_resumed event",
         )
 
@@ -144,7 +162,7 @@ class ConnectEvent(utils.Cog):
         await self.send_webhook(
             "guild_join",
             f"Added to new guild - ``{guild.name}``/``{guild.id}`` (`{guild.member_count}` members)",
-            f"{self.bot.user.name if self.bot.user else application_id} - Guild Join",
+            f"{try_username(self.bot)} - Guild Join",
             "Sent webhook for on_guild_join event",
         )
 
@@ -164,7 +182,7 @@ class ConnectEvent(utils.Cog):
             await self.send_webhook(
                 "guild_remove",
                 text,
-                f"{self.bot.user.name if self.bot.user else application_id} - Guild Remove",
+                f"{try_username(self.bot)} - Guild Remove",
                 "Sent webhook for on_guild_remove event",
             )
         else:
@@ -176,7 +194,7 @@ class ConnectEvent(utils.Cog):
             await self.send_webhook(
                 "guild_remove",
                 text,
-                f"{self.bot.user.name if self.bot.user else application_id} - Guild Remove",
+                f"{try_username(self.bot)} - Guild Remove",
                 "Sent webhook for on_guild_remove event",
             )
 
