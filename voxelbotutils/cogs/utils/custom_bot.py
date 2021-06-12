@@ -400,7 +400,8 @@ class MinimalBot(commands.AutoShardedBot):
             components: MessageComponents = None,
             ephemeral: bool = False, embeddify: bool = None,
             image_url: bool = None, embeddify_file: bool = True,
-            wait: bool = True):
+            wait: bool = True,
+            embeds: typing.List[discord.Embed] = None):
         """
         An alternative send method so that we can add components to messages.
 
@@ -419,8 +420,14 @@ class MinimalBot(commands.AutoShardedBot):
 
         # Work out the main content
         content = str(content) if content is not None else None
-        if embed is not None:
-            embed = embed.to_dict()
+        if embed is not None and embeds is not None:
+            raise discord.InvalidArgument('cannot pass both file and embeds parameter to send()')
+        if embed:
+            embeds = [embed]
+        if embeds and len(embeds) > 10:
+            raise discord.InvalidArgument('embeds parameter must be a list of up to 10 elements')
+        if embeds:
+            embeds = [embed.to_dict() for embed in embeds]
 
         # Work out our allowed mentions
         if allowed_mentions is not None:
@@ -486,11 +493,8 @@ class MinimalBot(commands.AutoShardedBot):
             payload['content'] = content
         if tts:
             payload['tts'] = True
-        if embed:
-            if r.path.startswith('/webhooks') or r.path.startswith('/interactions'):
-                payload['embeds'] = [embed]
-            else:
-                payload['embed'] = embed
+        if embeds:
+            payload['embeds'] = [embed]
         if nonce:
             payload['nonce'] = nonce
         if allowed_mentions:
@@ -583,16 +587,17 @@ class MinimalBot(commands.AutoShardedBot):
 
         # Make the embeds
         try:
-            embed = fields['embed']
+            embed = fields.get('embed', fields['embeds'])
         except KeyError:
             pass
         else:
             if embed is not None:
-                if isinstance(message, discord.WebhookMessage):
-                    fields['embeds'] = [embed.to_dict()]
-                    fields.pop('embed')
+                if isinstance(embed, list):
+                    fields['embeds'] = [embed.to_dict() for embed in embeds]
+                    fields.pop('embed', None)
                 else:
-                    fields['embed'] = embed.to_dict()
+                    fields['embeds'] = [embed.to_dict()]
+                    fields.pop('embed', None)
 
         # Make the components
         try:
