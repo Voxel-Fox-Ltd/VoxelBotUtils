@@ -240,7 +240,10 @@ class ErrorHandler(utils.Cog):
             utils.errors.IsNotUpgradeChatSubscriber, utils.errors.IsNotVoter, utils.errors.NotBotSupport,
         )
         if isinstance(error, owner_reinvoke_errors) and ctx.original_author_id in self.bot.owner_ids:
-            return await ctx.reinvoke()
+            if self.bot.config.get("owners_ignore_check_failures", True) and isinstance(error, commands.CheckFailure):
+                pass
+            else:
+                return await ctx.reinvoke()
 
         # See if the command itself has an error handler AND it isn't a locally handlled arg
         # if hasattr(ctx.command, "on_error") and not isinstance(ctx.command, utils.Command):

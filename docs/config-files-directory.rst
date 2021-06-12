@@ -72,6 +72,13 @@ Bot Config File
 
       Whether or not error messages triggered by slash commands should be ephemeral or not.
 
+   .. attribute:: owners_ignore_check_failures
+      :type: bool
+
+      .. versionadded:: 0.4.1
+
+      Whether or not check failures are ignored for owners.
+
    .. class:: event_webhook
 
       A simple webhook that recieves event pings.
