@@ -130,6 +130,9 @@ class MinimalBot(commands.AutoShardedBot):
         # Make sure we init the bot
         super().__init__(*args, **kwargs)
 
+        # Add some attrs that appear in a lot of places
+        self.application_id = None
+
         # Mess with the default D.py message send and edit methods
         async def send_button_msg_prop(messagable, *args, **kwargs) -> discord.Message:
             return await self._send_button_message(messagable, *args, **kwargs)
@@ -177,6 +180,18 @@ class MinimalBot(commands.AutoShardedBot):
 
         # discord.Message = ComponentMessage
         # discord.WebhookMessage = ComponentWebhookMessage
+
+    async def get_application_id(self) -> int:
+        """
+        Get the bot's application client ID.
+        """
+
+        if self.application_id:
+            return self.application_id
+        app = await self.application_info()
+        self.application_id = app.id
+        self._connection.application_id = app.id
+        return self.application_id
 
     async def create_message_log(
             self, messages: typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]) -> str:
@@ -763,9 +778,6 @@ class Bot(MinimalBot):
         # Aiohttp session
         self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=self.loop)
 
-        # Application ID (may not be bot ID)
-        self.application_id = None
-
         # Allow database connections like this
         self.database: DatabaseConnection = DatabaseConnection
         self.database.logger = self.logger.getChild('database')
@@ -1056,18 +1068,6 @@ class Bot(MinimalBot):
         except discord.InvalidArgument:
             self.logger.error(f"The webhook set in your config for the event {event_name} is not a valid Discord webhook")
             return None
-
-    async def get_application_id(self) -> int:
-        """
-        Get the bot's application client ID.
-        """
-
-        if self.application_id:
-            return self.application_id
-        app = await self.application_info()
-        self.application_id = app.id
-        self._connection.application_id = app.id
-        return self.application_id
 
     async def add_delete_reaction(
             self, message: discord.Message, valid_users: typing.List[discord.User] = None, *,
