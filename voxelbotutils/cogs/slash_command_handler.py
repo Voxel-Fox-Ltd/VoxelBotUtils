@@ -205,7 +205,7 @@ class SlashCommandHandler(utils.Cog):
         if isinstance(command, utils.Group):
             subcommands = list(command.commands)
             valid_subcommands = []
-            for i in (await self.bot.help_command.filter_commands_classmethod(ctx, subcommands)):
+            for i in (await utils.HelpCommand.filter_commands_classmethod(ctx, subcommands)):
                 if getattr(i, 'add_slash_command', True):
                     valid_subcommands.append(i)
             for subcommand in valid_subcommands:
@@ -223,7 +223,7 @@ class SlashCommandHandler(utils.Cog):
         slash_commands = []
         commands = list(ctx.bot.commands)
         filtered_commands = []
-        for i in (await self.bot.help_command.filter_commands_classmethod(ctx, commands)):
+        for i in (await utils.HelpCommand.filter_commands_classmethod(ctx, commands)):
             if getattr(i, 'add_slash_command', True):
                 filtered_commands.append(i)
         for command in filtered_commands:
