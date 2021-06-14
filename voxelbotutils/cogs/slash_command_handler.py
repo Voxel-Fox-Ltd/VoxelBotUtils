@@ -40,6 +40,7 @@ class SlashCommandHandler(utils.Cog):
         discord.PartialEmoji: utils.interactions.ApplicationCommandOptionType.STRING,
         str: utils.interactions.ApplicationCommandOptionType.STRING,
         int: utils.interactions.ApplicationCommandOptionType.INTEGER,
+        float: utils.interactions.ApplicationCommandOptionType.INTEGER,  # Controversial take
         inspect._empty: utils.interactions.ApplicationCommandOptionType.STRING,
     }
 
@@ -234,15 +235,15 @@ class SlashCommandHandler(utils.Cog):
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
-    async def addinteractioncommands(self, ctx, guild: bool = False, *, command_name: str = None):
+    async def addinteractioncommands(self, ctx, guild: bool = False, *command_names: str):
         """
         Adds all of the bot's interaction commands to the global interaction handler.
         """
 
         # Get the commands we want to add
         ctx.author = ctx.guild.me
-        if command_name:
-            commands_to_add = [await self.convert_into_application_command(ctx, self.bot.get_command(command_name))]
+        if command_names:
+            commands_to_add = [await self.convert_into_application_command(ctx, self.bot.get_command(i)) for i in command_names]
         else:
             commands_to_add: typing.List[utils.interactions.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
         command_names_to_add = [i.name for i in commands_to_add]
@@ -251,7 +252,7 @@ class SlashCommandHandler(utils.Cog):
         async with ctx.typing():
 
             # Remove old slash commands if we're adding all of them as new
-            if command_name is None:
+            if not command_names:
 
                 # Get the commands that currently exist
                 if guild:
