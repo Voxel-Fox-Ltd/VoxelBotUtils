@@ -372,14 +372,14 @@ class MinimalBot(commands.AutoShardedBot):
         )
         return await self.http.request(r)
 
-    async def get_context(self, message, *, cls=Context) -> 'discord.ext.commands.Context':
+    async def get_context(self, message, *, cls=None) -> 'discord.ext.commands.Context':
         """
         Create a new context object using the utils' Context.
 
         :meta private:
         """
 
-        return await super().get_context(message, cls=cls)
+        return await super().get_context(message, cls=cls or Context)
 
     def get_context_message(self, channel, content, embed, *args, **kwargs):
         """
@@ -529,14 +529,14 @@ class MinimalBot(commands.AutoShardedBot):
                                 'filename': file.filename, 'content_type': 'application/octet-stream',
                             }
                         )
-                response_data = await self.http.request(r, form=form, files=files)
+                response_data = await messageable._state.http.request(r, form=form, files=files)
             finally:
                 for f in files:
                     f.close()
         else:
             if wait is False:
                 payload = {"type": 4, "data": payload.copy()}
-            response_data = await self.http.request(r, json=payload)
+            response_data = await messageable._state.http.request(r, json=payload)
 
         # Set the attributes for the interactions
         try:
@@ -655,7 +655,7 @@ class MinimalBot(commands.AutoShardedBot):
                     app_id=message._state._webhook.id, token=message._state._webhook.token,
                     message_id=message.id,
                 )
-                response_data = await self.http.request(r, json=fields)
+                response_data = await message._state.http.request(r, json=fields)
             else:
                 response_data = await message._state.http.edit_message(message.channel.id, message.id, **fields)
             message._update(response_data)
