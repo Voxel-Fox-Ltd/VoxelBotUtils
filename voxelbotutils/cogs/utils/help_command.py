@@ -4,16 +4,18 @@ import typing
 import discord
 from discord.ext import commands
 
+from .errors import InvokedMetaCommand, NotBotSupport
+
 
 class HelpCommand(commands.MinimalHelpCommand):
 
     HELP_COMMAND_HIDDEN_ERRORS = (
         commands.DisabledCommand, commands.NotOwner,
-        utils.errors.NotBotSupport, utils.errors.InvokedMetaCommand,
+        NotBotSupport, InvokedMetaCommand,
     )
 
     @classmethod
-    async def filter_commands_classmethod(cls, ctx, commands_to_filter: typing.List[utils.Command]) -> typing.List[utils.Command]:
+    async def filter_commands_classmethod(cls, ctx, commands_to_filter: typing.List[commands.Command]) -> typing.List[commands.Command]:
         """
         Filter the command list down into a list of runnable commands.
         """
@@ -31,7 +33,7 @@ class HelpCommand(commands.MinimalHelpCommand):
             returned_commands.append(comm)
         return returned_commands
 
-    async def filter_commands(self, commands_to_filter: typing.List[utils.Command]) -> typing.List[utils.Command]:
+    async def filter_commands(self, commands_to_filter: typing.List[commands.Command]) -> typing.List[commands.Command]:
         """
         Filter the command list down into a list of runnable commands.
         """
@@ -68,7 +70,7 @@ class HelpCommand(commands.MinimalHelpCommand):
             command: []
         })
 
-    async def send_bot_help(self, mapping: typing.Dict[typing.Optional[utils.Cog], typing.List[commands.Command]]):
+    async def send_bot_help(self, mapping: typing.Dict[typing.Optional[commands.Cog], typing.List[commands.Command]]):
         """
         Sends all help to the given channel.
         """
@@ -168,7 +170,7 @@ class HelpCommand(commands.MinimalHelpCommand):
         embed.colour = random.randint(1, 0xffffff)
         return embed
 
-    def get_help_line(self, command: utils.Command, with_signature: bool = False):
+    def get_help_line(self, command: commands.Command, with_signature: bool = False):
         """
         Gets a doc line of help for a given command.
         """
