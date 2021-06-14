@@ -421,7 +421,7 @@ class MinimalBot(commands.AutoShardedBot):
         # Work out the main content
         content = str(content) if content is not None else None
         if embed is not None and embeds is not None:
-            raise discord.InvalidArgument('cannot pass both file and embeds parameter to send()')
+            raise discord.InvalidArgument('cannot pass both embed and embeds parameter to send()')
         if embed:
             embeds = [embed]
         if embeds and len(embeds) > 10:
@@ -494,7 +494,7 @@ class MinimalBot(commands.AutoShardedBot):
         if tts:
             payload['tts'] = True
         if embeds:
-            payload['embeds'] = [embed]
+            payload['embeds'] = embeds
         if nonce:
             payload['nonce'] = nonce
         if allowed_mentions:
@@ -594,10 +594,9 @@ class MinimalBot(commands.AutoShardedBot):
             if embed is not None:
                 if isinstance(embed, list):
                     fields['embeds'] = [embed.to_dict() for embed in embeds]
-                    fields.pop('embed', None)
                 else:
                     fields['embeds'] = [embed.to_dict()]
-                    fields.pop('embed', None)
+                fields.pop('embed', None)
 
         # Make the components
         try:
