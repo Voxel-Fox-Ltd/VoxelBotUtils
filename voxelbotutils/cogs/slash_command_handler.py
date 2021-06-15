@@ -283,7 +283,7 @@ class SlashCommandHandler(utils.Cog):
                         filename="slash_commands.json",
                     )
                     error_text = await e.response.json()
-                    await ctx.send(f"```json\n{json.dmups(error_text, indent=4)}```", file=file)
+                    await ctx.send(f"```json\n{json.dumps(error_text, indent=4)}```", file=file)
                 except discord.HTTPException:
                     pass
                 return
