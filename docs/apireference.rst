@@ -362,6 +362,11 @@ SettingsMenuOption
 
 .. autoclass:: voxelbotutils.SettingsMenuOption
 
+SettingsMenuConverter
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.SettingsMenuConverter
+
 SettingsMenuIterable
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
