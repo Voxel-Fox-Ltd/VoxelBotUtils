@@ -53,10 +53,10 @@ owners_ignore_check_failures = true  # Whether or not owners ignore check failur
 
 # Data that's copied directly over to a command
 [command_data]
-    website_link = ""  # A link to be used on !website
-    guild_invite = ""  # A link to be used on !support
-    github_link = ""  # A link to be used on !git
-    donate_link = ""  # A link to be used on !donate
+    website_link = ""  # Text to be output when !website is used
+    guild_invite = ""  # Text to be output when !support is used
+    github_link = ""  # Text to be output when !git is used
+    donate_link = ""  # Text to be output when !donate is used
     echo_command_enabled = true  # Whether or not the echo command is enabled
     stats_command_enabled = true  # Whether or not the stats command is enabled
     vote_command_enabled = false  # Whether or not the top.gg vote command is enabled
@@ -65,7 +65,7 @@ owners_ignore_check_failures = true  # Whether or not owners ignore check failur
 
 # Used to generate the invite link
 [oauth]
-    enabled = false  # Whether or not an invite link is enabled via the !invite command
+    enabled = true  # Whether or not an invite link is enabled via the !invite command
     base = ""  # The base url
     response_type = ""  # The response type given to the redirect URI
     redirect_uri = ""  # Where the user should be redirected to upon authorizing
