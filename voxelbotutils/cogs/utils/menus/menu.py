@@ -10,6 +10,8 @@ from .mixins import MenuDisplayable
 from .callbacks import MenuCallbacks
 from .converter import Converter
 from ..interactions.components import Button, ButtonStyle, MessageComponents
+from ..custom_cog import Cog
+from ..custom_command import Command
 
 
 def _do_nothing(return_value=None):
@@ -45,6 +47,20 @@ class Menu(MenuDisplayable):
         self.display = display  # Used for nested menus
         self.component_display = component_display  # Used for nested menus
         self._options = list(options)
+
+    def create_cog(self, *, cog_name: str = "Bot Settings", name: str = "setup", aliases: typing.List[str] = None, **command_kwargs):
+        """
+        Creates a cog that can be loaded into the bot in a setup method.
+        """
+
+        aliases = aliases or ["settings"]
+
+        class NestedCog(Cog, name=cog_name):
+            @commands.command(cls=Command, name=name, aliases=aliases, **command_kwargs)
+            async def setup(nested_self, ctx):
+                await self.start(ctx)
+
+        return NestedCog
 
     async def get_options(self, ctx: commands.Context, force_regenerate: bool = False):
         """
@@ -144,7 +160,7 @@ class Menu(MenuDisplayable):
             for i in options:
                 output = await i.get_display(ctx)
                 if output:
-                    output_strings.append(output)
+                    output_strings.append(f"\N{BULLET} {output}")
                 style = (ButtonStyle.SECONDARY if isinstance(i._callback, Menu) else None) or i._button_style or ButtonStyle.PRIMARY
                 buttons.append(Button(
                     i.component_display,
