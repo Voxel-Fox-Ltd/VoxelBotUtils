@@ -11,6 +11,17 @@ from discord.ext import commands
 FakeResponse = collections.namedtuple("FakeResponse", ["status", "reason"])
 
 
+class _FakeMentionable(discord.Object):
+
+    def __init__(self, id: int, mention: str = "null", name: str = "null"):
+        self.id = id
+        self.mention = mention
+        self.name = name
+
+    def __str__(self):
+        return self.name
+
+
 class Context(commands.Context):
     """
     A modified version of the default :class:`discord.ext.commands.Context` to allow for things like
@@ -56,3 +67,37 @@ class Context(commands.Context):
             f"<@!{self.bot.user.id}>",
             f"@{self.bot.user.name}",
         )
+
+    def get_mentionable_channel(self, channel_id: int, fallback: str = "null") -> str:
+        """
+        Get the mention string for a given channel ID.
+
+        Args:
+            channel_id (int): The ID of the object that you want to mention.
+            fallback (str, optional): The string to fall back to if the object isn't reachable.
+
+        Returns:
+            str: The mention string.
+        """
+
+        x = self.bot.get_channel(int(channel_id))
+        if x:
+            return x
+        return _FakeMentionable(id, fallback, fallback)
+
+    def get_mentionable_role(self, role_id: int, fallback: str = "null") -> str:
+        """
+        Get the mention string for a given role ID.
+
+        Args:
+            role_id (int): The ID of the object that you want to mention.
+            fallback (str, optional): The string to fall back to if the object isn't reachable.
+
+        Returns:
+            str: The mention string.
+        """
+
+        x = self.guild.get_role(int(role_id))
+        if x:
+            return x
+        return _FakeMentionable(id, fallback, fallback)
