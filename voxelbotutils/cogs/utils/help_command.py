@@ -1,5 +1,6 @@
 import random
 import typing
+import collections
 
 import discord
 from discord.ext import commands
@@ -13,6 +14,7 @@ class HelpCommand(commands.MinimalHelpCommand):
         commands.DisabledCommand, commands.NotOwner,
         NotBotSupport, InvokedMetaCommand,
     )
+    HELP_COMMAND_NAMES = ["help", "commands", "channelhelp"]
 
     @classmethod
     async def filter_commands_classmethod(cls, ctx, commands_to_filter: typing.List[commands.Command]) -> typing.List[commands.Command]:
@@ -21,8 +23,8 @@ class HelpCommand(commands.MinimalHelpCommand):
         """
 
         if ctx.author.id in ctx.bot.owner_ids:
-            return [i for i in commands_to_filter if i.name != "help"]
-        valid_commands = [i for i in commands_to_filter if i.hidden is False and i.enabled is True and i.name != "help"]
+            return [i for i in commands_to_filter if i.name not in HELP_COMMAND_NAMES]
+        valid_commands = [i for i in commands_to_filter if i.hidden is False and i.enabled is True and i.name not in HELP_COMMAND_NAMES]
         returned_commands = []
         for comm in valid_commands:
             try:
@@ -86,14 +88,14 @@ class HelpCommand(commands.MinimalHelpCommand):
         help_embed = self.get_initial_embed()
 
         # Add each command to the embed
-        command_strings = []
+        command_string_dict = collections.defaultdict(str)
         for cog, cog_commands in runnable_commands.items():
-            value = '\n'.join([self.get_help_line(command) for command in cog_commands])
+            value = '\n'.join([self.get_help_line(command) for command in cog_commands]) + '\n'
             try:
                 cog_name = cog.qualified_name
             except AttributeError:
                 cog_name = "Uncategorized"
-            command_strings.append((cog_name, value))
+            command_string_dict[cog_name] += value
 
             # See if it's a command with subcommands
             if isinstance(cog, commands.Group):
@@ -102,7 +104,7 @@ class HelpCommand(commands.MinimalHelpCommand):
                 help_embed.description = self.get_help_line(cog, with_signature=True)
 
         # Order embed by length before embedding
-        command_strings.sort(key=lambda x: len(x[1]), reverse=True)
+        command_strings = sorted(list(command_string_dict.items()), key=lambda x: x[1].count('\n'), reverse=True)
         for name, value in command_strings:
             if value.strip():
                 help_embed.add_field(
