@@ -600,18 +600,26 @@ class MinimalBot(commands.AutoShardedBot):
             if content is not None:
                 fields['content'] = str(content)
 
-        # Make the embeds
+        # Make the embed[s]
         try:
-            embed = fields.get('embed', fields['embeds'])
+            embed = fields.pop('embed')
         except KeyError:
-            pass
+            try:
+                embeds = fields.pop('embeds')
+            except KeyError:
+                pass
+            else:
+                if embeds is not None:
+                    embeds = [e.to_dict() for e in embeds]
+                else:
+                    embeds = []
+                fields['embeds'] = embeds
         else:
             if embed is not None:
-                if isinstance(embed, list):
-                    fields['embeds'] = [embed.to_dict() for embed in embeds]
-                else:
-                    fields['embeds'] = [embed.to_dict()]
-                fields.pop('embed', None)
+                embeds = [embed.to_dict()]
+            else:
+                embeds = []
+            fields['embeds'] = embeds
 
         # Make the components
         try:

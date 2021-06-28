@@ -3,6 +3,16 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.5.0
+--------------------------------------
+
+This update is mainly to deal with breaking changes for the settings menus.
+
+Changed Features
+""""""""""""""""""""""""
+
+* The settings menus have been entirely, incompatibly, redone.
+
 0.4.0
 --------------------------------------
 

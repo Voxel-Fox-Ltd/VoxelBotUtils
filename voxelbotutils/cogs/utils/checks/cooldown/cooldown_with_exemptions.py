@@ -7,7 +7,7 @@ class CooldownWithChannelExemptions(Cooldown):
     """
     A custom cooldown which allows for channel allow/deny listing by name.
 
-    Params:
+    Attributes:
         cooldown_in : typing.List[str]
             A list of channel names where the cooldown should apply. If left blank, it'll apply everywhere minus the deny list given.
         no_cooldown_in : typing.List[str]

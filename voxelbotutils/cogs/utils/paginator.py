@@ -125,30 +125,30 @@ class Paginator(object):
             components = MessageComponents(
                 ActionRow(
                     Button(
+                        label="Start",
                         custom_id="START",
-                        emoji="\N{BLACK LEFT-POINTING DOUBLE TRIANGLE}",
                         disabled=self.current_page == 0,
                     ),
                     Button(
+                        label="Previous",
                         custom_id="PREVIOUS",
-                        emoji="\N{LEFTWARDS BLACK ARROW}",
                         style=ButtonStyle.SECONDARY,
                         disabled=self.current_page == 0,
                     ),
                     Button(
+                        label="Stop",
                         custom_id="STOP",
-                        emoji="\N{BLACK SQUARE FOR STOP}",
                         style=ButtonStyle.DANGER,
                     ),
                     Button(
+                        label="Next",
                         custom_id="NEXT",
-                        emoji="\N{BLACK RIGHTWARDS ARROW}",
                         style=ButtonStyle.SECONDARY,
                         disabled=self.max_pages != "?" and self.current_page >= self.max_pages - 1,
                     ),
                     Button(
+                        label="End",
                         custom_id="END",
-                        emoji="\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}",
                         disabled=self.max_pages == "?" or self.current_page >= self.max_pages - 1,
                     ),
                 )

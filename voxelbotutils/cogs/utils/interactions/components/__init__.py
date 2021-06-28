@@ -17,6 +17,19 @@ class ComponentInteractionPayload(InteractionMessageable):
     ACK_IS_EDITABLE = False
     IS_COMPONENT = True
 
+    @staticmethod
+    def get_component_from_payload(components, search_id):
+        """
+        Get a component from the message payload given its custom ID.
+        """
+
+        clicked_button_payload = None
+        for action_row in components:
+            for component in action_row.get('components', list()):
+                if component.get('custom_id', None) == search_id:
+                    return component
+        return None
+
     @classmethod
     def from_payload(cls, data, state):
         """
@@ -25,26 +38,22 @@ class ComponentInteractionPayload(InteractionMessageable):
 
         # Try and find the component that was clicked
         clicked_button_id = data['data']['custom_id']
-        clicked_button_payload = None
-        for action_row in data['message'].get('components', list()):
-            for component in action_row.get('components', list()):
-                if component.get('custom_id', None) == clicked_button_id:
-                    clicked_button_payload = component
-                    break
-            if clicked_button_payload is not None:
-                break
+        clicked_button_payload = cls.get_component_from_payload(
+            data['message'].get('components', list()),
+            clicked_button_id,
+        )
 
         # Get the component type that we want to reconstruct
-        clicked_button_type = BaseComponent
+        component_model = BaseComponent
         if clicked_button_payload:
             component_model = component_types.get(clicked_button_payload['type'], BaseComponent)
 
         # And reconstruct that model
-        if clicked_button_type == BaseComponent:
+        try:
+            clicked_button_object = component_model.from_dict(clicked_button_payload)
+        except NotImplementedError:
             clicked_button_object = BaseComponent()
             clicked_button_object.custom_id = clicked_button_id
-        else:
-            clicked_button_object = clicked_button_type.from_dict(clicked_button_payload)
 
         # Make the response
         v = cls()
