@@ -4,7 +4,7 @@ import typing
 import discord
 
 
-class CheckFailure(enum.Enum):
+class CheckFailureAction(enum.Enum):
     """
     An enum describing actions that can be taken when a check fails.
 
@@ -34,18 +34,12 @@ class Check(object):
                 on_failure=voxelbotutils.menus.Check.failures.RETRY,
                 fail_message="You need to give a *number* between **7** and **31**.",
             )
-
-    Attributes:
-        check (typing.Callable[[discord.Message], bool]): A method that takes a message instance, returning whether or not
-            this instance has converted properly. This cannot be a coroutine.
-        fail_message (str, optional): If the message doesn't pass the check, this is the message that string that gets output.
-        on_failure (CheckFailure, optional): The action to take upon the check failing.
     """
 
-    failures = CheckFailure
+    failures = CheckFailureAction
 
     def __init__(
-            self, check: typing.Callable[[discord.Message], bool] = None, on_failure: CheckFailure = CheckFailure.FAIL,
+            self, check: typing.Callable[[discord.Message], bool] = None, on_failure: CheckFailureAction = CheckFailureAction.FAIL,
             fail_message: str = None):
         """
         Attributes:
@@ -56,5 +50,5 @@ class Check(object):
         """
 
         self.check: typing.Callable[discord.Message] = check
-        self.on_failure: CheckFailure = on_failure
+        self.on_failure: CheckFailureAction = on_failure
         self.fail_message: str = fail_message or "Please provide a valid input."

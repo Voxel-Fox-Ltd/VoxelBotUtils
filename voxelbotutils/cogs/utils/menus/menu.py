@@ -25,11 +25,6 @@ def _do_nothing(return_value=None):
 class Menu(MenuDisplayable):
     """
     A menu using components that's meant to ease up the process of doing settings within your bot.
-
-    Attributes:
-        display (str, optional): When using a nested submenu, this is the option that should be displayed.
-        component_display (str, optional): When using a nested submenu, this is the option that
-            should be displayed in the component.
     """
 
     callbacks = MenuCallbacks
@@ -38,7 +33,7 @@ class Menu(MenuDisplayable):
             self, *options: typing.List[Option], display: str = None, component_display: str = None):
         """
         Params:
-            *options (typing.List[Option]): A list of options that should be displayed in the menu.
+            options (typing.List[Option]): A list of options that should be displayed in the menu.
             display (str, optional): When using a nested submenu, this is the option that should be displayed.
             component_display (str, optional): When using a nested submenu, this is the option that
                 should be displayed in the component.
@@ -185,20 +180,6 @@ class Menu(MenuDisplayable):
 class MenuIterable(Menu, Option):
     """
     A menu instance that takes and shows iterable data.
-
-    Attributes:
-        select_sql (str): Description
-        select_sql_args (typing.Callable[[commands.Context], typing.List[typing.Any]]): Description
-        delete_sql (str): Description
-        delete_sql_args (typing.Callable[[commands.Context], typing.List[typing.Any]]): Description
-        row_text_display (typing.Callable[[commands.Context, dict], str]): Description
-        row_component_display (typing.Callable[[commands.Context, dict], str]): Description
-        converters (typing.List[Converter]): Description
-        insert_sql (str): Description
-        insert_sql_args (typing.Callable[[commands.Context], typing.List[typing.Any]]): Description
-        cache_callback (typing.Optional[typing.Callable[[commands.Context, typing.List[typing.Any]], None]]): Description
-        cache_delete_callback (typing.Optional[typing.Callable[[commands.Context, typing.List[typing.Any]], None]]): Description
-        cache_delete_args (typing.Optional[typing.Callable[[dict], typing.List[typing.Any]]]): Description
     """
 
     allow_none = False

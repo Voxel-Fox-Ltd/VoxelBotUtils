@@ -12,23 +12,6 @@ from .utils import async_wrap_callback
 class Option(MenuDisplayable):
     """
     An object for use in menus so as to represent one of the clickable options in the settings menus.
-
-    Attributes:
-        display (typing.Union[str, typing.Callable[[commands.Context], str]]): The item
-            that string be shown on the menu itself. If a string is passed, then it will
-            be given :code:`.format(ctx)`. If a method is passed, then it will be given a
-            :class:`discord.ext.commands.Context` object as an argument.
-        component_display (str): The string that gets shown in the button for this option.
-        converters (typing.Optional[typing.List[Converter]]): A list of converters that the
-            user should be asked for.
-        callback (typing.Callable[[commands.Context, typing.List[typing.Any]], None]): An async
-            function that will be given the context object and a list of the converted user-provided
-            arguments.
-        cache_callback (typing.Optional[typing.Callable[[commands.Context, typing.List[typing.Any]], None]]):
-            An async function that will be given the context object and a list of the
-            converted user-provided arguments. This is provided as well as the :param:`callback` parameter
-            so as to allow for the seperation of different reusable methods.
-        allow_none (bool): Whether or not the option should allow :code:`None` as a valid input.
     """
 
     def __init__(
