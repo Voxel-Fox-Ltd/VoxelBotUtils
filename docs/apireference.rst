@@ -347,32 +347,6 @@ converters.FilteredMember
    :no-special-members:
    :no-members:
 
-
-Settings Menus
-------------------------------------------------------------
-
-SettingsMenu
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.SettingsMenu
-   :no-special-members:
-
-SettingsMenuOption
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.SettingsMenuOption
-
-SettingsMenuConverter
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.SettingsMenuConverter
-
-SettingsMenuIterable
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.SettingsMenuIterable
-   :no-members:
-
 Errors
 -----------------------------------------------
 
