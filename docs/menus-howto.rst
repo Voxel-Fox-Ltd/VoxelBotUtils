@@ -1,4 +1,4 @@
-Interactions Howto
+Menus Howto
 ##########################################
 
 Menus are a pain to implement yourself in a lot of cases, so VoxelBotUtils does its best to handle those for you in an intuitive way.
