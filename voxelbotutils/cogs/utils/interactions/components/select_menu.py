@@ -2,7 +2,7 @@ import typing
 
 import discord
 
-from .models import BaseComponent, get_partial_emoji
+from .models import BaseComponent, DisableableComponent, get_partial_emoji
 
 
 class SelectOption(BaseComponent):
@@ -72,7 +72,7 @@ class SelectOption(BaseComponent):
         )
 
 
-class SelectMenu(BaseComponent):
+class SelectMenu(DisableableComponent):
     """
     Discord's dropdown component.
     """
@@ -82,7 +82,7 @@ class SelectMenu(BaseComponent):
 
     def __init__(
             self, custom_id: str, options: typing.List[SelectOption], placeholder: str = None,
-            min_values: int = None, max_values: int = None):
+            min_values: int = None, max_values: int = None, disabled: bool = False):
         """
         Args:
             custom_id (str): The custom ID for this component.
@@ -90,6 +90,7 @@ class SelectMenu(BaseComponent):
             placeholder (str, optional): The placeholder text for when nothing is selected.
             min_values (int, optional): The minimum amount of selectable values.
             max_values (int, optional): The maximum amount of selectable values.
+            disabled (bool, optional): Whether or not the select menu is clickable.
         """
 
         self.custom_id = custom_id
@@ -97,6 +98,7 @@ class SelectMenu(BaseComponent):
         self.placeholder = placeholder
         self.min_values = min_values or 1
         self.max_values = max_values or 1
+        self.disabled = disabled
 
     def to_dict(self):
         return {
@@ -106,6 +108,7 @@ class SelectMenu(BaseComponent):
             "min_values": self.min_values,
             "max_values": self.max_values,
             "options": [i.to_dict() for i in self.options],
+            "disabled": self.disabled
         }
 
     @classmethod
@@ -118,4 +121,5 @@ class SelectMenu(BaseComponent):
             placeholder=data.get("placeholder"),
             min_values=data.get("min_values"),
             max_values=data.get("max_values"),
+            disabled=data.get("disabled", False)
         )
