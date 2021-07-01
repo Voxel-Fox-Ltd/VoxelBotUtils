@@ -82,6 +82,14 @@ class Paginator(object):
                 pages += 1
             self.max_pages = pages
 
+        self._message = None
+
+    async def _edit_message(self, ctx, *args, **kwargs):
+        if self._message is None:
+            self._message = await ctx.send(*args, **kwargs)
+        else:
+            await self._message.edit(*args, **kwargs)
+
     async def start(self, ctx: commands.Context, *, timeout: float = 120):
         """
         Start and handle a paginator instance.
@@ -97,7 +105,6 @@ class Paginator(object):
         if self.max_pages == 0:
             await ctx.send("There's no data to be shown.")
             return
-        message = await ctx.send("Menu loading...")
 
         # Loop the reaction handler
         last_payload = None
@@ -107,7 +114,7 @@ class Paginator(object):
             try:
                 items = await self.get_page(self.current_page)
             except (KeyError, IndexError):
-                await message.edit(content="There's no data to be shown.")
+                await self._edit_message(ctx, content="There's no data to be shown.")
                 break
 
             # Format the page data
@@ -156,7 +163,7 @@ class Paginator(object):
 
             # See if the content is unchanged
             if payload != last_payload:
-                await message.edit(**payload, components=components)
+                await self._edit_message(ctx, **payload, components=components)
 
             # See if we want to bother paginating
             last_payload = payload
@@ -166,7 +173,7 @@ class Paginator(object):
             # Wait for reactions to be added by the user
             component_payload = None
             try:
-                check = lambda p: p.user.id == ctx.author.id and p.message.id == message.id
+                check = lambda p: p.user.id == ctx.author.id and p.message.id == self._message.id
                 component_payload = await ctx.bot.wait_for("component_interaction", check=check, timeout=timeout)
                 await component_payload.ack()
             except asyncio.TimeoutError:
