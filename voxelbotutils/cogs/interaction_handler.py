@@ -1,4 +1,3 @@
-import discord
 from discord.ext import commands
 
 from . import utils
@@ -31,6 +30,11 @@ class InteractionHandler(utils.Cog):
         else:
             payload_data_options = list()
 
+        # Put our options in a dict
+        given_values = {}
+        for i in payload_data_options:
+            given_values[i['name']] = i['value']
+
         # Make a string view
         command_args = [f"{i['value']}" for i in payload_data_options]
         view = commands.view.StringView(f"/{command_name.rstrip()} {' '.join(command_args)}")
@@ -47,9 +51,9 @@ class InteractionHandler(utils.Cog):
             data=payload,
             content=view.buffer,
         )
-        self.logger.debug(f"Made up fake message for interaction command")
+        self.logger.debug("Made up fake message for interaction command")
         ctx = cls(prefix="/", view=view, bot=self.bot, message=fake_message)
-        self.logger.debug(f"Made up fake context for interaction command")
+        self.logger.debug("Made up fake context for interaction command")
         ctx.data = payload
         ctx.original_author_id = fake_message.author.id
         view.skip_string(ctx.prefix)
@@ -58,9 +62,10 @@ class InteractionHandler(utils.Cog):
         # Make it work
         ctx.invoked_with = invoker
         ctx.command = self.bot.get_command(invoker)
+        ctx.given_values = given_values
 
         # Return context
-        self.logger.debug(f"Returning context object")
+        self.logger.debug("Returning context object")
         return ctx
 
     @utils.Cog.listener()
@@ -80,12 +85,35 @@ class InteractionHandler(utils.Cog):
         # See if it's a slash command
         elif payload['d']['type'] == 2:
             ctx = await self.get_context_from_interaction(payload['d'])
-            if ctx.command:
-                self.logger.debug("Invoking interaction context for command %s" % (ctx.command.name))
-            else:
+
+            # Invoke non-commands too
+            if not ctx.command:
                 self.logger.warning("No command found for interaction invoker %s" % (ctx.invoked_with))
-            # ctx._send_interaction_response_callback()
-            await self.bot.invoke(ctx)
+                self.bot.dispatch("command_error", ctx, commands.CommandNotFound())
+                return
+
+            # Convert our stuff
+            self.logger.debug("Invoking interaction context for command %s" % (ctx.command.name))
+            converted = {}
+            for name, value in ctx.given_values.items():
+                sig = ctx.command.clean_params[name]
+                converter = ctx.command._get_converter(sig)
+                v = await ctx.command.do_conversion(ctx, converter, value, sig)
+                converted[name] = v
+
+            # See if it can be run
+            try:
+                await ctx.command.can_run(ctx)
+            except commands.CommandError as e:
+                self.bot.dispatch("command_error", ctx, e)
+                return
+
+            # Try and run it
+            try:
+                await ctx.invoke(ctx.command, **converted)
+            except commands.CommandError as e:
+                self.bot.dispatch("command_error", ctx, e)
+                return
             return
 
         # See if it was a clicked component
