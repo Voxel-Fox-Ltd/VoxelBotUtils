@@ -43,7 +43,7 @@ class Menu(MenuDisplayable):
         self.component_display = component_display  # Used for nested menus
         self._options = list(options)
 
-    def create_cog(self, *, cog_name: str = "Bot Settings", name: str = "setup", aliases: typing.List[str] = None, **command_kwargs):
+    def create_cog(self, bot=None, *, cog_name: str = "Bot Settings", name: str = "setup", aliases: typing.List[str] = None, **command_kwargs):
         """
         Creates a cog that can be loaded into the bot in a setup method.
         """
@@ -55,6 +55,8 @@ class Menu(MenuDisplayable):
             async def setup(nested_self, ctx):
                 await self.start(ctx)
 
+        if bot:
+            return NestedCot(bot)
         return NestedCog
 
     async def get_options(self, ctx: commands.Context, force_regenerate: bool = False):
