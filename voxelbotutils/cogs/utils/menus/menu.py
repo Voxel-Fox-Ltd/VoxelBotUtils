@@ -56,7 +56,7 @@ class Menu(MenuDisplayable):
                 await self.start(ctx)
 
         if bot:
-            return NestedCot(bot)
+            return NestedCog(bot)
         return NestedCog
 
     async def get_options(self, ctx: commands.Context, force_regenerate: bool = False):
