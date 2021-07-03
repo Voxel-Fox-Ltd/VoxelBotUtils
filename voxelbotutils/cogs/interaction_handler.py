@@ -64,6 +64,7 @@ class InteractionHandler(utils.Cog):
         # Make it work
         ctx.invoked_with = invoker
         ctx.command = self.bot.get_command(command_name)
+        ctx.command_name = command_name
         ctx.given_values = given_values
 
         # Return context
@@ -96,6 +97,9 @@ class InteractionHandler(utils.Cog):
 
             # Convert our stuff
             self.logger.debug("Invoking interaction context for command %s" % (ctx.command.name))
+            self.logger.debug(ctx.command)
+            self.logger.debug(ctx.command_name)
+            self.logger.debug(ctx.given_values)
             positional_converted = []
             kwarg_converted = {}
             for name, value in ctx.given_values.items():
