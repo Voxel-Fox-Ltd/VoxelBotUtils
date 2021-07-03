@@ -23,8 +23,8 @@ class HelpCommand(commands.MinimalHelpCommand):
         """
 
         if ctx.author.id in ctx.bot.owner_ids:
-            return [i for i in commands_to_filter if i.name not in HELP_COMMAND_NAMES]
-        valid_commands = [i for i in commands_to_filter if i.hidden is False and i.enabled is True and i.name not in HELP_COMMAND_NAMES]
+            return [i for i in commands_to_filter if i.name not in cls.HELP_COMMAND_NAMES]
+        valid_commands = [i for i in commands_to_filter if i.hidden is False and i.enabled is True and i.name not in cls.HELP_COMMAND_NAMES]
         returned_commands = []
         for comm in valid_commands:
             try:
