@@ -63,7 +63,7 @@ class InteractionHandler(utils.Cog):
 
         # Make it work
         ctx.invoked_with = invoker
-        ctx.command = self.bot.get_command(invoker)
+        ctx.command = self.bot.get_command(command_name)
         ctx.given_values = given_values
 
         # Return context
