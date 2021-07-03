@@ -97,9 +97,9 @@ class InteractionHandler(utils.Cog):
 
             # Convert our stuff
             self.logger.debug("Invoking interaction context for command %s" % (ctx.command.name))
-            self.logger.debug(ctx.command)
-            self.logger.debug(ctx.command_name)
-            self.logger.debug(ctx.given_values)
+            # self.logger.debug(ctx.command)
+            # self.logger.debug(ctx.command_name)
+            # self.logger.debug(ctx.given_values)
             positional_converted = []
             kwarg_converted = {}
             for name, value in ctx.given_values.items():
