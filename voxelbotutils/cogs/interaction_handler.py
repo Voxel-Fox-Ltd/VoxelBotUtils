@@ -1,3 +1,5 @@
+import inspect
+
 from discord.ext import commands
 
 from . import utils
@@ -94,12 +96,16 @@ class InteractionHandler(utils.Cog):
 
             # Convert our stuff
             self.logger.debug("Invoking interaction context for command %s" % (ctx.command.name))
-            converted = {}
+            positional_converted = []
+            kwarg_converted = {}
             for name, value in ctx.given_values.items():
                 sig = ctx.command.clean_params[name]
                 converter = ctx.command._get_converter(sig)
                 v = await ctx.command.do_conversion(ctx, converter, value, sig)
-                converted[name] = v
+                if sig.kind in [inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD]:
+                    positional_converted.append(v)
+                else:
+                    kwarg_converted[name] = v
 
             # See if it can be run
             try:
@@ -110,7 +116,7 @@ class InteractionHandler(utils.Cog):
 
             # Try and run it
             try:
-                await ctx.invoke(ctx.command, **converted)
+                await ctx.invoke(ctx.command, *positional_converted, **kwarg_converted)
             except commands.CommandError as e:
                 self.bot.dispatch("command_error", ctx, e)
                 return
