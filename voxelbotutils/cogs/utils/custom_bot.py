@@ -4,7 +4,6 @@ import glob
 import logging
 import typing
 import copy
-from datetime import datetime as dt
 from urllib.parse import urlencode
 import string
 import platform
@@ -25,6 +24,7 @@ from .statsd import StatsdConnection
 from .analytics_log_handler import AnalyticsLogHandler
 from .upgrade_chat import UpgradeChat
 from .interactions.components import MessageComponents
+from .models import ComponentMessage, ComponentWebhookMessage
 from . import interactions
 from .. import all_packages as all_vfl_package_names
 
@@ -86,39 +86,6 @@ class RouteV8(discord.http.Route):
     BASE = 'https://discord.com/api/v8'
 
 
-_original_message = discord.Message
-_original_webhook_message = discord.WebhookMessage
-
-
-class ComponentMessage(_original_message):
-
-    __slots__ = _original_message.__slots__ + ("components",)
-
-    def __init__(self, *, state, channel, data):
-        self.components = MessageComponents.from_dict(data.get("components", list()))
-        super().__init__(state=state, channel=channel, data=data)
-
-    async def wait_for_component_interaction(self, *args, **kwargs):
-        pass
-
-    async def clear_components(self, *args, **kwargs):
-        pass
-
-    async def disable_components(self, *args, **kwargs):
-        pass
-
-    async def enable_components(self, *args, **kwargs):
-        pass
-
-    @classmethod
-    async def convert(cls, ctx, value):
-        return await commands.MessageConverter().convert(ctx, value)
-
-
-class ComponentWebhookMessage(ComponentMessage, _original_webhook_message):
-    pass
-
-
 class MinimalBot(commands.AutoShardedBot):
     """
     A minimal version of the VoxelBotUtils bot that inherits from :class:`discord.ext.commands.AutoShardedBot`
@@ -156,6 +123,9 @@ class MinimalBot(commands.AutoShardedBot):
         async def enable_components_msg_prop(message):
             return await message.edit(components=message.components.enable_components())
 
+        def create_message_prop(state, *args, **kwargs):
+            return ComponentMessage(state=state, *args, **kwargs)
+
         Messageable.send = send_button_msg_prop
         discord.message.MessageFlags.ephemeral = discord.flags.flag_value(lambda _: 64)
         discord.message.MessageFlags.VALID_FLAGS.update({"ephemeral": 64})
@@ -180,6 +150,8 @@ class MinimalBot(commands.AutoShardedBot):
 
         # discord.Message = ComponentMessage
         # discord.WebhookMessage = ComponentWebhookMessage
+
+        self._connection.create_message = create_message_prop
 
     async def get_application_id(self) -> int:
         """
@@ -429,7 +401,10 @@ class MinimalBot(commands.AutoShardedBot):
             messageable, content=content, embed=embed, file=file, embeddify=embeddify,
             image_url=image_url, embeddify_file=embeddify_file,
         )
-        state = self._connection
+        try:
+            state = messageable._state
+        except AttributeError:
+            state = self._connection
         lock = getattr(messageable, "_send_interaction_response_lock", asyncio.Lock())
         await lock.acquire()
 
@@ -572,7 +547,7 @@ class MinimalBot(commands.AutoShardedBot):
             webhook = discord.Webhook.partial(channel[1], channel[2], adapter=discord.AsyncWebhookAdapter(session=self.session))
             webhook._state = self._connection
             partial_webhook_state = discord.webhook._PartialWebhookState(webhook._adapter, webhook, parent=webhook._state)
-            ret = discord.WebhookMessage(data=response_data, state=partial_webhook_state, channel=messageable.channel)
+            ret = ComponentWebhookMessage(data=response_data, state=partial_webhook_state, channel=messageable.channel)
         else:
             ret = state.create_message(channel=channel, data=response_data)
 

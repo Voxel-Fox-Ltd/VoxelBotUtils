@@ -20,6 +20,7 @@ from .upgrade_chat import (
 from .paginator import Paginator
 from .interactions.components import *
 from .help_command import HelpCommand
+from .models import ComponentMessage, ComponentWebhookMessage
 
 
 def command(*args, **kwargs):
