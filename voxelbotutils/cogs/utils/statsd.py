@@ -57,7 +57,7 @@ class StatsdConnection(object):
     logger: logging.Logger = None
     __slots__ = ('conn',)
 
-    def __init__(self, connection:aiodogstatsd.Client=None):
+    def __init__(self, connection: aiodogstatsd.Client = None):
         """:meta private:"""
 
         self.conn = connection

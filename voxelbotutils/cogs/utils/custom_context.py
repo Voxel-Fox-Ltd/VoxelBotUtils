@@ -1,9 +1,5 @@
-import typing
-import asyncio
-import random
 import collections
 
-import aiohttp
 import discord
 from discord.ext import commands
 

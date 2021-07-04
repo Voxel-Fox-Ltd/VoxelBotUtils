@@ -33,7 +33,7 @@ class RedisConnection(object):
     logger: logging.Logger = None  # Set as a child of bot.logger
     lock_manager: aioredlock.Aioredlock = None
 
-    def __init__(self, connection: aioredis.RedisConnection=None):
+    def __init__(self, connection: aioredis.RedisConnection = None):
         """:meta private:"""
 
         self.conn = connection
