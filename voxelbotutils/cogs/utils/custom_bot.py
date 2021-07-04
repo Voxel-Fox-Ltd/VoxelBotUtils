@@ -16,6 +16,7 @@ import discord
 import toml
 from discord.ext import commands
 from discord.abc import Messageable
+from discord.state import ConnectionState
 
 from .custom_context import Context
 from .database import DatabaseConnection
@@ -151,7 +152,7 @@ class MinimalBot(commands.AutoShardedBot):
         # discord.Message = ComponentMessage
         # discord.WebhookMessage = ComponentWebhookMessage
 
-        self._connection.create_message = create_message_prop
+        ConnectionState.create_message = create_message_prop
 
     async def get_application_id(self) -> int:
         """

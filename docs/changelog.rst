@@ -9,7 +9,7 @@ A human-readable list of changes between versions.
 New Features
 """""""""""""""""""""""""""""""""""""""""""""""""
 
-* Allow a bot parameter in :func:`voxelbotutils.menus.SettingsMenu.create_cog`.
+* Allow a bot parameter in :func:`voxelbotutils.menus.Menu.create_cog`.
 
 Changed Features
 """"""""""""""""""""""""""""""""""""""""""""""""""
