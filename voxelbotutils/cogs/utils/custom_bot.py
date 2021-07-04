@@ -124,8 +124,8 @@ class MinimalBot(commands.AutoShardedBot):
         async def enable_components_msg_prop(message):
             return await message.edit(components=message.components.enable_components())
 
-        def create_message_prop(state, *args, **kwargs):
-            return ComponentMessage(state=state, *args, **kwargs)
+        # def create_message_prop(state, *args, **kwargs):
+        #     return ComponentMessage(state=state, *args, **kwargs)
 
         Messageable.send = send_button_msg_prop
         discord.message.MessageFlags.ephemeral = discord.flags.flag_value(lambda _: 64)
@@ -152,7 +152,7 @@ class MinimalBot(commands.AutoShardedBot):
         # discord.Message = ComponentMessage
         # discord.WebhookMessage = ComponentWebhookMessage
 
-        ConnectionState.create_message = create_message_prop
+        # ConnectionState.create_message = create_message_prop
 
     async def get_application_id(self) -> int:
         """
@@ -550,7 +550,8 @@ class MinimalBot(commands.AutoShardedBot):
             partial_webhook_state = discord.webhook._PartialWebhookState(webhook._adapter, webhook, parent=webhook._state)
             ret = ComponentWebhookMessage(data=response_data, state=partial_webhook_state, channel=messageable.channel)
         else:
-            ret = state.create_message(channel=channel, data=response_data)
+            # ret = state.create_message(channel=channel, data=response_data)
+            ret = ComponentMessage(state=state, channel=channel, data=response_data)
 
         # See if we want to delete the message
         lock.release()
