@@ -3,6 +3,34 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.5.2
+--------------------------------------
+
+New Features
+"""""""""""""""""""""""""""""""""""""""""""""""""
+
+* Allow a bot parameter in :func:`voxelbotutils.menus.SettingsMenu.create_cog`.
+
+Changed Features
+""""""""""""""""""""""""""""""""""""""""""""""""""
+
+* Message objects returned by the library will now be instances of :class:`voxelbotutils.ComponentMessage` or :class:`voxelbotutils.ComponentWebhookMessage`.
+* Handle parameters to slash commands better instead of leaving them to D.py to be converted.
+
+Bugs Fixed
+""""""""""""""""""""""""""""""""""""""""""""""""""
+
+* Fixed an issue where paginators wouldn't expire cleanly.
+
+0.5.1
+--------------------------------------
+
+Changed Features
+""""""""""""""""""""""""""""""""""""""""""""""""""
+
+* Allow select menus to be disabled
+* Don't add a "menu loading" message for paginators.
+
 0.5.0
 --------------------------------------
 

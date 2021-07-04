@@ -77,6 +77,12 @@ TimeValue
 
 .. autoclass:: voxelbotutils.TimeValue
 
+ComponentMessage
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.ComponentMessage
+.. autoclass:: voxelbotutils.ComponentWebhookMessage
+
 UpgradeChat Utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
