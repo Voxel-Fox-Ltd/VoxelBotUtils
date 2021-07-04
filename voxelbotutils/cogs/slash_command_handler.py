@@ -81,8 +81,7 @@ class SlashCommandHandler(utils.Cog):
         except AttributeError:
             pass
         try:
-            origin = annotation.__origin__
-            return True
+            return annotation.__origin__ is typing.Union
         except AttributeError:
             return False
 
@@ -259,7 +258,6 @@ class SlashCommandHandler(utils.Cog):
                     commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
                 else:
                     commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_global_application_commands()
-                command_json_current = [i.to_json() for i in commands_current]
 
                 # See which commands we need to delete
                 commands_to_remove = [i for i in commands_current if i.name not in command_names_to_add]
