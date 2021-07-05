@@ -89,7 +89,7 @@ class Menu(MenuDisplayable):
                     return False
                 if payload.user.id == ctx.author.id:
                     return True
-                payload.respond(f"Only {ctx.author.mention} can interact with these buttons.", ephemeral=True)
+                ctx.bot.loop.create_task(payload.respond(f"Only {ctx.author.mention} can interact with these buttons.", ephemeral=True))
                 return False
             return button_check
 
