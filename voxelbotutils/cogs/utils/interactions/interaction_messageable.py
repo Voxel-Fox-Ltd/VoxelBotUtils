@@ -38,11 +38,9 @@ class InteractionMessageable(Messageable):
             slash commands are used.
     """
 
-    IS_INTERACTION = True
-    IS_COMPONENT = False
+    is_interaction = True
     CAN_SEND_EPHEMERAL = True
     ACK_IS_EDITABLE = True
-    ACK_RESPONSE_TYPE = 5
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

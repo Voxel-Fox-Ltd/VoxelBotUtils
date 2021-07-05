@@ -17,7 +17,7 @@ class CommandEvent(utils.Cog):
         content = ctx.message.content.replace('\n', '\\n')[:self.CONTENT_LIMIT]
         if len(ctx.message.content) > self.CONTENT_LIMIT:
             content += '...'
-        invoke_text = "Interaction invoked" if ctx.IS_INTERACTION else "Command invoked"
+        invoke_text = "Interaction invoked" if ctx.is_interaction else "Command invoked"
         if ctx.guild is None:
             return logger.info(f"{invoke_text} ({ctx.invoked_with}) ~ (G0/C{ctx.channel.id}/U{ctx.author.id}) :: {content}")
         logger.info(f"{invoke_text} ({ctx.invoked_with}) ~ (G{ctx.guild.id}/C{ctx.channel.id}/U{ctx.author.id}) :: {content}")
