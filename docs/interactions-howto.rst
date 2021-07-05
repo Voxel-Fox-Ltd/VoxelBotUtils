@@ -58,7 +58,7 @@ Then for all button types other than :attr:`ButtonStyle.LINK`, you can get notif
 .. code-block:: python
 
    payload = await bot.wait_for("component_interaction", check=lambda p: p.message.id == 123123123123)
-   await payload.ack()
+   await payload.defer()
 
 After that, you can work out which of your buttons the user clicked on and take action based on that, sending back to the button payload so as to complete the interaction.
 

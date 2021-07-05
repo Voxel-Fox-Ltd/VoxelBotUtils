@@ -27,16 +27,16 @@ class Context(commands.Context):
         original_author_id (int): The ID of the original person to run the command. Persists through
             the bot's `sudo` command, if you want to check the original author.
         clean_prefix (str): A clean version of the prefix that the command was invoked with.
-        IS_INTERACTION (bool): Whether or not the command was invoked via a slash command.
+        is_interaction (bool): Whether or not the context was invoked via an interaction
     """
 
-    IS_INTERACTION = False
     CAN_SEND_EPHEMERAL = False
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.original_author_id = self.author.id
         self.is_slash_command = False
+        self.is_interaction = False
         self._send_interaction_response_task = None
 
     async def okay(self) -> None:
@@ -47,8 +47,12 @@ class Context(commands.Context):
         return await self.message.add_reaction("\N{OK HAND SIGN}")
 
     async def ack(self):
+        """:meta private: Deprecated"""
+        pass
+
+    async def defer(self):
         """
-        An ack method so we can use the same code for slash commands
+        A defer method so we can use the same code for slash commands
         as we do for text commands.
         """
 

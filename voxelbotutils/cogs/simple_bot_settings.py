@@ -70,7 +70,7 @@ class BotSettings(utils.Cog):
         try:
             check = lambda p: p.user.id == ctx.author.id and p.message.id == m.id
             payload = await self.bot.wait_for("component_interaction", check=check, timeout=120)
-            await payload.ack()
+            await payload.defer()
         except asyncio.TimeoutError:
             try:
                 await m.delete()

@@ -16,7 +16,7 @@ class InteractionTyping(Typing):
     async def do_typing(self, sleep_forever: bool = True):
         if not self.messageable._sent_ack_response and not self.messageable._sent_message_response:
             async with self.messageable._send_interaction_response_lock:
-                await self.messageable.ack()
+                await self.messageable.defer()
         while sleep_forever:
             await asyncio.sleep(5)  # Loop forever
 
@@ -52,6 +52,7 @@ class InteractionMessageable(Messageable):
         self._sent_message_response = False
 
         self.component = None  # We'll put the interacted-with component here if we get one
+        self.values = None
 
         # If we want to respond before sending a pending response, we can use type 4 - this responds intially with a message.
         #     After doing this we want to respond using webhooks rather than the interaction endpoint.
@@ -84,7 +85,11 @@ class InteractionMessageable(Messageable):
     async def trigger_typing(self, *args, **kwargs):
         await InteractionTyping(self).do_typing(sleep_forever=False)
 
-    async def ack(self, *, ephemeral: bool = False):
+    async def ack(self, *args, **kwargs):
+        """:meta private:"""
+        return await self.defer(*args, **kwargs)
+
+    async def defer(self, *, ephemeral: bool = False, defer_type: int = 5):
         """
         Send an acknowledge payload to Discord for the interaction. The :func:`send` method does this
         automatically if you haven't called it yourself, but if you're doing a time-intensive operation
@@ -99,16 +104,19 @@ class InteractionMessageable(Messageable):
         interaction_id, _, token = await self._get_channel()
         r = discord.http.Route('POST', '/interactions/{interaction_id}/{token}/callback', interaction_id=interaction_id, token=token)
         flags = discord.MessageFlags(ephemeral=ephemeral)
-        await self._state.http.request(r, json={"type": self.ACK_RESPONSE_TYPE, "data": {"flags": flags.value}})
+        json = {"type": defer_type}
+        if flags:
+            json.update({"data": {"flags": flags.value}})
+        await self._state.http.request(r, json=json)
         self._sent_ack_response = True
 
-    def respond(self, *args, **kwargs):
+    async def respond(self, *args, **kwargs):
         """
         Send a type 4 response to Discord for the interaction. The :func:`send` method does this for
         you automatically if you use the :code:`wait=False` kwarg.
         """
 
-        self._state.loop.create_task(self.send(*args, wait=False, **kwargs))
+        return await self.send(*args, wait=False, **kwargs)
 
     def typing(self, *args, **kwargs):
         return InteractionTyping(self)

@@ -86,7 +86,7 @@ class Converter(object):
                 return button_check
             try:
                 payload = await ctx.bot.wait_for("component_interaction", check=get_button_check(sent_message), timeout=60.0)
-                await payload.ack()
+                await payload.defer()
             except asyncio.TimeoutError:
                 raise ConverterTimeout(self.timeout_message)
             return await self.converter.convert(ctx, payload.component)
