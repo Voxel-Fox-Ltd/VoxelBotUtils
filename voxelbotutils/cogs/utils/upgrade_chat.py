@@ -299,7 +299,7 @@ class UpgradeChat(object):
     """
 
     BASE = "https://api.upgrade.chat/v1/{endpoint}"
-    USER_REQUEST_CACHE = collections.defaultdict(lambda: (dt(2000, 1, 1), None,))
+    USER_REQUEST_CACHE = collections.defaultdict(lambda: (None, dt(2000, 1, 1),))
 
     def __init__(self, client_id: str, client_secret: str):
         """
