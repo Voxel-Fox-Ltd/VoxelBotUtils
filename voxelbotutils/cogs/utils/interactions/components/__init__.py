@@ -1,10 +1,9 @@
 import discord
 
-from .models import BaseComponent, DisableableComponent, ComponentHolder
-from .action_row import MessageComponents, ActionRow, component_types
-from .buttons import ButtonStyle, Button
-from .select_menu import SelectOption, SelectMenu
+from .models import BaseComponent
+from .action_row import component_types
 from ..interaction_messageable import InteractionMessageable
+from ...models import ComponentMessage
 
 
 class ComponentInteractionPayload(InteractionMessageable):
@@ -12,10 +11,22 @@ class ComponentInteractionPayload(InteractionMessageable):
     An interaction messageable that comes from a component interaction.
     """
 
-    __slots__ = ("component", "user", "message", "guild", "channel", "_state", "data")
-    ACK_RESPONSE_TYPE = 6
+    __slots__ = ("component", "user", "message", "guild", "channel", "_state", "data",)
     ACK_IS_EDITABLE = False
-    IS_COMPONENT = True
+
+    async def defer_update(self):
+        """
+        Sends a deferred update payload to Discord for this interaction.
+        """
+
+        await self.defer(defer_type=6)
+
+    async def update_message(self, *args, **kwargs):
+        """
+        Sends an update to the original message as an interaction response.
+        """
+
+        return await self.send(*args, wait=False, _no_wait_response_type=7, **kwargs)
 
     @staticmethod
     def get_component_from_payload(components, search_id):
@@ -23,7 +34,6 @@ class ComponentInteractionPayload(InteractionMessageable):
         Get a component from the message payload given its custom ID.
         """
 
-        clicked_button_payload = None
         for action_row in components:
             for component in action_row.get('components', list()):
                 if component.get('custom_id', None) == search_id:
@@ -65,7 +75,7 @@ class ComponentInteractionPayload(InteractionMessageable):
         v.channel = channel
         v.guild = guild
         try:
-            v.message = discord.Message(channel=channel, data=data['message'], state=state)
+            v.message = ComponentMessage(channel=channel, data=data['message'], state=state)
         except KeyError:
             v.message = discord.PartialMessage(channel=channel, id=int(data['message']['id']))
         if guild:

@@ -16,7 +16,6 @@ import discord
 import toml
 from discord.ext import commands
 from discord.abc import Messageable
-from discord.state import ConnectionState
 
 from .custom_context import Context
 from .database import DatabaseConnection
@@ -388,8 +387,8 @@ class MinimalBot(commands.AutoShardedBot):
             components: MessageComponents = None,
             ephemeral: bool = False, embeddify: bool = None,
             image_url: bool = None, embeddify_file: bool = True,
-            wait: bool = True,
-            embeds: typing.List[discord.Embed] = None):
+            wait: bool = True, embeds: typing.List[discord.Embed] = None,
+            _no_wait_response_type: int = 4):
         """
         An alternative send method so that we can add components to messages.
 
@@ -458,19 +457,19 @@ class MinimalBot(commands.AutoShardedBot):
         # Send a response if it's an interaction
         if isinstance(channel, (list, tuple)):
 
-            # Sent no responses - send an ack
+            # Sent no responses but we want a message back - send a defer
             if not messageable._sent_ack_response and wait:
-                await messageable.ack(ephemeral=ephemeral)
+                await messageable.defer(ephemeral=ephemeral)
 
             # Sent no responses but we don't want a message object back from Discord
             elif not messageable._sent_ack_response:
                 r = discord.http.Route('POST', '/interactions/{interaction_id}/{token}/callback', interaction_id=channel[0], token=channel[2])
 
-            # Sent an ack that we should edit
+            # Sent a defer that we should edit
             if wait and messageable.ACK_IS_EDITABLE and messageable._sent_ack_response and not messageable._sent_message_response:
                 r = discord.http.Route('PATCH', '/webhooks/{app_id}/{token}/messages/@original', app_id=channel[1], token=channel[2])
 
-            # Sent an ack and a response, or sent an ack with no editable original message
+            # Sent a defer and a response, or sent a defer with no editable original message
             elif wait:
                 r = discord.http.Route('POST', '/webhooks/{app_id}/{token}', app_id=channel[1], token=channel[2])
 
@@ -526,7 +525,7 @@ class MinimalBot(commands.AutoShardedBot):
                     f.close()
         else:
             if wait is False:
-                payload = {"type": 4, "data": payload.copy()}
+                payload = {"type": _no_wait_response_type, "data": payload.copy()}
             response_data = await messageable._state.http.request(r, json=payload)
 
         # Set the attributes for the interactions
@@ -712,9 +711,9 @@ class Bot(MinimalBot):
 
     def __init__(
             self, config_file: str = 'config/config.toml', logger: logging.Logger = None,
-            activity:discord.Activity = discord.Game(name="Reconnecting..."),
+            activity: discord.Activity = discord.Game(name="Reconnecting..."),
             status: discord.Status = discord.Status.dnd, case_insensitive: bool = True,
-            intents:discord.Intents = None,
+            intents: discord.Intents = None,
             allowed_mentions: discord.AllowedMentions = discord.AllowedMentions(everyone=False),
             *args, **kwargs):
         """
@@ -1333,7 +1332,7 @@ class Bot(MinimalBot):
         if ctx.command is None:
             return await super().invoke(ctx)
         command_stats_name = ctx.command.qualified_name.replace(' ', '_')
-        command_stats_tags = {"command_name": command_stats_name, "slash_command": ctx.IS_INTERACTION}
+        command_stats_tags = {"command_name": command_stats_name, "slash_command": ctx.is_interaction}
         async with self.stats() as stats:
             stats.increment("discord.bot.commands", tags=command_stats_tags)
         return await super().invoke(ctx)
