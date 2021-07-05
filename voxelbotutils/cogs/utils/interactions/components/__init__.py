@@ -16,6 +16,10 @@ class ComponentInteractionPayload(InteractionMessageable):
     __slots__ = ("component", "user", "message", "guild", "channel", "_state", "data",)
     ACK_IS_EDITABLE = False
 
+    async def ack(self, *args, **kwargs):
+        """:meta private:"""
+        return await self.defer(*args, defer_type=6, **kwargs)
+
     async def defer_update(self):
         """
         Sends a deferred update payload to Discord for this interaction.
