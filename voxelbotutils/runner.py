@@ -112,6 +112,21 @@ class LogFilter(logging.Filter):
         return record.levelno < self.filter_level
 
 
+def _set_default_log_level(logger_name, log_filter, formatter, loglevel):
+    logger = logging.getLogger(logger_name) if isinstance(logger_name, str) else logger_name
+
+    stdout_logger = logging.StreamHandler(sys.stdout)
+    stdout_logger.addFilter(log_filter)
+    stdout_logger.setFormatter(formatter)
+    set_log_level(stdout_logger, loglevel)
+    logger.addHandler(stdout_logger)
+
+    stderr_logger = logging.StreamHandler(sys.stderr)
+    stderr_logger.setFormatter(formatter)
+    set_log_level(stderr_logger, loglevel, logging.WARNING)
+    logger.addHandler(stderr_logger)
+
+
 def set_default_log_levels(bot: Bot, args: argparse.Namespace) -> None:
     """
     Set the default levels for the logger
@@ -124,92 +139,20 @@ def set_default_log_levels(bot: Bot, args: argparse.Namespace) -> None:
     formatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s: %(message)s')
     bot.logger = logger
 
-    # Let's make a filter here so we can add that to the stdout handlers
     log_filter = LogFilter(logging.WARNING)
 
-    # Make our stream handlers
-    bot_stdout_logger = logging.StreamHandler(sys.stdout)
-    bot_stderr_logger = logging.StreamHandler(sys.stderr)
-    database_stdout_logger = logging.StreamHandler(sys.stdout)
-    database_stderr_logger = logging.StreamHandler(sys.stderr)
-    redis_stdout_logger = logging.StreamHandler(sys.stdout)
-    redis_stderr_logger = logging.StreamHandler(sys.stderr)
-    stats_stdout_logger = logging.StreamHandler(sys.stdout)
-    stats_stderr_logger = logging.StreamHandler(sys.stderr)
-    discord_stdout_logger = logging.StreamHandler(sys.stdout)
-    discord_stderr_logger = logging.StreamHandler(sys.stderr)
-    aiohttp_stdout_logger = logging.StreamHandler(sys.stdout)
-    aiohttp_stderr_logger = logging.StreamHandler(sys.stderr)
-    aiohttp_access_stdout_logger = logging.StreamHandler(sys.stdout)
-    aiohttp_access_stderr_logger = logging.StreamHandler(sys.stderr)
-
-    # Add the filters for the stdout handlers
-    bot_stdout_logger.addFilter(log_filter)
-    database_stdout_logger.addFilter(log_filter)
-    redis_stdout_logger.addFilter(log_filter)
-    stats_stdout_logger.addFilter(log_filter)
-    discord_stdout_logger.addFilter(log_filter)
-    aiohttp_stdout_logger.addFilter(log_filter)
-    aiohttp_access_stdout_logger.addFilter(log_filter)
-
-    # Add our formatters
-    bot_stdout_logger.setFormatter(formatter)
-    bot_stderr_logger.setFormatter(formatter)
-    database_stdout_logger.setFormatter(formatter)
-    database_stderr_logger.setFormatter(formatter)
-    redis_stdout_logger.setFormatter(formatter)
-    redis_stderr_logger.setFormatter(formatter)
-    stats_stdout_logger.setFormatter(formatter)
-    stats_stderr_logger.setFormatter(formatter)
-    discord_stdout_logger.setFormatter(formatter)
-    discord_stderr_logger.setFormatter(formatter)
-    aiohttp_stdout_logger.setFormatter(formatter)
-    aiohttp_stderr_logger.setFormatter(formatter)
-    aiohttp_access_stdout_logger.setFormatter(formatter)
-    aiohttp_access_stderr_logger.setFormatter(formatter)
-
-    # Set all the loggers to debug
-    set_log_level(bot.logger, 'DEBUG')
-    set_log_level(bot.database.logger, 'DEBUG')
-    set_log_level(bot.redis.logger, 'DEBUG')
-    set_log_level(bot.stats.logger, 'DEBUG')
-    set_log_level('discord', 'DEBUG')
-    set_log_level('aiohttp', 'DEBUG')
-    set_log_level('aiohttp.access', 'DEBUG')
-
-    # Set loglevel defaults for the stdout handlers
-    set_log_level(bot_stdout_logger, args.loglevel)
-    set_log_level(database_stdout_logger, args.loglevel)
-    set_log_level(redis_stdout_logger, args.loglevel)
-    set_log_level(stats_stdout_logger, args.loglevel)
-    set_log_level(discord_stdout_logger, args.loglevel)
-    set_log_level(aiohttp_stdout_logger, args.loglevel)
-    set_log_level(aiohttp_access_stdout_logger, args.loglevel)
-
-    # Set loglevel default for the stderr handlers
-    set_log_level(bot_stderr_logger, args.loglevel, logging.WARNING)
-    set_log_level(database_stderr_logger, args.loglevel, logging.WARNING)
-    set_log_level(redis_stderr_logger, args.loglevel, logging.WARNING)
-    set_log_level(stats_stderr_logger, args.loglevel, logging.WARNING)
-    set_log_level(discord_stderr_logger, args.loglevel, logging.WARNING)
-    set_log_level(aiohttp_stdout_logger, args.loglevel, logging.WARNING)
-    set_log_level(aiohttp_access_stdout_logger, args.loglevel, logging.WARNING)
-
-    # Add the stream handlers to the loggers
-    bot.logger.addHandler(bot_stdout_logger)
-    bot.logger.addHandler(bot_stderr_logger)
-    bot.database.logger.addHandler(database_stdout_logger)
-    bot.database.logger.addHandler(database_stderr_logger)
-    bot.redis.logger.addHandler(redis_stdout_logger)
-    bot.redis.logger.addHandler(redis_stderr_logger)
-    bot.stats.logger.addHandler(stats_stdout_logger)
-    bot.stats.logger.addHandler(stats_stderr_logger)
-    logging.getLogger('discord').addHandler(discord_stdout_logger)
-    logging.getLogger('discord').addHandler(discord_stderr_logger)
-    logging.getLogger('aiohttp').addHandler(aiohttp_stdout_logger)
-    logging.getLogger('aiohttp').addHandler(aiohttp_stderr_logger)
-    logging.getLogger('aiohttp.access').addHandler(aiohttp_access_stdout_logger)
-    logging.getLogger('aiohttp.access').addHandler(aiohttp_access_stderr_logger)
+    loggers = [
+        bot.logger,
+        bot.database.logger,
+        bot.redis.logger,
+        bot.stats.logger,
+        'discord',
+        'aiohttp',
+        'aiohttp.access',
+        'upgradechat',
+    ]
+    for i in loggers:
+        _set_default_log_level(i, log_filter, formatter, args.loglevel)
 
 
 async def create_initial_database(db) -> None:
