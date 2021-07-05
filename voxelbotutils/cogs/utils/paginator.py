@@ -200,7 +200,7 @@ class Paginator(object):
                 self.current_page = 0
 
         # Let us break from the loop
-        ctx.bot.loop.create_task(self._edit_message(components=components.disable_components()))
+        ctx.bot.loop.create_task(self._edit_message(ctx, components=components.disable_components()))
 
     async def get_page(self, page_number: int) -> typing.List[typing.Any]:
         """
