@@ -2,6 +2,8 @@ from datetime import datetime as dt, timedelta
 import typing
 from base64 import b64encode
 import enum
+import collections
+import json
 
 import aiohttp
 
@@ -293,6 +295,7 @@ class UpgradeChat(object):
     """
 
     BASE = "https://api.upgrade.chat/v1/{endpoint}"
+    USER_REQUEST_CACHE = collections.defaultdict(lambda: (dt(2000, 1, 1), None,))
 
     def __init__(self, client_id: str, client_secret: str):
         """
@@ -375,6 +378,12 @@ class UpgradeChat(object):
                 type = type.name
             params.update({"type": type})
 
+        # Serialise our request so we can cache a response
+        key = json.dumps(params, sort_keys=True)
+        cached, expiry = self.USER_REQUEST_CACHE[key]
+        if expiry > dt.utcnow():
+            return cached
+
         # And our headers
         try:
             access_token = await self.get_access_token()
@@ -395,5 +404,8 @@ class UpgradeChat(object):
 
         # Deal with our response
         if data.get("data"):
-            return [UpgradeChatOrder.from_api(i) for i in data.get("data")]
-        return []
+            v = [UpgradeChatOrder.from_api(i) for i in data.get("data")]
+        else:
+            v = []
+        self.USER_REQUEST_CACHE[key] = (v, dt.utcnow() + timedelta(minutes=2),)
+        return v
