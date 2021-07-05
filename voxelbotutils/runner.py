@@ -12,6 +12,21 @@ from .cogs.utils.statsd import StatsdConnection
 from .cogs.utils.custom_bot import Bot
 
 
+class CascadingLogger(logging.getLoggerClass()):
+
+    def setLevel(self, level):
+        for i in self.handlers:
+            if isinstance(i, logging.StreamHandler):
+                if i.stream.name == "<stdout>":
+                    i.setLevel(level)
+                elif i.stream.name == "<stderr>":
+                    i.setLevel(max([level, logging.WARNING]))
+        super().setLevel(level)
+
+
+logging.setLoggerClass(CascadingLogger)
+
+
 # Set up the loggers
 def set_log_level(
         logger_to_change: typing.Union[logging.Logger, str], log_level: str,
@@ -115,6 +130,8 @@ class LogFilter(logging.Filter):
 def _set_default_log_level(logger_name, log_filter, formatter, loglevel):
     logger = logging.getLogger(logger_name) if isinstance(logger_name, str) else logger_name
 
+    set_log_level(logger, 'DEBUG')
+
     stdout_logger = logging.StreamHandler(sys.stdout)
     stdout_logger.addFilter(log_filter)
     stdout_logger.setFormatter(formatter)
@@ -125,6 +142,11 @@ def _set_default_log_level(logger_name, log_filter, formatter, loglevel):
     stderr_logger.setFormatter(formatter)
     set_log_level(stderr_logger, loglevel, logging.WARNING)
     logger.addHandler(stderr_logger)
+
+    # logger.warning("Test warning message")
+    # logger.info("Test info message")
+    # logger.error("Test error message")
+    # logger.critical("Test critical message")
 
 
 def set_default_log_levels(bot: Bot, args: argparse.Namespace) -> None:
