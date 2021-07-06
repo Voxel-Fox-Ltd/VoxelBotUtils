@@ -80,7 +80,9 @@ class Context(commands.Context):
             str: The mention string.
         """
 
-        x = self.bot.get_channel(int(channel_id))
+        x = None
+        if channel_id is not None:
+            x = self.bot.get_channel(int(channel_id))
         if x:
             return x
         return _FakeMentionable(id, fallback, fallback)
@@ -97,7 +99,9 @@ class Context(commands.Context):
             str: The mention string.
         """
 
-        x = self.guild.get_role(int(role_id))
+        x = None
+        if role_id is not None:
+            x = self.guild.get_role(int(role_id))
         if x:
             return x
         return _FakeMentionable(id, fallback, fallback)
