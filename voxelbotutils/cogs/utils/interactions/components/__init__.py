@@ -18,6 +18,7 @@ class ComponentInteractionPayload(InteractionMessageable):
 
     async def ack(self, *args, **kwargs):
         """:meta private:"""
+
         return await self.defer(*args, defer_type=6, **kwargs)
 
     async def defer_update(self):

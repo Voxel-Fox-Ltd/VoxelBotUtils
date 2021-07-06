@@ -67,7 +67,7 @@ def set_log_level(
 
 
 # Set up loggers
-logger = logging.getLogger('voxelbotutils')
+logger = logging.getLogger('vbu')
 
 
 # Make sure the sharding info provided is correctish
@@ -158,7 +158,9 @@ def set_default_log_levels(bot: Bot, args: argparse.Namespace) -> None:
         args (argparse.Namespace): The argparse namespace saying what levels to set each logger to
     """
 
-    formatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s: %(message)s')
+    # formatter = logging.Formatter('%(asctime)s [%(levelname)s][%(name)s] %(message)s')
+    # formatter = logging.Formatter('{asctime} | {levelname: <8} | {module}:{funcName}:{lineno} - {message}', style='{')
+    formatter = logging.Formatter('{asctime} | {levelname: <8} | {name}: {message}', style='{')
     bot.logger = logger
 
     log_filter = LogFilter(logging.WARNING)
