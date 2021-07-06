@@ -77,6 +77,11 @@ TimeValue
 
 .. autoclass:: voxelbotutils.TimeValue
 
+TimeFormatter
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.TimeFormatter
+
 ComponentMessage
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

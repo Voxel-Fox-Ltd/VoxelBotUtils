@@ -3,6 +3,14 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.5.3
+--------------------------------------
+
+New Features
+"""""""""""""""""""""""""""""""""""""""""""""""""
+
+* Add :class:`voxelbotutils.TimeFormatter`.
+
 0.5.2
 --------------------------------------
 
