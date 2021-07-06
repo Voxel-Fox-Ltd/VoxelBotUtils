@@ -1,1 +1,1 @@
-py .\setup.py clean --all sdist bdist_wheel
+py setup.py clean --all sdist bdist_wheel
