@@ -815,9 +815,6 @@ class Bot(MinimalBot):
         self.guild_settings.clear()
         self.user_settings.clear()
 
-        # Grab the application ID if we need it
-        await self.get_application_id()
-
         # Get database connection
         db = await self.database.get_connection()
 
@@ -1300,8 +1297,9 @@ class Bot(MinimalBot):
             self.logger.info("Not running bot startup method due to database being disabled")
 
         # Get the recommended shard count for this bot
-        async with self.session.get("https://discord.com/api/v9/gateway/bot") as r:
-            data = await r.json()
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://discord.com/api/v9/gateway/bot", headers={"Authorization": f"Bot {self.config['token']}"}) as r:
+                data = await r.json()
         recommended_shard_count = data['shards']
         self.logger.info(f"Recommended shard count for this bot: {recommended_shard_count}")
         if recommended_shard_count / 2 > self.shard_count:
