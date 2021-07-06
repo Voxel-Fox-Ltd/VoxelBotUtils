@@ -99,7 +99,7 @@ class Menu(MenuDisplayable):
             # Wait for the user to click on a button
             try:
                 payload = await ctx.bot.wait_for("component_interaction", check=get_button_check(menu_message), timeout=60.0)
-                await payload.defer()
+                await payload.defer_update()
             except asyncio.TimeoutError:
                 break
 

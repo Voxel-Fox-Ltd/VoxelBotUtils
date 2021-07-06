@@ -145,7 +145,7 @@ class SettingsMenuOption(object):
                         payload.user.id == self.context.author.id,
                     ])
                 payload = await self.context.bot.wait_for("component_interaction", timeout=120, check=check)
-                await payload.defer()
+                await payload.defer_update()
                 content = str(payload.component.custom_id)
             else:
                 def check(message):
@@ -623,7 +623,7 @@ class SettingsMenu(object):
                         payload.user.id == ctx.author.id,
                     ])
                 payload = await ctx.bot.wait_for("component_interaction", check=check, timeout=timeout)
-                await payload.defer()
+                await payload.defer_update()
             except asyncio.TimeoutError:
                 break
             picked_emoji = str(payload.component.custom_id)

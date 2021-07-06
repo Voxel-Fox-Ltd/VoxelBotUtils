@@ -175,7 +175,7 @@ class Paginator(object):
             try:
                 check = lambda p: p.user.id == ctx.author.id and p.message.id == self._message.id
                 component_payload = await ctx.bot.wait_for("component_interaction", check=check, timeout=timeout)
-                await component_payload.defer()
+                await component_payload.defer_update()
             except asyncio.TimeoutError:
                 break
 

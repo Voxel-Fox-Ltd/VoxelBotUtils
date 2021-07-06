@@ -16,7 +16,7 @@ class InteractionTyping(Typing):
     async def do_typing(self, sleep_forever: bool = True):
         if not self.messageable._sent_ack_response and not self.messageable._sent_message_response:
             async with self.messageable._send_interaction_response_lock:
-                await self.messageable.defer()
+                await self.messageable.defer_update()
         while sleep_forever:
             await asyncio.sleep(5)  # Loop forever
 
