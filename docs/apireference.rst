@@ -155,7 +155,15 @@ InteractionMessageable
 .. autoclass:: voxelbotutils.InteractionMessageable
    :no-members:
    :no-special-members:
-   :members: ack, respond
+   :members: defer, respond
+
+ComponentInteractionPayload
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.cogs.utils.interactions.components.ComponentInteractionPayload
+   :no-members:
+   :no-special-members:
+   :members: defer, respond, defer_update, update_message
 
 BaseComponent
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
