@@ -529,7 +529,7 @@ class MinimalBot(commands.AutoShardedBot):
                 for f in files:
                     f.close()
         else:
-            if wait is False:
+            if wait is False and messageable._sent_ack_response is False:
                 payload = {"type": _no_wait_response_type, "data": payload.copy()}
             response_data = await messageable._state.http.request(r, json=payload)
 
