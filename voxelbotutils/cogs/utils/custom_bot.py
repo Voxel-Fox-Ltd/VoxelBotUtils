@@ -412,12 +412,13 @@ class MinimalBot(commands.AutoShardedBot):
         content = str(content) if content is not None else None
         if embed is not None and embeds is not None:
             raise discord.InvalidArgument('cannot pass both embed and embeds parameter to send()')
-        if embed:
+        if embed is not None:
             embeds = [embed]
+            embed = None
         if embeds and len(embeds) > 10:
             raise discord.InvalidArgument('embeds parameter must be a list of up to 10 elements')
         if embeds:
-            embeds = [embed.to_dict() for embed in embeds]
+            embeds = [e.to_dict() for e in embeds]
 
         # Work out our allowed mentions
         if allowed_mentions is not None:
