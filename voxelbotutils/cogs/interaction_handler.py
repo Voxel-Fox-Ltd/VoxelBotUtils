@@ -89,17 +89,15 @@ class InteractionHandler(utils.Cog):
         elif payload['d']['type'] == 2:
             ctx = await self.get_context_from_interaction(payload['d'])
 
-            # Invoke non-commands too
-            if not ctx.command:
-                self.logger.warning("No command found for interaction invoker %s" % (ctx.invoked_with))
-                self.bot.dispatch("command_error", ctx, commands.CommandNotFound())
+            # Raise a commandnotfound
+            if ctx.command is None:
+                if ctx.invoked_with:
+                    exc = commands.CommandNotFound('Command "{}" is not found'.format(ctx.invoked_with))
+                    self.bot.dispatch('command_error', ctx, exc)
                 return
 
-            # Convert our stuff
+            # Convert our given vales
             self.logger.debug("Invoking interaction context for command %s" % (ctx.command.name))
-            # self.logger.debug(ctx.command)
-            # self.logger.debug(ctx.command_name)
-            # self.logger.debug(ctx.given_values)
             positional_converted = []
             kwarg_converted = {}
             for name, value in ctx.given_values.items():
@@ -111,20 +109,18 @@ class InteractionHandler(utils.Cog):
                 else:
                     kwarg_converted[name] = v
 
-            # See if it can be run
+            # And invoke
+            self.bot.dispatch('command', ctx)
             try:
-                await ctx.command.can_run(ctx)
-            except commands.CommandError as e:
-                self.bot.dispatch("command_error", ctx, e)
-                return
-
-            # Try and run it
-            try:
-                await ctx.invoke(ctx.command, *positional_converted, **kwarg_converted)
-            except commands.CommandError as e:
-                self.bot.dispatch("command_error", ctx, e)
-                return
-            return
+                if await self.bot.can_run(ctx, call_once=True):
+                    # await ctx.command.invoke(ctx)
+                    await ctx.invoke(ctx.command, *positional_converted, **kwarg_converted)
+                else:
+                    raise commands.CheckFailure('The global check once functions failed.')
+            except commands.CommandError as exc:
+                await ctx.command.dispatch_error(ctx, exc)
+            else:
+                self.bot.dispatch('command_completion', ctx)
 
         # See if it was a clicked component
         elif payload['d']['type'] == 3:
