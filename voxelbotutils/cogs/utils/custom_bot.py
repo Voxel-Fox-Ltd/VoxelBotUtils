@@ -466,6 +466,10 @@ class MinimalBot(commands.AutoShardedBot):
             elif not messageable._sent_ack_response:
                 r = discord.http.Route('POST', '/interactions/{interaction_id}/{token}/callback', interaction_id=channel[0], token=channel[2])
 
+            # A fallback for if someone says no wait but they HAVE sent an ack
+            else:
+                r = discord.http.Route('POST', '/webhooks/{app_id}/{token}', app_id=channel[1], token=channel[2])
+
             # Sent a defer that we should edit
             if wait and messageable.ACK_IS_EDITABLE and messageable._sent_ack_response and not messageable._sent_message_response:
                 r = discord.http.Route('PATCH', '/webhooks/{app_id}/{token}/messages/@original', app_id=channel[1], token=channel[2])
