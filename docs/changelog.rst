@@ -11,6 +11,17 @@ New Features
 
 * Add :class:`voxelbotutils.TimeFormatter`.
 
+Changed Features
+"""""""""""""""""""""""""""""""""""""""""""""""""
+
+* The bot will now say its recommended shard count before trying to connect.
+
+Bugs Fixed
+""""""""""""""""""""""""""""""""""""""""""""""""""
+
+* Temporarily fixed an issue where the bot wouldn't start without installing web requirements.
+* Fix the embed kwarg not being usable for some embeds.
+
 0.5.2
 --------------------------------------
 
@@ -24,6 +35,7 @@ Changed Features
 
 * Message objects returned by the library will now be instances of :class:`voxelbotutils.ComponentMessage` or :class:`voxelbotutils.ComponentWebhookMessage`.
 * Handle parameters to slash commands better instead of leaving them to D.py to be converted.
+* Change the format on vbu's loggers.
 
 Bugs Fixed
 """"""""""""""""""""""""""""""""""""""""""""""""""
