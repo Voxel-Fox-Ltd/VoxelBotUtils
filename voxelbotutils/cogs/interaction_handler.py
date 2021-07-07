@@ -112,9 +112,9 @@ class InteractionHandler(utils.Cog):
             # And invoke
             self.bot.dispatch('command', ctx)
             try:
-                if await self.bot.can_run(ctx, call_once=True):
-                    # await ctx.command.invoke(ctx)
-                    await ctx.invoke(ctx.command, *positional_converted, **kwarg_converted)
+                if await self.bot.can_run(ctx):
+                    if await ctx.command.can_run(ctx):
+                        await ctx.invoke(ctx.command, *positional_converted, **kwarg_converted)
                 else:
                     raise commands.CheckFailure('The global check once functions failed.')
             except commands.CommandError as exc:
