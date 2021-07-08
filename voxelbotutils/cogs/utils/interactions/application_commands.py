@@ -7,24 +7,41 @@ from ..custom_context import Context
 
 
 class ApplicationCommandOptionType(enum.IntEnum):
-    SUBCOMMAND = 1
-    SUBCOMMAND_GROUP = 2
-    STRING = 3
-    INTEGER = 4
-    BOOLEAN = 5
-    USER = 6
-    CHANNEL = 7
-    ROLE = 8
+    """
+    The different types of option that an application command argument can have.
+    """
+
+    SUBCOMMAND = 1  #: If the option is a subcommand.
+    SUBCOMMAND_GROUP = 2  #: If the option is a subcommand group.
+    STRING = 3  #: If the option is a string.
+    INTEGER = 4  #: If the option is an integer.
+    BOOLEAN = 5  #: If the option is a boolean.
+    USER = 6  #: If the option is a user.
+    CHANNEL = 7  #: If the option is a channel.
+    ROLE = 8  #: If the option is a role.
 
 
 class ApplicationCommandOptionChoice(object):
+    """
+    The possible choices that an application command can take.
 
-    def __init__(self, name:str, value:typing.Any):
+    Attributes:
+        name (str): The name of this option.
+        value (str): The value given to this option.
+    """
+
+    def __init__(self, name: str, value: typing.Any):
+        """
+        Args:
+            name (str): The name of this option.
+            value (typing.Any): The value given to this option.
+        """
+
         self.name: str = name
         self.value: typing.Any = value
 
     @classmethod
-    def from_data(cls, data:dict):
+    def from_data(cls, data: dict):
         return cls(data['name'], data['value'])
 
     def to_json(self) -> dict:
@@ -32,10 +49,31 @@ class ApplicationCommandOptionChoice(object):
 
 
 class ApplicationCommandOption(object):
+    """
+    An option displayed in a given application command.
+
+    Attributes:
+        name (str): The name of this option.
+        type (ApplicationCommandOptionType): The type of this command option.
+        description (str): The description given to this argument.
+        default (typing.Any): The default value given to the command option.
+        required (bool): Whether or not this option is required for the command to run.
+        choices (typing.List[ApplicationCommandOptionChoice]): A list of choices that this command can take.
+        options (typing.List[ApplicationCommandOption]): A list of options that go into the application command.
+    """
 
     def __init__(
             self, name: str, type: ApplicationCommandOptionType, description: str,
             default: typing.Optional[str] = None, required: bool = True):
+        """
+        Args:
+            name (str): The name of this option.
+            type (ApplicationCommandOptionType): The type of this command option.
+            description (str): The description given to this argument.
+            default (typing.Any): The default value given to the command option.
+            required (bool): Whether or not this option is required for the command to run.
+        """
+
         self.name: str = name
         self.type: ApplicationCommandOptionType = type
         self.description: str = description
@@ -45,9 +83,17 @@ class ApplicationCommandOption(object):
         self.options: typing.List['ApplicationCommandOption'] = list()
 
     def add_choice(self, choice: ApplicationCommandOptionChoice) -> None:
+        """
+        Add a choice to this instance.
+        """
+
         self.choices.append(choice)
 
     def add_option(self, option: 'ApplicationCommandOption') -> None:
+        """
+        Add an option to this instance.
+        """
+
         self.options.append(option)
 
     @classmethod
@@ -77,8 +123,24 @@ class ApplicationCommandOption(object):
 
 
 class ApplicationCommand(object):
+    """
+    An instance of an application command.
+
+    Attributes:
+        name (str): The name of this command.
+        description (str): The description for this command.
+        options (typing.List[ApplicationCommandOption]): A list of the options added to this command.
+        id (int): The ID of this application command.
+        application_id (int): The application ID that this command is attached to.
+    """
 
     def __init__(self, name: str, description: str):
+        """
+        Args:
+            name (str): The name of this command.
+            description (str): The description for this command.
+        """
+
         self.name: str = name
         self.description: str = description
         self.options: typing.List[ApplicationCommandOption] = list()
@@ -86,6 +148,10 @@ class ApplicationCommand(object):
         self.application_id: int = None
 
     def add_option(self, option: ApplicationCommandOption):
+        """
+        Add an option to this command instance.
+        """
+
         self.options.append(option)
 
     @classmethod

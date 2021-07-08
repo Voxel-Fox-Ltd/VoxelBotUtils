@@ -144,10 +144,35 @@ UpgradeChatInterval
 .. autoclass:: voxelbotutils.UpgradeChatInterval
    :no-special-members:
 
-Interactions
+Slash Commands
 ---------------------------------------------------
 
-Interactions also have :ref:`their own page<interactions howto>` for a basic integration guide.
+Slash commands also have :ref:`their own page<interactions howto>` for a basic integration guide.
+
+ApplicationCommand
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.ApplicationCommand
+
+ApplicationCommandOption
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.ApplicationCommandOption
+
+ApplicationCommandOptionChoice
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.ApplicationCommandOptionChoice
+
+ApplicationCommandOptionType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.ApplicationCommandOptionType
+
+Components
+---------------------------------------------------
+
+Components also have :ref:`their own page<interactions howto>` for a basic integration guide.
 
 InteractionMessageable
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -238,11 +263,6 @@ SelectMenu
    :exclude-members: to_dict, from_dict
    :inherited-members:
    :show-inheritance:
-
-ApplicationCommandOptionType
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.ApplicationCommandOptionType
 
 Checks
 -------------------------------------------------

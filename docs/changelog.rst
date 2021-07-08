@@ -15,6 +15,7 @@ Changed Features
 """""""""""""""""""""""""""""""""""""""""""""""""
 
 * The bot will now say its recommended shard count before trying to connect.
+* The :func:`voxelbotutils.Bot.create_global_application_command`, :func:`voxelbotutils.Bot.create_guild_application_command`, :func:`voxelbotutils.Bot.bulk_create_global_application_commands`, and :func:`voxelbotutils.Bot.bulk_create_guild_application_command`s will now return instances of :class:`voxelbotutils.ApplicationCommand`.
 
 Bugs Fixed
 """"""""""""""""""""""""""""""""""""""""""""""""""
