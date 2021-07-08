@@ -6,14 +6,13 @@ Interactions such as slash commands and buttons are some sexy lil additions to D
 Responding to an Interaction
 ------------------------------------------
 
-Interactions need to be responded to, or it shows as "this interaction has failed" in the Discord UI. The Discord API supports a few ways of responding, but there are two ways built into VBU:
+Interactions need to be responded to, or it shows as "this interaction has failed" in the Discord UI. The Discord API supports a few ways of responding:
 
-* :code:`ack` an interaction, and respond later.
+* :code:`defer` an interaction, which gives a "processing" message, and respond later.
+* :code:`defer_update` an interaction, which doesn't give a processing message, and respond later. This is only available on components.
 * :code:`respond` to an interaction, and receive no :class:`discord.Message` object back.
 
 Using the :func:`respond` method will send a type 4 response in the backend, which means that you're unable to receive a message object back from the API, but it does allow you to give responses without showing the loading symbol - a use case for this could be an ephemeral message saying "you can't use this button" or suchlike.
-
-The respond method is functionally identical to using :code:`wait=False` on the response's :code:`send` method.
 
 Slash Commands
 ------------------------------------------
@@ -22,7 +21,9 @@ One of the inbuilt cogs in VBU allows you to automatically add all public comman
 
 To [attempt to] add all of your commands as slash commands, run the :code:`!addslashcommands` command in your code, and the bot will attempt to convert all of your arguments and bulk-add the commands to Discord. If this conversion fails, you'll be given a straight traceback of the error instead of anything interpreted, so you can see exactly where the issue stems from.
 
-Most issues stem from using :class:`discord.ext.commands.Greedy`, misordering your optional arguments (they must appear at the end), using even *slightly* complex group commands, and using converters that don't stem from a commonly converted types (though in this instance you can add a :code:`SLASH_COMMAND_ARG_TYPE` attribute to your converter for the bot to use).
+Most issues stem from using :class:`discord.ext.commands.Greedy`, misordering your optional arguments (they must appear at the end), using even *slightly* complex group commands, and using converters that don't stem from a commonly converted types (though in this instance you can add a :code:`SLASH_COMMAND_ARG_TYPE` attribute being an instance of :class:`voxelbotutils.ApplicationCommandOptionType` to your converter for the bot to use).
+
+When adding arguments to a command, you're able to give descriptions to those arguments using :attr:`voxelbotutils.Command.argument_descriptions`.
 
 Components
 ------------------------------------------

@@ -239,6 +239,11 @@ SelectMenu
    :inherited-members:
    :show-inheritance:
 
+ApplicationCommandOptionType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.ApplicationCommandOptionType
+
 Checks
 -------------------------------------------------
 
