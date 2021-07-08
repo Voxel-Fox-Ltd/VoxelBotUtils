@@ -4,7 +4,7 @@ import pathlib
 
 import discord
 
-from .runner import run_bot, run_website
+from .runner import run_bot, run_website, run_sharder
 
 
 def create_file(*path, content: str = None):
@@ -43,6 +43,7 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     runner_subparser.required = True
     bot_subparser = runner_subparser.add_parser("run-bot")
     website_subparser = runner_subparser.add_parser("run-website")
+    sharder_subparser = runner_subparser.add_parser("run-sharder")
     create_config_subparser = runner_subparser.add_parser("create-config")
     check_config_subparser = runner_subparser.add_parser("check-config")
     runner_subparser.add_parser("version")
@@ -62,6 +63,11 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     website_subparser.add_argument("--port", nargs="?", type=int, default="8080", help="The port to run the website with.")
     website_subparser.add_argument("--debug", action="store_true", default=False, help="Whether or not to run the website in debug mode")
     website_subparser.add_argument("--loglevel", nargs="?", default="INFO", help="Global logging level - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+
+    # Set up the sharder arguments
+    sharder_subparser.add_argument("config_file", nargs="?", default="config/config.toml", help="The configuration for the bot.")
+    sharder_subparser.add_argument("--shardcount", nargs="?", type=int, default=None, help="The amount of shards that the bot should be using.")
+    sharder_subparser.add_argument("--loglevel", nargs="?", default="INFO", help="Global logging level - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
 
     # See what we want to make a config file for
     create_config_subparser.add_argument("config_type", nargs=1, help="The type of config file that we want to create.", choices=["bot", "website", "all"])
@@ -173,6 +179,8 @@ def main():
         run_bot(args)
     elif args.subcommand == "run-website":
         run_website(args)
+    elif args.subcommand == "run-sharder":
+        run_sharder(args)
 
 
 if __name__ == '__main__':

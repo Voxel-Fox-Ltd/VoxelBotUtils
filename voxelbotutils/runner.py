@@ -6,6 +6,8 @@ import typing
 import os
 import importlib
 
+import toml
+
 from .cogs.utils.database import DatabaseConnection
 from .cogs.utils.redis import RedisConnection
 from .cogs.utils.statsd import StatsdConnection
@@ -235,7 +237,7 @@ async def start_database_pool(config: dict) -> None:
         await create_initial_database(db)
 
 
-async def start_redis_pool(config:dict) -> None:
+async def start_redis_pool(config: dict) -> None:
     """
     Start the redis pool conneciton
     """
@@ -256,6 +258,17 @@ async def start_redis_pool(config:dict) -> None:
     logger.info("Created redis pool successfully")
 
 
+def set_event_loop():
+    try:
+        import uvloop
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    except ImportError:
+        pass
+    if sys.platform == 'win32':
+        loop = asyncio.ProactorEventLoop()
+        asyncio.set_event_loop(loop)
+
+
 def run_bot(args: argparse.Namespace) -> None:
     """
     Starts the bot, connects the database, runs the async loop forever
@@ -265,16 +278,7 @@ def run_bot(args: argparse.Namespace) -> None:
     """
 
     os.chdir(args.bot_directory)
-
-    # Use right event loop
-    try:
-        import uvloop
-        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-    except ImportError:
-        pass
-    if sys.platform == 'win32':
-        loop = asyncio.ProactorEventLoop()
-        asyncio.set_event_loop(loop)
+    set_event_loop()
 
     # And run file
     shard_ids = validate_sharding_information(args)
@@ -341,16 +345,7 @@ def run_website(args: argparse.Namespace) -> None:
     import markdown
 
     os.chdir(args.website_directory)
-
-    # Use right event loop
-    try:
-        import uvloop
-        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-    except ImportError:
-        pass
-    if sys.platform == 'win32':
-        loop = asyncio.ProactorEventLoop()
-        asyncio.set_event_loop(loop)
+    set_event_loop()
 
     # Read config
     with open(args.config_file) as a:
@@ -487,6 +482,48 @@ def run_website(args: argparse.Namespace) -> None:
             loop.run_until_complete(asyncio.wait_for(DatabaseConnection.pool.close(), timeout=30.0))
         except asyncio.TimeoutError:
             logger.error("Couldn't gracefully close the database connection pool within 30 seconds")
+    if config.get('redis', {}).get('enabled', False):
+        logger.info("Closing redis pool")
+        RedisConnection.pool.close()
+
+    logger.info("Closing asyncio loop")
+    loop.stop()
+    loop.close()
+
+
+def run_sharder(args: argparse.Namespace) -> None:
+    """
+    Starts the sharder, connects the redis, runs the async loop forever
+
+    Args:
+        args (argparse.Namespace): The arguments namespace that wants to be run
+    """
+
+    set_event_loop()
+    loop = asyncio.get_event_loop()
+
+    # Read config
+    with open(args.config_file) as a:
+        config = toml.load(a)
+
+    # Connect the redis pool
+    if config.get('redis', {}).get('enabled', False):
+        re_connect = start_redis_pool(config)
+        loop.run_until_complete(re_connect)
+    else:
+        raise Exception("Redis needs to be enabled to be able to run the sharder.")
+
+    # Run the bot
+    try:
+        logger.info("Running sharder")
+        # channel_list = await RedisConnection.conn.subscribe("VBUShardManager")
+        # channel = channel_list[0]
+        # while (await channel.wait_message()):
+        #     data = await channel.get_json()
+    except KeyboardInterrupt:
+        logger.info("Logging out sharder")
+
+    # We're now done running the sharder, time to clean up and close
     if config.get('redis', {}).get('enabled', False):
         logger.info("Closing redis pool")
         RedisConnection.pool.close()
