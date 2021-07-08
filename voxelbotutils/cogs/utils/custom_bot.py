@@ -1418,3 +1418,42 @@ class Bot(MinimalBot):
 
         # Return information
         return content, embed
+
+    async def launch_shard(self, gateway, shard_id: int, *, initial: bool = False):
+        """
+        Ask the shard manager if we're allowed to launch.
+        """
+
+        return await super().launch_shard(gateway, shard_id, initial=initial)
+
+    async def launch_shards(self):
+        """
+        Launch all of the shards using the shard manager.
+        """
+
+        # If we don't have redis, let's just ignore the shard manager
+        if not self.config.get('redis', {}).get('enabled', False):
+            return await super().launch_shards()
+
+        # Get the gateway
+        if self.shard_count is None:
+            self.shard_count, gateway = await self.http.get_bot_gateway()
+        else:
+            gateway = await self.http.get_gateway()
+
+        # Set the shard count
+        self._connection.shard_count = self.shard_count
+
+        # Set the shard IDs
+        shard_ids = self.shard_ids or range(self.shard_count)
+        self._connection.shard_ids = shard_ids
+
+        # Connect each shard
+        connect_tasks = []
+        for shard_id in shard_ids:
+            initial = shard_id == shard_ids[0]
+            connect_tasks.append(self.loop.create_task(self.launch_shard(gateway, shard_id, initial=initial)))
+        await asyncio.gather(*connect_tasks)
+
+        # Set the shards launched flag to true
+        self._connection.shards_launched.set()
