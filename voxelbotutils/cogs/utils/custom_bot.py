@@ -225,7 +225,7 @@ class MinimalBot(commands.AutoShardedBot):
         async with self.session.post("https://voxelfox.co.uk/discord/chatlog", json=data) as r:
             return await r.text()
 
-    async def create_global_application_command(self, command: interactions.ApplicationCommand) -> None:
+    async def create_global_application_command(self, command: interactions.ApplicationCommand) -> interactions.ApplicationCommand:
         """
         Add a global slash command for the bot.
 
@@ -238,10 +238,11 @@ class MinimalBot(commands.AutoShardedBot):
             'POST', '/applications/{application_id}/commands',
             application_id=application_id,
         )
-        return await self.http.request(r, json=command.to_json())
+        data = await self.http.request(r, json=command.to_json())
+        return interactions.ApplicationCommand.from_data(data)
 
     async def create_guild_application_command(
-            self, guild: discord.Guild, command: interactions.ApplicationCommand) -> None:
+            self, guild: discord.Guild, command: interactions.ApplicationCommand) -> interactions.ApplicationCommand:
         """
         Add a guild-level slash command for the bot.
 
@@ -255,10 +256,11 @@ class MinimalBot(commands.AutoShardedBot):
             'POST', '/applications/{application_id}/guilds/{guild_id}/commands',
             application_id=application_id, guild_id=guild.id,
         )
-        return await self.http.request(r, json=command.to_json())
+        data = await self.http.request(r, json=command.to_json())
+        return interactions.ApplicationCommand.from_data(data)
 
     async def bulk_create_global_application_commands(
-            self, commands: typing.List[interactions.ApplicationCommand]) -> None:
+            self, commands: typing.List[interactions.ApplicationCommand]) -> typing.List[interactions.ApplicationCommand]:
         """
         Bulk add a global slash command for the bot.
 
@@ -272,10 +274,11 @@ class MinimalBot(commands.AutoShardedBot):
             'PUT', '/applications/{application_id}/commands',
             application_id=application_id,
         )
-        return await self.http.request(r, json=[i.to_json() for i in commands])
+        data = await self.http.request(r, json=[i.to_json() for i in commands])
+        return [interactions.ApplicationCommand.from_data(i) for i in data]
 
     async def bulk_create_guild_application_commands(
-            self, guild: discord.Guild, commands: typing.List[interactions.ApplicationCommand]) -> None:
+            self, guild: discord.Guild, commands: typing.List[interactions.ApplicationCommand]) -> typing.List[interactions.ApplicationCommand]:
         """
         Bulk add a guild-level slash command for the bot.
 
@@ -290,7 +293,8 @@ class MinimalBot(commands.AutoShardedBot):
             'PUT', '/applications/{application_id}/guilds/{guild_id}/commands',
             application_id=application_id, guild_id=guild.id,
         )
-        return await self.http.request(r, json=[i.to_json() for i in commands])
+        data = await self.http.request(r, json=[i.to_json() for i in commands])
+        return [interactions.ApplicationCommand.from_data(i) for i in data]
 
     async def get_global_application_commands(self) -> typing.List[interactions.ApplicationCommand]:
         """

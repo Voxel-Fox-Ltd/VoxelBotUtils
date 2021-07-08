@@ -47,7 +47,7 @@ class ApplicationCommandOption(object):
     def add_choice(self, choice: ApplicationCommandOptionChoice) -> None:
         self.choices.append(choice)
 
-    def add_option(self, option:'ApplicationCommandOption') -> None:
+    def add_option(self, option: 'ApplicationCommandOption') -> None:
         self.options.append(option)
 
     @classmethod
