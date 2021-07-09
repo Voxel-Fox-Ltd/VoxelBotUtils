@@ -30,22 +30,22 @@ class ShardManager(object):
         Args:
             max_concurrency (int, optional): The maximum amount of shards allowed to be connecting simultaneously
         """
-        
+
         self.lock = asyncio.Lock()
         self.loop = asyncio.get_event_loop()
         self.max_concurrency: int = max_concurrency  #: The maximum number of shards that can connect concurrently.
-        self.shards_connecting: typing.List[int] = [] #: The IDs of the shards that are currently connecting.
+        self.shards_connecting: typing.List[int] = []  #: The IDs of the shards that are currently connecting.
         self.shards_waiting: typing.List[int] = []  #: The IDs of the shards that are waiting to connect.
         self.channel: 'aioredis.Channel' = None  #: The connected redis channel
 
-    @staticmethod 
+    @staticmethod
     async def get_max_concurrency(token: str) -> int:
         """
         Ask Discord for the max concurrency of a bot given its token.
 
         Args:
             token (string): The token of the bot to request the maximum concurrency for
-        
+
         Returns:
             int: The maximum concurrency for the given bot.
         """
@@ -64,9 +64,9 @@ class ShardManager(object):
 
     @classmethod
     async def get_redis_channel(cls):
-        channel_list = await cls.redis.conn.subscribe("VBUShardManager")
+        channel_list = await cls.redis.pool.subscribe("VBUShardManager")
         return channel_list[0]
-    
+
     async def run(self):
         """
         Connect and run the main event loop for the shard manager.
@@ -75,7 +75,7 @@ class ShardManager(object):
         # Grab the channel "VBUShardManager"
         self.channel = await self.get_redis_channel()
         self.loop.create_task(self.shard_queue_handler())
-        
+
         # Loop forever getting its messages
         while (await self.channel.wait_message()):
             data: dict = await self.channel.get_json()
@@ -85,7 +85,7 @@ class ShardManager(object):
             if any(("op" not in data, "shard" not in data)):
                 logger.warning(f'Message is missing opcode or shard ID - {data}')
                 continue
-                
+
             # See which opcode we got
             if data.get('op') == ShardManagerOpCodes.REQUEST_CONNECT.value:
                 await self.shard_request(data.get('shard'))
@@ -93,17 +93,17 @@ class ShardManager(object):
             elif data.get('op') == ShardManagerOpCodes.CONNECT_COMPLETE.value:
                 await self.shard_connected(data.get('shard'))
                 continue
-                
+
             # Invalid opcode
             else:
                 logger.warning(f'Message with invalid opcode received - {data}')
                 continue
-                
+
     async def shard_queue_handler(self):
         """
         Moves waiting shards to connecting if there's enough room available.
         """
-        
+
         while True:
             async with self.lock:
                 if self.shards_waiting and len(self.shards_connecting) < self.max_concurrency:
@@ -147,10 +147,10 @@ class ShardManager(object):
         async with self.lock:
             self.shards_connecting.remove(shard_id)
 
-    @classmethod 
+    @classmethod
     async def ask_to_connect(cls, shard_id: int):
         """
-        A method for bots to use when connecting a shard. Waits until it recieves a message saying 
+        A method for bots to use when connecting a shard. Waits until it recieves a message saying
         it's okay to connect before continuing.
         """
 
@@ -164,10 +164,10 @@ class ShardManager(object):
             if data.get("op") == ShardManagerOpCodes.CONNECT_READY.value and data.get("shard") == shard_id:
                 return
 
-    @classmethod 
+    @classmethod
     async def done_connecting(cls, shard_id: int):
         """
-        A method for bots to use when connecting a shard. Waits until it recieves a message saying 
+        A method for bots to use when connecting a shard. Waits until it recieves a message saying
         it's okay to connect before continuing.
         """
 
