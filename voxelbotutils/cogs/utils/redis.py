@@ -49,6 +49,7 @@ class RedisConnection(object):
 
         cls.config = config.copy()
         modified_config = config.copy()
+        modified_config.pop('shard_manager_enabled', False)
         if modified_config.pop('enabled', True) is False:
             raise NotImplementedError("The Redis connection has been disabled.")
         address = modified_config.pop('host'), modified_config.pop('port')
