@@ -3,6 +3,27 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.5.5
+--------------------------------------
+
+New Features
+"""""""""""""""""""""""""""""""""""""""""""""""""
+
+* Added a shard manager.
+
+0.5.4
+--------------------------------------
+
+Changed Features
+"""""""""""""""""""""""""""""""""""""""""""""""""
+
+* Remove caching from UpgradeChat utils.
+
+Bugs Fixed
+""""""""""""""""""""""""""""""""""""""""""""""""""
+
+* Fix logger being undefined in UpgradeChat utils.
+
 0.5.3
 --------------------------------------
 
