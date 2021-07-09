@@ -117,14 +117,14 @@ class ShardManager(object):
         while True:
             async with self.lock:
                 if len(self.shards_connecting) < self.max_concurrency:
+                    shard_id = None
                     if self.priority_shards_waiting:
                         shard_id = self.priority_shards_waiting.pop(0)
                     elif self.shards_waiting:
                         shard_id = self.shards_waiting.pop(0)
-                    else:
-                        continue
-                    self.shards_connecting.append(shard_id)
-                    self.loop.create_task(self.send_shard_connect(shard_id))
+                    if shard_id is not None:
+                        self.shards_connecting.append(shard_id)
+                        self.loop.create_task(self.send_shard_connect(shard_id))
             await asyncio.sleep(0.1)
 
     async def shard_request(self, shard_id: int, priority: bool = False):
@@ -137,7 +137,7 @@ class ShardManager(object):
         """
 
         async with self.lock:
-            if shard_id in self.shards_waiting:
+            if shard_id in self.shards_waiting or self.shard_id in self.priority_shards_waiting:
                 logger.info(f"Shard {shard_id} already in the connection waitlist")
                 pass
             elif shard_id in self.shards_connecting:
