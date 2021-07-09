@@ -1477,9 +1477,10 @@ class Bot(MinimalBot):
 
         redis_config = self.config.get('redis', {})
         shard_manager_enabled = redis_config.get('shard_manager_enabled', True) and redis_config.get('enabled', True)
+        queue = self._AutoShardedClient__queue  # I'm sorry Danny
 
         while not self.is_closed():
-            item = await self.__queue.get()
+            item = await queue.get()
             if item.type == discord.shard.EventType.close:
                 await self.close()
                 if isinstance(item.error, discord.errors.ConnectionClosed):
