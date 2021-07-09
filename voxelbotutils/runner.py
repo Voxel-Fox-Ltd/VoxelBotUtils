@@ -5,6 +5,7 @@ import sys
 import typing
 import os
 import importlib
+from voxelbotutils.cogs.utils.shard_manager import ShardManager
 
 import toml
 
@@ -513,20 +514,19 @@ def run_sharder(args: argparse.Namespace) -> None:
     else:
         raise Exception("Redis needs to be enabled to be able to run the sharder.")
 
+    # Get the max concurrency
+    max_concurrency = loop.run_until_complete(ShardManager.get_max_concurrency(config['token']))
+
     # Run the bot
     try:
         logger.info("Running sharder")
-        # channel_list = await RedisConnection.conn.subscribe("VBUShardManager")
-        # channel = channel_list[0]
-        # while (await channel.wait_message()):
-        #     data = await channel.get_json()
+        loop.run_until_complete(ShardManager(max_concurrency).run())
     except KeyboardInterrupt:
         logger.info("Logging out sharder")
 
     # We're now done running the sharder, time to clean up and close
-    if config.get('redis', {}).get('enabled', False):
-        logger.info("Closing redis pool")
-        RedisConnection.pool.close()
+    logger.info("Closing redis pool")
+    RedisConnection.pool.close()
 
     logger.info("Closing asyncio loop")
     loop.stop()

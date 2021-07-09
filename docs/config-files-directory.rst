@@ -328,6 +328,11 @@ Bot Config File
 
          The database that you want to connect to.
 
+      .. attribute:: shard_manager_enabled
+         :type: bool 
+
+         Whether or not the shard manager for this instance is enabled.
+
    .. class:: embed
 
       Details for auto-embedding all bot responses.
