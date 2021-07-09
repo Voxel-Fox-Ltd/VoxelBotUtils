@@ -342,14 +342,14 @@ class UpgradeChat(object):
         }
 
         # Get the token data
-        self.logger.debug("Requesting Oauth token")
+        logger.debug("Requesting Oauth token")
         async with aiohttp.ClientSession() as session:
             async with session.post("https://api.upgrade.chat/oauth/token", data=data, headers=headers) as r:
                 data = await r.json()
 
         # Parse and store
         self._access_token = (data['access_token'], data['refresh_token'], dt.fromtimestamp(int(data['access_token_expires_in']) / 1_000))
-        self.logger.debug(f"Received Oauth token - expires at {self._access_token[-1]}")
+        logger.debug(f"Received Oauth token - expires at {self._access_token[-1]}")
         return self._access_token[0]
 
     async def get_orders(
@@ -389,7 +389,7 @@ class UpgradeChat(object):
         # key = json.dumps(params, sort_keys=True)
         # cached, expiry = self.USER_REQUEST_CACHE[key]
         # if expiry > dt.utcnow():
-        #     self.logger.info(f"Using cached response from UpgradeChat for request GET {url} {params}")
+        #     logger.info(f"Using cached response from UpgradeChat for request GET {url} {params}")
         #     return cached
 
         # And our headers
@@ -403,10 +403,10 @@ class UpgradeChat(object):
         }
 
         # Send the web request
-        self.logger.debug(f"Sending request to UpgradeChat GET {url} {params}")
+        logger.debug(f"Sending request to UpgradeChat GET {url} {params}")
         async with aiohttp.ClientSession() as session:
             async with session.get(url, params=params, headers=headers) as r:
-                self.logger.info(f"Received response from UpgradeChat GET {r.url} {r.status} {await r.text()}")
+                logger.info(f"Received response from UpgradeChat GET {r.url} {r.status} {await r.text()}")
                 try:
                     data = await r.json()
                 except Exception:
