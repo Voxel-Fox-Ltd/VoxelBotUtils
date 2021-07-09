@@ -34,9 +34,8 @@ class ShardManager(object):
         self.lock = asyncio.Lock()
         self.loop = asyncio.get_event_loop()
         self.max_concurrency: int = max_concurrency  #: The maximum number of shards that can connect concurrently.
+        self.shard_connect_queue = asyncio.PriorityQueue()  #: A queue for the shards that want to connect.
         self.shards_connecting: typing.List[int] = []  #: The IDs of the shards that are currently connecting.
-        self.shards_waiting: typing.List[int] = []  #: The IDs of the shards that are waiting to connect.
-        self.priority_shards_waiting: typing.List[int] = []  #: A list of IDs of shards to connect ASAP.
         self.channel: 'aioredis.Channel' = None  #: The connected redis channel
         self.shard_connect_waiters = {}
 
@@ -116,15 +115,11 @@ class ShardManager(object):
 
         while True:
             async with self.lock:
-                if len(self.shards_connecting) < self.max_concurrency:
-                    if self.priority_shards_waiting:
-                        shard_id = self.priority_shards_waiting.pop(0)
-                    elif self.shards_waiting:
-                        shard_id = self.shards_waiting.pop(0)
-                    else:
-                        continue
-                    self.shards_connecting.append(shard_id)
-                    self.loop.create_task(self.send_shard_connect(shard_id))
+                if not self.shard_connect_queue.empty():
+                    if len(self.shards_connecting) < self.max_concurrency:
+                        shard_id = await self.shard_connect_queue.get()
+                        self.shards_connecting.append(shard_id)
+                        self.loop.create_task(self.send_shard_connect(shard_id))
             await asyncio.sleep(0.1)
 
     async def shard_request(self, shard_id: int, priority: bool = False):
@@ -147,10 +142,10 @@ class ShardManager(object):
             else:
                 if priority:
                     logger.info(f"Adding shard {shard_id} to the priority waitlist for connecting")
-                    self.priority_shards_waiting.append(shard_id)
+                    self.shard_connect_queue.put_nowait((0, shard_id))
                 else:
                     logger.info(f"Adding shard {shard_id} to the waitlist for connecting")
-                    self.shards_waiting.append(shard_id)
+                    self.shard_connect_queue.put_nowait((10, shard_id))
 
     async def send_shard_connect(self, shard_id: int):
         """
@@ -175,7 +170,7 @@ class ShardManager(object):
             shard_id (int): The ID of the shard that just connected.
         """
 
-        logger.info(f"Shard {shard_id} connected - from the connecting shards list")
+        logger.info(f"Shard {shard_id} connected - removing from the connecting shards list")
         async with self.lock:
             self.shards_connecting.remove(shard_id)
 
