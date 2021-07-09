@@ -16,6 +16,8 @@ class ShardManagerOpCodes(enum.Enum):
     REQUEST_CONNECT = "REQUEST_CONNECT"  #: A bot asking to connect
     CONNECT_READY = "CONNECT_READY"  #: The manager saying that a given shard is allowed to connect
     CONNECT_COMPLETE = "CONNECT_COMPLETE"  #: A bot saying that a shard is done connecting
+    PING = "PING"  #: A simple ack for the bot and sharder.
+    PONG = "PONG"  #: A simple ack for the bot and sharder.
 
 
 class ShardManager(object):
@@ -38,7 +40,8 @@ class ShardManager(object):
         self.shards_waiting: typing.List[int] = []  #: The IDs of the shards that are waiting to connect.
         self.priority_shards_waiting: typing.List[int] = []  #: A list of IDs of shards to connect ASAP.
         self.channel: 'aioredis.Channel' = None  #: The connected redis channel
-        self.shard_connect_waiters = {}
+        self.shard_connect_waiters = {}  #: A dictionary of events to see if a given shard has been pinged to connect.
+        self.pong_received = asyncio.Event()  #: Whether or not the sharder has received a pong
 
     @staticmethod
     async def get_max_concurrency(token: str) -> int:
@@ -90,18 +93,22 @@ class ShardManager(object):
             logger.debug(f'Recieved message over VBUShardManager - {data}')
 
             # Make sure the data is valid
-            if any(("op" not in data, "shard" not in data)):
+            if "op" not in data:
                 logger.warning(f'Message is missing opcode or shard ID - {data}')
                 continue
 
             # See which opcode we got
-            if data.get('op') == ShardManagerOpCodes.REQUEST_CONNECT.value:
+            opcode = data.get('op')
+            if opcode == ShardManagerOpCodes.PING.value:
+                async with self.redis() as re:
+                    await re.publish("VBUShardManager", {"op": ShardManagerOpCodes.PONG.value})
+            elif opcode == ShardManagerOpCodes.REQUEST_CONNECT.value:
                 await self.shard_request(data.get('shard'), data.get('priority', False))
                 continue
-            elif data.get('op') == ShardManagerOpCodes.CONNECT_COMPLETE.value:
+            elif opcode == ShardManagerOpCodes.CONNECT_COMPLETE.value:
                 await self.shard_connected(data.get('shard'))
                 continue
-            elif data.get('op') == ShardManagerOpCodes.CONNECT_READY.value:
+            elif opcode in [ShardManagerOpCodes.CONNECT_READY.value, ShardManagerOpCodes.PONG.value]:
                 continue  # We send this - we don't need to read it
 
             # Invalid opcode
@@ -184,10 +191,15 @@ class ShardManager(object):
         A task to be run while the shards for the bot are connecting.
         """
 
+        async with self.redis() as re:
+            await re.publish("VBUShardManager", {"op": ShardManagerOpCodes.PING.value})
         channel = await self.get_redis_channel()
         while (await channel.wait_message()):
             data: dict = await channel.get_json()
-            if data.get("op") == ShardManagerOpCodes.CONNECT_READY.value:
+            opcode = data.get("op")
+            if opcode == ShardManagerOpCodes.PONG.value:
+                self.pong_received.set()
+            elif opcode == ShardManagerOpCodes.CONNECT_READY.value:
                 self.shard_connect_waiters.get(data.get("shard"), asyncio.Event()).set()
 
     async def ask_to_connect(self, shard_id: int, priority: bool = False):
@@ -196,6 +208,7 @@ class ShardManager(object):
         it's okay to connect before continuing.
         """
 
+        await self.pong_received.wait()
         self.shard_connect_waiters[shard_id] = event = asyncio.Event()
         async with self.redis() as re:
             await re.publish("VBUShardManager", {
