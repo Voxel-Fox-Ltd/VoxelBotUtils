@@ -1467,7 +1467,7 @@ class Bot(MinimalBot):
         # Set up our shard manager
         shard_launch_tasks = []
         self._shard_launch_listener = self.loop.create_task(self.shard_manager.channel_message_listener())
-        shard_manager_timeout = 30
+        shard_manager_timeout = 10
         try:
             await asyncio.wait_for(self.shard_manager.pong_received.wait(), timeout=shard_manager_timeout)
         except asyncio.TimeoutError:

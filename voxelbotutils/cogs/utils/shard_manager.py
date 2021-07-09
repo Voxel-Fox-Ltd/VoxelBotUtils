@@ -100,6 +100,7 @@ class ShardManager(object):
             # See which opcode we got
             opcode = data.get('op')
             if opcode == ShardManagerOpCodes.PING.value:
+                await asyncio.sleep(0.5)  # Delay a bit
                 async with self.redis() as re:
                     await re.publish("VBUShardManager", {"op": ShardManagerOpCodes.PONG.value})
             elif opcode == ShardManagerOpCodes.REQUEST_CONNECT.value:
@@ -192,6 +193,7 @@ class ShardManager(object):
         """
 
         async with self.redis() as re:
+            logger.info("Sending ping opcode")
             await re.publish("VBUShardManager", {"op": ShardManagerOpCodes.PING.value})
         channel = await self.get_redis_channel()
         while (await channel.wait_message()):
