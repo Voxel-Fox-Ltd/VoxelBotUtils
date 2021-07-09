@@ -152,7 +152,7 @@ def _set_default_log_level(logger_name, log_filter, formatter, loglevel):
     # logger.critical("Test critical message")
 
 
-def set_default_log_levels(bot: Bot, args: argparse.Namespace) -> None:
+def set_default_log_levels(args: argparse.Namespace) -> None:
     """
     Set the default levels for the logger
 
@@ -164,21 +164,20 @@ def set_default_log_levels(bot: Bot, args: argparse.Namespace) -> None:
     # formatter = logging.Formatter('%(asctime)s [%(levelname)s][%(name)s] %(message)s')
     # formatter = logging.Formatter('{asctime} | {levelname: <8} | {module}:{funcName}:{lineno} - {message}', style='{')
     formatter = logging.Formatter('{asctime} | {levelname: <8} | {name}: {message}', style='{')
-    bot.logger = logger
-
     log_filter = LogFilter(logging.WARNING)
-
     loggers = [
-        bot.logger,
-        bot.database.logger,
-        bot.redis.logger,
-        bot.stats.logger,
+        logger,
+        DatabaseConnection.logger,
+        RedisConnection.logger,
+        StatsdConnection.logger,
         'discord',
         'aiohttp',
         'aiohttp.access',
         'upgradechat',
     ]
     for i in loggers:
+        if i is None:
+            continue
         _set_default_log_level(i, log_filter, formatter, args.loglevel)
 
 
@@ -285,7 +284,13 @@ def run_bot(args: argparse.Namespace) -> None:
     shard_ids = validate_sharding_information(args)
     bot = Bot(shard_count=args.shardcount, shard_ids=shard_ids, config_file=args.config_file)
     loop = bot.loop
-    set_default_log_levels(bot, args)
+
+    # Set up loggers
+    bot.logger = logger
+    DatabaseConnection.logger = logger.getChild("database")
+    RedisConnection.logger = logger.getChild("redis")
+    StatsdConnection.logger = logger.getChild("statsd")
+    set_default_log_levels(args)
 
     # Connect the database pool
     if bot.config.get('database', {}).get('enabled', False):
@@ -421,12 +426,12 @@ def run_website(args: argparse.Namespace) -> None:
 
     # Add our connections and their loggers
     app['database'] = DatabaseConnection
-    DatabaseConnection.logger = logger.getChild("database")
     app['redis'] = RedisConnection
-    RedisConnection.logger = logger.getChild("redis")
     app['logger'] = logger.getChild("route")
-    StatsdConnection.logger = logger.getChild("statsd")
     app['stats'] = StatsdConnection
+    DatabaseConnection.logger = logger.getChild("database")
+    RedisConnection.logger = logger.getChild("redis")
+    StatsdConnection.logger = logger.getChild("statsd")
 
     # Add our config
     app['config'] = config
@@ -449,7 +454,7 @@ def run_website(args: argparse.Namespace) -> None:
         bot = Bot(f"./config/{bot_config_location}")
         app['bots'][bot_name] = bot
         if index == 0:
-            set_default_log_levels(bot, args)
+            set_default_log_levels(args)
         try:
             loop.run_until_complete(bot.login())
             bot.load_all_extensions()
@@ -507,6 +512,9 @@ def run_sharder(args: argparse.Namespace) -> None:
     with open(args.config_file) as a:
         config = toml.load(a)
 
+    RedisConnection.logger = logger.getChild("redis")
+    set_default_log_levels(args)
+
     # Connect the redis pool
     if config.get('redis', {}).get('enabled', False):
         re_connect = start_redis_pool(config)
@@ -518,9 +526,10 @@ def run_sharder(args: argparse.Namespace) -> None:
     max_concurrency = loop.run_until_complete(ShardManager.get_max_concurrency(config['token']))
 
     # Run the bot
+    logger.info("Running sharder")
+    loop.create_task(ShardManager(max_concurrency).run())
     try:
-        logger.info("Running sharder")
-        loop.run_until_complete(ShardManager(max_concurrency).run())
+        loop.run_forever()
     except KeyboardInterrupt:
         logger.info("Logging out sharder")
 
