@@ -2,14 +2,13 @@ import asyncio
 from datetime import datetime as dt
 
 from discord.ext import commands
-
-from ..upgrade_chat import UpgradeChatItemType
+import upgradechat
 
 
 class IsNotUpgradeChatPurchaser(commands.CheckFailure):
     """The error raised when the user is missing an UpradeChat purchase."""
 
-    def __init__(self, item_names:str):
+    def __init__(self, item_names: str):
         self.item_names = item_names
         super().__init__(
             f"You need to purchase `{self.item_names[0]}` to use this command - "
@@ -49,10 +48,10 @@ def is_upgrade_chat_purchaser(*any_item_names):
         # Grab all purchased roles by the user
         try:
             purchases = await asyncio.wait_for(
-                ctx.bot.upgrade_chat.get_orders(discord_id=ctx.author.id, type=UpgradeChatItemType.SHOP),
+                ctx.bot.upgrade_chat.get_orders(discord_id=ctx.author.id, type=upgradechat.UpgradeChatItemType.SHOP),
                 timeout=3,
             )
-        except asyncio.TimeoutError:
+        except (asyncio.TimeoutError, upgradechat.UpgradeChatError):
             raise commands.CheckFailure("Upgrade.Chat is currently unable to process my request for purchasers - please try again later.")
 
         # See if they purchased anything that's correct
@@ -96,10 +95,10 @@ def is_upgrade_chat_subscriber(*any_item_names):
         # Grab all purchased roles by the user
         try:
             purchases = await asyncio.wait_for(
-                ctx.bot.upgrade_chat.get_orders(discord_id=ctx.author.id, type=UpgradeChatItemType.UPGRADE),
+                ctx.bot.upgrade_chat.get_orders(discord_id=ctx.author.id, type=upgradechat.UpgradeChatItemType.UPGRADE),
                 timeout=3,
             )
-        except asyncio.TimeoutError:
+        except (asyncio.TimeoutError, upgradechat.UpgradeChatError):
             raise commands.CheckFailure("Upgrade.Chat is currently unable to process my request for subscribers - please try again later.")
 
         # See if they purchased anything that's correct

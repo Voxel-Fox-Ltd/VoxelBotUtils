@@ -17,13 +17,13 @@ import toml
 import discord
 from discord.ext import commands
 from discord.abc import Messageable
+import upgradechat
 
 from .custom_context import Context
 from .database import DatabaseConnection
 from .redis import RedisConnection
 from .statsd import StatsdConnection
 from .analytics_log_handler import AnalyticsLogHandler
-from .upgrade_chat import UpgradeChat
 from .interactions.components import MessageComponents
 from .models import ComponentMessage, ComponentWebhookMessage
 from . import interactions
@@ -711,7 +711,7 @@ class Bot(MinimalBot):
         user_agent (str): The user agent that the bot should use for web requests as set in the
             :attr:`config file<BotConfig.user_agent>`. This isn't used automatically anywhere,
             so it just here as a provided convenience.
-        upgrade_chat (UpgradeChat): An UpgradeChat connector instance using the oauth information
+        upgrade_chat (upgradechat.UpgradeChat): An UpgradeChat connector instance using the oauth information
             provided in your :class:`config file<BotConfig.upgrade_chat>`.
         clean_prefix (str): The default prefix for the bot.
         owner_ids (typing.List[int]): A list of the owners from the :attr:`config file<BotConfig.owners>`.
@@ -975,12 +975,15 @@ class Bot(MinimalBot):
         ))
 
     @property
-    def upgrade_chat(self):
+    def upgrade_chat(self) -> upgradechat.UpgradeChat:
         """:meta private:"""
 
         if self._upgrade_chat:
             return self._upgrade_chat
-        self._upgrade_chat = UpgradeChat(self.config["upgrade_chat"]["client_id"], self.config["upgrade_chat"]["client_secret"])
+        self._upgrade_chat = upgradechat.UpgradeChat(
+            self.config["upgrade_chat"]["client_id"],
+            self.config["upgrade_chat"]["client_secret"],
+        )
         return self._upgrade_chat
 
     async def get_user_topgg_vote(self, user_id: int) -> bool:

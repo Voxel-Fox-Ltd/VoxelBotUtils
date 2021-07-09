@@ -50,6 +50,7 @@ intersphinx_mapping = {
     'aiohttp': ('https://docs.aiohttp.org/en/stable/', None),
     'asyncpg': ('https://magicstack.github.io/asyncpg/current/', None),
     'aioredis': ('https://aioredis.readthedocs.io/en/v1.3.0/', None),
+    'upgradechat': ('https://upgradechatpy.readthedocs.io/en/latest/', None),
     # 'aiodogstatsd': ('https://gr1n.github.io/aiodogstatsd/', None),
 }
 

@@ -1,6 +1,7 @@
 # Discord and config handling
 discord.py
 toml
+upgradechatpy>=1.0.1
 
 # Storage handling
 asyncpg

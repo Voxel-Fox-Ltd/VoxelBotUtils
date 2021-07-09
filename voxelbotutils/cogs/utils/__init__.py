@@ -13,10 +13,6 @@ from .redis import RedisConnection, RedisChannelHandler, redis_channel_handler  
 from .statsd import StatsdConnection  # noqa
 from .time_value import TimeValue  # noqa
 from .interactions import ApplicationCommand, ApplicationCommandOption, ApplicationCommandOptionChoice, ApplicationCommandOptionType  # noqa
-from .upgrade_chat import (  # noqa
-    UpgradeChat, UpgradeChatOrder, UpgradeChatUser, UpgradeChatOrderItem, UpgradeChatInterval, UpgradeChatProduct,
-    UpgradeChatItemType, UpgradeChatPaymentProcessor, UpgradeChatProductType,
-)
 from .paginator import Paginator  # noqa
 from .interactions.components import *  # noqa
 from .help_command import HelpCommand  # noqa
