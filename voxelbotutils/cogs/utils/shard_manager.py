@@ -111,6 +111,7 @@ class ShardManager(object):
                     shard_id = self.shards_waiting.pop(0)
                     self.shards_connecting.append(shard_id)
                     self.loop.create_task(self.send_shard_connect(shard_id))
+            await asyncio.sleep(0.1)
 
     async def shard_request(self, shard_id: int):
         """
