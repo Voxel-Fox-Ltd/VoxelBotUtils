@@ -64,6 +64,15 @@ class RedisConnection(object):
         conn = cls.pool
         return cls(conn)
 
+    @classmethod
+    def _get_connection(cls):
+        """
+        Acquires a connection from the connection pool.
+        """
+
+        conn = cls.pool
+        return cls(conn)
+
     async def disconnect(self) -> None:
         """
         Releases a connection back into the connection pool.
