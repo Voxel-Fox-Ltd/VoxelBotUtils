@@ -13,8 +13,8 @@ import sys
 from voxelbotutils.cogs.utils.shard_manager import ShardManager
 
 import aiohttp
-import discord
 import toml
+import discord
 from discord.ext import commands
 from discord.abc import Messageable
 
@@ -1433,10 +1433,9 @@ class Bot(MinimalBot):
 
         if shard_manager_enabled:
             await self.shard_manager.ask_to_connect(shard_id)
-        v = await super().launch_shard(gateway, shard_id, initial=initial)
+        await super().launch_shard(gateway, shard_id, initial=initial)
         if shard_manager_enabled:
             await self.shard_manager.done_connecting(shard_id)
-        return v
 
     async def launch_shards(self):
         """
@@ -1463,12 +1462,44 @@ class Bot(MinimalBot):
 
         # Connect each shard
         shard_launch_tasks = []
-        shard_launch_listener = self.loop.create_task(self.shard_manager.channel_message_listener())
+        self._shard_launch_listener = self.loop.create_task(self.shard_manager.channel_message_listener())
         for shard_id in shard_ids:
             initial = shard_id == shard_ids[0]
             shard_launch_tasks.append(self.loop.create_task(self.launch_shard(gateway, shard_id, initial=initial)))
         await asyncio.wait(shard_launch_tasks)
-        shard_launch_listener.cancel()
 
         # Set the shards launched flag to true
         self._connection.shards_launched.set()
+
+    async def connect(self, *, reconnect=True):
+        self._reconnect = reconnect
+        await self.launch_shards()
+
+        redis_config = self.config.get('redis', {})
+        shard_manager_enabled = redis_config.get('shard_manager_enabled', True) and redis_config.get('enabled', True)
+
+        while not self.is_closed():
+            item = await self.__queue.get()
+            if item.type == discord.shard.EventType.close:
+                await self.close()
+                if isinstance(item.error, discord.errors.ConnectionClosed):
+                    if item.error.code != 1000:
+                        raise item.error
+                    if item.error.code == 4014:
+                        raise discord.errors.PrivilegedIntentsRequired(item.shard.id) from None
+                return
+            elif item.type == discord.shard.EventType.identify:
+                if shard_manager_enabled:
+                    await self.shard_manager.ask_to_connect(item.shard.id, priority=True)  # Let's assign reidentifies a higher priority
+                await item.shard.reidentify(item.error)
+                if shard_manager_enabled:
+                    await self.shard_manager.done_connecting(item.shard.id)
+            elif item.type == discord.shard.EventType.resume:
+                await item.shard.reidentify(item.error)
+            elif item.type == discord.shard.EventType.reconnect:
+                await item.shard.reconnect()
+            elif item.type == discord.shard.EventType.terminate:
+                await self.close()
+                raise item.error
+            elif item.type == discord.shard.EventType.clean_close:
+                return

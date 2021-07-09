@@ -36,6 +36,7 @@ class ShardManager(object):
         self.max_concurrency: int = max_concurrency  #: The maximum number of shards that can connect concurrently.
         self.shards_connecting: typing.List[int] = []  #: The IDs of the shards that are currently connecting.
         self.shards_waiting: typing.List[int] = []  #: The IDs of the shards that are waiting to connect.
+        self.priority_shards_waiting: typing.List[int] = []  #: A list of IDs of shards to connect ASAP.
         self.channel: 'aioredis.Channel' = None  #: The connected redis channel
         self.shard_connect_waiters = {}
 
@@ -95,7 +96,7 @@ class ShardManager(object):
 
             # See which opcode we got
             if data.get('op') == ShardManagerOpCodes.REQUEST_CONNECT.value:
-                await self.shard_request(data.get('shard'))
+                await self.shard_request(data.get('shard'), data.get('priority', False))
                 continue
             elif data.get('op') == ShardManagerOpCodes.CONNECT_COMPLETE.value:
                 await self.shard_connected(data.get('shard'))
@@ -115,18 +116,24 @@ class ShardManager(object):
 
         while True:
             async with self.lock:
-                if self.shards_waiting and len(self.shards_connecting) < self.max_concurrency:
-                    shard_id = self.shards_waiting.pop(0)
+                if len(self.shards_connecting) < self.max_concurrency:
+                    if self.priority_shards_waiting:
+                        shard_id = self.priority_shards_waiting.pop(0)
+                    elif self.shards_waiting:
+                        shard_id = self.shards_waiting.pop(0)
+                    else:
+                        continue
                     self.shards_connecting.append(shard_id)
                     self.loop.create_task(self.send_shard_connect(shard_id))
             await asyncio.sleep(0.1)
 
-    async def shard_request(self, shard_id: int):
+    async def shard_request(self, shard_id: int, priority: bool = False):
         """
         Add a shard to the waiting list for connections.
 
         Args:
             shard_id (int): The ID of the shard that's asking to connect.
+            priority (bool): Whether or not this ID should be added to the priority waitlist.
         """
 
         async with self.lock:
@@ -138,8 +145,12 @@ class ShardManager(object):
                 await asyncio.sleep(1)
                 return await self.send_shard_connect(shard_id)
             else:
-                logger.info(f"Adding shard {shard_id} to the waitlist for connecting")
-                self.shards_waiting.append(shard_id)
+                if priority:
+                    logger.info(f"Adding shard {shard_id} to the priority waitlist for connecting")
+                    self.priority_shards_waiting.append(shard_id)
+                else:
+                    logger.info(f"Adding shard {shard_id} to the waitlist for connecting")
+                    self.shards_waiting.append(shard_id)
 
     async def send_shard_connect(self, shard_id: int):
         """
@@ -179,7 +190,7 @@ class ShardManager(object):
             if data.get("op") == ShardManagerOpCodes.CONNECT_READY.value:
                 self.shard_connect_waiters.get(data.get("shard"), asyncio.Event()).set()
 
-    async def ask_to_connect(self, shard_id: int):
+    async def ask_to_connect(self, shard_id: int, priority: bool = False):
         """
         A method for bots to use when connecting a shard. Waits until it recieves a message saying
         it's okay to connect before continuing.
@@ -190,6 +201,7 @@ class ShardManager(object):
             await re.publish("VBUShardManager", {
                 "shard": shard_id,
                 "op": ShardManagerOpCodes.REQUEST_CONNECT.value,
+                "priority": priority,
             })
         await event.wait()
 
