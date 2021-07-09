@@ -64,7 +64,8 @@ class ShardManager(object):
 
     @classmethod
     async def get_redis_channel(cls):
-        channel_list = await cls.redis.pool.subscribe("VBUShardManager")
+        async with cls.redis() as re:
+            channel_list = await re.conn.subscribe("VBUShardManager")
         return channel_list[0]
 
     async def run(self):
@@ -131,10 +132,11 @@ class ShardManager(object):
         """
 
         # Tell the shard it's able to connect
-        await self.redis.publish_json("VBUShardManager", {
-            "shard": shard_id,
-            "op": ShardManagerOpCodes.CONNECT_READY.value,
-        })
+        async with self.redis() as re:
+            await re.publish("VBUShardManager", {
+                "shard": shard_id,
+                "op": ShardManagerOpCodes.CONNECT_READY.value,
+            })
 
     async def shard_connected(self, shard_id: int):
         """
@@ -155,10 +157,11 @@ class ShardManager(object):
         """
 
         channel = await cls.get_redis_channel()
-        await cls.redis.publish_json("VBUShardManager", {
-            "shard": shard_id,
-            "op": ShardManagerOpCodes.REQUEST_CONNECT.value,
-        })
+        async with cls.redis() as re:
+            await re.publish("VBUShardManager", {
+                "shard": shard_id,
+                "op": ShardManagerOpCodes.REQUEST_CONNECT.value,
+            })
         while (await channel.wait_message()):
             data: dict = await channel.get_json()
             if data.get("op") == ShardManagerOpCodes.CONNECT_READY.value and data.get("shard") == shard_id:
@@ -171,7 +174,8 @@ class ShardManager(object):
         it's okay to connect before continuing.
         """
 
-        await cls.redis.publish_json("VBUShardManager", {
-            "shard": shard_id,
-            "op": ShardManagerOpCodes.CONNECT_COMPLETE.value,
-        })
+        async with cls.redis() as re:
+            await re.publish("VBUShardManager", {
+                "shard": shard_id,
+                "op": ShardManagerOpCodes.CONNECT_COMPLETE.value,
+            })

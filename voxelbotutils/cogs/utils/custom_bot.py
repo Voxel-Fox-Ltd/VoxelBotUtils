@@ -1424,15 +1424,15 @@ class Bot(MinimalBot):
         """
         Ask the shard manager if we're allowed to launch.
         """
-        
+
         redis_config = self.config.get('redis', {})
-        shard_manager_enabled = not (redis_config.get('shard_manager_enabled', False) and redis_config.get('enabled', False))
+        shard_manager_enabled = redis_config.get('shard_manager_enabled', True) and redis_config.get('enabled', True)
 
         if shard_manager_enabled:
             await ShardManager.ask_to_connect(shard_id)
 
         await super().launch_shard(gateway, shard_id, initial=initial)
-        
+
         if shard_manager_enabled:
             await ShardManager.done_connecting(shard_id)
         return
@@ -1444,7 +1444,7 @@ class Bot(MinimalBot):
 
         # If we don't have redis, let's just ignore the shard manager
         redis_config = self.config.get('redis', {})
-        if not (redis_config.get('shard_manager_enabled', False) and redis_config.get('enabled', False)):
+        if not (redis_config.get('shard_manager_enabled', False) or redis_config.get('enabled', False)):
             return await super().launch_shards()
 
         # Get the gateway
