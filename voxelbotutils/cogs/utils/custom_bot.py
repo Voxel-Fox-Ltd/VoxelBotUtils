@@ -781,6 +781,9 @@ class Bot(MinimalBot):
         self.stats.config = self.config.get('statsd', {})
         self.stats.logger = self.logger.getChild('statsd')
 
+        # Shard manager time
+        self.shard_manager = ShardManager()  # We don't care about the max concurrency so we're gonna leave that as default
+
         # Gently add an UpgradeChat wrapper here - added as a property method so we can create a new instance if
         # the config is reloaded
         self._upgrade_chat = None
@@ -1429,13 +1432,11 @@ class Bot(MinimalBot):
         shard_manager_enabled = redis_config.get('shard_manager_enabled', True) and redis_config.get('enabled', True)
 
         if shard_manager_enabled:
-            await ShardManager.ask_to_connect(shard_id)
-
-        await super().launch_shard(gateway, shard_id, initial=initial)
-
+            await self.shard_manager.ask_to_connect(shard_id)
+        v = await super().launch_shard(gateway, shard_id, initial=initial)
         if shard_manager_enabled:
-            await ShardManager.done_connecting(shard_id)
-        return
+            await self.shard_manager.done_connecting(shard_id)
+        return v
 
     async def launch_shards(self):
         """
@@ -1461,11 +1462,13 @@ class Bot(MinimalBot):
         self._connection.shard_ids = shard_ids
 
         # Connect each shard
-        connect_tasks = []
+        shard_launch_tasks = []
+        shard_launch_listener = self.loop.create_task(self.shard_manager.channel_message_listener())
         for shard_id in shard_ids:
             initial = shard_id == shard_ids[0]
-            connect_tasks.append(self.loop.create_task(self.launch_shard(gateway, shard_id, initial=initial)))
-        await asyncio.gather(*connect_tasks)
+            shard_launch_tasks.append(self.loop.create_task(self.launch_shard(gateway, shard_id, initial=initial)))
+        await asyncio.wait(shard_launch_tasks)
+        shard_launch_listener.cancel()
 
         # Set the shards launched flag to true
         self._connection.shards_launched.set()

@@ -37,6 +37,7 @@ class ShardManager(object):
         self.shards_connecting: typing.List[int] = []  #: The IDs of the shards that are currently connecting.
         self.shards_waiting: typing.List[int] = []  #: The IDs of the shards that are waiting to connect.
         self.channel: 'aioredis.Channel' = None  #: The connected redis channel
+        self.shard_connect_waiters = {}
 
     @staticmethod
     async def get_max_concurrency(token: str) -> int:
@@ -62,11 +63,13 @@ class ShardManager(object):
         except Exception:
             return 1  # We could gracefully fail here, but I don't care for it
 
-    @classmethod
-    async def get_redis_channel(cls):
-        async with cls.redis() as re:
+    async def get_redis_channel(self):
+        if self.channel:
+            return self.channel
+        async with self.redis() as re:
             channel_list = await re.conn.subscribe("VBUShardManager")
-        return channel_list[0]
+        self.channel = channel_list[0]
+        return self.channel
 
     async def run(self):
         """
@@ -74,12 +77,13 @@ class ShardManager(object):
         """
 
         # Grab the channel "VBUShardManager"
-        self.channel = await self.get_redis_channel()
+        channel = await self.get_redis_channel()
         self.loop.create_task(self.shard_queue_handler())
 
         # Loop forever getting its messages
-        while (await self.channel.wait_message()):
-            data: dict = await self.channel.get_json()
+        logger.info('Waiting for messages on VBUShardManager')
+        while (await channel.wait_message()):
+            data: dict = await channel.get_json()
             logger.debug(f'Recieved message over VBUShardManager - {data}')
 
             # Make sure the data is valid
@@ -94,6 +98,8 @@ class ShardManager(object):
             elif data.get('op') == ShardManagerOpCodes.CONNECT_COMPLETE.value:
                 await self.shard_connected(data.get('shard'))
                 continue
+            elif data.get('op') == ShardManagerOpCodes.CONNECT_READY.value:
+                continue  # We send this - we don't need to read it
 
             # Invalid opcode
             else:
@@ -121,9 +127,17 @@ class ShardManager(object):
             shard_id (int): The ID of the shard that's asking to connect.
         """
 
-        logger.info(f"Adding shard {shard_id} to the waitlist for connecting")
         async with self.lock:
-            self.shards_waiting.append(shard_id)
+            if shard_id in self.shards_waiting:
+                logger.info(f"Shard {shard_id} already in the connection waitlist")
+                pass
+            elif shard_id in self.shards_connecting:
+                logger.info(f"Shard {shard_id} asked to connect again - resending connect payload")
+                await asyncio.sleep(1)
+                return await self.send_shard_connect(shard_id)
+            else:
+                logger.info(f"Adding shard {shard_id} to the waitlist for connecting")
+                self.shards_waiting.append(shard_id)
 
     async def send_shard_connect(self, shard_id: int):
         """
@@ -148,36 +162,42 @@ class ShardManager(object):
             shard_id (int): The ID of the shard that just connected.
         """
 
-        logger.info(f"Removing shard {shard_id} from the connecting shards list")
+        logger.info(f"Shard {shard_id} connected - from the connecting shards list")
         async with self.lock:
             self.shards_connecting.remove(shard_id)
 
-    @classmethod
-    async def ask_to_connect(cls, shard_id: int):
+    async def channel_message_listener(self):
+        """
+        A task to be run while the shards for the bot are connecting.
+        """
+
+        channel = await self.get_redis_channel()
+        while (await channel.wait_message()):
+            data: dict = await channel.get_json()
+            if data.get("op") == ShardManagerOpCodes.CONNECT_READY.value:
+                self.shard_connect_waiters.get(data.get("shard"), asyncio.Event()).set()
+
+    async def ask_to_connect(self, shard_id: int):
         """
         A method for bots to use when connecting a shard. Waits until it recieves a message saying
         it's okay to connect before continuing.
         """
 
-        channel = await cls.get_redis_channel()
-        async with cls.redis() as re:
+        self.shard_connect_waiters[shard_id] = event = asyncio.Event()
+        async with self.redis() as re:
             await re.publish("VBUShardManager", {
                 "shard": shard_id,
                 "op": ShardManagerOpCodes.REQUEST_CONNECT.value,
             })
-        while (await channel.wait_message()):
-            data: dict = await channel.get_json()
-            if data.get("op") == ShardManagerOpCodes.CONNECT_READY.value and data.get("shard") == shard_id:
-                return
+        await event.wait()
 
-    @classmethod
-    async def done_connecting(cls, shard_id: int):
+    async def done_connecting(self, shard_id: int):
         """
         A method for bots to use when connecting a shard. Waits until it recieves a message saying
         it's okay to connect before continuing.
         """
 
-        async with cls.redis() as re:
+        async with self.redis() as re:
             await re.publish("VBUShardManager", {
                 "shard": shard_id,
                 "op": ShardManagerOpCodes.CONNECT_COMPLETE.value,

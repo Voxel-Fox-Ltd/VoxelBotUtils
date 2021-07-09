@@ -66,7 +66,6 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
 
     # Set up the sharder arguments
     sharder_subparser.add_argument("config_file", nargs="?", default="config/config.toml", help="The configuration for the bot.")
-    sharder_subparser.add_argument("--shardcount", nargs="?", type=int, default=None, help="The amount of shards that the bot should be using.")
     sharder_subparser.add_argument("--loglevel", nargs="?", default="INFO", help="Global logging level - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
 
     # See what we want to make a config file for

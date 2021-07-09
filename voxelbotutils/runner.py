@@ -174,6 +174,7 @@ def set_default_log_levels(args: argparse.Namespace) -> None:
         'aiohttp',
         'aiohttp.access',
         'upgradechat',
+        'shardmanager',
     ]
     for i in loggers:
         if i is None:
@@ -526,7 +527,7 @@ def run_sharder(args: argparse.Namespace) -> None:
     max_concurrency = loop.run_until_complete(ShardManager.get_max_concurrency(config['token']))
 
     # Run the bot
-    logger.info("Running sharder")
+    logger.info(f"Running sharder with {max_concurrency} shards")
     loop.create_task(ShardManager(max_concurrency).run())
     try:
         loop.run_forever()
