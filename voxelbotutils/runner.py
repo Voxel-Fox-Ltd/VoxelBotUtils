@@ -174,7 +174,7 @@ def set_default_log_levels(args: argparse.Namespace) -> None:
         'aiohttp',
         'aiohttp.access',
         'upgradechat',
-        'shardmanager',
+        # 'shardmanager',
     ]
     for i in loggers:
         if i is None:

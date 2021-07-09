@@ -9,7 +9,7 @@ import aioredis
 from .redis import RedisConnection
 
 
-logger = logging.getLogger("shardmanager")
+logger = logging.getLogger("vbu.sharder")
 
 
 class ShardManagerOpCodes(enum.Enum):
@@ -137,7 +137,7 @@ class ShardManager(object):
         """
 
         async with self.lock:
-            if shard_id in self.shards_waiting or self.shard_id in self.priority_shards_waiting:
+            if shard_id in self.shards_waiting or shard_id in self.priority_shards_waiting:
                 logger.info(f"Shard {shard_id} already in the connection waitlist")
                 pass
             elif shard_id in self.shards_connecting:
@@ -175,7 +175,7 @@ class ShardManager(object):
             shard_id (int): The ID of the shard that just connected.
         """
 
-        logger.info(f"Shard {shard_id} connected - from the connecting shards list")
+        logger.info(f"Shard {shard_id} connected - removing from the connecting shards list")
         async with self.lock:
             self.shards_connecting.remove(shard_id)
 
