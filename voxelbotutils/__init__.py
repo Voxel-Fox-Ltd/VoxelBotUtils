@@ -1,4 +1,4 @@
 from . import runner, web
 from .cogs.utils import *
 
-__version__ = "0.5.6"
+__version__ = "0.5.7"

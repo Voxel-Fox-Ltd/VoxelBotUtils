@@ -3,6 +3,7 @@ import asyncio
 import aiohttp
 import enum
 import logging
+import time
 
 import aioredis
 
@@ -10,6 +11,15 @@ from .redis import RedisConnection
 
 
 logger = logging.getLogger("vbu.sharder")
+
+
+class ShardConnectTimer(object):
+
+    def __init__(self):
+        self.start_time = time.perf_counter()
+
+    def get_elapsed_time(self) -> float:
+        return time.perf_counter() - self.start_time
 
 
 class ShardManagerOpCodes(enum.Enum):
@@ -42,6 +52,9 @@ class ShardManager(object):
         self.channel: 'aioredis.Channel' = None  #: The connected redis channel
         self.shard_connect_waiters = {}  #: A dictionary of events to see if a given shard has been pinged to connect.
         self.pong_received = asyncio.Event()  #: Whether or not the sharder has received a pong
+
+        self.shard_wait_timers = {}
+        self.shard_connect_timers = {}
 
     @staticmethod
     async def get_max_concurrency(token: str) -> int:
@@ -159,6 +172,7 @@ class ShardManager(object):
                 else:
                     logger.info(f"Adding shard {shard_id} to the waitlist for connecting")
                     self.shards_waiting.append(shard_id)
+                self.shard_wait_timers[shard_id] = ShardConnectTimer()
 
     async def send_shard_connect(self, shard_id: int):
         """
@@ -169,6 +183,7 @@ class ShardManager(object):
         """
 
         logger.info(f"Telling shard {shard_id} that it can connect now")
+        self.shard_connect_timers[shard_id] = ShardConnectTimer()
         async with self.redis() as re:
             await re.publish("VBUShardManager", {
                 "shard": shard_id,
@@ -183,7 +198,9 @@ class ShardManager(object):
             shard_id (int): The ID of the shard that just connected.
         """
 
-        logger.info(f"Shard {shard_id} connected - removing from the connecting shards list")
+        connect_time = self.shard_connect_timers[shard_id].get_elapsed_time()
+        wait_time = self.shard_wait_timers[shard_id].get_elapsed_time()
+        logger.info(f"Shard {shard_id} connected after {wait_time:,.3f}s after being in the queue for {connect_time:,.3f}s")
         async with self.lock:
             self.shards_connecting.remove(shard_id)
 
