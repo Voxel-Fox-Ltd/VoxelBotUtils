@@ -386,11 +386,11 @@ class UpgradeChat(object):
         url = self.BASE.format(endpoint="orders")
 
         # Serialise our request so we can cache a response
-        key = json.dumps(params, sort_keys=True)
-        cached, expiry = self.USER_REQUEST_CACHE[key]
-        if expiry > dt.utcnow():
-            self.logger.info(f"Using cached response from UpgradeChat for request GET {url} {params}")
-            return cached
+        # key = json.dumps(params, sort_keys=True)
+        # cached, expiry = self.USER_REQUEST_CACHE[key]
+        # if expiry > dt.utcnow():
+        #     self.logger.info(f"Using cached response from UpgradeChat for request GET {url} {params}")
+        #     return cached
 
         # And our headers
         try:
@@ -406,16 +406,16 @@ class UpgradeChat(object):
         self.logger.debug(f"Sending request to UpgradeChat GET {url} {params}")
         async with aiohttp.ClientSession() as session:
             async with session.get(url, params=params, headers=headers) as r:
+                self.logger.info(f"Received response from UpgradeChat GET {r.url} {r.status} {await r.text()}")
                 try:
                     data = await r.json()
                 except Exception:
                     return []
-                self.logger.info(f"Received response from UpgradeChat GET {r.url} {r.status} {await r.text()}")
 
         # Deal with our response
         if data.get("data"):
             v = [UpgradeChatOrder.from_api(i) for i in data.get("data")]
         else:
             v = []
-        self.USER_REQUEST_CACHE[key] = (v, dt.utcnow() + timedelta(minutes=2),)
+        # self.USER_REQUEST_CACHE[key] = (v, dt.utcnow() + timedelta(minutes=2),)
         return v
