@@ -3,6 +3,14 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.5.6
+--------------------------------------
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""""""""""""
+
+* Fix error in creating a redis connection.
+
 0.5.5
 --------------------------------------
 
