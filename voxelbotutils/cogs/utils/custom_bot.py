@@ -1460,12 +1460,22 @@ class Bot(MinimalBot):
         shard_ids = self.shard_ids or range(self.shard_count)
         self._connection.shard_ids = shard_ids
 
-        # Connect each shard
+        # Set up our shard manager
         shard_launch_tasks = []
         self._shard_launch_listener = self.loop.create_task(self.shard_manager.channel_message_listener())
+        shard_manager_timeout = 30
+        try:
+            await asyncio.wait_for(self.shard_manager.pong_received.wait(), timeout=shard_manager_timeout)
+        except asyncio.TimeoutError:
+            self.logger.critical(f"The shard manager for this bot did not respond within {shard_manager_timeout} seconds.")
+            exit(1)
+
+        # Connect each shard
         for shard_id in shard_ids:
             initial = shard_id == shard_ids[0]
             shard_launch_tasks.append(self.loop.create_task(self.launch_shard(gateway, shard_id, initial=initial)))
+
+        # Wait for them all to connect
         await asyncio.wait(shard_launch_tasks)
 
         # Set the shards launched flag to true
