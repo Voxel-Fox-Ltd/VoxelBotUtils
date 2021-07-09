@@ -59,9 +59,11 @@ class ShardManager(object):
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, headers=headers) as r:
                     data = await r.json()
-            return data['max_concurrency']
+            logger.debug(data)
+            return data['session_start_limit']['max_concurrency']
         except Exception:
-            return 1  # We could gracefully fail here, but I don't care for it
+            logger.critical("Failed to get session start limit")
+            raise
 
     async def get_redis_channel(self):
         if self.channel:
