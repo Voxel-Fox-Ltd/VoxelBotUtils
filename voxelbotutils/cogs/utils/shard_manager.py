@@ -121,6 +121,7 @@ class ShardManager(object):
             shard_id (int): The ID of the shard that's asking to connect.
         """
 
+        logger.info(f"Adding shard {shard_id} to the waitlist for connecting")
         async with self.lock:
             self.shards_waiting.append(shard_id)
 
@@ -132,7 +133,7 @@ class ShardManager(object):
             shard_id (int): The ID of the shard that's asking to connect.
         """
 
-        # Tell the shard it's able to connect
+        logger.info(f"Telling shard {shard_id} that it can connect now")
         async with self.redis() as re:
             await re.publish("VBUShardManager", {
                 "shard": shard_id,
@@ -147,6 +148,7 @@ class ShardManager(object):
             shard_id (int): The ID of the shard that just connected.
         """
 
+        logger.info(f"Removing shard {shard_id} from the connecting shards list")
         async with self.lock:
             self.shards_connecting.remove(shard_id)
 
