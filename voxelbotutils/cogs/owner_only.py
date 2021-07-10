@@ -23,11 +23,11 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
 
     def __init__(self, bot: utils.Bot):
         super().__init__(bot)
-        if bot.config.get("redis", {}).get("enabled"):
+        if self.bot.config.get("redis", {}).get("enabled"):
             self.redis_ev_listener.start()
 
     def cog_unload(self):
-        if bot.config.get("redis", {}).get("enabled"):
+        if self.bot.config.get("redis", {}).get("enabled"):
             self.redis_ev_listener.stop()
 
     @utils.redis_channel_handler("RunRedisEval")
@@ -216,8 +216,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
             'guild': ctx.guild,
             'message': ctx.message,
             'self': self,
+            'vbu': utils,
         }
-        env.update(globals())
+        # env.update(globals())
 
         # See if the user attached a file (alix was here)
         if ctx.message.attachments:

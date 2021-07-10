@@ -3,6 +3,15 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.5.7
+--------------------------------------
+
+Changed Features
+"""""""""""""""""""""""""""""""""""""""""""""""""
+
+* Removed native UpgradeChat utils, and instead move them to an external dependancy.
+* Change the eval command to not include globals, and include the VBU data in a :code:`vbu` arg.
+
 0.5.6
 --------------------------------------
 
