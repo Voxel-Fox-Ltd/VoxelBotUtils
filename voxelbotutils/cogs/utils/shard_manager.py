@@ -113,6 +113,7 @@ class ShardManager(object):
             # See which opcode we got
             opcode = data.get('op')
             if opcode == ShardManagerOpCodes.PING.value:
+                logger.info("Received a ping, sending a pong")
                 await asyncio.sleep(0.5)  # Delay a bit
                 async with self.redis() as re:
                     await re.publish("VBUShardManager", {"op": ShardManagerOpCodes.PONG.value})
@@ -130,6 +131,14 @@ class ShardManager(object):
                 logger.warning(f'Message with invalid opcode received - {data}')
                 continue
 
+    @property
+    def max_concurrency_not_reached(self):
+        return len(self.shards_connecting) < self.max_concurrency
+
+    @property
+    def shard_in_waitlist(self):
+        return self.priority_shards_waiting or self.shards_waiting
+
     async def shard_queue_handler(self):
         """
         Moves waiting shards to connecting if there's enough room available.
@@ -137,7 +146,7 @@ class ShardManager(object):
 
         while True:
             async with self.lock:
-                if len(self.shards_connecting) < self.max_concurrency:
+                while self.shard_in_waitlist and self.max_concurrency_not_reached:
                     shard_id = None
                     if self.priority_shards_waiting:
                         shard_id = self.priority_shards_waiting.pop(0)
@@ -200,7 +209,7 @@ class ShardManager(object):
 
         connect_time = self.shard_connect_timers[shard_id].get_elapsed_time()
         wait_time = self.shard_wait_timers[shard_id].get_elapsed_time()
-        logger.info(f"Shard {shard_id} connected after {wait_time:,.3f}s after being in the queue for {connect_time:,.3f}s")
+        logger.info(f"Shard {shard_id} connected after {connect_time:,.3f}s after being in the queue for {wait_time:,.3f}s")
         async with self.lock:
             self.shards_connecting.remove(shard_id)
 

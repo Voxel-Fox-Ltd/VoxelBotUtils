@@ -38,7 +38,7 @@ class DatabaseConnection(object):
 
     config: dict = None
     pool: asyncpg.pool.Pool = None
-    logger: logging.Logger = None
+    logger: logging.Logger = logging.getLogger("vbu.database")
     __slots__ = ('conn', 'transaction', 'is_active',)
 
     def __init__(self, connection: asyncpg.Connection = None, transaction: asyncpg.transaction.Transaction = None):

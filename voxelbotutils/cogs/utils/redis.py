@@ -30,7 +30,7 @@ class RedisConnection(object):
 
     config: dict = None
     pool: aioredis.Redis = None
-    logger: logging.Logger = None  # Set as a child of bot.logger
+    logger: logging.Logger = logging.getLogger("vbu.redis")
     lock_manager: aioredlock.Aioredlock = None
 
     def __init__(self, connection: aioredis.RedisConnection = None):

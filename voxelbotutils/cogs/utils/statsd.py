@@ -54,7 +54,7 @@ class StatsdConnection(object):
     """
 
     config: dict = None
-    logger: logging.Logger = None
+    logger: logging.Logger = logging.getLogger("vbu.statsd")
     __slots__ = ('conn',)
 
     def __init__(self, connection: aiodogstatsd.Client = None):

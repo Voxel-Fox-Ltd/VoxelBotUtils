@@ -28,6 +28,7 @@ class CascadingLogger(logging.getLoggerClass()):
 
 
 logging.setLoggerClass(CascadingLogger)
+logger = logging.getLogger('vbu')
 
 
 # Set up the loggers
@@ -67,10 +68,6 @@ def set_log_level(
         logger_to_change.setLevel(max([level, minimum_level]))
     else:
         logger_to_change.setLevel(level)
-
-
-# Set up loggers
-logger = logging.getLogger('vbu')
 
 
 # Make sure the sharding info provided is correctish
@@ -166,15 +163,11 @@ def set_default_log_levels(args: argparse.Namespace) -> None:
     formatter = logging.Formatter('{asctime} | {levelname: <8} | {name}: {message}', style='{')
     log_filter = LogFilter(logging.WARNING)
     loggers = [
-        logger,
-        DatabaseConnection.logger,
-        RedisConnection.logger,
-        StatsdConnection.logger,
+        'vbu',
         'discord',
         'aiohttp',
         'aiohttp.access',
         'upgradechat',
-        # 'shardmanager',
     ]
     for i in loggers:
         if i is None:
@@ -287,10 +280,7 @@ def run_bot(args: argparse.Namespace) -> None:
     loop = bot.loop
 
     # Set up loggers
-    bot.logger = logger
-    DatabaseConnection.logger = logger.getChild("database")
-    RedisConnection.logger = logger.getChild("redis")
-    StatsdConnection.logger = logger.getChild("statsd")
+    bot.logger = logger.getChild("bot")
     set_default_log_levels(args)
 
     # Connect the database pool
@@ -430,9 +420,6 @@ def run_website(args: argparse.Namespace) -> None:
     app['redis'] = RedisConnection
     app['logger'] = logger.getChild("route")
     app['stats'] = StatsdConnection
-    DatabaseConnection.logger = logger.getChild("database")
-    RedisConnection.logger = logger.getChild("redis")
-    StatsdConnection.logger = logger.getChild("statsd")
 
     # Add our config
     app['config'] = config

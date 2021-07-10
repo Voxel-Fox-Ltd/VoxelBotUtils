@@ -774,16 +774,13 @@ class Bot(MinimalBot):
 
         # Allow database connections like this
         self.database: DatabaseConnection = DatabaseConnection
-        self.database.logger = self.logger.getChild('database')
 
         # Allow redis connections like this
         self.redis: RedisConnection = RedisConnection
-        self.redis.logger = self.logger.getChild('redis')
 
         # Allow Statsd connections like this
         self.stats: StatsdConnection = StatsdConnection
         self.stats.config = self.config.get('statsd', {})
-        self.stats.logger = self.logger.getChild('statsd')
 
         # Shard manager time
         self.shard_manager = ShardManager()  # We don't care about the max concurrency so we're gonna leave that as default
