@@ -16,7 +16,7 @@ class MiscCommands(utils.Cog):
 
         await ctx.send(f"{self.bot.config['command_data']['guild_invite']}", embeddify=False)
 
-    @utils.command(aliases=['patreon'], add_slash_command=False)
+    @utils.command(aliases=['patreon'], add_slash_command=True)
     @utils.checks.is_config_set('command_data', 'donate_link')
     @commands.bot_has_permissions(send_messages=True)
     async def donate(self, ctx: utils.Context):
@@ -26,7 +26,7 @@ class MiscCommands(utils.Cog):
 
         await ctx.send(f"{self.bot.config['command_data']['donate_link']}", embeddify=False)
 
-    @utils.command(add_slash_command=False)
+    @utils.command(add_slash_command=True)
     @commands.bot_has_permissions(send_messages=True)
     @utils.checks.is_config_set('command_data', 'website_link')
     async def website(self, ctx: utils.Context):
