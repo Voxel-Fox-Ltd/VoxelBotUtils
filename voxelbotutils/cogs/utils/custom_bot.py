@@ -10,7 +10,6 @@ import platform
 import random
 import json
 import sys
-from voxelbotutils.cogs.utils.shard_manager import ShardManagerClient
 
 import aiohttp
 import toml
@@ -26,6 +25,7 @@ from .statsd import StatsdConnection
 from .analytics_log_handler import AnalyticsLogHandler
 from .interactions.components import MessageComponents
 from .models import ComponentMessage, ComponentWebhookMessage
+from .shard_manager import ShardManagerClient
 from . import interactions
 from .. import all_packages as all_vfl_package_names
 
