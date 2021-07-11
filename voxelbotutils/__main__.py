@@ -66,6 +66,9 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
 
     # Set up the sharder arguments
     sharder_subparser.add_argument("config_file", nargs="?", default="config/config.toml", help="The configuration for the bot.")
+    sharder_subparser.add_argument("--host", nargs="?", default="127.0.0.1", help="The host address to listen on.")
+    sharder_subparser.add_argument("--port", nargs="?", default=8888, type=int, help="The host port to listen on.")
+    sharder_subparser.add_argument("--concurrency", nargs="?", default=1, type=int, help="The max concurrency of the connecting bot.")
     sharder_subparser.add_argument("--loglevel", nargs="?", default="INFO", help="Global logging level - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
 
     # See what we want to make a config file for
