@@ -11,6 +11,7 @@ Changed Features
 
 * Removed native UpgradeChat utils, and instead move them to an external dependancy.
 * Change the eval command to not include globals, and include the VBU data in a :code:`vbu` arg.
+* Changed the shard manager to use sockets instead of redis
 
 0.5.6
 --------------------------------------
@@ -26,7 +27,7 @@ Bugs Fixed
 New Features
 """""""""""""""""""""""""""""""""""""""""""""""""
 
-* Added a shard manager.
+* Added a shard manager using redis.
 
 0.5.4
 --------------------------------------
