@@ -10,7 +10,7 @@ import platform
 import random
 import json
 import sys
-from voxelbotutils.cogs.utils.shard_manager import ShardManager
+from voxelbotutils.cogs.utils.shard_manager import ShardManagerClient
 
 import aiohttp
 import toml
@@ -782,9 +782,6 @@ class Bot(MinimalBot):
         self.stats: StatsdConnection = StatsdConnection
         self.stats.config = self.config.get('statsd', {})
 
-        # Shard manager time
-        self.shard_manager = ShardManager()  # We don't care about the max concurrency so we're gonna leave that as default
-
         # Gently add an UpgradeChat wrapper here - added as a property method so we can create a new instance if
         # the config is reloaded
         self._upgrade_chat = None
@@ -1432,14 +1429,23 @@ class Bot(MinimalBot):
         Ask the shard manager if we're allowed to launch.
         """
 
-        redis_config = self.config.get('redis', {})
-        shard_manager_enabled = redis_config.get('shard_manager_enabled', True) and redis_config.get('enabled', True)
+        # See if the shard manager is enabled
+        shard_manager_config = self.config.get('shard_manager', {})
+        shard_manager_enabled = shard_manager_config.get('enabled', False)
 
-        if shard_manager_enabled:
-            await self.shard_manager.ask_to_connect(shard_id)
+        # It isn't so Dpy can just do its thang
+        if not shard_manager_enabled:
+            return await super().launch_shard(gateway, shard_id, initial=initial)
+
+        # Get the host and port to connect to 
+        host = shard_manager_config.get('host', '127.0.0.1')
+        port = shard_manager_config.get('port', 8888)
+
+        # Connect using our shard manager
+        shard_manager = await ShardManagerClient.open_connection(host, port)
+        await shard_manager.ask_to_connect(shard_id)
         await super().launch_shard(gateway, shard_id, initial=initial)
-        if shard_manager_enabled:
-            await self.shard_manager.done_connecting(shard_id)
+        await shard_manager.done_connecting(shard_id)
 
     async def launch_shards(self):
         """
@@ -1447,8 +1453,8 @@ class Bot(MinimalBot):
         """
 
         # If we don't have redis, let's just ignore the shard manager
-        redis_config = self.config.get('redis', {})
-        if not (redis_config.get('shard_manager_enabled', False) or redis_config.get('enabled', False)):
+        shard_manager_enabled = self.config.get('shard_manager', {}).get('enabled', False)
+        if not shard_manager_enabled:
             return await super().launch_shards()
 
         # Get the gateway
@@ -1464,17 +1470,8 @@ class Bot(MinimalBot):
         shard_ids = self.shard_ids or range(self.shard_count)
         self._connection.shard_ids = shard_ids
 
-        # Set up our shard manager
-        shard_launch_tasks = []
-        self._shard_launch_listener = self.loop.create_task(self.shard_manager.channel_message_listener())
-        shard_manager_timeout = 10
-        try:
-            await asyncio.wait_for(self.shard_manager.pong_received.wait(), timeout=shard_manager_timeout)
-        except asyncio.TimeoutError:
-            self.logger.critical(f"The shard manager for this bot did not respond within {shard_manager_timeout} seconds.")
-            exit(1)
-
         # Connect each shard
+        shard_launch_tasks = []
         for shard_id in shard_ids:
             initial = shard_id == shard_ids[0]
             shard_launch_tasks.append(self.loop.create_task(self.launch_shard(gateway, shard_id, initial=initial)))
