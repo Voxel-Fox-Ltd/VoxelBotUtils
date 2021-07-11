@@ -311,7 +311,7 @@ Bot Config File
       .. attribute:: enabled
          :type: bool
 
-         Whether or not to connect to reids on startup.
+         Whether or not to connect to redis on startup.
 
       .. attribute:: host
          :type: str
@@ -328,10 +328,22 @@ Bot Config File
 
          The database that you want to connect to.
 
-      .. attribute:: shard_manager_enabled
+   .. class:: shard_manager 
+
+      .. attribute:: enabled
          :type: bool 
 
          Whether or not the shard manager for this instance is enabled.
+
+      .. attribute:: host 
+         :type: str 
+
+         The host IP that the manager is running on.
+
+      .. attribute:: port 
+         :type: int
+
+         The host port that the manager is running on.
 
    .. class:: embed
 
@@ -542,7 +554,7 @@ Website Config File
       .. attribute:: enabled
          :type: bool
 
-         Whether or not to connect to reids on startup.
+         Whether or not to connect to redis on startup.
 
       .. attribute:: host
          :type: str

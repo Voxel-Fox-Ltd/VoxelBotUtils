@@ -88,7 +88,11 @@ owners_ignore_check_failures = true  # Whether or not owners ignore check failur
     host = "127.0.0.1"
     port = 6379
     db = 0
-    shard_manager_enabled = false
+
+[shard_manager]
+    enabled = false
+    host = "127.0.0.1"
+    port = 8888
 
 # The data that gets shoves into custom context for the embed
 [embed]
