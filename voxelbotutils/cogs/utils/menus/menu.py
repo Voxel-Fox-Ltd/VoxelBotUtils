@@ -51,6 +51,11 @@ class Menu(MenuDisplayable):
         aliases = aliases or ["settings"]
 
         class NestedCog(Cog, name=cog_name):
+
+            def cog_unload(self):
+                super().cog_unload()
+                self.bot.remove_command(name)
+
             @commands.command(cls=Command, name=name, aliases=aliases, **command_kwargs)
             async def setup(nested_self, ctx):
                 await self.start(ctx)
