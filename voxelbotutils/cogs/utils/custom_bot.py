@@ -1079,7 +1079,7 @@ class Bot(MinimalBot):
 
         # See if we want to make this as a task or not
         if wait is False:
-            return self.loop.create_task(self.add_delete_button(
+            return self.loop.create_task(self.add_delete_reaction(
                 message=message, valid_users=valid_users, delete=delete, timeout=timeout, wait=True,
             ))
 
