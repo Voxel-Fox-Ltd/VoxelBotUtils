@@ -85,7 +85,7 @@ class Button(DisableableComponent):
                 v.update({
                     "emoji": {
                         "name": self.emoji.name,
-                        "id": str(self.emoji.id),
+                        "id": str(self.emoji.id) if self.emoji.id else None,
                         "animated": self.emoji.animated,
                     },
                 })
