@@ -115,11 +115,15 @@ class Button(DisableableComponent):
 
         emoji = data.get("emoji")
         if emoji is not None:
-            emoji = discord.PartialEmoji(
-                name=emoji.get("name"),
-                animated=emoji.get("animated", False),
-                id=emoji.get("id"),
-            )
+            emoji_id = emoji.get("id")
+            if emoji_id is None:
+                emoji = emoji.get("name")
+            else:
+                emoji = discord.PartialEmoji(
+                    name=emoji.get("name"),
+                    animated=emoji.get("animated", False),
+                    id=emoji.get("id"),
+                )
         return cls(
             label=data.get("label"),
             style=ButtonStyle(data.get("style", ButtonStyle.PRIMARY.value)),
