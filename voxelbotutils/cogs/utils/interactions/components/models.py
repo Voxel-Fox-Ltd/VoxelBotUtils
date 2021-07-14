@@ -1,6 +1,7 @@
 import re
 import typing
 import json
+from voxelbotutils.cogs.utils.interactions.components.action_row import ActionRow
 
 import discord
 
@@ -81,7 +82,7 @@ class ComponentHolder(BaseComponent):
     A message component that holds other message components.
     """
 
-    def __init__(self, *components: typing.List[BaseComponent]):
+    def __init__(self, *components: typing.Union[BaseComponent, ActionRow]):
         """
         Args:
             *components: A list of the components that this component holder holds.
