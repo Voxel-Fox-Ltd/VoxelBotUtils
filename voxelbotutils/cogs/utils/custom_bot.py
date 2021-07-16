@@ -1448,10 +1448,10 @@ class Bot(MinimalBot):
         port = shard_manager_config.get('port', 8888)
 
         # Connect using our shard manager
-        self.shard_manager = await ShardManagerClient.open_connection(host, port)
-        await self.shard_manager.ask_to_connect(shard_id)
+        shard_manager = await ShardManagerClient.open_connection(host, port)
+        await shard_manager.ask_to_connect(shard_id)
         await super().launch_shard(gateway, shard_id, initial=initial)
-        await self.shard_manager.done_connecting(shard_id)
+        await shard_manager.done_connecting(shard_id)
 
     async def launch_shards(self):
         """
@@ -1492,9 +1492,17 @@ class Bot(MinimalBot):
         self._reconnect = reconnect
         await self.launch_shards()
 
-        redis_config = self.config.get('redis', {})
-        shard_manager_enabled = redis_config.get('shard_manager_enabled', True) and redis_config.get('enabled', True)
+        shard_manager_config = self.config.get('shard_manager', {})
+        shard_manager_enabled = shard_manager_config.get('enabled', True)
+        host = shard_manager_config.get('host', '127.0.0.1')
+        port = shard_manager_config.get('port', 8888)
         queue = self._AutoShardedClient__queue  # I'm sorry Danny
+
+        # Make a shard manager instance if we need to
+        async def get_shard_manager():
+            if not shard_manager_enabled:
+                return
+            return await ShardManagerClient.open_connection(host, port)
 
         while not self.is_closed():
             item = await queue.get()
@@ -1507,11 +1515,12 @@ class Bot(MinimalBot):
                         raise discord.errors.PrivilegedIntentsRequired(item.shard.id) from None
                 return
             elif item.type == discord.shard.EventType.identify:
+                shard_manager = await get_shard_manager()
                 if shard_manager_enabled:
-                    await self.shard_manager.ask_to_connect(item.shard.id, priority=True)  # Let's assign reidentifies a higher priority
+                    await shard_manager.ask_to_connect(item.shard.id, priority=True)  # Let's assign reidentifies a higher priority
                 await item.shard.reidentify(item.error)
                 if shard_manager_enabled:
-                    await self.shard_manager.done_connecting(item.shard.id)
+                    await shard_manager.done_connecting(item.shard.id)
             elif item.type == discord.shard.EventType.resume:
                 await item.shard.reidentify(item.error)
             elif item.type == discord.shard.EventType.reconnect:
