@@ -788,6 +788,7 @@ class Bot(MinimalBot):
 
         # Store the startup method so I can see if it completed successfully
         self.startup_method = None
+        self.shard_manager = None
 
         # Regardless of whether we start statsd or not, I want to add the log handler
         handler = AnalyticsLogHandler(self)
@@ -1442,15 +1443,15 @@ class Bot(MinimalBot):
         if not shard_manager_enabled:
             return await super().launch_shard(gateway, shard_id, initial=initial)
 
-        # Get the host and port to connect to 
+        # Get the host and port to connect to
         host = shard_manager_config.get('host', '127.0.0.1')
         port = shard_manager_config.get('port', 8888)
 
         # Connect using our shard manager
-        shard_manager = await ShardManagerClient.open_connection(host, port)
-        await shard_manager.ask_to_connect(shard_id)
+        self.shard_manager = await ShardManagerClient.open_connection(host, port)
+        await self.shard_manager.ask_to_connect(shard_id)
         await super().launch_shard(gateway, shard_id, initial=initial)
-        await shard_manager.done_connecting(shard_id)
+        await self.shard_manager.done_connecting(shard_id)
 
     async def launch_shards(self):
         """
