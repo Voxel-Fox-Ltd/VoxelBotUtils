@@ -24,11 +24,11 @@ class TimeFormatter(object):
         self.time = time
 
     def __str__(self):
-        return f"<t:{self.time.timestamp()}>"
+        return f"<t:{int(self.time.timestamp())}>"
 
     @property
     def _fs(self):
-        return f"<t:{self.time.timestamp()}:{{}}>"
+        return f"<t:{int(self.time.timestamp())}:{{}}>"
 
     short_time = property(lambda self: self._fs.format("t"))  # 14:11
     long_time = property(lambda self: self._fs.format("T"))  # 14:11:44
