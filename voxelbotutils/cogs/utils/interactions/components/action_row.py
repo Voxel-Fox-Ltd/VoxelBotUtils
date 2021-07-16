@@ -49,7 +49,7 @@ class MessageComponents(ComponentHolder):
         return [i.to_dict() for i in self.components]
 
     @classmethod
-    def from_dict(cls, data: list):
+    def from_dict(cls, data: dict):
         new_components = []
         for i in data:
             component_type = component_types.get(i['type'], BaseComponent)
