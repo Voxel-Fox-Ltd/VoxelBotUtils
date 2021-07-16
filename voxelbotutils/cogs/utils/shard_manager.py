@@ -186,10 +186,6 @@ class ShardManagerServer(object):
                 except ValueError:
                     pass
                 try:
-                    self.shard_queue.remove(shard_id)
-                except ValueError:
-                    pass
-                try:
                     self.shards_in_queue.remove(shard_id)
                 except ValueError:
                     pass
