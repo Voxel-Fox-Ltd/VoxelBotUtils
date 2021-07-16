@@ -1310,13 +1310,18 @@ class Bot(MinimalBot):
         async with aiohttp.ClientSession() as session:
             async with session.get("https://discord.com/api/v9/gateway/bot", headers={"Authorization": f"Bot {self.config['token']}"}) as r:
                 data = await r.json()
-        recommended_shard_count = data['shards']
-        self.logger.info(f"Recommended shard count for this bot: {recommended_shard_count}")
-        if recommended_shard_count / 2 > self.shard_count:
-            self.logger.warning((
-                f"The shard count for this bot ({self.shard_count}) is significantly "
-                f"lower than the recommended number {recommended_shard_count}."
-            ))
+        recommended_shard_count = None
+        try:
+            recommended_shard_count = data['shards']
+            self.logger.info(f"Recommended shard count for this bot: {recommended_shard_count}")
+        except KeyError:
+            self.logger.info("Recommended shard count for this bot could not be retrieved")
+        else:
+            if recommended_shard_count / 2 > self.shard_count:
+                self.logger.warning((
+                    f"The shard count for this bot ({self.shard_count}) is significantly "
+                    f"lower than the recommended number {recommended_shard_count}."
+                ))
 
         # And run the original
         self.logger.info("Running original D.py start method")
