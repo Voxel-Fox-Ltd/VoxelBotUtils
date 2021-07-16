@@ -809,7 +809,7 @@ class Bot(MinimalBot):
         try:
             await self._startup()
         except Exception as e:
-            self.logger.error(e)
+            self.logger.error(e, exc_info=True)
             exit(1)
 
     async def _startup(self):
