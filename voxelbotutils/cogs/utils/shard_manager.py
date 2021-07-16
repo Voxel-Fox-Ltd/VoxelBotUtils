@@ -26,10 +26,11 @@ class ShardManagerOpCodes(enum.Enum):
     """
     The opcodes that each shard connection wants to send/receive.
     """
-    
+
     REQUEST_CONNECT = "REQUEST_CONNECT"  #: A bot asking to connect
     CONNECT_READY = "CONNECT_READY"  #: The manager saying that a given shard is allowed to connect
     CONNECT_COMPLETE = "CONNECT_COMPLETE"  #: A bot saying that a shard is done connecting
+    PING = "PING"  #: A shard ping
 
 
 class ShardManagerServer(object):
@@ -43,12 +44,13 @@ class ShardManagerServer(object):
             max_concurrency (int, optional): The maximum amount of shards allowed to be connecting simultaneously
         """
 
-        # General 
+        # General
         self.host = host
-        self.port = port 
+        self.port = port
         self.lock = asyncio.Lock()
         self.loop = asyncio.get_event_loop()
         self.queue_handler_task = None
+        self.shard_keepalive_handler_task = None
 
         # Things used by the manager
         self.max_concurrency: int = max_concurrency  #: The maximum number of shards that can connect concurrently.
@@ -97,12 +99,13 @@ class ShardManagerServer(object):
         self.server = await asyncio.start_server(self.connection_handler, host=self.host, port=self.port)
         logger.info('Waiting for connections')
         self.queue_handler_task = self.loop.create_task(self.shard_queue_handler())
+        self.shard_keepalive_handler_task = self.loop.create_task(self.shard_keepalive_handler())
 
     async def connection_handler(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         """
         Handle an asyncio socket connection.
         """
-        
+
         # Loop until buffer is empty and EOF is received
         logger.info(f"New connection at {writer.transport}")
         while not reader.at_eof():
@@ -155,6 +158,44 @@ class ShardManagerServer(object):
     def shard_in_waitlist(self):
         return not self.shard_queue.empty()
 
+    async def shard_keepalive_handler(self):
+        """
+        Handles sending keepalives to each of the shards.
+        """
+
+        while True:
+
+            # Set up a list of shards that we couldn't connect to
+            ids_to_remove = list()
+
+            # Ping each connected shard
+            for shard_id, writer in self.shard_stream_writers.items():
+                try:
+                    logger.info(f"Sending ping to shard ID {shard_id}")
+                    await self.tell_shard(shard_id, {"op", ShardManagerOpCodes.PING.value})
+                except Exception:
+                    logger.info(f"Shard ID {shard_id} couldn't be sent our ping, removing from the list of connectable shards")
+                    ids_to_remove.append(shard_id)
+
+            # Remove unreachable shards
+            for i in ids_to_remove:
+                self.shard_stream_writers.pop(shard_id, None)
+                try:
+                    self.shards_connecting.remove(shard_id)
+                except ValueError:
+                    pass
+                try:
+                    self.shard_queue.remove(shard_id)
+                except ValueError:
+                    pass
+                try:
+                    self.shards_in_queue.remove(shard_id)
+                except ValueError:
+                    pass
+
+            # And sleep
+            await asyncio.sleep(15)
+
     async def shard_queue_handler(self):
         """
         Moves waiting shards to connecting if there's enough room available.
@@ -163,6 +204,9 @@ class ShardManagerServer(object):
         while True:
             while self.shard_in_waitlist and not self.max_concurrency_reached:
                 _, shard_id = await self.shard_queue.get()
+                if shard_id not in self.shards_in_queue:
+                    logger.info(f"I wanted to tell shard ID {shard_id} to connect but they're not in the waitlist - continuing")
+                    continue
                 self.shards_connecting.append(shard_id)
                 self.shards_in_queue.remove(shard_id)
                 self.loop.create_task(self.send_shard_connect(shard_id))
@@ -285,11 +329,17 @@ class ShardManagerClient(object):
         it's okay to connect before continuing.
         """
 
-        await self.tell_manager(shard_id, {
-            "op": ShardManagerOpCodes.REQUEST_CONNECT.value,
-            "priority": priority,
-        })
-        await self.can_connect.wait()
+        while True:
+            await self.tell_manager(shard_id, {
+                "op": ShardManagerOpCodes.REQUEST_CONNECT.value,
+                "priority": priority,
+            })
+            try:
+                await asyncio.wait_for(self.can_connect.wait(), timeout=30)
+                return
+            except asyncio.TimeoutError:
+                logger.info(f"Timed out waiting for connection - asking the shard manager if we can connect again")
+                continue
 
     async def done_connecting(self, shard_id: int):
         """
