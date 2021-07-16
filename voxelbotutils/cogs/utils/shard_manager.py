@@ -173,8 +173,9 @@ class ShardManagerServer(object):
                 try:
                     logger.info(f"Sending ping to shard ID {shard_id}")
                     await self.tell_shard(shard_id, {"op", ShardManagerOpCodes.PING.value})
-                except Exception:
-                    logger.info(f"Shard ID {shard_id} couldn't be sent our ping, removing from the list of connectable shards")
+                except Exception as e:
+                    logger.info(f"Shard ID {shard_id} couldn't be sent our ping, removing from the list of connectable shards - {e}")
+                    logger.debug(e, exc_info=True)
                     ids_to_remove.append(shard_id)
 
             # Remove unreachable shards
