@@ -245,7 +245,9 @@ class ShardManagerClient(object):
         The method to be run when asking to connect.
         """
 
+        logger.info("Connecting to shard manager...")
         reader, writer = await asyncio.open_connection(host, port)
+        logger.info("Connected")
         return cls(reader, writer)
 
     async def tell_manager(self, shard_id: int, data: dict):
@@ -254,6 +256,7 @@ class ShardManagerClient(object):
         """
 
         data.update({"shard": shard_id})
+        logger.info(f"Telling shard manager {data}")
         self.writer.write(json.dumps(data).encode() + b"\n")
         await self.writer.drain()
 
@@ -271,6 +274,7 @@ class ShardManagerClient(object):
                 data = json.loads(raw_data.decode())
             except Exception:
                 continue
+            logger.info(f"Received message from shard_manager - {data}")
             if data['op'] == ShardManagerOpCodes.CONNECT_READY.value:
                 self.can_connect.set()
             await asyncio.sleep(0.1)
