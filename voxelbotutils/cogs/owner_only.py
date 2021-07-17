@@ -164,9 +164,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
 
         # And send our data
         try:
-            await sendable.send(**payload)
+            await sendable.send(**payload, embeddify=False)
         except discord.HTTPException as e:
-            return await ctx.send(f"I couldn't send that message - `{e}`")
+            return await ctx.send(f"I couldn't send that message - `{e}`", embeddify=False)
         await ctx.okay()
 
     def _cleanup_code(self, content):
