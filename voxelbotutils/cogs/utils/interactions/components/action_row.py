@@ -26,7 +26,7 @@ class ActionRow(ComponentHolder):
         }
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data: list):
         components = data.get("components", list())
         new_components = []
         for i in components:
