@@ -36,7 +36,7 @@ class InteractionHandler(utils.Cog):
             given_values[i['name']] = i['value']
 
         # If we have a target_id, then the interaction is a context menu
-        if 'given_id' in payload['data']:
+        if 'target_id' in payload['data']:
             given_values[None] = payload['data']['target_id']
 
         # Make a string view
