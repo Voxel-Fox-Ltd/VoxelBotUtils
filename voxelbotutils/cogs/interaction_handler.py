@@ -104,7 +104,7 @@ class InteractionHandler(utils.Cog):
             kwarg_converted = {}
             for name, value in ctx.given_values.items():
                 if name is None:
-                    for name, sig in ctx.command.clean_params:
+                    for name, sig in ctx.command.clean_params.items():
                         break  # Just get the first param - deliberately shadow "name"
                 else:
                     sig = ctx.command.clean_params[name]
