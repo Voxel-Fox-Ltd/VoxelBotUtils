@@ -16,8 +16,6 @@ class InteractionHandler(utils.Cog):
         Make a context object from an interaction.
         """
 
-        # command_args = [f"﹃{i['value']}﹄" for i in payload['data'].get('options', list())]  # ﹃﹄ are valid quotes for Dpy
-
         # Get the arguments from the payload
         command_name = payload['data']['name']
         if 'options' in payload['data']:
@@ -36,6 +34,10 @@ class InteractionHandler(utils.Cog):
         given_values = {}
         for i in payload_data_options:
             given_values[i['name']] = i['value']
+
+        # If we have a target_id, then the interaction is a context menu
+        if 'given_id' in payload['data']:
+            given_values[None] = payload['data']['target_id']
 
         # Make a string view
         command_args = [f"{i['value']}" for i in payload_data_options]
@@ -96,12 +98,16 @@ class InteractionHandler(utils.Cog):
                     self.bot.dispatch('command_error', ctx, exc)
                 return
 
-            # Convert our given vales
-            self.logger.debug("Invoking interaction context for command %s" % (ctx.command.name))
+            # Convert our given values
+            self.logger.debug("Converterting interaction args for command %s" % (ctx.command.name))
             positional_converted = []
             kwarg_converted = {}
             for name, value in ctx.given_values.items():
-                sig = ctx.command.clean_params[name]
+                if name is None:
+                    for name, sig in ctx.command.clean_params:
+                        break  # Just get the first param - deliberately shadow "name"
+                else:
+                    sig = ctx.command.clean_params[name]
                 converter = ctx.command._get_converter(sig)
                 v = await ctx.command.do_conversion(ctx, converter, value, sig)
                 if sig.kind in [inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD]:
@@ -110,6 +116,7 @@ class InteractionHandler(utils.Cog):
                     kwarg_converted[name] = v
 
             # And invoke
+            self.logger.debug("Invoking interaction context for command %s" % (ctx.command.name))
             self.bot.dispatch('command', ctx)
             try:
                 if await self.bot.can_run(ctx):
