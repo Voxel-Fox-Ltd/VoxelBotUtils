@@ -1,11 +1,60 @@
 import asyncio
 import datetime
 import typing
+import argparse
 
 from discord.ext import commands
 from discord.ext.commands.core import wrap_callback
 
 from .custom_cog import Cog
+
+
+class DiscordArgumentParser(argparse.ArgumentParser):
+
+    @classmethod
+    async def convert(cls, ctx, value):
+        try:
+            # Set up our parser
+            parser = cls(add_help=False, exit_on_error=False)
+            original_converters = {}
+            for packed in ctx.command.argparse:
+                try:
+                    args, kwargs = packed
+                except ValueError:
+                    args, kwargs = packed, dict()
+                converter = kwargs.pop("type", str)
+                if isinstance(args, str):
+                    added = parser.add_argument(args, **kwargs)
+                else:
+                    added = parser.add_argument(*args, **kwargs)
+                original_converters[added.dest] = converter
+
+            # Set up our stuff to be cast to strings because that's how we be do
+            # ctx.bot.logger.info(f"value {value}")
+            # ctx.bot.logger.info(f"original_converters {original_converters}")
+            # ctx.bot.logger.info(f"parser {parser}")
+
+            # Convert the given args
+            try:
+                args = parser.parse_args(value.split())
+            except (argparse.ArgumentError, SystemExit) as e:
+                ctx.bot.logger.error(e, exc_info=True)
+                raise commands.BadArgument(str(e))
+            for dest, kwarg_value in args._get_kwargs():
+                converter = original_converters[dest]
+                if isinstance(kwarg_value, (list, tuple)):
+                    converted = list()
+                    for i in kwarg_value:
+                        converted.append(await ctx.command.do_conversion(ctx, converter, i, None))
+                else:
+                    converted = await ctx.command.do_conversion(ctx, converter, kwarg_value, None)
+                setattr(args, dest, converted)
+
+            # Parse the arguments
+            return args
+        except Exception as e:
+            ctx.bot.logger.error(e, exc_info=True)
+            raise
 
 
 class Command(commands.Command):
@@ -28,6 +77,8 @@ class Command(commands.Command):
         add_slash_command (bool): Whether or not this command should be added as a slash command.
         argument_descriptions (typing.List[str]): A list of descriptions for the command arguments to
             be used in slash commands.
+        argparse (typing.Tuple[typing.Tuple[str], typing.Dict[str, typing.Any]]): A list of args and kwargs
+            to be expanded into argparse.
     """
 
     def __init__(self, *args, **kwargs):
@@ -38,6 +89,7 @@ class Command(commands.Command):
         self.locally_handled_errors: list = kwargs.get('locally_handled_errors', None)
         self.add_slash_command: bool = kwargs.get('add_slash_command', True)
         self.argument_descriptions: typing.List[str] = kwargs.get('argument_descriptions', list())
+        self.argparse: list = kwargs.get('argparse', list())
 
         # Fix cooldown to be our custom type
         cooldown = self._buckets._cooldown
@@ -114,12 +166,16 @@ class Command(commands.Command):
             else:
                 await self._prepare_cooldowns(ctx)
                 await self._parse_arguments(ctx)
-
             await self.call_before_hooks(ctx)
         except Exception:
             if self._max_concurrency is not None:
                 await self._max_concurrency.release(ctx)
             raise
+
+    async def _actual_conversion(self, ctx, converter, argument, param):
+        if converter == argparse.ArgumentParser or isinstance(converter, argparse.ArgumentParser):
+            converter = DiscordArgumentParser
+        return await super()._actual_conversion(ctx, converter, argument, param)
 
     async def dispatch_error(self, ctx, error):
         """
