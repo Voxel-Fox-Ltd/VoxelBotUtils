@@ -7,9 +7,24 @@ from discord.ext import commands
 FakeResponse = collections.namedtuple("FakeResponse", ["status", "reason"])
 
 
-class _FakeMentionable(discord.Object):
+class AbstractMentionable(discord.Object):
+    """
+    A fake mentionable object for use anywhere that you can't catch an error on a :code:`.mention` being None.
+
+    Attributes:
+        id (int): The ID of the mentionable.
+        mention (str): The mention string for the object.
+        name (str): The name of the object.
+    """
 
     def __init__(self, id: int, mention: str = "null", name: str = "null"):
+        """
+        Args:
+            id (int): The ID of the mentionable.
+            mention (str): The string to be returned when :code:`.mention` is run.
+            name (str): The string to be returned when :code:`.name` is run.
+        """
+
         self.id = id
         self.mention = mention
         self.name = name
@@ -68,16 +83,16 @@ class Context(commands.Context):
             f"@{self.bot.user.name}",
         )
 
-    def get_mentionable_channel(self, channel_id: int, fallback: str = "null") -> str:
+    def get_mentionable_channel(self, channel_id: int, fallback: str = "null") -> AbstractMentionable:
         """
         Get the mention string for a given channel ID.
 
         Args:
-            channel_id (int): The ID of the object that you want to mention.
-            fallback (str, optional): The string to fall back to if the object isn't reachable.
+            channel_id (int): The ID of the channel that you want to mention.
+            fallback (str, optional): The string to fall back to if the channel isn't reachable.
 
         Returns:
-            str: The mention string.
+            typing.Union[discord.TextChannel, voxelbotutils.AbstractMentionable]: The mentionable channel.
         """
 
         x = None
@@ -85,18 +100,18 @@ class Context(commands.Context):
             x = self.bot.get_channel(int(channel_id))
         if x:
             return x
-        return _FakeMentionable(id, fallback, fallback)
+        return AbstractMentionable(id, fallback, fallback)
 
-    def get_mentionable_role(self, role_id: int, fallback: str = "null") -> str:
+    def get_mentionable_role(self, role_id: int, fallback: str = "null") -> AbstractMentionable:
         """
         Get the mention string for a given role ID.
 
         Args:
-            role_id (int): The ID of the object that you want to mention.
-            fallback (str, optional): The string to fall back to if the object isn't reachable.
+            role_id (int): The ID of the role that you want to mention.
+            fallback (str, optional): The string to fall back to if the role isn't reachable.
 
         Returns:
-            str: The mention string.
+            typing.Union[discord.Role, voxelbotutils.AbstractMentionable]: The mentionable role.
         """
 
         x = None
@@ -104,4 +119,4 @@ class Context(commands.Context):
             x = self.guild.get_role(int(role_id))
         if x:
             return x
-        return _FakeMentionable(id, fallback, fallback)
+        return AbstractMentionable(id, fallback, fallback)

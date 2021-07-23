@@ -7,7 +7,7 @@ from .context_embed import Embed  # noqa
 from .custom_bot import MinimalBot, Bot, ComponentMessage  # noqa
 from .custom_cog import Cog  # noqa
 from .custom_command import Command, Group, SubcommandGroup  # noqa
-from .custom_context import Context  # noqa
+from .custom_context import Context, AbstractMentionable  # noqa
 from .database import DatabaseConnection  # noqa
 from .redis import RedisConnection, RedisChannelHandler, redis_channel_handler  # noqa
 from .statsd import StatsdConnection  # noqa

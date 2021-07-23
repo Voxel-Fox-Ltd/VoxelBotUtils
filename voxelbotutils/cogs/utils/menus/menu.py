@@ -30,9 +30,9 @@ class Menu(MenuDisplayable):
     callbacks = MenuCallbacks
 
     def __init__(
-            self, *options: typing.List[Option], display: str = None, component_display: str = None):
+            self, *options: Option, display: str = None, component_display: str = None):
         """
-        Params:
+        Args:
             options (typing.List[Option]): A list of options that should be displayed in the menu.
             display (str, optional): When using a nested submenu, this is the option that should be displayed.
             component_display (str, optional): When using a nested submenu, this is the option that
@@ -53,8 +53,8 @@ class Menu(MenuDisplayable):
         class NestedCog(Cog, name=cog_name):
 
             def cog_unload(self):
-                super().cog_unload()
                 self.bot.remove_command(name)
+                super().cog_unload()
 
             @commands.command(cls=Command, name=name, aliases=aliases, **command_kwargs)
             async def setup(nested_self, ctx):

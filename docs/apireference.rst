@@ -43,6 +43,11 @@ Context
 .. autoclass:: voxelbotutils.Context
    :no-special-members:
 
+AbstractMentionable
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.AbstractMentionable
+
 DatabaseConnection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
