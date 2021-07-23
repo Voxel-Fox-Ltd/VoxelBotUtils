@@ -15,18 +15,15 @@ class DiscordArgumentParser(argparse.ArgumentParser):
     async def convert(cls, ctx, value):
         try:
             # Set up our parser
-            parser = cls(add_help=False, exit_on_error=False)
+            parser = cls(add_help=False, exit_on_error=False)  # exit_on_error only exists in later versions. Unfortunate.
             original_converters = {}
             for packed in ctx.command.argparse:
                 try:
-                    args, kwargs = packed
+                    *args, kwargs = packed
                 except ValueError:
-                    args, kwargs = packed, dict()
+                    *args, kwargs = packed, dict()
                 converter = kwargs.pop("type", str)
-                if isinstance(args, str):
-                    added = parser.add_argument(args, **kwargs)
-                else:
-                    added = parser.add_argument(*args, **kwargs)
+                added = parser.add_argument(*args, **kwargs)
                 original_converters[added.dest] = converter
 
             # Set up our stuff to be cast to strings because that's how we be do
@@ -77,21 +74,19 @@ class Command(commands.Command):
         add_slash_command (bool): Whether or not this command should be added as a slash command.
         argument_descriptions (typing.List[str]): A list of descriptions for the command arguments to
             be used in slash commands.
-        argparse (typing.Tuple[typing.Tuple[str], typing.Dict[str, typing.Any]]): A list of args and kwargs
+        argparse (typing.Tuple[str, ..., typing.Dict[str, typing.Any]]): A list of args and kwargs
             to be expanded into argparse.
 
-            For instance, if you had a ban command and wanted to specify a ban time with a :code:`-d` flag,
+            For instance, if you had a ban command and wanted to specify a ban time with a :code:`-days` flag,
             you could set that up like so:
 
             ::
 
                 @voxelbotutils.command(argparse=(
-                    ("user", {"type": discord.Member}),
-                    (("-days", "-d"), {"type": int, "default": 0}),
+                    ("-days", "-d", {"type": int, "default": 0, "nargs": "?"}),
                 ))
-                async def ban(self, ctx, *, namespace: argparse.Namespace):
-                    user: discord.Member = namespace.user
-                    ban_time: int = namespace.days
+                async def ban(self, ctx, user: discord.Member, *, namespace: argparse.Namespace):
+                    ban_time: int = namespace.days  # Conversion is handled automatically
                     ...
     """
 
