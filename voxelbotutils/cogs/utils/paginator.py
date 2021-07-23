@@ -95,7 +95,7 @@ class Paginator(object):
         Start and handle a paginator instance.
 
         Args:
-            ctx (commands.Context): The context instance for the called command.
+            ctx (discord.ext.commands.Context): The context instance for the called command.
             timeout (float, optional): How long you should wait between getting a reaction
                 and timing out.
         """

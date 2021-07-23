@@ -16,18 +16,18 @@ class DatabaseConnection(object):
         ::
 
             # The database can be used via context
-            async with bot.database() as db:
+            async with DatabaseConnection() as db:
                 values = await db("SELECT user_id FROM user_settings WHERE enabled=$1", True)
             for row in values:
                 print(row['user_id'])
 
             # Or you can get a connection object that you can pass around
-            db = await bot.database.get_connection()
+            db = await DatabaseConnection.get_connection()
             await db("DELETE FROM user_settings")
             await db.disconnect()
 
             # And transactions are also available
-            async with bot.database() as db:
+            async with DatabaseConnection() as db:
                 await db.start_transaction()
                 await db("DELETE FROM guild_settings")
                 await db.commit_transaction()

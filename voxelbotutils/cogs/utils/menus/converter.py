@@ -31,11 +31,14 @@ class Converter(object):
         """
         Args:
             prompt (str): The message that should be sent to the user when asking for the convertable.
-            checks (typing.List[Check]): A list of check objects that should be used to make sure the user's
+            checks (typing.List[voxelbotutils.menus.Check]): A list of check objects that should be used to make sure the user's
                 input is valid. These will be silently ignored if a :param:`components` parameter is passed.
             converter (typing.Union[typing.Callable[[str], typing.Any], commands.Converter]): A callable that
                 will be used to convert the user's input. If a converter fails then :code:`None` will be returned,
                 so use the given checks to make sure that this does not happen if this behaviour is undesirable.
+            components (voxelbotutils.MessageComponents): An instance of message components to be sent by the bot.
+                If components are sent then the bot will not accept a message as a response, only an interaction
+                with the component.
             timeout_message (str): The message that should get output to the user if this converter times out.
         """
 

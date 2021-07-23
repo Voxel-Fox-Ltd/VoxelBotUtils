@@ -83,10 +83,10 @@ class TimeValue(object):
         self.duration: int = math.ceil(duration)
         remaining = self.duration
 
-        self.years, remaining = self.get_quotient_and_remainder(remaining, 60 * 60 * 24 * 365)
-        self.days, remaining = self.get_quotient_and_remainder(remaining, 60 * 60 * 24)
-        self.hours, remaining = self.get_quotient_and_remainder(remaining, 60 * 60)
-        self.minutes, remaining = self.get_quotient_and_remainder(remaining, 60)
+        self.years, remaining = self._get_quotient_and_remainder(remaining, 60 * 60 * 24 * 365)
+        self.days, remaining = self._get_quotient_and_remainder(remaining, 60 * 60 * 24)
+        self.hours, remaining = self._get_quotient_and_remainder(remaining, 60 * 60)
+        self.minutes, remaining = self._get_quotient_and_remainder(remaining, 60)
         self.seconds = remaining
 
         self.clean_spaced = ' '.join([i for i in [
@@ -117,7 +117,7 @@ class TimeValue(object):
         self.delta = timedelta(seconds=self.duration)
 
     @staticmethod
-    def get_quotient_and_remainder(value: int, divisor: int):
+    def _get_quotient_and_remainder(value: int, divisor: int):
         """
         A divmod wrapper that just catches a zero division error.
         """
@@ -140,14 +140,14 @@ class TimeValue(object):
         Provided for use of the Discord.py module.
 
         Args:
-            ctx (commands.Context): The current context object that we want to convert under.
+            ctx (discord.ext.commands.Context): The current context object that we want to convert under.
             value (str): The value string to be converted.
 
         Returns:
-            TimeValue: A time value instance.
+            voxelbotutils.TimeValue: A time value instance.
 
         Raises:
-            InvalidTimeDuration: If the time could not be successfully converted.
+            voxelbotutils.errors.InvalidTimeDuration: If the time could not be successfully converted.
         """
 
         return cls.parse(value)
@@ -161,10 +161,10 @@ class TimeValue(object):
             value (str): The value string to be converted.
 
         Returns:
-            TimeValue: A time value instance.
+            voxelbotutils.TimeValue: A time value instance.
 
         Raises:
-            InvalidTimeDuration: If the time could not be successfully converted.
+            voxelbotutils.errors.InvalidTimeDuration: If the time could not be successfully converted.
         """
 
         # If the value given is purely a number, add the "minute" unit to the end

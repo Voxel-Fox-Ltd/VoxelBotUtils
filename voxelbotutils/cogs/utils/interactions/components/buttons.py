@@ -1,8 +1,6 @@
 import enum
 import typing
 import uuid
-import asyncio
-import re
 
 import discord
 
@@ -45,7 +43,7 @@ class Button(DisableableComponent):
         """
         Args:
             label (str): The label that is added to the button.
-            style (ButtonStyle, optional): The style that the button should use.
+            style (voxelbotutils.ButtonStyle, optional): The style that the button should use.
             custom_id (str, optional): The custom ID that should be assigned to the button. If you
                 don't provide one, then a UUID1 is generated automatically. Buttons with the LINK
                 style do not support the :attr:`custom_id` attribute, so it will be ignored.
@@ -110,7 +108,7 @@ class Button(DisableableComponent):
             data (dict): The payload data that the button should be constructed from.
 
         Returns:
-            Button: The button that the payload describes.
+            voxelbotutils.Button: The button that the payload describes.
         """
 
         emoji = data.get("emoji")

@@ -18,7 +18,7 @@ class TimeFormatter(object):
     def __init__(self, time: dt):
         """
         Params:
-            time (dt): The time that you want to format.
+            time (datetime.datetime): The time that you want to format.
         """
 
         self.time = time

@@ -81,10 +81,10 @@ class ComponentHolder(BaseComponent):
     A message component that holds other message components.
     """
 
-    def __init__(self, *components: typing.List[BaseComponent]):
+    def __init__(self, *components: BaseComponent):
         """
         Args:
-            *components: A list of the components that this component holder holds.
+            *components (voxelbotutils.BaseComponent): A list of the components that this component holder holds.
         """
 
         self.components = list(components)
@@ -94,7 +94,7 @@ class ComponentHolder(BaseComponent):
         Adds a component to this holder.
 
         Args:
-            component (BaseComponent): The component that you want to add.
+            component (voxelbotutils.BaseComponent): The component that you want to add.
         """
 
         self.components.append(component)
@@ -105,7 +105,7 @@ class ComponentHolder(BaseComponent):
         Removes a component from this holder.
 
         Args:
-            component (BaseComponent): The component that you want to remove.
+            component (voxelbotutils.BaseComponent): The component that you want to remove.
         """
 
         self.components.remove(component)
@@ -114,7 +114,7 @@ class ComponentHolder(BaseComponent):
     def disable_components(self) -> None:
         """
         Disables all of the components inside this component holder that
-        inherit from :class:`DisableableComponent`.
+        inherit from :class:`voxelbotutils.DisableableComponent`.
         """
 
         for i in self.components:
@@ -127,7 +127,7 @@ class ComponentHolder(BaseComponent):
     def enable_components(self) -> None:
         """
         Enables all of the components inside this component holder that
-        inherit from :class:`DisableableComponent`.
+        inherit from :class:`voxelbotutils.DisableableComponent`.
         """
 
         for i in self.components:
@@ -145,7 +145,7 @@ class ComponentHolder(BaseComponent):
             custom_id (str): The ID of the component that you want to find.
 
         Returns:
-            typing.Optional[BaseComponent]: The component that was found, if any.
+            typing.Optional[voxelbotutils.BaseComponent]: The component that was found, if any.
         """
 
         for i in self.components:

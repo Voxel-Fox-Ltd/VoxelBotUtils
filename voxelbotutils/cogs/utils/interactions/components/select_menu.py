@@ -86,7 +86,7 @@ class SelectMenu(DisableableComponent):
         """
         Args:
             custom_id (str): The custom ID for this component.
-            options (typing.List[SelectOption]): The options that should be displayed in this component.
+            options (typing.List[voxelbotutils.SelectOption]): The options that should be displayed in this component.
             placeholder (str, optional): The placeholder text for when nothing is selected.
             min_values (int, optional): The minimum amount of selectable values.
             max_values (int, optional): The maximum amount of selectable values.

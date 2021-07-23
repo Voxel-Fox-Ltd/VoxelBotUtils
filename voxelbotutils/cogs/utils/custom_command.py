@@ -79,6 +79,20 @@ class Command(commands.Command):
             be used in slash commands.
         argparse (typing.Tuple[typing.Tuple[str], typing.Dict[str, typing.Any]]): A list of args and kwargs
             to be expanded into argparse.
+
+            For instance, if you had a ban command and wanted to specify a ban time with a :code:`-d` flag,
+            you could set that up like so:
+
+            ::
+
+                @voxelbotutils.command(argparse=(
+                    ("user", {"type": discord.Member}),
+                    (("-days", "-d"), {"type": int, "default": 0}),
+                ))
+                async def ban(self, ctx, *, namespace: argparse.Namespace):
+                    user: discord.Member = namespace.user
+                    ban_time: int = namespace.days
+                    ...
     """
 
     def __init__(self, *args, **kwargs):
@@ -108,7 +122,7 @@ class Command(commands.Command):
         Gets the remaining cooldown for a given command.
 
         Args:
-            ctx (commands.Context): The context object for the command/author.
+            ctx (discord.ext.commands.Context): The context object for the command/author.
             current (float, optional): The current time.
 
         Returns:
@@ -121,6 +135,8 @@ class Command(commands.Command):
     async def _prepare_cooldowns(self, ctx: commands.Context):
         """
         Prepares all the cooldowns for the command to be called.
+
+        :meta private:
         """
 
         if self._buckets.valid:
@@ -149,6 +165,8 @@ class Command(commands.Command):
         method.
 
         https://github.com/Rapptz/discord.py/blob/a4d29e8cfdb91b5e120285b605e65be2c01f2c87/discord/ext/commands/core.py#L774-L795
+
+        :meta private:
         """
 
         ctx.command = self
@@ -173,13 +191,15 @@ class Command(commands.Command):
             raise
 
     async def _actual_conversion(self, ctx, converter, argument, param):
-        if converter == argparse.ArgumentParser or isinstance(converter, argparse.ArgumentParser):
+        if converter in [argparse.ArgumentParser, argparse.Namespace] or isinstance(converter, (argparse.ArgumentParser, argparse.Namespace)):
             converter = DiscordArgumentParser
         return await super()._actual_conversion(ctx, converter, argument, param)
 
     async def dispatch_error(self, ctx, error):
         """
-        Like how we'd normally dispatch an error, but we deal with local lads
+        Like how we'd normally dispatch an error, but we deal with local lads.
+
+        :meta private:
         """
 
         # They didn't set anything? Default behaviour then
@@ -246,7 +266,7 @@ class Group(commands.Group):
         The normal :func:`discord.ext.Command.can_run` but it ignores cooldowns.
 
         Args:
-            ctx (commands.Context): The command we want to chek if can be run.
+            ctx (discord.ext.commands.Context): The command we want to chek if can be run.
 
         Returns:
             bool: Whether or not the command can be run.
@@ -292,7 +312,9 @@ class Group(commands.Group):
 
     async def dispatch_error(self, ctx, error):
         """
-        Like how we'd normally dispatch an error, but we deal with local lads
+        Like how we'd normally dispatch an error, but we deal with local lads.
+
+        :meta private:
         """
 
         # They didn't set anything? Default behaviour then

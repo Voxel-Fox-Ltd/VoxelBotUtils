@@ -124,9 +124,6 @@ class MinimalBot(commands.AutoShardedBot):
         async def enable_components_msg_prop(message):
             return await message.edit(components=message.components.enable_components())
 
-        # def create_message_prop(state, *args, **kwargs):
-        #     return ComponentMessage(state=state, *args, **kwargs)
-
         Messageable.send = send_button_msg_prop
         discord.message.MessageFlags.ephemeral = discord.flags.flag_value(lambda _: 64)
         discord.message.MessageFlags.VALID_FLAGS.update({"ephemeral": 64})
@@ -149,14 +146,12 @@ class MinimalBot(commands.AutoShardedBot):
 
         discord.PartialMessage.edit = edit_button_msg_prop
 
-        # discord.Message = ComponentMessage
-        # discord.WebhookMessage = ComponentWebhookMessage
-
-        # ConnectionState.create_message = create_message_prop
-
     async def get_application_id(self) -> int:
         """
         Get the bot's application client ID.
+
+        Returns:
+            int: The bot's application ID.
         """
 
         if self.application_id:
@@ -231,7 +226,10 @@ class MinimalBot(commands.AutoShardedBot):
         Add a global slash command for the bot.
 
         Args:
-            command (interactions.ApplicationCommand): The command that you want to add.
+            command (voxelbotutils.ApplicationCommand): The command that you want to add.
+
+        Returns:
+            voxelbotutils.ApplicationCommand: The updated command instance using the returned API data.
         """
 
         application_id = await self.get_application_id()
@@ -249,7 +247,10 @@ class MinimalBot(commands.AutoShardedBot):
 
         Args:
             guild (discord.Guild): The guild you want to add the command to.
-            command (interactions.ApplicationCommand): The command you want to add.
+            command (voxelbotutils.ApplicationCommand): The command you want to add.
+
+        Returns:
+            voxelbotutils.ApplicationCommand: The updated command instance using the returned API data.
         """
 
         application_id = await self.get_application_id()
@@ -266,8 +267,12 @@ class MinimalBot(commands.AutoShardedBot):
         Bulk add a global slash command for the bot.
 
         Args:
-            commands (typing.List[interactions.ApplicationCommand]): The list of commands
+            commands (typing.List[voxelbotutils.ApplicationCommand]): The list of commands
                 you want to add.
+
+        Returns:
+            typing.List[voxelbotutils.ApplicationCommand]: The updated command instances
+                using the returned API data.
         """
 
         application_id = await self.get_application_id()
@@ -285,8 +290,12 @@ class MinimalBot(commands.AutoShardedBot):
 
         Args:
             guild (discord.Guild): The guild you want to add the command to.
-            commands (typing.List[interactions.ApplicationCommand]): The list of commands
+            commands (typing.List[voxelbotutils.ApplicationCommand]): The list of commands
                 you want to add.
+
+        Returns:
+            typing.List[voxelbotutils.ApplicationCommand]: The updated command instances
+                using the returned API data.
         """
 
         application_id = await self.get_application_id()
@@ -302,7 +311,11 @@ class MinimalBot(commands.AutoShardedBot):
         Add a global slash command for the bot.
 
         Returns:
-            typing.List[interactions.ApplicationCommand]: A list of commands that have been added.
+            typing.List[voxelbotutils.ApplicationCommand]: A list of commands that have been added.
+
+        Returns:
+            typing.List[voxelbotutils.ApplicationCommand]: The command instances
+                that were previously added for the application.
         """
 
         application_id = await self.get_application_id()
@@ -321,7 +334,8 @@ class MinimalBot(commands.AutoShardedBot):
             guild (discord.Guild): The guild you want to get commands for.
 
         Returns:
-            typing.List[interactions.ApplicationCommand]: A list of commands that have been added.
+            typing.List[voxelbotutils.ApplicationCommand]: The command instances
+                that were previously added for the application.
         """
 
         application_id = await self.get_application_id()
@@ -337,7 +351,8 @@ class MinimalBot(commands.AutoShardedBot):
         Remove a global slash command for the bot.
 
         Args:
-            command (interactions.ApplicationCommand): The command that you want to remove.
+            command (voxelbotutils.ApplicationCommand): The command that you want to remove. A command
+                ID is required for this to work.
         """
 
         application_id = await self.get_application_id()
@@ -354,7 +369,8 @@ class MinimalBot(commands.AutoShardedBot):
 
         Args:
             guild (discord.Guild): The guild that you want to remove the command on.
-            command (interactions.ApplicationCommand): The command that you want to remove.
+            command (interactions.ApplicationCommand): The command that you want to remove. A command
+                ID is required for this to work.
         """
 
         application_id = await self.get_application_id()
@@ -674,7 +690,7 @@ class MinimalBot(commands.AutoShardedBot):
 
     async def _wait_for_button_message(self, message, *, check=None, timeout=None):
         """
-        Wait for an interaction on a button.
+        Wait for an interaction on a button. Deprecated.
 
         :meta private:
         """
@@ -1437,6 +1453,8 @@ class Bot(MinimalBot):
     async def launch_shard(self, gateway, shard_id: int, *, initial: bool = False):
         """
         Ask the shard manager if we're allowed to launch.
+
+        :meta private:
         """
 
         # See if the shard manager is enabled
@@ -1460,6 +1478,8 @@ class Bot(MinimalBot):
     async def launch_shards(self):
         """
         Launch all of the shards using the shard manager.
+
+        :meta private:
         """
 
         # If we don't have redis, let's just ignore the shard manager
@@ -1493,6 +1513,12 @@ class Bot(MinimalBot):
         self._connection.shards_launched.set()
 
     async def connect(self, *, reconnect=True):
+        """
+        A version of connect that uses the shard manager.
+
+        :meta private:
+        """
+
         self._reconnect = reconnect
         await self.launch_shards()
 

@@ -18,7 +18,7 @@ class RedisConnection(object):
         ::
 
             # In a command
-            async with bot.redis() as re:
+            async with RedisConnection() as re:
                 await re.publish("channel_name", {"foo": "bar"})
                 await re.publish_str("channel_two", "baz")
 

@@ -88,7 +88,7 @@ class MessageComponents(ComponentHolder):
         buttons. This does *not* check that you've added fewer than 5 rows.
 
         Args:
-            *buttons (Button): The buttons that you want to have added.
+            *buttons (voxelbotutils.Button): The buttons that you want to have added.
         """
 
         v = cls()
