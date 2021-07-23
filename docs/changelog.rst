@@ -3,6 +3,29 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.5.8
+--------------------------------------
+
+New Features
+"""""""""""""""""""""""""""""""""""""""
+
+* Handle disconnects and reconnects better in the shard manager.
+* Handle pings and keepalives in the shard manager.
+* :code:`target_id` is now supported in the slash command handler.
+* Add an :attr:`argparse<voxelbotutils.Command.argparse>` attribute to the command decorator. The :code:`!addslashcommands` command is now updated to use this.
+
+Changed Features
+"""""""""""""""""""""""""""""""""""""""
+
+* :code:`exc_info` is now returned properly on a startup failure.
+* The :code:`send` command is no longer embeddified.
+* The list of colours has been updated for the :class:`voxelbotutils.converters.ColourConverter`.
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""
+
+* Fixed error in outputting the recommended shard count.
+
 0.5.7
 --------------------------------------
 
@@ -11,7 +34,7 @@ Changed Features
 
 * Removed native UpgradeChat utils, and instead move them to an external dependancy.
 * Change the eval command to not include globals, and include the VBU data in a :code:`vbu` arg.
-* Changed the shard manager to use sockets instead of redis
+* Changed the shard manager to use sockets instead of redis.
 
 0.5.6
 --------------------------------------
