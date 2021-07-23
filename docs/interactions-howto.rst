@@ -8,18 +8,22 @@ Responding to an Interaction
 
 Interactions need to be responded to, or it shows as "this interaction has failed" in the Discord UI. The Discord API supports a few ways of responding:
 
-* :code:`defer` an interaction, which gives a "processing" message, and respond later.
-* :code:`defer_update` an interaction, which doesn't give a processing message, and respond later. This is only available on components.
-* :code:`respond` to an interaction, and receive no :class:`discord.Message` object back.
-
-Using the :func:`respond` method will send a type 4 response in the backend, which means that you're unable to receive a message object back from the API, but it does allow you to give responses without showing the loading symbol - a use case for this could be an ephemeral message saying "you can't use this button" or suchlike.
+* :method:`defer<voxelbotutils.InteractionMessageable.defer>` an interaction, which gives a "processing" message, and respond later.
+* :method:`defer_update<voxelbotutils.InteractionMessageable.defer_update>` an interaction, which doesn't give a processing message, and respond later. This is only available on components.
+* :method:`respond<voxelbotutils.InteractionMessageable.respond>` to an interaction, and receive no :class:`discord.Message` object back.
 
 Slash Commands
 ------------------------------------------
 
-One of the inbuilt cogs in VBU allows you to automatically add all public commands (anything that's not a :func:`meta command<voxelbotutils.checks.meta_command>`, not an :func:`owner only command<discord.ext.commands.is_owner>`, and has its :attr:`add_slash_command<voxelbotutils.Command.add_slash_command>` attribute set to `True` - as is the default) as slash commands.
+One of the inbuilt cogs in VBU adds the :code:`!addslashcommands` owner-only command, which attempts to automatically add all public commands as slash commands.
 
-To [attempt to] add all of your commands as slash commands, run the :code:`!addslashcommands` command in your code, and the bot will attempt to convert all of your arguments and bulk-add the commands to Discord. If this conversion fails, you'll be given a straight traceback of the error instead of anything interpreted, so you can see exactly where the issue stems from.
+A public command needs all of the three:
+
+* It can't be a :func:`meta command<voxelbotutils.checks.meta_command>`.
+* It can't be an :func:`owner only command<discord.ext.commands.is_owner>` command.
+* It needs its :attr:`add_slash_command<voxelbotutils.Command.add_slash_command>` attribute set to `True` (as is the default).
+
+Running the :code:`!addslashcommands` command will make your bot attempt to convert all of your arguments and bulk-add the commands to Discord. If this conversion fails, you'll be given a traceback of the error so you can see exactly where the issue stems from.
 
 Most issues stem from using :class:`discord.ext.commands.Greedy`, misordering your optional arguments (they must appear at the end), using even *slightly* complex group commands, and using converters that don't stem from a commonly converted types (though in this instance you can add a :code:`SLASH_COMMAND_ARG_TYPE` attribute being an instance of :class:`voxelbotutils.ApplicationCommandOptionType` to your converter for the bot to use).
 
@@ -39,6 +43,10 @@ All interactions need to be placed into a :class:`MessageComponents` object, and
          voxelbotutils.Button("Finally")
       )
    )
+   await channel.send(
+      "Text is required - component-only messages aren't supported yet (July 2021)",
+      components=components,
+   )
 
 Buttons
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -47,40 +55,61 @@ Using buttons has been made pretty simple. First, you send your button to the us
 
 .. code-block:: python
 
-   button1 = voxelbotutils.Button("Button 1")
-   button2 = voxelbotutils.Button("Button 2")
+   button1 = voxelbotutils.Button("Button 1", custsom_id="button 1")
+   button2 = voxelbotutils.Button("Button 2", custsom_id="button 1")
    components = voxelbotutils.MessageComponents(
       voxelbotutils.ActionRow(button1, button2)
    )
-   m = await channel.send("Text is required when sending buttons, unfortunately.", components=components)
+   m = await channel.send("X", components=components)
 
 Then for all button types other than :attr:`ButtonStyle.LINK`, you can get notified when a user clicks on your button. This is dispatched as a :code:`component_interaction` event.
 
 .. code-block:: python
 
-   payload = await bot.wait_for("component_interaction", check=lambda p: p.message.id == 123123123123)
+   payload = await bot.wait_for(
+      "component_interaction",
+      check=lambda p: p.message.id == m.id,
+   )
    await payload.defer()
 
-After that, you can work out which of your buttons the user clicked on and take action based on that, sending back to the button payload so as to complete the interaction.
+After that, you can work out which of your buttons the user clicked on using their custom IDs and take action based on that, sending back to the button payload so as to complete the interaction:
 
 .. code-block:: python
 
-   clicked_button = p.component
-   if clicked_button == button1:
-      await p.send("You clicked on button 1!", ephemeral=True)
-   elif clicked_button == button2:
-      await p.send("You clicked on button 2!", ephemeral=True)
+   clicked_button = payload.component
+   if clicked_button.custom_id == "button 1":
+      await payload.respond("{payload.user.mention} clicked on button 1!")
+   elif clicked_button.custom_id == "button 2":
+      await payload.respond("{payload.user.mention} clicked on button 2!")
 
 Select Menus
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Dropdowns allow the user to select one or more options from a given set.
+Dropdowns allow the user to select one or more options from a given set. Unlike buttons, you can only fit one select menu per action row.
 
 .. code-block:: python
 
-   button1 = voxelbotutils.Button("Button 1")
-   button2 = voxelbotutils.Button("Button 2")
    components = voxelbotutils.MessageComponents(
-      voxelbotutils.ActionRow(button1, button2)
+      voxelbotutils.ActionRow(
+         voxelbotutils.SelectMenu(
+            custom_id="select menu",
+            options=[
+               voxelbotutils.SelectOption(label="Item 1", value="item1"),
+               voxelbotutils.SelectOption(label="Item 2", value="item2"),
+               voxelbotutils.SelectOption(label="Item 3", value="item3"),
+            ]
+         )
+      )
    )
-   m = await channel.send("Text is required when sending buttons, unfortunately.", components=components)
+   m = await channel.send("X", components=components)
+
+You'll then receive a :code:`component_interaction` event for every time the user updates their selected options, the values of which are passed on to you.
+
+.. code-block:: python
+
+   payload = await bot.wait_for(
+      "component_interaction",
+      check=lambda p: p.message.id == m.id,
+   )
+   # payload.values is a list of strings
+   await payload.respond("{payload.user.mention} set {payload.values} in the select menu!")
