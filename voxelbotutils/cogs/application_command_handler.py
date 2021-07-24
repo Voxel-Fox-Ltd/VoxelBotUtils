@@ -241,7 +241,7 @@ class ApplicationCommandHandler(utils.Cog):
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
-    async def addslashcommands(self, ctx, guild_only: bool, *, namespace: argparse.Namespace):
+    async def addslashcommands(self, ctx, guild_only: bool, *, namespace: argparse.Namespace = None):
         """
         Adds all of the bot's interaction commands to the global interaction handler.
         """
@@ -302,7 +302,7 @@ class ApplicationCommandHandler(utils.Cog):
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
-    async def removeslashcommands(self, ctx, guild_only: bool, *, namespace: argparse.Namespace):
+    async def removeslashcommands(self, ctx, guild_only: bool, *, namespace: argparse.Namespace = None):
         """
         Removes the bot's interaction commands from the global interaction handler.
         """
