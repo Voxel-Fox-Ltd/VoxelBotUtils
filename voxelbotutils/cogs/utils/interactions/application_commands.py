@@ -151,6 +151,7 @@ class ApplicationCommand(object):
 
         self.name: str = name
         self.description: str = description
+        self.type: ApplicationCommandType = type
         self.options: typing.List[ApplicationCommandOption] = list()
         self.id: int = None
         self.application_id: int = None
