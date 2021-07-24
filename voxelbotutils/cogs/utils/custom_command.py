@@ -9,7 +9,7 @@ from discord.ext.commands.core import wrap_callback
 from .custom_cog import Cog
 
 
-class DiscordArgumentParser(argparse.ArgumentParser):
+class DiscordArgparser(argparse.ArgumentParser):
 
     @classmethod
     async def convert(cls, ctx, value):
@@ -185,10 +185,24 @@ class Command(commands.Command):
                 await self._max_concurrency.release(ctx)
             raise
 
+    def _check_converter_is_argparser(self, annotation):
+        return any((
+            annotation in [argparse.ArgumentParser, argparse.Namespace],
+            isinstance(annotation, (argparse.ArgumentParser, argparse.Namespace)),
+        ))
+
     async def _actual_conversion(self, ctx, converter, argument, param):
-        if converter in [argparse.ArgumentParser, argparse.Namespace] or isinstance(converter, (argparse.ArgumentParser, argparse.Namespace)):
-            converter = DiscordArgumentParser
+        if self._check_converter_is_argparser(converter):
+            converter = DiscordArgparser
         return await super()._actual_conversion(ctx, converter, argument, param)
+
+    async def transform(self, ctx, param):
+        try:
+            return await super().transform(ctx, param)
+        except commands.MissingRequiredArgument:
+            if param.kind == param.KEYWORD_ONLY and self._check_converter_is_argparser(param.annotation):
+                return await self._argparser.convert(ctx, "")
+            raise
 
     async def dispatch_error(self, ctx, error):
         """
