@@ -15,7 +15,7 @@ class DiscordArgparser(argparse.ArgumentParser):
     async def convert(cls, ctx, value):
         try:
             # Set up our parser
-            parser = cls(add_help=False, exit_on_error=False)  # exit_on_error only exists in later versions. Unfortunate.
+            parser = cls(add_help=False)  # exit_on_error only exists in later versions. Unfortunate.
             original_converters = {}
             for packed in ctx.command.argparse:
                 try:
