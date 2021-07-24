@@ -550,7 +550,7 @@ class MinimalBot(commands.AutoShardedBot):
                 for f in files:
                     f.close()
         else:
-            if wait is False and messageable._sent_ack_response is False:
+            if isinstance(channel, (list, tuple)) and wait is False and messageable._sent_ack_response is False:
                 payload = {"type": _no_wait_response_type, "data": payload.copy()}
             response_data = await messageable._state.http.request(r, json=payload)
 
@@ -565,6 +565,7 @@ class MinimalBot(commands.AutoShardedBot):
             pass
 
         # See if we want to respond with anything
+        lock.release()
         if wait is False:
             return
 
@@ -579,7 +580,6 @@ class MinimalBot(commands.AutoShardedBot):
             ret = ComponentMessage(state=state, channel=channel, data=response_data)
 
         # See if we want to delete the message
-        lock.release()
         if delete_after is not None:
             await ret.delete(delay=delete_after)
 
