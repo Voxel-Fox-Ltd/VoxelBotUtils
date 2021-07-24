@@ -241,15 +241,15 @@ class ApplicationCommandHandler(utils.Cog):
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
-    async def addslashcommands(self, ctx, guild_only: bool, *, namespace: argparse.Namespace = None):
+    async def addslashcommands(self, ctx, guild_only: bool, *commands: str):
         """
         Adds all of the bot's interaction commands to the global interaction handler.
         """
 
         # Get the commands we want to add
         ctx.author = ctx.guild.me
-        if namespace.commands:
-            commands_to_add = [await self.convert_into_application_command(ctx, self.bot.get_command(i)) for i in namespace.commands]
+        if commands:
+            commands_to_add = [await self.convert_into_application_command(ctx, self.bot.get_command(i)) for i in commands]
         else:
             commands_to_add: typing.List[utils.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
         command_names_to_add = [i.name for i in commands_to_add]
@@ -258,7 +258,7 @@ class ApplicationCommandHandler(utils.Cog):
         async with ctx.typing():
 
             # Remove old slash commands if we're adding all of them as new
-            if not namespace.commands:
+            if commands:
 
                 # Get the commands that currently exist
                 if guild_only:
@@ -302,7 +302,7 @@ class ApplicationCommandHandler(utils.Cog):
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
-    async def removeslashcommands(self, ctx, guild_only: bool, *, namespace: argparse.Namespace = None):
+    async def removeslashcommands(self, ctx, guild_only: bool, *commands: str):
         """
         Removes the bot's interaction commands from the global interaction handler.
         """
@@ -318,7 +318,7 @@ class ApplicationCommandHandler(utils.Cog):
 
             # See which commands we need to delete
             for command in commands_current:
-                if namespace.commands and command.name not in namespace.commands:
+                if commands and command.name not in commands:
                     continue
                 if guild_only:
                     await self.bot.delete_guild_application_command(ctx.guild, command)
