@@ -13,45 +13,37 @@ class DiscordArgparser(argparse.ArgumentParser):
 
     @classmethod
     async def convert(cls, ctx, value):
-        try:
-            # Set up our parser
-            parser = cls(add_help=False)  # exit_on_error only exists in later versions. Unfortunate.
-            original_converters = {}
-            for packed in ctx.command.argparse:
-                try:
-                    *args, kwargs = packed
-                except ValueError:
-                    *args, kwargs = packed, dict()
-                converter = kwargs.pop("type", str)
-                added = parser.add_argument(*args, **kwargs)
-                original_converters[added.dest] = converter
 
-            # Set up our stuff to be cast to strings because that's how we be do
-            # ctx.bot.logger.info(f"value {value}")
-            # ctx.bot.logger.info(f"original_converters {original_converters}")
-            # ctx.bot.logger.info(f"parser {parser}")
-
-            # Convert the given args
+        # Set up our parser
+        parser = cls(add_help=False)  # exit_on_error only exists in later versions. Unfortunate.
+        original_converters = {}
+        for packed in ctx.command.argparse:
             try:
-                args = parser.parse_args(value.split())
-            except (argparse.ArgumentError, SystemExit) as e:
-                ctx.bot.logger.error(e, exc_info=True)
-                raise commands.BadArgument(str(e))
-            for dest, kwarg_value in args._get_kwargs():
-                converter = original_converters[dest]
-                if isinstance(kwarg_value, (list, tuple)):
-                    converted = list()
-                    for i in kwarg_value:
-                        converted.append(await ctx.command.do_conversion(ctx, converter, i, None))
-                else:
-                    converted = await ctx.command.do_conversion(ctx, converter, kwarg_value, None)
-                setattr(args, dest, converted)
+                *args, kwargs = packed
+            except ValueError:
+                *args, kwargs = packed, dict()
+            converter = kwargs.pop("type", str)
+            added = parser.add_argument(*args, **kwargs)
+            original_converters[added.dest] = converter
 
-            # Parse the arguments
-            return args
-        except Exception as e:
+        # Convert the given args
+        try:
+            args = parser.parse_args(value.split())
+        except (argparse.ArgumentError, SystemExit) as e:
             ctx.bot.logger.error(e, exc_info=True)
-            raise
+            raise commands.BadArgument(str(e))
+        for dest, kwarg_value in args._get_kwargs():
+            converter = original_converters[dest]
+            if isinstance(kwarg_value, (list, tuple)):
+                converted = list()
+                for i in kwarg_value:
+                    converted.append(await ctx.command.do_conversion(ctx, converter, i, None))
+            else:
+                converted = await ctx.command.do_conversion(ctx, converter, kwarg_value, None)
+            setattr(args, dest, converted)
+
+        # Parse the arguments
+        return args
 
 
 class Command(commands.Command):
@@ -201,7 +193,7 @@ class Command(commands.Command):
             return await super().transform(ctx, param)
         except commands.MissingRequiredArgument:
             if param.kind == param.KEYWORD_ONLY and self._check_converter_is_argparser(param.annotation):
-                return await self._argparser.convert(ctx, "")
+                return await DiscordArgparser.convert(ctx, "")
             raise
 
     async def dispatch_error(self, ctx, error):
