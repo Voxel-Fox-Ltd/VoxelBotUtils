@@ -9,6 +9,6 @@ all_packages = (
     'misc_commands',
     'owner_only',
     'presence_auto_updater',
-    'slash_command_handler',
+    'application_command_handler',
     'interaction_handler',
 )

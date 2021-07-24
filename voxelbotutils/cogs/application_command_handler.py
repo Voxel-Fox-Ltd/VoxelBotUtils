@@ -1,9 +1,7 @@
 import typing
-import enum
 import io
 import json
 import inspect
-import asyncio
 import argparse
 
 import discord
@@ -12,42 +10,42 @@ from discord.ext import commands
 from . import utils
 
 
-class SlashCommandHandler(utils.Cog):
+class ApplicationCommandHandler(utils.Cog):
 
     COMMAND_TYPE_MAPPER = {
-        discord.User: utils.interactions.ApplicationCommandOptionType.USER,
-        discord.Member: utils.interactions.ApplicationCommandOptionType.USER,
-        commands.UserConverter: utils.interactions.ApplicationCommandOptionType.USER,
-        commands.MemberConverter: utils.interactions.ApplicationCommandOptionType.USER,
-        discord.TextChannel: utils.interactions.ApplicationCommandOptionType.CHANNEL,
-        commands.TextChannelConverter: utils.interactions.ApplicationCommandOptionType.CHANNEL,
-        discord.VoiceChannel: utils.interactions.ApplicationCommandOptionType.CHANNEL,
-        commands.VoiceChannelConverter: utils.interactions.ApplicationCommandOptionType.CHANNEL,
-        discord.CategoryChannel: utils.interactions.ApplicationCommandOptionType.CHANNEL,
-        commands.CategoryChannelConverter: utils.interactions.ApplicationCommandOptionType.CHANNEL,
-        discord.Role: utils.interactions.ApplicationCommandOptionType.ROLE,
-        commands.RoleConverter: utils.interactions.ApplicationCommandOptionType.ROLE,
-        utils.converters.UserID: utils.interactions.ApplicationCommandOptionType.USER,
-        utils.converters.ChannelID: utils.interactions.ApplicationCommandOptionType.CHANNEL,
-        utils.converters.EnumConverter: utils.interactions.ApplicationCommandOptionType.STRING,
-        utils.converters.BooleanConverter: utils.interactions.ApplicationCommandOptionType.BOOLEAN,
-        utils.converters.ColourConverter: utils.interactions.ApplicationCommandOptionType.STRING,
-        utils.converters.FilteredUser: utils.interactions.ApplicationCommandOptionType.USER,
-        utils.converters.FilteredMember: utils.interactions.ApplicationCommandOptionType.USER,
-        utils.TimeValue: utils.interactions.ApplicationCommandOptionType.STRING,
-        commands.clean_content: utils.interactions.ApplicationCommandOptionType.STRING,
-        discord.Message: utils.interactions.ApplicationCommandOptionType.STRING,
-        discord.Emoji: utils.interactions.ApplicationCommandOptionType.STRING,
-        discord.PartialEmoji: utils.interactions.ApplicationCommandOptionType.STRING,
-        str: utils.interactions.ApplicationCommandOptionType.STRING,
-        int: utils.interactions.ApplicationCommandOptionType.INTEGER,
-        float: utils.interactions.ApplicationCommandOptionType.INTEGER,  # Controversial take
-        inspect._empty: utils.interactions.ApplicationCommandOptionType.STRING,
+        discord.User: utils.ApplicationCommandOptionType.USER,
+        discord.Member: utils.ApplicationCommandOptionType.USER,
+        commands.UserConverter: utils.ApplicationCommandOptionType.USER,
+        commands.MemberConverter: utils.ApplicationCommandOptionType.USER,
+        discord.TextChannel: utils.ApplicationCommandOptionType.CHANNEL,
+        commands.TextChannelConverter: utils.ApplicationCommandOptionType.CHANNEL,
+        discord.VoiceChannel: utils.ApplicationCommandOptionType.CHANNEL,
+        commands.VoiceChannelConverter: utils.ApplicationCommandOptionType.CHANNEL,
+        discord.CategoryChannel: utils.ApplicationCommandOptionType.CHANNEL,
+        commands.CategoryChannelConverter: utils.ApplicationCommandOptionType.CHANNEL,
+        discord.Role: utils.ApplicationCommandOptionType.ROLE,
+        commands.RoleConverter: utils.ApplicationCommandOptionType.ROLE,
+        utils.converters.UserID: utils.ApplicationCommandOptionType.USER,
+        utils.converters.ChannelID: utils.ApplicationCommandOptionType.CHANNEL,
+        utils.converters.EnumConverter: utils.ApplicationCommandOptionType.STRING,
+        utils.converters.BooleanConverter: utils.ApplicationCommandOptionType.BOOLEAN,
+        utils.converters.ColourConverter: utils.ApplicationCommandOptionType.STRING,
+        utils.converters.FilteredUser: utils.ApplicationCommandOptionType.USER,
+        utils.converters.FilteredMember: utils.ApplicationCommandOptionType.USER,
+        utils.TimeValue: utils.ApplicationCommandOptionType.STRING,
+        commands.clean_content: utils.ApplicationCommandOptionType.STRING,
+        discord.Message: utils.ApplicationCommandOptionType.STRING,
+        discord.Emoji: utils.ApplicationCommandOptionType.STRING,
+        discord.PartialEmoji: utils.ApplicationCommandOptionType.STRING,
+        str: utils.ApplicationCommandOptionType.STRING,
+        int: utils.ApplicationCommandOptionType.INTEGER,
+        float: utils.ApplicationCommandOptionType.INTEGER,  # Controversial take
+        inspect._empty: utils.ApplicationCommandOptionType.STRING,
     }
 
     def __init__(self, bot: utils.Bot):
         super().__init__(bot)
-        self.commands: typing.List[utils.interactions.ApplicationCommand] = None
+        self.commands: typing.List[utils.ApplicationCommand] = None
         self.application_id = None
 
     @staticmethod
@@ -110,7 +108,7 @@ class SlashCommandHandler(utils.Cog):
         except AttributeError:
             return None
 
-    async def get_slash_commands(self) -> typing.List[utils.interactions.ApplicationCommand]:
+    async def get_slash_commands(self) -> typing.List[utils.ApplicationCommand]:
         """
         Get the application's global command objects.
         """
@@ -119,12 +117,16 @@ class SlashCommandHandler(utils.Cog):
             return self.commands
         r = discord.http.Route("GET", "/applications/{app_id}/commands", app_id=self.bot.application_id)
         data = await self.bot.http.request(r)
-        self.commands = [utils.interactions.ApplicationCommand.from_data(i) for i in data]
+        self.commands = [utils.ApplicationCommand.from_data(i) for i in data]
         return self.commands
+
+    @staticmethod
+    def get_command_description(command) -> str:
+        return command.short_doc or f"Allows you to run the {command.qualified_name} command"
 
     async def convert_into_application_command(
             self, ctx, command: typing.Union[utils.Command, utils.Group], *,
-            is_option: bool = False) -> utils.interactions.ApplicationCommand:
+            is_option: bool = False) -> utils.ApplicationCommand:
         """
         Convert a given Discord command into an application command.
         """
@@ -132,17 +134,18 @@ class SlashCommandHandler(utils.Cog):
         # Make command
         kwargs = {
             'name': command.name,
-            'description': command.short_doc or f"Allows you to run the {command.qualified_name} command",
+            'description': self.get_command_description(command),
+            'type': utils.ApplicationCommandType.CHAT_INPUT,
         }
         if is_option:
             if isinstance(command, utils.SubcommandGroup):
-                application_command_type = utils.interactions.ApplicationCommandOptionType.SUBCOMMAND_GROUP
+                application_command_type = utils.ApplicationCommandOptionType.SUBCOMMAND_GROUP
             else:
-                application_command_type = utils.interactions.ApplicationCommandOptionType.SUBCOMMAND
+                application_command_type = utils.ApplicationCommandOptionType.SUBCOMMAND
             kwargs.update({'type': application_command_type})
-            application_command = utils.interactions.ApplicationCommandOption(**kwargs)
+            application_command = utils.ApplicationCommandOption(**kwargs)
         else:
-            application_command = utils.interactions.ApplicationCommand(**kwargs)
+            application_command = utils.ApplicationCommand(**kwargs)
 
         # Go through its args
         for index, arg in enumerate(command.clean_params.values()):
@@ -195,7 +198,7 @@ class SlashCommandHandler(utils.Cog):
                 pass
 
             # Add option
-            application_command.add_option(utils.interactions.ApplicationCommandOption(
+            application_command.add_option(utils.ApplicationCommandOption(
                 name=arg.name,
                 description=description,
                 type=safe_arg_type,
@@ -216,7 +219,7 @@ class SlashCommandHandler(utils.Cog):
         # Return command
         return application_command
 
-    async def convert_all_into_application_command(self, ctx: utils.Context) -> typing.List[utils.interactions.ApplicationCommand]:
+    async def convert_all_into_application_command(self, ctx: utils.Context) -> typing.List[utils.ApplicationCommand]:
         """
         Convert all of the commands for the bot into application commands.
         """
@@ -231,14 +234,14 @@ class SlashCommandHandler(utils.Cog):
             slash_commands.append(await self.convert_into_application_command(ctx, command))
         return slash_commands
 
-    @utils.command(aliases=['addslashcommands'], argparse=(
+    @utils.command(aliases=['addslashcommand'], argparse=(
         ("-commands", "-command", "-c", {"type": str, "nargs": "*"}),
         ("-delete-old", "-d", {"type": bool, "nargs": "?", "default": True}),
     ))
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
-    async def addinteractioncommands(self, ctx, guild_only: typing.Optional[bool] = False, *, namespace: argparse.Namespace):
+    async def addslashcommands(self, ctx, guild_only: bool, *, namespace: argparse.Namespace):
         """
         Adds all of the bot's interaction commands to the global interaction handler.
         """
@@ -248,7 +251,7 @@ class SlashCommandHandler(utils.Cog):
         if namespace.commands:
             commands_to_add = [await self.convert_into_application_command(ctx, self.bot.get_command(i)) for i in namespace.commands]
         else:
-            commands_to_add: typing.List[utils.interactions.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
+            commands_to_add: typing.List[utils.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
         command_names_to_add = [i.name for i in commands_to_add]
 
         # Start typing because this takes a while
@@ -259,12 +262,12 @@ class SlashCommandHandler(utils.Cog):
 
                 # Get the commands that currently exist
                 if guild_only:
-                    commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
+                    commands_current: typing.List[utils.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
                 else:
-                    commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_global_application_commands()
+                    commands_current: typing.List[utils.ApplicationCommand] = await self.bot.get_global_application_commands()
 
                 # See which commands we need to delete
-                commands_to_remove = [i for i in commands_current if i.name not in command_names_to_add]
+                commands_to_remove = [i for i in commands_current if i.name not in command_names_to_add and i.type == utils.ApplicationCommandType]
                 for command in commands_to_remove:
                     if guild_only:
                         await self.bot.delete_guild_application_command(ctx.guild, command)
@@ -293,13 +296,13 @@ class SlashCommandHandler(utils.Cog):
         # And we done
         await ctx.reply("Done.", embeddify=False)
 
-    @utils.command(aliases=['removeslashcommands'], argparse=(
+    @utils.command(aliases=['removeslashcommand'], argparse=(
         ("-commands", "-command", "-c", {"type": str, "nargs": "*"}),
     ))
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
-    async def removeinteractioncommands(self, ctx, guild_only: bool, *, namespace: argparse.Namespace):
+    async def removeslashcommands(self, ctx, guild_only: bool, *, namespace: argparse.Namespace):
         """
         Removes the bot's interaction commands from the global interaction handler.
         """
@@ -309,13 +312,13 @@ class SlashCommandHandler(utils.Cog):
 
             # Get the commands that currently exist
             if guild_only:
-                commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
+                commands_current: typing.List[utils.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
             else:
-                commands_current: typing.List[utils.interactions.ApplicationCommand] = await self.bot.get_global_application_commands()
+                commands_current: typing.List[utils.ApplicationCommand] = await self.bot.get_global_application_commands()
 
             # See which commands we need to delete
             for command in commands_current:
-                if namespace.commands and command.name != namespace.commands:
+                if namespace.commands and command.name not in namespace.commands:
                     continue
                 if guild_only:
                     await self.bot.delete_guild_application_command(ctx.guild, command)
@@ -324,9 +327,39 @@ class SlashCommandHandler(utils.Cog):
                 self.logger.info(f"Removed slash command for {command.name}")
 
         # And we done
-        await ctx.reply("Done.", embeddify=False)
+        await ctx.reply("Done.", embeddify=False, wait=False)
+
+    @utils.command(aliases=['addcontextcommand'])
+    @commands.guild_only()
+    @commands.is_owner()
+    @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
+    async def addcontextcommands(self, ctx, guild_only: bool, type_: str, *commands: str):
+        """
+        Add a list of context commands to a menu.
+        """
+
+        # Make sure the type is correct
+        if type_.lower() not in ["user", "message"]:
+            return await ctx.send("Your context command type needs to be one of **user** or **message**.")
+        command_type = utils.ApplicationCommandType[type_.upper()]
+
+        # Typing indicator
+        async with ctx.typing():
+
+            # Grab the commands
+            commands_to_add = [self.bot.get_command(i) for i in commands]
+            application_commands = [utils.ApplicationCommand(i.name, self.get_command_description(i), command_type) for i in commands_to_add]
+
+            # And add them
+            if guild_only:
+                await self.bot.bulk_create_guild_application_commands(ctx.guild, application_commands)
+            else:
+                await self.bot.bulk_create_global_application_commands(application_commands)
+
+        # And done
+        await ctx.reply("Done.", embeddify=False, wait=False)
 
 
 def setup(bot: utils.Bot):
-    x = SlashCommandHandler(bot)
+    x = ApplicationCommandHandler(bot)
     bot.add_cog(x)

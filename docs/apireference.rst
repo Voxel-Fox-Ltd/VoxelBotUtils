@@ -103,6 +103,11 @@ ApplicationCommand
 
 .. autoclass:: voxelbotutils.ApplicationCommand
 
+ApplicationCommandType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.ApplicationCommandType
+
 ApplicationCommandOption
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

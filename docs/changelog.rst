@@ -3,6 +3,9 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.5.9
+--------------------------------------
+
 0.5.8
 --------------------------------------
 

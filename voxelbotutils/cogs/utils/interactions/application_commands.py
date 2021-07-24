@@ -3,8 +3,6 @@ import typing
 
 import discord
 
-from ..custom_context import Context
-
 
 class ApplicationCommandOptionType(enum.IntEnum):
     """
@@ -19,6 +17,16 @@ class ApplicationCommandOptionType(enum.IntEnum):
     USER = 6  #: If the option is a user.
     CHANNEL = 7  #: If the option is a channel.
     ROLE = 8  #: If the option is a role.
+
+
+class ApplicationCommandType(enum.IntEnum):
+    """
+    The different types of application commands.
+    """
+
+    CHAT_INPUT = 1  #: Chat input application commands, like slash commands.
+    USER = 2  #: An application command in the user context menu.
+    MESSAGE = 3  #: An application command in the message context menu.
 
 
 class ApplicationCommandOptionChoice(object):
@@ -134,7 +142,7 @@ class ApplicationCommand(object):
         application_id (int): The application ID that this command is attached to.
     """
 
-    def __init__(self, name: str, description: str):
+    def __init__(self, name: str, description: str, type: ApplicationCommandType = ApplicationCommandType.CHAT_INPUT):
         """
         Args:
             name (str): The name of this command.
@@ -156,7 +164,7 @@ class ApplicationCommand(object):
 
     @classmethod
     def from_data(cls, data: dict):
-        command = cls(data['name'], data['description'])
+        command = cls(data['name'], data['description'], ApplicationCommandType(data.get('type', 1)))
         command.id = int(data['id'])
         command.application_id = int(data['application_id'])
         for option in data.get('options', list()):
@@ -167,11 +175,15 @@ class ApplicationCommand(object):
         return isinstance(other, self.__class__) and self.to_json() == other.to_json()
 
     def to_json(self):
-        return {
+        v = {
             "name": self.name,
             "description": self.description,
+            "type": self.type.value,
             "options": [i.to_json() for i in self.options],
         }
+        if self.type != ApplicationCommandType.CHAT_INPUT:
+            v.pop("options", None)
+        return v
 
 
 class InteractionMessage(discord.Message):
