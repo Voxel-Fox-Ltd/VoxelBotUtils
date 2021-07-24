@@ -12,7 +12,7 @@ from .database import DatabaseConnection  # noqa
 from .redis import RedisConnection, RedisChannelHandler, redis_channel_handler  # noqa
 from .statsd import StatsdConnection  # noqa
 from .time_value import TimeValue  # noqa
-from .interactions import ApplicationCommand, ApplicationCommandOption, ApplicationCommandOptionChoice, ApplicationCommandOptionType  # noqa
+from .interactions import *  # noqa
 from .paginator import Paginator  # noqa
 from .interactions.components import *  # noqa
 from .help_command import HelpCommand  # noqa
