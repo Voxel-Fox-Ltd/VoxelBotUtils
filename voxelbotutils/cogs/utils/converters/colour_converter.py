@@ -837,7 +837,7 @@ COLOURS_BY_NAME = {
     "pine green": 0x01796F,
     "pine tree": 0x2A2F23,
     "pineapple": 0x563C0D,
-    "pink": 0xFFC0CB,
+    "pink": 0xDB0072,
     "pink (pantone)": 0xD74894,
     "pink diamond (ace hardware color)": 0xF6D6DE,
     "pink diamond (independent retailers colors)": 0xF0D3DC,
