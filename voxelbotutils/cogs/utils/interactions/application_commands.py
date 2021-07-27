@@ -179,7 +179,7 @@ class ApplicationCommand(object):
         v = {
             "name": self.name,
             "description": self.description,
-            "type": self.type.value,
+            # "type": self.type.value,
             "options": [i.to_json() for i in self.options],
         }
         if self.type != ApplicationCommandType.CHAT_INPUT:
