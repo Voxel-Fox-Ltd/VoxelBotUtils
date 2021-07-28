@@ -16,23 +16,21 @@ class InteractionHandler(utils.Cog):
         Make a context object from an interaction.
         """
 
-        # Get the arguments from the payload
+        # Try and create the command name
         command_name = payload['data']['name']
-        if 'options' in payload['data']:
-            payload_data_options = payload['data']
-            while 'options' in payload_data_options:
-                payload_data_options = payload_data_options['options']
-                if isinstance(payload_data_options, list) and payload_data_options and 'options' in payload_data_options[0]:
-                    payload_data_options = payload_data_options[0]
-                    command_name += f" {payload_data_options['name']}"
-                else:
-                    break
-        else:
-            payload_data_options = list()
+        data = payload['data']
+        options = list()
+        while "options" in data:
+            options = data['options']
+            if data['options'][0]['type'] in [1, 2]:
+                command_name += f" {data['options'][0]['name']}"
+                data = data['options'][0]
+            else:
+                break
 
         # Put our options in a dict
         given_values = {}
-        for i in payload_data_options:
+        for i in options:
             given_values[i['name']] = i['value']
 
         # If we have a target_id, then the interaction is a context menu
@@ -40,7 +38,7 @@ class InteractionHandler(utils.Cog):
             given_values[None] = payload['data']['target_id']
 
         # Make a string view
-        command_args = [f"{i['value']}" for i in payload_data_options]
+        command_args = [f"{i['value']}" for i in options]
         view = commands.view.StringView(f"/{command_name.rstrip()} {' '.join(command_args)}")
         self.logger.debug(f"Made up fake string for interaction command: {view.buffer}")
 
