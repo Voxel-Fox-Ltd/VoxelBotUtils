@@ -20,12 +20,14 @@ class InteractionHandler(utils.Cog):
         command_name = payload['data']['name']
         data = payload['data']
         options = list()
-        while "options" in data:
-            options = data['options']
+        while True:
+            if "options" not in data:
+                break
             if data['options'][0]['type'] in [1, 2]:
-                command_name += f" {data['options'][0]['name']}"
                 data = data['options'][0]
+                command_name += f" {data['name']}"
             else:
+                options = data['options']
                 break
 
         # Put our options in a dict
