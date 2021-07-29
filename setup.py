@@ -12,14 +12,14 @@ except Exception:
 
 # Here are the requirements
 requirements = [
-    "discord.py>=1.6,<2.0",
+    "discord.py>=1.7,<2.0",
     "toml",
     "asyncpg",
     "aioredis",
     "aioredlock",
     "aiodogstatsd",
     "aiohttp",
-    "upgradechatpy>=1.0.1"
+    "upgradechatpy>=1.0.2"
 ]
 
 

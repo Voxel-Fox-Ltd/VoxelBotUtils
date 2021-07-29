@@ -994,6 +994,7 @@ class Bot(MinimalBot):
         self._upgrade_chat = upgradechat.UpgradeChat(
             self.config["upgrade_chat"]["client_id"],
             self.config["upgrade_chat"]["client_secret"],
+            session=self.session,
         )
         return self._upgrade_chat
 
