@@ -6,6 +6,23 @@ A human-readable list of changes between versions.
 0.5.9
 --------------------------------------
 
+New Features
+"""""""""""""""""""""""""""""""""""""""
+
+* Support for context commands.
+
+Changed Features
+"""""""""""""""""""""""""""""""""""""""
+
+* Updated the list of converted colours.
+* Changed how slash commands/subcommands were parsed.
+* :attr:`Bot.session` now logs to statsd.
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""
+
+* Fixed error where you couldn't set wait kwarg on :code:`TextChannel`s.
+
 0.5.8
 --------------------------------------
 
