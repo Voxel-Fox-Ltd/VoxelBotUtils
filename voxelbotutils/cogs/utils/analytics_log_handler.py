@@ -1,5 +1,6 @@
 import re
 import logging
+import json
 
 import aiohttp
 
@@ -147,6 +148,7 @@ class AnalyticsClientSession(aiohttp.ClientSession):
             stats.increment("discord.bot.http", tags={
                 "url": url,
                 "method": response.method,
+                "query": json.dumps(dict(response.url.query), sort_keys=True),
                 "status_code": status,
                 "status_code_class": str(status)[0] + "x" * (len(str(status)) - 1)
             })
