@@ -1,7 +1,7 @@
 # Discord and config handling
 discord.py>=1.7,<2.0
 toml
-upgradechatpy>=1.0.2
+upgradechatpy>=1.0.3
 
 # Storage handling
 asyncpg

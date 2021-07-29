@@ -19,7 +19,7 @@ requirements = [
     "aioredlock",
     "aiodogstatsd",
     "aiohttp",
-    "upgradechatpy>=1.0.2"
+    "upgradechatpy>=1.0.3"
 ]
 
 
