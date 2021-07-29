@@ -22,7 +22,7 @@ from .custom_context import Context
 from .database import DatabaseConnection
 from .redis import RedisConnection
 from .statsd import StatsdConnection
-from .analytics_log_handler import AnalyticsLogHandler
+from .analytics_log_handler import AnalyticsLogHandler, AnalyticsClientSession
 from .interactions.components import MessageComponents
 from .models import ComponentMessage, ComponentWebhookMessage
 from .shard_manager import ShardManagerClient
@@ -786,7 +786,7 @@ class Bot(MinimalBot):
         }
 
         # Aiohttp session
-        self.session: aiohttp.ClientSession = aiohttp.ClientSession(loop=self.loop)
+        self.session: aiohttp.ClientSession = AnalyticsClientSession(self, loop=self.loop)
 
         # Allow database connections like this
         self.database: DatabaseConnection = DatabaseConnection
