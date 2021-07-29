@@ -786,7 +786,7 @@ class Bot(MinimalBot):
         }
 
         # Aiohttp session
-        self.session: aiohttp.ClientSession = AnalyticsClientSession(self, loop=self.loop)
+        self.session: aiohttp.ClientSession = AnalyticsClientSession(self, loop=self.loop, headers={"User-Agent": self.user_agent})
 
         # Allow database connections like this
         self.database: DatabaseConnection = DatabaseConnection
