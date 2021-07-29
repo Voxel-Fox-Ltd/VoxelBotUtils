@@ -148,7 +148,7 @@ class AnalyticsClientSession(aiohttp.ClientSession):
                 "url": url,
                 "method": response.method,
                 "status_code": status,
-                "status_code_class": str("status")[0] + "x" * (len(str("status")) - 1)
+                "status_code_class": str(status)[0] + "x" * (len(str(status)) - 1)
             })
 
     async def _request(self, *args, **kwargs):
