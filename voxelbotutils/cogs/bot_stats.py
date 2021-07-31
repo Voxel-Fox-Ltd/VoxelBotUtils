@@ -60,7 +60,7 @@ class BotStats(vbu.Cog):
 
     @vbu.command()
     @commands.bot_has_permissions(send_messages=True)
-    @vbu.checks.is_config_set('command_data', 'vote_command_enabled')
+    @vbu.checks.is_config_set('bot_listing_api_keys', 'topgg_token')
     async def vote(self, ctx: vbu.Context):
         """
         Gives you a link to vote for the bot.
@@ -154,7 +154,6 @@ class BotStats(vbu.Cog):
 
     @vbu.command(aliases=['status', 'botinfo'], add_slash_command=False)
     @commands.bot_has_permissions(send_messages=True, embed_links=True)
-    @vbu.checks.is_config_set('command_data', 'stats_command_enabled')
     async def stats(self, ctx: vbu.Context):
         """
         Gives you the stats for the bot.
