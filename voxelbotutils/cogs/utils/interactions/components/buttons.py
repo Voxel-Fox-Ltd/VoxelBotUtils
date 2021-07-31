@@ -126,6 +126,7 @@ class Button(DisableableComponent):
             label=data.get("label"),
             style=ButtonStyle(data.get("style", ButtonStyle.PRIMARY.value)),
             custom_id=data.get("custom_id"),
+            url=data.get("url"),
             emoji=emoji,
             disabled=data.get("disabled", False),
         )

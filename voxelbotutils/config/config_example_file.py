@@ -62,12 +62,21 @@ bot_support_role_id = 0  # The ID used to determine whether or not the user is p
 
     # These are added as link buttons the bottom of the message.
     # Your bot invite (if enabled) will always be added as the first button.
-    [bot_info.links]
-        # "Website" = "https://example.com/#Your website here"
-        # "Support" = "https://example.com/#Your guild here"
-        # "Git" = "https://example.com/#Your git link"
-        # "Donate" = "https://example.com/#Your donate link"
-        # "Vote" = "https://example.com/#Your vote link"
+    # [bot_info.links.Website]
+    #     url = "https://example.com/#your_website_url"
+    #     emoji = "\U0001f517"
+    # [bot_info.links."Support Server"]  # You CAN have multiple words in a label
+    #     url = "https://example.com/#your_guild_invite"
+    #     emoji = ""
+    # [bot_info.links.Git]
+    #     url = "https://example.com/#your_git_link"
+    #     emoji = ""
+    # [bot_info.links.Donate]
+    #     url = "https://example.com/#your_donate_link"
+    #     emoji = ""
+    # [bot_info.links.Vote]
+    #     url = "https://example.com/#your_vote_link"
+    #     emoji = ""
 
 # Used to generate the invite link.
 [oauth]

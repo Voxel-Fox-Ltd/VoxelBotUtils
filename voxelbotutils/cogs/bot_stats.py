@@ -17,7 +17,7 @@ class BotStats(vbu.Cog):
 
         # Get the info embed
         info_embed = vbu.Embed(
-            description=self.bot.config.get("bot_info", {}).get("content", ""),
+            description=self.bot.config.get("bot_info", {}).get("content", "").format(bot=self.bot),
         ).set_author_to_user(
             self.bot.user,
         )
@@ -27,15 +27,12 @@ class BotStats(vbu.Cog):
         buttons = []
         if (invite_link := self.get_invite_link()):
             buttons.append(vbu.Button(label="Invite", url=invite_link, style=vbu.ButtonStyle.LINK))
-        for i, o in links.items():
-            buttons.append(vbu.Button(label=i, url=o, style=vbu.ButtonStyle.LINK))
+        for label, info in links.items():
+            buttons.append(vbu.Button(emoji=info.get("emoji") or None, label=label, url=info['url'], style=vbu.ButtonStyle.LINK))
         components = vbu.MessageComponents.add_buttons_with_rows(*buttons)
 
-        # Get the stats embed
-        stats_embed = self.get_stats_embed()
-
         # And send
-        return await ctx.send(embeds=[info_embed, stats_embed], components=components)
+        return await ctx.send(embed=info_embed, components=components, wait=False)
 
     def get_invite_link(self):
         """
@@ -85,13 +82,18 @@ class BotStats(vbu.Cog):
         """
 
         # Get creator info
-        creator_id = self.bot.config["owners"][0]
-        creator = self.bot.get_user(creator_id) or await self.bot.fetch_user(creator_id)
+        try:
+            creator_id = self.bot.config["owners"][0]
+            creator = self.bot.get_user(creator_id) or await self.bot.fetch_user(creator_id)
+        except IndexError:
+            creator_id = None
+            creator = None
 
         # Make embed
         embed = vbu.Embed(use_random_colour=True)
-        embed.set_footer(f"{self.bot.user} - VoxelBotvbu v{__version__}", icon_url=self.bot.user.avatar_url)
-        embed.add_field("Creator", f"{creator!s}\n{creator_id}")
+        embed.set_footer(f"{self.bot.user} - VoxelBotUtils v{__version__}", icon_url=self.bot.user.avatar_url)
+        if creator_id:
+            embed.add_field("Creator", f"{creator!s}\n{creator_id}")
         embed.add_field("Library", f"Discord.py {discord.__version__}")
         if self.bot.shard_count != len((self.bot.shard_ids or [0])):
             embed.add_field(
