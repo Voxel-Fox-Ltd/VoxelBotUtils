@@ -1,43 +1,70 @@
-import asyncio
-
 import discord
 from discord.ext import commands
 
-from . import utils
+from . import utils as vbu
 from .. import __version__
 
 
-class BotStats(utils.Cog):
+class BotStats(vbu.Cog):
 
-    @utils.command(aliases=['git', 'code'], add_slash_command=False)
-    @utils.checks.is_config_set('command_data', 'github_link')
+    @vbu.command()
+    @vbu.checks.is_config_set('bot_info', 'enabled')
     @commands.bot_has_permissions(send_messages=True)
-    async def github(self, ctx: utils.Context):
+    async def info(self, ctx: vbu.Context):
         """
-        Sends the GitHub Repository link.
-        """
-
-        await ctx.send(f"<{self.bot.config['command_data']['github_link']}>", embeddify=False)
-
-    @utils.command()
-    @commands.bot_has_permissions(send_messages=True)
-    @utils.checks.is_config_set('oauth', 'enabled')
-    async def invite(self, ctx: utils.Context):
-        """
-        Gives you the bot's invite link.
+        Give you some of the bot's info.
         """
 
-        oauth = self.bot.config['oauth'].copy()
+        # Get the info embed
+        info_embed = vbu.Embed(
+            description=self.bot.config.get("bot_info", {}).get("content", ""),
+        ).set_author_to_user(
+            self.bot.user,
+        )
+
+        # Make up our buttons
+        links = self.bot.config.get("bot_info", {}).get("links", dict())
+        buttons = []
+        if (invite_link := self.get_invite_link()):
+            buttons.append(vbu.Button(label="Invite", url=invite_link, style=vbu.ButtonStyle.LINK))
+        for i, o in links.items():
+            buttons.append(vbu.Button(label=i, url=o, style=vbu.ButtonStyle.LINK))
+        components = vbu.MessageComponents.add_buttons_with_rows(*buttons)
+
+        # Get the stats embed
+        stats_embed = self.get_stats_embed()
+
+        # And send
+        return await ctx.send(embeds=[info_embed, stats_embed], components=components)
+
+    def get_invite_link(self):
+        """
+        Get the invite link for the bot.
+        """
+
+        if not self.bot.config.get("oauth", {}).get("enabled", True):
+            return None
+        oauth = self.bot.config.get("oauth", {}).copy()
         permissions = discord.Permissions.none()
         for i in oauth.pop('permissions', list()):
             setattr(permissions, i, True)
         oauth['permissions'] = permissions
-        await ctx.send(f"<{self.bot.get_invite_link(**oauth)}>", embeddify=False)
+        return self.bot.get_invite_link(**oauth)
 
-    @utils.command()
+    @vbu.command()
     @commands.bot_has_permissions(send_messages=True)
-    @utils.checks.is_config_set('command_data', 'vote_command_enabled')
-    async def vote(self, ctx: utils.Context):
+    @vbu.checks.is_config_set('oauth', 'enabled')
+    async def invite(self, ctx: vbu.Context):
+        """
+        Gives you the bot's invite link.
+        """
+
+        await ctx.send(f"<{self.get_invite_link()}>", embeddify=False)
+
+    @vbu.command()
+    @commands.bot_has_permissions(send_messages=True)
+    @vbu.checks.is_config_set('command_data', 'vote_command_enabled')
+    async def vote(self, ctx: vbu.Context):
         """
         Gives you a link to vote for the bot.
         """
@@ -52,12 +79,9 @@ class BotStats(utils.Cog):
             return await ctx.send("Despite being enabled, the vote command has no vote links to provide :/")
         return await ctx.send("\n".join(output_strings), embeddify=False)
 
-    @utils.command(aliases=['status', 'botinfo'], add_slash_command=False)
-    @commands.bot_has_permissions(send_messages=True, embed_links=True)
-    @utils.checks.is_config_set('command_data', 'stats_command_enabled')
-    async def stats(self, ctx: utils.Context):
+    async def get_stats_embed(self):
         """
-        Gives you the stats for the bot.
+        Get the stats embed - now as a function so I can use it in multiple places.
         """
 
         # Get creator info
@@ -65,8 +89,8 @@ class BotStats(utils.Cog):
         creator = self.bot.get_user(creator_id) or await self.bot.fetch_user(creator_id)
 
         # Make embed
-        embed = utils.Embed(use_random_colour=True)
-        embed.set_footer(f"{self.bot.user} - VoxelBotUtils v{__version__}", icon_url=self.bot.user.avatar_url)
+        embed = vbu.Embed(use_random_colour=True)
+        embed.set_footer(f"{self.bot.user} - VoxelBotvbu v{__version__}", icon_url=self.bot.user.avatar_url)
         embed.add_field("Creator", f"{creator!s}\n{creator_id}")
         embed.add_field("Library", f"Discord.py {discord.__version__}")
         if self.bot.shard_count != len((self.bot.shard_ids or [0])):
@@ -78,14 +102,6 @@ class BotStats(utils.Cog):
             embed.add_field("Guild Count", f"{len(self.bot.guilds):,}")
         embed.add_field("Shard Count", f"{self.bot.shard_count or 1:,}")
         embed.add_field("Average WS Latency", f"{(self.bot.latency * 1000):.2f}ms")
-        try:
-            all_tasks = asyncio.Task.all_tasks()
-        except AttributeError:
-            all_tasks = asyncio.all_tasks()
-        embed.add_field(
-            "Coroutines",
-            f"{len([i for i in all_tasks if not i.done()]):,} running, {len(all_tasks):,} total.",
-        )
 
         # Get topgg data
         if self.bot.config.get('bot_listing_api_keys', {}).get("topgg_token"):
@@ -132,10 +148,20 @@ class BotStats(utils.Cog):
                 except KeyError:
                     embed.add_field(**content)
 
-        # Send it out wew let's go
+        return embed
+
+    @vbu.command(aliases=['status', 'botinfo'], add_slash_command=False)
+    @commands.bot_has_permissions(send_messages=True, embed_links=True)
+    @vbu.checks.is_config_set('command_data', 'stats_command_enabled')
+    async def stats(self, ctx: vbu.Context):
+        """
+        Gives you the stats for the bot.
+        """
+
+        embed = await self.get_stats_embed()
         await ctx.send(embed=embed)
 
 
-def setup(bot: utils.Bot):
+def setup(bot: vbu.Bot):
     x = BotStats(bot)
     bot.add_cog(x)

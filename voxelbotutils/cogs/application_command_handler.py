@@ -2,50 +2,49 @@ import typing
 import io
 import json
 import inspect
-import argparse
 
 import discord
 from discord.ext import commands
 
-from . import utils
+from . import utils as vbu
 
 
-class ApplicationCommandHandler(utils.Cog):
+class ApplicationCommandHandler(vbu.Cog):
 
     COMMAND_TYPE_MAPPER = {
-        discord.User: utils.ApplicationCommandOptionType.USER,
-        discord.Member: utils.ApplicationCommandOptionType.USER,
-        commands.UserConverter: utils.ApplicationCommandOptionType.USER,
-        commands.MemberConverter: utils.ApplicationCommandOptionType.USER,
-        discord.TextChannel: utils.ApplicationCommandOptionType.CHANNEL,
-        commands.TextChannelConverter: utils.ApplicationCommandOptionType.CHANNEL,
-        discord.VoiceChannel: utils.ApplicationCommandOptionType.CHANNEL,
-        commands.VoiceChannelConverter: utils.ApplicationCommandOptionType.CHANNEL,
-        discord.CategoryChannel: utils.ApplicationCommandOptionType.CHANNEL,
-        commands.CategoryChannelConverter: utils.ApplicationCommandOptionType.CHANNEL,
-        discord.Role: utils.ApplicationCommandOptionType.ROLE,
-        commands.RoleConverter: utils.ApplicationCommandOptionType.ROLE,
-        utils.converters.UserID: utils.ApplicationCommandOptionType.USER,
-        utils.converters.ChannelID: utils.ApplicationCommandOptionType.CHANNEL,
-        utils.converters.EnumConverter: utils.ApplicationCommandOptionType.STRING,
-        utils.converters.BooleanConverter: utils.ApplicationCommandOptionType.BOOLEAN,
-        utils.converters.ColourConverter: utils.ApplicationCommandOptionType.STRING,
-        utils.converters.FilteredUser: utils.ApplicationCommandOptionType.USER,
-        utils.converters.FilteredMember: utils.ApplicationCommandOptionType.USER,
-        utils.TimeValue: utils.ApplicationCommandOptionType.STRING,
-        commands.clean_content: utils.ApplicationCommandOptionType.STRING,
-        discord.Message: utils.ApplicationCommandOptionType.STRING,
-        discord.Emoji: utils.ApplicationCommandOptionType.STRING,
-        discord.PartialEmoji: utils.ApplicationCommandOptionType.STRING,
-        str: utils.ApplicationCommandOptionType.STRING,
-        int: utils.ApplicationCommandOptionType.INTEGER,
-        float: utils.ApplicationCommandOptionType.INTEGER,  # Controversial take
-        inspect._empty: utils.ApplicationCommandOptionType.STRING,
+        discord.User: vbu.ApplicationCommandOptionType.USER,
+        discord.Member: vbu.ApplicationCommandOptionType.USER,
+        commands.UserConverter: vbu.ApplicationCommandOptionType.USER,
+        commands.MemberConverter: vbu.ApplicationCommandOptionType.USER,
+        discord.TextChannel: vbu.ApplicationCommandOptionType.CHANNEL,
+        commands.TextChannelConverter: vbu.ApplicationCommandOptionType.CHANNEL,
+        discord.VoiceChannel: vbu.ApplicationCommandOptionType.CHANNEL,
+        commands.VoiceChannelConverter: vbu.ApplicationCommandOptionType.CHANNEL,
+        discord.CategoryChannel: vbu.ApplicationCommandOptionType.CHANNEL,
+        commands.CategoryChannelConverter: vbu.ApplicationCommandOptionType.CHANNEL,
+        discord.Role: vbu.ApplicationCommandOptionType.ROLE,
+        commands.RoleConverter: vbu.ApplicationCommandOptionType.ROLE,
+        vbu.converters.UserID: vbu.ApplicationCommandOptionType.USER,
+        vbu.converters.ChannelID: vbu.ApplicationCommandOptionType.CHANNEL,
+        vbu.converters.EnumConverter: vbu.ApplicationCommandOptionType.STRING,
+        vbu.converters.BooleanConverter: vbu.ApplicationCommandOptionType.BOOLEAN,
+        vbu.converters.ColourConverter: vbu.ApplicationCommandOptionType.STRING,
+        vbu.converters.FilteredUser: vbu.ApplicationCommandOptionType.USER,
+        vbu.converters.FilteredMember: vbu.ApplicationCommandOptionType.USER,
+        vbu.TimeValue: vbu.ApplicationCommandOptionType.STRING,
+        commands.clean_content: vbu.ApplicationCommandOptionType.STRING,
+        discord.Message: vbu.ApplicationCommandOptionType.STRING,
+        discord.Emoji: vbu.ApplicationCommandOptionType.STRING,
+        discord.PartialEmoji: vbu.ApplicationCommandOptionType.STRING,
+        str: vbu.ApplicationCommandOptionType.STRING,
+        int: vbu.ApplicationCommandOptionType.INTEGER,
+        float: vbu.ApplicationCommandOptionType.INTEGER,  # Controversial take
+        inspect._empty: vbu.ApplicationCommandOptionType.STRING,
     }
 
-    def __init__(self, bot: utils.Bot):
+    def __init__(self, bot: vbu.Bot):
         super().__init__(bot)
-        self.commands: typing.List[utils.ApplicationCommand] = None
+        self.commands: typing.List[vbu.ApplicationCommand] = None
         self.application_id = None
 
     @staticmethod
@@ -108,7 +107,7 @@ class ApplicationCommandHandler(utils.Cog):
         except AttributeError:
             return None
 
-    async def get_slash_commands(self) -> typing.List[utils.ApplicationCommand]:
+    async def get_slash_commands(self) -> typing.List[vbu.ApplicationCommand]:
         """
         Get the application's global command objects.
         """
@@ -117,7 +116,7 @@ class ApplicationCommandHandler(utils.Cog):
             return self.commands
         r = discord.http.Route("GET", "/applications/{app_id}/commands", app_id=self.bot.application_id)
         data = await self.bot.http.request(r)
-        self.commands = [utils.ApplicationCommand.from_data(i) for i in data]
+        self.commands = [vbu.ApplicationCommand.from_data(i) for i in data]
         return self.commands
 
     @staticmethod
@@ -125,8 +124,8 @@ class ApplicationCommandHandler(utils.Cog):
         return command.short_doc or f"Allows you to run the {command.qualified_name} command"
 
     async def convert_into_application_command(
-            self, ctx, command: typing.Union[utils.Command, utils.Group], *,
-            is_option: bool = False) -> utils.ApplicationCommand:
+            self, ctx, command: typing.Union[vbu.Command, vbu.Group], *,
+            is_option: bool = False) -> vbu.ApplicationCommand:
         """
         Convert a given Discord command into an application command.
         """
@@ -135,17 +134,17 @@ class ApplicationCommandHandler(utils.Cog):
         kwargs = {
             'name': command.name,
             'description': self.get_command_description(command),
-            'type': utils.ApplicationCommandType.CHAT_INPUT,
+            'type': vbu.ApplicationCommandType.CHAT_INPUT,
         }
         if is_option:
-            if isinstance(command, utils.SubcommandGroup):
-                application_command_type = utils.ApplicationCommandOptionType.SUBCOMMAND_GROUP
+            if isinstance(command, vbu.SubcommandGroup):
+                application_command_type = vbu.ApplicationCommandOptionType.SUBCOMMAND_GROUP
             else:
-                application_command_type = utils.ApplicationCommandOptionType.SUBCOMMAND
+                application_command_type = vbu.ApplicationCommandOptionType.SUBCOMMAND
             kwargs.update({'type': application_command_type})
-            application_command = utils.ApplicationCommandOption(**kwargs)
+            application_command = vbu.ApplicationCommandOption(**kwargs)
         else:
-            application_command = utils.ApplicationCommand(**kwargs)
+            application_command = vbu.ApplicationCommand(**kwargs)
 
         # Go through its args
         for index, arg in enumerate(command.clean_params.values()):
@@ -198,7 +197,7 @@ class ApplicationCommandHandler(utils.Cog):
                 pass
 
             # Add option
-            application_command.add_option(utils.ApplicationCommandOption(
+            application_command.add_option(vbu.ApplicationCommandOption(
                 name=arg.name,
                 description=description,
                 type=safe_arg_type,
@@ -206,10 +205,10 @@ class ApplicationCommandHandler(utils.Cog):
             ))
 
         # Go through its subcommands
-        if isinstance(command, utils.Group):
+        if isinstance(command, vbu.Group):
             subcommands = list(command.commands)
             valid_subcommands = []
-            for i in (await utils.HelpCommand.filter_commands_classmethod(ctx, subcommands)):
+            for i in (await vbu.HelpCommand.filter_commands_classmethod(ctx, subcommands)):
                 if getattr(i, 'add_slash_command', True):
                     valid_subcommands.append(i)
             for subcommand in valid_subcommands:
@@ -219,7 +218,7 @@ class ApplicationCommandHandler(utils.Cog):
         # Return command
         return application_command
 
-    async def convert_all_into_application_command(self, ctx: utils.Context) -> typing.List[utils.ApplicationCommand]:
+    async def convert_all_into_application_command(self, ctx: vbu.Context) -> typing.List[vbu.ApplicationCommand]:
         """
         Convert all of the commands for the bot into application commands.
         """
@@ -227,14 +226,14 @@ class ApplicationCommandHandler(utils.Cog):
         slash_commands = []
         commands = list(ctx.bot.commands)
         filtered_commands = []
-        for i in (await utils.HelpCommand.filter_commands_classmethod(ctx, commands)):
+        for i in (await vbu.HelpCommand.filter_commands_classmethod(ctx, commands)):
             if getattr(i, 'add_slash_command', True):
                 filtered_commands.append(i)
         for command in filtered_commands:
             slash_commands.append(await self.convert_into_application_command(ctx, command))
         return slash_commands
 
-    @utils.command(aliases=['addslashcommand'], argparse=(
+    @vbu.command(aliases=['addslashcommand'], argparse=(
         ("-commands", "-command", "-c", {"type": str, "nargs": "*"}),
         ("-delete-old", "-d", {"type": bool, "nargs": "?", "default": True}),
     ))
@@ -251,7 +250,7 @@ class ApplicationCommandHandler(utils.Cog):
         if commands:
             commands_to_add = [await self.convert_into_application_command(ctx, self.bot.get_command(i)) for i in commands]
         else:
-            commands_to_add: typing.List[utils.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
+            commands_to_add: typing.List[vbu.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
         command_names_to_add = [i.name for i in commands_to_add]
 
         # Start typing because this takes a while
@@ -262,12 +261,12 @@ class ApplicationCommandHandler(utils.Cog):
 
                 # Get the commands that currently exist
                 if guild_only:
-                    commands_current: typing.List[utils.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
+                    commands_current: typing.List[vbu.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
                 else:
-                    commands_current: typing.List[utils.ApplicationCommand] = await self.bot.get_global_application_commands()
+                    commands_current: typing.List[vbu.ApplicationCommand] = await self.bot.get_global_application_commands()
 
                 # See which commands we need to delete
-                commands_to_remove = [i for i in commands_current if i.name not in command_names_to_add and i.type == utils.ApplicationCommandType]
+                commands_to_remove = [i for i in commands_current if i.name not in command_names_to_add and i.type == vbu.ApplicationCommandType]
                 for command in commands_to_remove:
                     if guild_only:
                         await self.bot.delete_guild_application_command(ctx.guild, command)
@@ -296,7 +295,7 @@ class ApplicationCommandHandler(utils.Cog):
         # And we done
         await ctx.reply("Done.", embeddify=False)
 
-    @utils.command(aliases=['removeslashcommand'], argparse=(
+    @vbu.command(aliases=['removeslashcommand'], argparse=(
         ("-commands", "-command", "-c", {"type": str, "nargs": "*"}),
     ))
     @commands.guild_only()
@@ -312,9 +311,9 @@ class ApplicationCommandHandler(utils.Cog):
 
             # Get the commands that currently exist
             if guild_only:
-                commands_current: typing.List[utils.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
+                commands_current: typing.List[vbu.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
             else:
-                commands_current: typing.List[utils.ApplicationCommand] = await self.bot.get_global_application_commands()
+                commands_current: typing.List[vbu.ApplicationCommand] = await self.bot.get_global_application_commands()
 
             # See which commands we need to delete
             for command in commands_current:
@@ -329,7 +328,7 @@ class ApplicationCommandHandler(utils.Cog):
         # And we done
         await ctx.reply("Done.", embeddify=False, wait=False)
 
-    @utils.command(aliases=['addcontextcommand'])
+    @vbu.command(aliases=['addcontextcommand'])
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
@@ -341,14 +340,14 @@ class ApplicationCommandHandler(utils.Cog):
         # Make sure the type is correct
         if type_.lower() not in ["user", "message"]:
             return await ctx.send("Your context command type needs to be one of **user** or **message**.")
-        command_type = utils.ApplicationCommandType[type_.upper()]
+        command_type = vbu.ApplicationCommandType[type_.upper()]
 
         # Typing indicator
         async with ctx.typing():
 
             # Grab the commands
             commands_to_add = [self.bot.get_command(i) for i in commands]
-            application_commands = [utils.ApplicationCommand(i.name, self.get_command_description(i), command_type) for i in commands_to_add]
+            application_commands = [vbu.ApplicationCommand(i.name, self.get_command_description(i), command_type) for i in commands_to_add]
 
             # And add them
             if guild_only:
@@ -360,6 +359,6 @@ class ApplicationCommandHandler(utils.Cog):
         await ctx.reply("Done.", embeddify=False, wait=False)
 
 
-def setup(bot: utils.Bot):
+def setup(bot: vbu.Bot):
     x = ApplicationCommandHandler(bot)
     bot.add_cog(x)

@@ -3,16 +3,16 @@ import asyncio
 import discord
 from discord.ext import tasks
 
-from . import utils
+from . import utils as vbu
 
 
-class PresenceAutoUpdater(utils.Cog):
+class PresenceAutoUpdater(vbu.Cog):
 
     TWITCH_TOKEN_URL = "https://id.twitch.tv/oauth2/token"
     TWITCH_SEARCH_URL = "https://api.twitch.tv/helix/streams"
     TWITCH_USERNAME_URL = "https://api.twitch.tv/helix/users"
 
-    def __init__(self, bot: utils.Bot):
+    def __init__(self, bot: vbu.Bot):
         super().__init__(bot)
         self.presence_auto_update_loop.start()
         self.presence_before = None
@@ -184,6 +184,6 @@ class PresenceAutoUpdater(utils.Cog):
         await asyncio.sleep(1)  # Let's sleep here so we don't override our on_ready's set default presence
 
 
-def setup(bot: utils.Bot):
+def setup(bot: vbu.Bot):
     x = PresenceAutoUpdater(bot)
     bot.add_cog(x)

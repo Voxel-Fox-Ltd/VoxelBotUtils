@@ -3,34 +3,14 @@ import json
 import discord
 from discord.ext import tasks
 
-from . import utils
+from . import utils as vbu
 
 
-class Analytics(utils.Cog):
+class Analytics(vbu.Cog):
 
-    GOOGLE_ANALYTICS_URL = 'https://www.google-analytics.com/collect'
     FOUND_GATEWAY_OPCODES = {}
 
-    """
-    v   : version            : !1
-    t   : type (of hit)      : !pageview
-    aip : anonymise IP       : !true
-    tid : tracking ID        : ?from config
-    an  : application name   : ?from config
-    dp  : document path      : command/event name
-    dh  : document host      : ?from config
-    cid : user ID            : Discord user ID
-    cs  : campaign source    : guild ID
-    cm  : campaign medium
-    cd  : screen name
-    dt  : document title     : command/event name
-    cc  : campaign content
-    dr  : document referrer  : !discord.com
-    cd1 : custom dimension 1 : !timestamp
-    cm1 : custom metric 1    : ISO-format timestamp
-    """
-
-    def __init__(self, bot: utils.Bot):
+    def __init__(self, bot: vbu.Bot):
         super().__init__(bot)
         self.post_statsd_guild_count.start()
         self.post_topgg_guild_count.start()
@@ -128,7 +108,7 @@ class Analytics(utils.Cog):
     async def before_post_statsd_guild_count(self):
         await self.bot.wait_until_ready()
 
-    @utils.Cog.listener()
+    @vbu.Cog.listener()
     async def on_socket_raw_send(self, payload: dict):
         """
         A raw socket response message send Discord.
@@ -159,7 +139,7 @@ class Analytics(utils.Cog):
             except KeyError:
                 pass
 
-    @utils.Cog.listener()
+    @vbu.Cog.listener()
     async def on_socket_response(self, payload: dict):
         """
         A raw socket response message from Discord.
@@ -171,7 +151,7 @@ class Analytics(utils.Cog):
             except KeyError:
                 pass
 
-    @utils.Cog.listener()
+    @vbu.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
         """
         Pinged when the bot joins a guild
@@ -180,7 +160,7 @@ class Analytics(utils.Cog):
         async with self.bot.stats() as stats:
             stats.increment("discord.stats.guild_joins")
 
-    @utils.Cog.listener()
+    @vbu.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild):
         """
         Pinged when the bot joins a guild
@@ -190,6 +170,6 @@ class Analytics(utils.Cog):
             stats.decrement("discord.stats.guild_joins")
 
 
-def setup(bot: utils.Bot):
+def setup(bot: vbu.Bot):
     x = Analytics(bot)
     bot.add_cog(x)

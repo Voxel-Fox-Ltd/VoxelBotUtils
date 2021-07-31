@@ -2,14 +2,14 @@ import inspect
 
 from discord.ext import commands
 
-from . import utils
+from . import utils as vbu
 
 
-class SlashCommandContext(utils.interactions.interaction_messageable.InteractionMessageable, utils.Context):
+class SlashCommandContext(vbu.interactions.interaction_messageable.InteractionMessageable, vbu.Context):
     pass
 
 
-class InteractionHandler(utils.Cog):
+class InteractionHandler(vbu.Cog):
 
     async def get_context_from_interaction(self, payload, *, cls=SlashCommandContext):
         """
@@ -49,7 +49,7 @@ class InteractionHandler(utils.Cog):
         channel, _ = state._get_guild_channel(payload)
 
         # Make our fake message
-        fake_message = utils.interactions.InteractionMessage(
+        fake_message = vbu.interactions.InteractionMessage(
             channel=channel,
             state=state,
             data=payload,
@@ -73,7 +73,7 @@ class InteractionHandler(utils.Cog):
         self.logger.debug("Returning context object")
         return ctx
 
-    @utils.Cog.listener()
+    @vbu.Cog.listener()
     async def on_socket_response(self, payload: dict):
         """
         Process any interaction create payloads we may receive.
@@ -131,7 +131,7 @@ class InteractionHandler(utils.Cog):
 
         # See if it was a clicked component
         elif payload['d']['type'] == 3:
-            clicked_button_payload = utils.interactions.components.ComponentInteractionPayload.from_payload(
+            clicked_button_payload = vbu.interactions.components.ComponentInteractionPayload.from_payload(
                 payload['d'], self.bot._connection,
             )
             # clicked_button_payload._send_interaction_response_callback()
@@ -144,6 +144,6 @@ class InteractionHandler(utils.Cog):
             self.logger.warning("Invalid interaction type received - %d" % (payload['d']['type']))
 
 
-def setup(bot: utils.Bot):
+def setup(bot: vbu.Bot):
     x = InteractionHandler(bot)
     bot.add_cog(x)

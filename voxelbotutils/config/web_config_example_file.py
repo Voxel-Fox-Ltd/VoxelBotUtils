@@ -8,7 +8,7 @@ oauth_scopes = [ "identify", "guilds", ]  # The scopes that should be added to t
 # Config files are loaded as `config/<filename>`
 # This is fully welcome to be entirely empty
 [discord_bot_configs]
-    bot = "config.toml"
+    # bot = "config.toml"
 
 # Used for the bot's invite and login links
 [oauth]

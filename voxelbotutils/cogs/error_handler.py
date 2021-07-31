@@ -6,14 +6,14 @@ import aiohttp
 import discord
 from discord.ext import commands
 
-from . import utils
+from . import utils as vbu
 
 
-class ErrorHandler(utils.Cog):
+class ErrorHandler(vbu.Cog):
 
     COMMAND_ERROR_RESPONSES = (
         (
-            utils.errors.MissingRequiredArgumentString,
+            vbu.errors.MissingRequiredArgumentString,
             lambda ctx, error: f"You're missing `{error.param}`, which is required for this command - see `{ctx.clean_prefix}help {' '.join(ctx.command.qualified_name.split(' ')[:-1] + [ctx.invoked_with])}`."
         ),
         (
@@ -25,15 +25,15 @@ class ErrorHandler(utils.Cog):
             lambda ctx, error: "The quotes in your message have been done incorrectly."
         ),
         (
-            utils.checks.cooldown.NoRaiseCommandOnCooldown,
+            vbu.checks.cooldown.NoRaiseCommandOnCooldown,
             lambda ctx, error: None
         ),
         (
             commands.CommandOnCooldown,
-            lambda ctx, error: f"You can't use this command again for another {utils.TimeValue(error.retry_after).clean_spaced}."
+            lambda ctx, error: f"You can't use this command again for another {vbu.TimeValue(error.retry_after).clean_spaced}."
         ),
         (
-            utils.errors.BotNotReady,
+            vbu.errors.BotNotReady,
             lambda ctx, error: "The bot isn't ready to start processing that command yet - please wait."
         ),
         (
@@ -41,15 +41,15 @@ class ErrorHandler(utils.Cog):
             lambda ctx, error: f"You can only run this command in channels set as NSFW. {'You can set channels as NSFW in their channel settings.' if ctx.channel.permissions_for(ctx.author).manage_channels else ''}"
         ),
         (
-            utils.errors.BotNotInGuild,
+            vbu.errors.BotNotInGuild,
             lambda ctx, error: "The bot needs to be in the guild for you to run this command."
         ),
         (
-            utils.errors.IsSlashCommand,
+            vbu.errors.IsSlashCommand,
             lambda ctx, error: "This command cannot be run as a slash command."
         ),
         (
-            utils.errors.IsNotSlashCommand,
+            vbu.errors.IsNotSlashCommand,
             lambda ctx, error: "This command can only be run as a slash command."
         ),
         (
@@ -57,7 +57,7 @@ class ErrorHandler(utils.Cog):
             lambda ctx, error: "This command has been disabled."
         ),
         (
-            utils.errors.NotBotSupport,
+            vbu.errors.NotBotSupport,
             lambda ctx, error: "You need to be part of the bot's support team to be able to run this command."
         ),
         (
@@ -191,7 +191,7 @@ class ErrorHandler(utils.Cog):
         # (commands.CommandRegistrationError, lambda ctx, error: ""),
     )
 
-    async def send_to_ctx_or_author(self, ctx: utils.Context, text: str, author_text: str = None) -> typing.Optional[discord.Message]:
+    async def send_to_ctx_or_author(self, ctx: vbu.Context, text: str, author_text: str = None) -> typing.Optional[discord.Message]:
         """
         Tries to send the given text to ctx, but failing that, tries to send it to the author
         instead. If it fails that too, it just stays silent.
@@ -217,15 +217,15 @@ class ErrorHandler(utils.Cog):
             pass
         return None
 
-    @utils.Cog.listener()
-    async def on_command_error(self, ctx: utils.Context, error: commands.CommandError):
+    @vbu.Cog.listener()
+    async def on_command_error(self, ctx: vbu.Context, error: commands.CommandError):
         """
         Global error handler for all the commands around wew.
         """
 
         # Set up some errors that are just straight up ignored
         ignored_errors = (
-            commands.CommandNotFound, utils.errors.InvokedMetaCommand,
+            commands.CommandNotFound, vbu.errors.InvokedMetaCommand,
         )
         if isinstance(error, ignored_errors):
             return
@@ -237,7 +237,7 @@ class ErrorHandler(utils.Cog):
         owner_reinvoke_errors = (
             commands.MissingRole, commands.MissingAnyRole, commands.MissingPermissions,
             commands.CommandOnCooldown, commands.DisabledCommand, commands.CheckFailure,
-            utils.errors.IsNotUpgradeChatSubscriber, utils.errors.IsNotVoter, utils.errors.NotBotSupport,
+            vbu.errors.IsNotUpgradeChatSubscriber, vbu.errors.IsNotVoter, vbu.errors.NotBotSupport,
         )
         if isinstance(error, owner_reinvoke_errors) and ctx.original_author_id in self.bot.owner_ids:
             if self.bot.config.get("owners_ignore_check_failures", True) and isinstance(error, commands.CheckFailure):
@@ -246,7 +246,7 @@ class ErrorHandler(utils.Cog):
                 return await ctx.reinvoke()
 
         # See if the command itself has an error handler AND it isn't a locally handlled arg
-        # if hasattr(ctx.command, "on_error") and not isinstance(ctx.command, utils.Command):
+        # if hasattr(ctx.command, "on_error") and not isinstance(ctx.command, vbu.Command):
         if hasattr(ctx.command, "on_error"):
             return
 
@@ -323,6 +323,6 @@ class ErrorHandler(utils.Cog):
             logger.error(line)
 
 
-def setup(bot: utils.Bot):
+def setup(bot: vbu.Bot):
     x = ErrorHandler(bot)
     bot.add_cog(x)

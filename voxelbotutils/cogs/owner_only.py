@@ -13,15 +13,15 @@ import inspect
 import discord
 from discord.ext import commands
 
-from . import utils
+from . import utils as vbu
 
 
-class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': False}):
+class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': False}):
     """
     Handles commands that only the owner should be able to run.
     """
 
-    def __init__(self, bot: utils.Bot):
+    def __init__(self, bot: vbu.Bot):
         super().__init__(bot)
         if self.bot.config.get("redis", {}).get("enabled"):
             self.redis_ev_listener.start()
@@ -30,7 +30,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         if self.bot.config.get("redis", {}).get("enabled"):
             self.redis_ev_listener.stop()
 
-    @utils.redis_channel_handler("RunRedisEval")
+    @vbu.redis_channel_handler("RunRedisEval")
     async def redis_ev_listener(self, payload):
         """
         Listens for the redis* commands being run and invokes them.
@@ -55,7 +55,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         message.content = new_content
 
         # And process
-        ctx: utils.Context = await self.bot.get_context(message)
+        ctx: vbu.Context = await self.bot.get_context(message)
         ctx.message = message
         ctx.guild = guild
         ctx.channel = channel
@@ -63,17 +63,17 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         ctx.me = bot
         await self.bot.invoke(ctx)
 
-    @utils.command()
+    @vbu.command()
     @commands.is_owner()
-    @utils.checks.is_config_set("redis", "enabled")
+    @vbu.checks.is_config_set("redis", "enabled")
     @commands.bot_has_permissions(send_messages=True, attach_files=True, add_reactions=True)
-    async def redis(self, ctx: utils.Context, *, content: str):
+    async def redis(self, ctx: vbu.Context, *, content: str):
         """
         Pings a command to be run over redis.
         """
 
         if not content:
-            raise utils.errors.MissingRequiredArgumentString("content")
+            raise vbu.errors.MissingRequiredArgumentString("content")
         async with self.bot.redis() as re:
             await re.publish("RunRedisEval", {
                 'channel_id': ctx.channel.id,
@@ -83,17 +83,17 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
                 'content': content,
             })
 
-    @utils.command(aliases=['src'])
+    @vbu.command(aliases=['src'])
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, attach_files=True, add_reactions=True)
-    async def source(self, ctx: utils.Context, *, command_name: str):
+    async def source(self, ctx: vbu.Context, *, command_name: str):
         """
         Shows you the source for a given command.
         """
 
         # Get command
         if not command_name:
-            raise utils.errors.MissingRequiredArgumentString("command_name")
+            raise vbu.errors.MissingRequiredArgumentString("command_name")
         command = self.bot.get_command(command_name)
         if command is None:
             return await ctx.send(f"I couldn't find a command named `{command_name}`.", allowed_mentions=discord.AllowedMentions.none())
@@ -115,12 +115,12 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
             pages.append(f"```py\n{last}\n```")
 
         # Paginate
-        await utils.Paginator(pages, per_page=1).start(ctx)
+        await vbu.Paginator(pages, per_page=1).start(ctx)
 
-    @utils.command(aliases=['pm', 'dm', 'send'])
+    @vbu.command(aliases=['pm', 'dm', 'send'])
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True)
-    async def message(self, ctx: utils.Context, snowflake: int, *, content: str = None):
+    async def message(self, ctx: vbu.Context, snowflake: int, *, content: str = None):
         """
         DMs a user the given content.
         """
@@ -199,10 +199,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
             index += 1
         return f"Executed in **{time_taken:,.3f}** {precision}."
 
-    @utils.command(aliases=['evall', 'eval'])
+    @vbu.command(aliases=['evall', 'eval'])
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def ev(self, ctx: utils.Context, *, content: str = None):
+    async def ev(self, ctx: vbu.Context, *, content: str = None):
         """
         Evaluates some Python code.
         """
@@ -216,7 +216,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
             'guild': ctx.guild,
             'message': ctx.message,
             'self': self,
-            'vbu': utils,
+            'vbu': vbu,
         }
         # env.update(globals())
 
@@ -228,12 +228,12 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
                 except Exception:
                     pass
         if not content:
-            raise utils.errors.MissingRequiredArgumentString("content")
+            raise vbu.errors.MissingRequiredArgumentString("content")
 
         # Make code and output string
         content = self._cleanup_code(content)
         if not content:
-            raise utils.errors.MissingRequiredArgumentString("content")
+            raise vbu.errors.MissingRequiredArgumentString("content")
         code = f'async def func():\n{textwrap.indent(content, "  ")}'
 
         # Make the function into existence
@@ -298,10 +298,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         else:
             return await ctx.send(text, embeddify=False)
 
-    @utils.command(aliases=['rld', 'rl'])
+    @vbu.command(aliases=['rld', 'rl'])
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def reload(self, ctx: utils.Context, *cog_name: str):
+    async def reload(self, ctx: vbu.Context, *cog_name: str):
         """
         Unloads and reloads a cog from the bot.
         """
@@ -337,9 +337,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
             await ctx.send("Reloaded:\n`" + "`\n`".join(reloaded_cogs) + "`")
         return
 
-    @utils.command(aliases=['downloadcog', 'dlcog', 'download', 'dl', 'stealcog'])
+    @vbu.command(aliases=['downloadcog', 'dlcog', 'download', 'dl', 'stealcog'])
     @commands.is_owner()
-    async def downloadfile(self, ctx: utils.Context, url: str, file_folder: typing.Optional[str]):
+    async def downloadfile(self, ctx: vbu.Context, url: str, file_folder: typing.Optional[str]):
         """
         Download a cog from Github.
         """
@@ -388,10 +388,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         # And done
         await ctx.send(f"Downloaded the `{file_name}` cog, saved as `{file_path}`, and loaded successfully into the bot.")
 
-    @utils.command()
+    @vbu.command()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def runsql(self, ctx: utils.Context, *, sql: str):
+    async def runsql(self, ctx: vbu.Context, *, sql: str):
         """
         Runs a line of SQL into the database.
         """
@@ -439,10 +439,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
             file = discord.File(io.StringIO(string_output), filename="runsql.txt")
             await ctx.send(file=file)
 
-    @utils.group()
+    @vbu.group()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def botuser(self, ctx: utils.Context):
+    async def botuser(self, ctx: vbu.Context):
         """
         A parent command for the bot user configuration section.
         """
@@ -452,7 +452,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
     @botuser.command(name='name', aliases=['username'])
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def botuser_name(self, ctx: utils.Context, *, username: str):
+    async def botuser_name(self, ctx: vbu.Context, *, username: str):
         """
         Lets you set the username for the bot account.
         """
@@ -465,7 +465,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
     @botuser.command(name='avatar', aliases=['photo', 'image', 'picture'])
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def botuser_avatar(self, ctx: utils.Context, *, image_url: typing.Optional[str]):
+    async def botuser_avatar(self, ctx: vbu.Context, *, image_url: typing.Optional[str]):
         """
         Lets you set the profile picture of the bot.
         """
@@ -484,7 +484,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
     @botuser.command(name='activity', aliases=['game'])
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def botuser_activity(self, ctx: utils.Context, activity_type: str, *, name: typing.Optional[str]):
+    async def botuser_activity(self, ctx: vbu.Context, activity_type: str, *, name: typing.Optional[str]):
         """
         Changes the activity of the bot.
         """
@@ -498,7 +498,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
     @botuser.command(name='status')
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def botuser_status(self, ctx: utils.Context, status: str):
+    async def botuser_status(self, ctx: vbu.Context, status: str):
         """
         Changes the online status of the bot.
         """
@@ -506,7 +506,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         status = getattr(discord.Status, status.lower())
         await self.bot.change_presence(activity=self.bot.guilds[0].me.activity, status=status)
 
-    @utils.command(aliases=['sudo'])
+    @vbu.command(aliases=['sudo'])
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
     async def su(self, ctx, who: discord.User, *, command: str):
@@ -531,10 +531,10 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         # Invoke it dab
         await self.bot.invoke(new_ctx)
 
-    @utils.command(aliases=['sh'])
+    @vbu.command(aliases=['sh'])
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True)
-    async def shell(self, ctx: utils.Context, *, command: str):
+    async def shell(self, ctx: vbu.Context, *, command: str):
         """
         Run a shell command.
         """
@@ -573,9 +573,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
         except discord.HTTPException:
             pass
 
-    @utils.group()
+    @vbu.group()
     @commands.is_owner()
-    async def export(self, ctx: utils.Context):
+    async def export(self, ctx: vbu.Context):
         """
         The parent group for the export commands.
         """
@@ -585,7 +585,7 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
     @export.command(name="commands")
     @commands.bot_has_permissions(send_messages=True, attach_files=True)
     @commands.is_owner()
-    async def export_commands(self, ctx: utils.Context):
+    async def export_commands(self, ctx: vbu.Context):
         """
         Exports the commands for the bot as a markdown file.
         """
@@ -619,9 +619,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
 
     @export.command(name="guild")
     @commands.bot_has_permissions(send_messages=True, attach_files=True)
-    @utils.checks.is_config_set('database', 'enabled')
+    @vbu.checks.is_config_set('database', 'enabled')
     @commands.is_owner()
-    async def export_guild(self, ctx: utils.Context, guild_id: typing.Optional[int]):
+    async def export_guild(self, ctx: vbu.Context, guild_id: typing.Optional[int]):
         """
         Exports data for a given guild from the database.
 
@@ -707,9 +707,9 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
 
     @export.command(name="table")
     @commands.bot_has_permissions(send_messages=True, attach_files=True)
-    @utils.checks.is_config_set('database', 'enabled')
+    @vbu.checks.is_config_set('database', 'enabled')
     @commands.is_owner()
-    async def export_table(self, ctx: utils.Context, table_name: str):
+    async def export_table(self, ctx: vbu.Context, table_name: str):
         """
         Exports a given table from the database into a .csv file.
         """
@@ -745,6 +745,6 @@ class OwnerOnly(utils.Cog, command_attrs={'hidden': True, 'add_slash_command': F
             return
 
 
-def setup(bot: utils.Bot):
+def setup(bot: vbu.Bot):
     x = OwnerOnly(bot)
     bot.add_cog(x)

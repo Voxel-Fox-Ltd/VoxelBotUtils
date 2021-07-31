@@ -3,16 +3,16 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from . import utils
+from . import utils as vbu
 
 
-class BotSettings(utils.Cog):
+class BotSettings(vbu.Cog):
 
-    @utils.command(add_slash_command=False)
+    @vbu.command(add_slash_command=False)
     @commands.bot_has_permissions(send_messages=True)
     @commands.guild_only()
-    @utils.checks.is_config_set('database', 'enabled')
-    async def prefix(self, ctx: utils.Context, *, new_prefix: str = None):
+    @vbu.checks.is_config_set('database', 'enabled')
+    async def prefix(self, ctx: vbu.Context, *, new_prefix: str = None):
         """
         Changes the prefix that the bot uses.
         """
@@ -30,7 +30,7 @@ class BotSettings(utils.Cog):
         try:
             await commands.has_guild_permissions(manage_guild=True).predicate(ctx)
         except Exception:
-            return await ctx.send(f"You do not have permission to change the command prefix.")
+            return await ctx.send("You do not have permission to change the command prefix.")
 
         # Validate prefix
         if len(new_prefix) > 30:
@@ -49,62 +49,7 @@ class BotSettings(utils.Cog):
             allowed_mentions=discord.AllowedMentions.none(),
         )
 
-    @utils.command(aliases=['follow'], add_slash_command=False)
-    @commands.has_permissions(manage_guild=True, manage_channels=True)
-    @commands.bot_has_permissions(send_messages=True, add_reactions=True, manage_channels=True)
-    @commands.guild_only()
-    @utils.checks.is_config_set('command_data', 'updates_channel_id')
-    async def updates(self, ctx:utils.Context):
-        """
-        Get official bot updates from the support server.
-        """
 
-        # See if they're sure
-        m = await ctx.send(
-            (
-                f"This will follow the bot's official updates channel from the support server "
-                f"(`{ctx.clean_prefix}support`). Would you like to continue?"
-            ),
-            components=utils.MessageComponents.boolean_buttons(),
-        )
-        try:
-            check = lambda p: p.user.id == ctx.author.id and p.message.id == m.id
-            payload = await self.bot.wait_for("component_interaction", check=check, timeout=120)
-            await payload.defer_update()
-        except asyncio.TimeoutError:
-            try:
-                await m.delete()
-            except discord.HTTPException:
-                pass
-            return
-
-        # Cancel follow
-        if payload.component.custom_id == "NO":
-            return await ctx.send("Alright, cancelling!")
-
-        # Get channel
-        channel_id = self.bot.config['command_data']['updates_channel_id']
-        try:
-            channel = self.bot.get_channel(channel_id) or await self.bot.fetch_channel(channel_id)
-            assert channel.is_news()
-        except Exception:
-            return await payload.send("I couldn't reach the updates channel!")
-
-        # Follow it
-        try:
-            await channel.follow(destination=ctx.channel)
-        except discord.HTTPException as e:
-            return await payload.send(f"I wasn't able to follow the updates channel - {e}")
-
-        # Output message
-        try:
-            check = lambda m: m.guild and m.guild.id == ctx.guild.id and m.content.endswith(f"#{channel.name}")
-            await self.bot.wait_for("message", check=check, timeout=5)
-        except asyncio.TimeoutError:
-            pass
-        return await payload.send("Now following the bot's updates channel!")
-
-
-def setup(bot: utils.Bot):
+def setup(bot: vbu.Bot):
     x = BotSettings(bot)
     bot.add_cog(x)

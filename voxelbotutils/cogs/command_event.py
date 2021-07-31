@@ -1,12 +1,12 @@
-from . import utils
+from . import utils as vbu
 
 
-class CommandEvent(utils.Cog):
+class CommandEvent(vbu.Cog):
 
     CONTENT_LIMIT = 50
 
-    @utils.Cog.listener()
-    async def on_command(self, ctx: utils.Context):
+    @vbu.Cog.listener()
+    async def on_command(self, ctx: vbu.Context):
         """
         Pinged when a command is invoked.
         """
@@ -23,6 +23,6 @@ class CommandEvent(utils.Cog):
         logger.info(f"{invoke_text} ({ctx.invoked_with}) ~ (G{ctx.guild.id}/C{ctx.channel.id}/U{ctx.author.id}) :: {content}")
 
 
-def setup(bot: utils.Bot):
+def setup(bot: vbu.Bot):
     x = CommandEvent(bot)
     bot.add_cog(x)

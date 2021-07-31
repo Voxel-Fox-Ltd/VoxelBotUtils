@@ -6,7 +6,7 @@ all_packages = (
     'connect_event',
     'error_handler',
     'help_command',
-    'misc_commands',
+    # 'misc_commands',
     'owner_only',
     'presence_auto_updater',
     'application_command_handler',

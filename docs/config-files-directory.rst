@@ -160,20 +160,6 @@ Bot Config File
       .. attribute:: dm_typing
          :type: bool
 
-   .. class:: help_command
-
-      Attributes for the help command.
-
-      .. attribute:: dm_help
-         :type: bool
-
-         Whether or not the help command should be DM'd to the user by default.
-
-      .. attribute:: content
-         :type: str
-
-         Additional content to be sent along with the bot's help embed.
-
    .. class:: bot_listing_api_keys
 
       API keys that the bot uses internally to keep the bot listings up-to-date.
@@ -182,54 +168,23 @@ Bot Config File
 
       .. attribute:: discordbotlist_token
 
-   .. class:: command_data
+   .. class:: bot_info
 
-      Simple data for call/response commands.
-
-      .. attribute:: website_link
-         :type: str
-
-         A link to your website.
-
-      .. attribute:: guild_invite
-         :type: str
-
-         A link to your guild.
-
-      .. attribute:: github_link
-         :type: str
-
-         A link to the bot's git page.
-
-      .. attribute:: donate_link
-         :type: str
-
-         A link where users can donate to you.
-
-      .. attribute:: echo_command_enabled
+      .. attribute:: enabled
          :type: bool
 
-         Whether or not the echo command is enabled.
+         Whether or not the info command is enabled. It's highly recommended that this remains enabled.
 
-      .. attribute:: stats_command_enabled
-         :type: bool
-
-         Whether or not the stats command is enabled.
-
-      .. attribute:: vote_command_enabled
-         :type: bool
-
-         Whether or not the vote command is enabled - this will link to your Top.gg page where users can vote for the bot.
-
-      .. attribute:: updates_channel_id
-         :type: int
-
-         The channel ID for an announcement channel where users can receive updates about your bot.
-
-      .. attribute:: info
+      .. attrribute:: content
          :type: str
 
-         Simple information about your bot that gets output on using the :code:`!info` command.
+         The content that should be output in the info command. This gets put into an embed, so standard markdown is allowed.
+         This string is also passed into :code:`.format` with your :code:`bot` instance and the :code:`links` provided below.
+
+      .. attribute:: links
+         :type: dict
+
+         The links that should be added as buttons onto your info command.
 
    .. class:: oauth
 
@@ -239,11 +194,6 @@ Bot Config File
          :type: bool
 
          Whether or not the invite command is enabled.
-
-      .. attribute:: base
-         :type: str
-
-         The base of your invite link. You probably don't need to change this.
 
       .. attribute:: response_type
          :type: str
