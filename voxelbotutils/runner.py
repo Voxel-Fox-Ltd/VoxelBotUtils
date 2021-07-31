@@ -5,7 +5,6 @@ import sys
 import typing
 import os
 import importlib
-from voxelbotutils.cogs.utils.shard_manager import ShardManagerServer
 
 import toml
 
@@ -13,6 +12,7 @@ from .cogs.utils.database import DatabaseConnection
 from .cogs.utils.redis import RedisConnection
 from .cogs.utils.statsd import StatsdConnection
 from .cogs.utils.custom_bot import Bot
+from .cogs.utils.shard_manager import ShardManagerServer
 
 
 class CascadingLogger(logging.getLoggerClass()):
@@ -36,17 +36,17 @@ def set_log_level(
         logger_to_change: typing.Union[logging.Logger, str], log_level: str,
         minimum_level: int = None) -> None:
     """
-    Set a logger to a default log level
+    Set a logger to a default log level.
 
     Args:
-        logger_to_change (logging.Logger): The logger you want to change
-        log_level (str): Description
+        logger_to_change (logging.Logger): The logger you want to change.
+        log_level (str): The log level that you want to set the logger to.
 
     Returns:
         None
 
     Raises:
-        ValueError: An invalid log_level was passed to the method
+        ValueError: An invalid log_level was passed to the method.
     """
 
     # Make sure we're setting it to something
@@ -73,13 +73,13 @@ def set_log_level(
 # Make sure the sharding info provided is correctish
 def validate_sharding_information(args: argparse.Namespace) -> typing.Optional[typing.List[int]]:
     """
-    Validate the given shard information and make sure that what's passed in is accurate
+    Validate the given shard information and make sure that what's passed in is accurate.
 
     Args:
-        args (argparse.Namespace): The parsed argparse namespace for the program
+        args (argparse.Namespace): The parsed argparse namespace for the program.
 
     Returns:
-        typing.List[int]: A list of shard IDs to use with the bot
+        typing.List[int]: A list of shard IDs to use with the bot.
     """
 
     # Set up some short vars for us to use
@@ -151,11 +151,11 @@ def _set_default_log_level(logger_name, log_filter, formatter, loglevel):
 
 def set_default_log_levels(args: argparse.Namespace) -> None:
     """
-    Set the default levels for the logger
+    Set the default levels for the logger.
 
     Args:
-        bot (Bot): The custom bot object containing the logger, database logger, and redis logger
-        args (argparse.Namespace): The argparse namespace saying what levels to set each logger to
+        bot (Bot): The custom bot object containing the logger, database logger, and redis logger.
+        args (argparse.Namespace): The argparse namespace saying what levels to set each logger to.
     """
 
     # formatter = logging.Formatter('%(asctime)s [%(levelname)s][%(name)s] %(message)s')
@@ -172,12 +172,12 @@ def set_default_log_levels(args: argparse.Namespace) -> None:
     for i in loggers:
         if i is None:
             continue
-        _set_default_log_level(i, log_filter, formatter, args.loglevel)
+        _set_default_log_level(i, log_filter, formatter, getattr(args, "loglevel", "ERROR"))
 
 
 async def create_initial_database(db) -> None:
     """
-    Create the initial database using the internal database.psql file
+    Create the initial database using the internal database.psql file.
     """
 
     # Open the db file
@@ -209,7 +209,7 @@ async def create_initial_database(db) -> None:
 
 async def start_database_pool(config: dict) -> None:
     """
-    Start the database pool connection
+    Start the database pool connection.
     """
 
     # Connect the database pool
@@ -233,7 +233,7 @@ async def start_database_pool(config: dict) -> None:
 
 async def start_redis_pool(config: dict) -> None:
     """
-    Start the redis pool conneciton
+    Start the redis pool connection.
     """
 
     # Connect the redis pool
@@ -265,10 +265,10 @@ def set_event_loop():
 
 def run_bot(args: argparse.Namespace) -> None:
     """
-    Starts the bot, connects the database, runs the async loop forever
+    Starts the bot, connects the database, runs the async loop forever.
 
     Args:
-        args (argparse.Namespace): The arguments namespace that wants to be run
+        args (argparse.Namespace): The arguments namespace that wants to be run.
     """
 
     os.chdir(args.bot_directory)
@@ -323,10 +323,10 @@ def run_bot(args: argparse.Namespace) -> None:
 
 def run_website(args: argparse.Namespace) -> None:
     """
-    Starts the website, connects the database, logs in the specified bots, runs the async loop forever
+    Starts the website, connects the database, logs in the specified bots, runs the async loop forever.
 
     Args:
-        args (argparse.Namespace): The arguments namespace that wants to be run
+        args (argparse.Namespace): The arguments namespace that wants to be run.
     """
 
     # Load our imports here so we don't need to require them all the time
@@ -335,7 +335,6 @@ def run_website(args: argparse.Namespace) -> None:
     from aiohttp_session import setup as session_setup, SimpleCookieStorage
     from aiohttp_session.cookie_storage import EncryptedCookieStorage as ECS
     from jinja2 import FileSystemLoader
-    import toml
     import re
     import html
     from datetime import datetime as dt
@@ -446,9 +445,8 @@ def run_website(args: argparse.Namespace) -> None:
         try:
             loop.run_until_complete(bot.login())
             bot.load_all_extensions()
-        except Exception as e:
-            logger.error(f"Failed to start bot {bot_name}")
-            logger.error(e)
+        except Exception:
+            logger.error(f"Failed to start bot {bot_name}", exc_info=True)
             exit(1)
 
     # Start the HTTP server
@@ -487,10 +485,10 @@ def run_website(args: argparse.Namespace) -> None:
 
 def run_sharder(args: argparse.Namespace) -> None:
     """
-    Starts the sharder, connects the redis, runs the async loop forever
+    Starts the sharder, connects the redis, runs the async loop forever.
 
     Args:
-        args (argparse.Namespace): The arguments namespace that wants to be run
+        args (argparse.Namespace): The arguments namespace that wants to be run.
     """
 
     set_event_loop()
@@ -504,6 +502,119 @@ def run_sharder(args: argparse.Namespace) -> None:
         loop.run_forever()
     except KeyboardInterrupt:
         logger.info("Logging out sharder")
+
+    logger.info("Closing asyncio loop")
+    loop.stop()
+    loop.close()
+
+
+def run_shell(args: argparse.Namespace) -> None:
+    """
+    Starts the shell for you.
+
+    Args:
+        args (argparse.Namespace): The arguments namespace that wants to be run.
+    """
+
+    os.chdir(args.bot_directory)
+    set_event_loop()
+
+    # And run file
+    bot = Bot(config_file=args.config_file)
+    loop = bot.loop
+
+    # Set up loggers
+    bot.logger = logger.getChild("bot")
+    set_default_log_levels(args)
+
+    # Connect the database pool
+    if bot.config.get('database', {}).get('enabled', False):
+        db_connect_task = start_database_pool(bot.config)
+        loop.run_until_complete(db_connect_task)
+
+    # Connect the redis pool
+    if bot.config.get('redis', {}).get('enabled', False):
+        re_connect = start_redis_pool(bot.config)
+        loop.run_until_complete(re_connect)
+
+    # Load the bot's extensions
+    logger.info('Loading extensions... ')
+    bot.load_all_extensions()
+
+    # Set up the default env
+    import voxelbotutils as vbu
+    import discord
+    from discord.ext import commands
+    import textwrap
+    import traceback
+    import re
+    env = {
+        'bot': bot,
+        'vbu': vbu,
+        'discord': discord,
+        'commands': commands,
+    }
+
+    # Run the bot
+    try:
+        logger.info("Running bot")
+        loop.run_until_complete(bot.login())
+
+        # Run our shell loop
+        while True:
+
+            # Get a user input
+            line = input(">>> ")
+            if not line.strip():
+                line = "None"
+
+            # See if they want to save that to a var
+            var_name = None
+            if (match := re.search(r"^([a-zA-Z_][a-zA-Z0-9_]*) ?=", line)):
+                var_name = match.group(1)
+                line = line.replace(match.group(0), "").lstrip()
+            elif (match := re.search(r"^(?:from (?:[a-zA-Z_][a-zA-Z0-9_]*) )?import ([a-zA-Z_][a-zA-Z0-9_]*)", line)):
+                var_name = match.group(1)
+                line = line + f"\nreturn {var_name}"
+
+            # Make sure that something is returned
+            if not line.split("\n")[-1].startswith("return "):
+                line = "return " + line
+
+            # Make it asyncable
+            code = f'async def _func():\n{textwrap.indent(line, "  ")}'
+
+            # Run the function
+            exec(code, env)
+            func = env['_func']
+            try:
+                ret = loop.run_until_complete(func())
+
+            # Catch any errors
+            except Exception:
+                print(traceback.format_exc().rstrip())
+
+            # Deal with the result
+            else:
+                if var_name is not None:
+                    env.update({var_name: ret})
+                elif ret is not None:
+                    print(repr(ret))
+
+    except KeyboardInterrupt:
+        logger.info("Logging out bot")
+        loop.run_until_complete(bot.close())
+
+    # We're now done running the bot, time to clean up and close
+    if bot.config.get('database', {}).get('enabled', False):
+        logger.info("Closing database pool")
+        try:
+            loop.run_until_complete(asyncio.wait_for(DatabaseConnection.pool.close(), timeout=30.0))
+        except asyncio.TimeoutError:
+            logger.error("Couldn't gracefully close the database connection pool within 30 seconds")
+    if bot.config.get('redis', {}).get('enabled', False):
+        logger.info("Closing redis pool")
+        RedisConnection.pool.close()
 
     logger.info("Closing asyncio loop")
     loop.stop()

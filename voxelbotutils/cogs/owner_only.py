@@ -217,6 +217,8 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
             'message': ctx.message,
             'self': self,
             'vbu': vbu,
+            'discord': discord,
+            'commands': commands,
         }
         # env.update(globals())
 

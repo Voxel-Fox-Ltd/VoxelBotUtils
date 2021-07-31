@@ -4,7 +4,7 @@ import pathlib
 
 import discord
 
-from .runner import run_bot, run_website, run_sharder
+from .runner import run_bot, run_website, run_sharder, run_shell
 
 
 def create_file(*path, content: str = None):
@@ -44,6 +44,7 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     bot_subparser = runner_subparser.add_parser("run-bot")
     website_subparser = runner_subparser.add_parser("run-website")
     sharder_subparser = runner_subparser.add_parser("run-sharder")
+    shell_subparser = runner_subparser.add_parser("run-shell")
     create_config_subparser = runner_subparser.add_parser("create-config")
     check_config_subparser = runner_subparser.add_parser("check-config")
     runner_subparser.add_parser("version")
@@ -70,6 +71,10 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     sharder_subparser.add_argument("--port", nargs="?", default=8888, type=int, help="The host port to listen on.")
     sharder_subparser.add_argument("--concurrency", nargs="?", default=1, type=int, help="The max concurrency of the connecting bot.")
     sharder_subparser.add_argument("--loglevel", nargs="?", default="INFO", help="Global logging level - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+
+    # Set up the shell arguments
+    shell_subparser.add_argument("bot_directory", nargs="?", default=".", help="The directory containing a config and a cogs folder for the bot to run.")
+    shell_subparser.add_argument("config_file", nargs="?", default="config/config.toml", help="The configuration for the bot.")
 
     # See what we want to make a config file for
     create_config_subparser.add_argument("config_type", nargs=1, help="The type of config file that we want to create.", choices=["bot", "website", "all"])
@@ -183,6 +188,8 @@ def main():
         run_website(args)
     elif args.subcommand == "run-sharder":
         run_sharder(args)
+    elif args.subcommand == "run-shell":
+        run_shell(args)
 
 
 if __name__ == '__main__':

@@ -3,6 +3,17 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.6.0
+--------------------------------------
+
+Breaking changes this time involve the messages intent becoming priviliged in time. Everything in this is to try to make that transition easier.
+
+New Features
+"""""""""""""""""""""""""""""""""""""""
+
+* A new :code:`info` command and :class:`config<BotConfig.bot_info>`
+* :code:`vbu run-shell` as a new command line argument.
+
 0.5.9
 --------------------------------------
 

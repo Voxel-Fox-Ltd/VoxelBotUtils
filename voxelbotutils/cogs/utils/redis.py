@@ -220,7 +220,7 @@ class RedisChannelHandler(object):
                 else:
                     self.callback(self.cog, data)
             except Exception as e:
-                self.connection.logger.error(e)
+                self.connection.logger.error("Failed to run channel task", exc_info=True)
 
     async def unsubscribe(self):
         """
