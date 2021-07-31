@@ -66,6 +66,11 @@ class InteractionHandler(vbu.Cog):
         # Make it work
         ctx.invoked_with = invoker
         ctx.command = self.bot.get_command(command_name)
+        if ctx.command is None and 'target_id' in payload['data']:
+            for i in list(self.bot.commands):
+                if getattr(i, "context_command_name", None) == command_name:
+                    ctx.command = i
+                    break
         ctx.command_name = command_name
         ctx.given_values = given_values
 
@@ -117,7 +122,7 @@ class InteractionHandler(vbu.Cog):
 
             # And invoke
             self.logger.debug("Invoking interaction context for command %s" % (ctx.command.name))
-            self.bot.dispatch('command', ctx)
+            self.bot.dispatch("command", ctx)
             try:
                 if await self.bot.can_run(ctx):
                     if await ctx.command.can_run(ctx):
@@ -127,7 +132,7 @@ class InteractionHandler(vbu.Cog):
             except commands.CommandError as exc:
                 await ctx.command.dispatch_error(ctx, exc)
             else:
-                self.bot.dispatch('command_completion', ctx)
+                self.bot.dispatch("command_completion", ctx)
 
         # See if it was a clicked component
         elif payload['d']['type'] == 3:

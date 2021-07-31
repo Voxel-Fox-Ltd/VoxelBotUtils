@@ -38,7 +38,7 @@ class ApplicationCommandHandler(vbu.Cog):
         discord.PartialEmoji: vbu.ApplicationCommandOptionType.STRING,
         str: vbu.ApplicationCommandOptionType.STRING,
         int: vbu.ApplicationCommandOptionType.INTEGER,
-        float: vbu.ApplicationCommandOptionType.INTEGER,  # Controversial take
+        float: vbu.ApplicationCommandOptionType.NUMBER,
         inspect._empty: vbu.ApplicationCommandOptionType.STRING,
     }
 
@@ -107,24 +107,36 @@ class ApplicationCommandHandler(vbu.Cog):
         except AttributeError:
             return None
 
-    async def get_slash_commands(self) -> typing.List[vbu.ApplicationCommand]:
+    @staticmethod
+    def filter_commands(commands: list) -> list:
         """
-        Get the application's global command objects.
+        Return a list of filtered commands.
         """
 
-        if self.commands is not None:
-            return self.commands
-        r = discord.http.Route("GET", "/applications/{app_id}/commands", app_id=self.bot.application_id)
-        data = await self.bot.http.request(r)
-        self.commands = [vbu.ApplicationCommand.from_data(i) for i in data]
-        return self.commands
+        # Make sure they're enabled and visible
+        commands = [
+            i for i in commands
+            if i.hidden is False and i.enabled is True and i.name not in ["help", "channelhelp", "commands"] and getattr(i, "add_slash_command", True)
+        ]
+
+        # Filter out owner-only commands
+        commands = [
+            i for i in commands
+            if not any(
+                o for o in i.checks
+                if not f"{o.__module__}.{o.__qualname__}".startswith("discord.ext.commands.core.is_owner.")
+            )
+        ]
+
+        # And return
+        return commands
 
     @staticmethod
     def get_command_description(command) -> str:
         return command.short_doc or f"Allows you to run the {command.qualified_name} command"
 
-    async def convert_into_application_command(
-            self, ctx, command: typing.Union[vbu.Command, vbu.Group], *,
+    def convert_into_slash_command(
+            self, command: typing.Union[vbu.Command, vbu.Group], *,
             is_option: bool = False) -> vbu.ApplicationCommand:
         """
         Convert a given Discord command into an application command.
@@ -177,13 +189,11 @@ class ApplicationCommandHandler(vbu.Cog):
                     safe_arg_type = getattr(arg_type, "SLASH_COMMAND_ARG_TYPE", None)
 
             except Exception:
-                await ctx.send(f"Hit an error converting `{command.qualified_name}` command.")
-                raise
+                raise Exception(f"Hit an error converting `{command.qualified_name}` command.")
 
             # Make sure the type exists
             if safe_arg_type is None:
-                await ctx.send(f"Hit an error converting `{command.qualified_name}` command.")
-                raise Exception(f"Couldn't convert {arg_type} into a valid slash command argument type.")
+                raise Exception(f"Couldn't convert {arg_type} into a valid slash command argument type for command `{command.qualified_name}`.")
 
             # Say if it's optional
             if arg.default is not inspect._empty or self.is_typing_optional(arg.annotation):
@@ -208,39 +218,49 @@ class ApplicationCommandHandler(vbu.Cog):
         if isinstance(command, vbu.Group):
             subcommands = list(command.commands)
             valid_subcommands = []
-            for i in (await vbu.HelpCommand.filter_commands_classmethod(ctx, subcommands)):
+            for i in self.filter_commands(subcommands):
                 if getattr(i, 'add_slash_command', True):
                     valid_subcommands.append(i)
             for subcommand in valid_subcommands:
-                converted_option = await self.convert_into_application_command(ctx, subcommand, is_option=True)
+                converted_option = self.convert_into_slash_command(subcommand, is_option=True)
                 application_command.add_option(converted_option)
 
         # Return command
         return application_command
 
-    async def convert_all_into_application_command(self, ctx: vbu.Context) -> typing.List[vbu.ApplicationCommand]:
+    def convert_into_context_command(
+            self, command: typing.Union[vbu.Command, vbu.Group]) -> vbu.ApplicationCommand:
+        """
+        Convert a given Discord command into an application command.
+        """
+
+        kwargs = {
+            "name": command.context_command_name or command.name,
+            "description": "ContextCommand",
+            "type": command.context_command_type,
+        }
+        application_command = vbu.ApplicationCommand(**kwargs)
+        return application_command
+
+    def convert_all_into_application_command(self, ctx: vbu.Context) -> typing.List[vbu.ApplicationCommand]:
         """
         Convert all of the commands for the bot into application commands.
         """
 
-        slash_commands = []
+        application_commands = []
         commands = list(ctx.bot.commands)
-        filtered_commands = []
-        for i in (await vbu.HelpCommand.filter_commands_classmethod(ctx, commands)):
-            if getattr(i, 'add_slash_command', True):
-                filtered_commands.append(i)
+        filtered_commands = self.filter_commands(commands)
         for command in filtered_commands:
-            slash_commands.append(await self.convert_into_application_command(ctx, command))
-        return slash_commands
+            application_commands.append(self.convert_into_slash_command(command))
+            if getattr(command, "context_command_type", None):
+                application_commands.append(self.convert_into_context_command(command))
+        return application_commands
 
-    @vbu.command(aliases=['addslashcommand'], argparse=(
-        ("-commands", "-command", "-c", {"type": str, "nargs": "*"}),
-        ("-delete-old", "-d", {"type": bool, "nargs": "?", "default": True}),
-    ))
+    @vbu.command(aliases=['addslashcommands', 'addslashcommand', 'addapplicationcommand'], add_slash_command=False)
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
-    async def addslashcommands(self, ctx, guild_only: bool, *commands: str):
+    async def addapplicationcommands(self, ctx, guild_only: bool, *commands: str):
         """
         Adds all of the bot's interaction commands to the global interaction handler.
         """
@@ -250,7 +270,7 @@ class ApplicationCommandHandler(vbu.Cog):
         if commands:
             commands_to_add = [await self.convert_into_application_command(ctx, self.bot.get_command(i)) for i in commands]
         else:
-            commands_to_add: typing.List[vbu.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
+            commands_to_add: typing.List[vbu.ApplicationCommand] = self.convert_all_into_application_command(ctx)
         command_names_to_add = [i.name for i in commands_to_add]
 
         # Start typing because this takes a while
@@ -295,13 +315,11 @@ class ApplicationCommandHandler(vbu.Cog):
         # And we done
         await ctx.reply("Done.", embeddify=False)
 
-    @vbu.command(aliases=['removeslashcommand'], argparse=(
-        ("-commands", "-command", "-c", {"type": str, "nargs": "*"}),
-    ))
+    @vbu.command(aliases=['removeslashcommands', 'removeslashcommand', 'removeapplicationcommand'], add_slash_command=False)
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
-    async def removeslashcommands(self, ctx, guild_only: bool, *commands: str):
+    async def removeapplicationcommands(self, ctx, guild_only: bool, *commands: str):
         """
         Removes the bot's interaction commands from the global interaction handler.
         """
@@ -326,36 +344,6 @@ class ApplicationCommandHandler(vbu.Cog):
                 self.logger.info(f"Removed slash command for {command.name}")
 
         # And we done
-        await ctx.reply("Done.", embeddify=False, wait=False)
-
-    @vbu.command(aliases=['addcontextcommand'])
-    @commands.guild_only()
-    @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
-    async def addcontextcommands(self, ctx, guild_only: bool, type_: str, *commands: str):
-        """
-        Add a list of context commands to a menu.
-        """
-
-        # Make sure the type is correct
-        if type_.lower() not in ["user", "message"]:
-            return await ctx.send("Your context command type needs to be one of **user** or **message**.")
-        command_type = vbu.ApplicationCommandType[type_.upper()]
-
-        # Typing indicator
-        async with ctx.typing():
-
-            # Grab the commands
-            commands_to_add = [self.bot.get_command(i) for i in commands]
-            application_commands = [vbu.ApplicationCommand(i.name, self.get_command_description(i), command_type) for i in commands_to_add]
-
-            # And add them
-            if guild_only:
-                await self.bot.bulk_create_guild_application_commands(ctx.guild, application_commands)
-            else:
-                await self.bot.bulk_create_global_application_commands(application_commands)
-
-        # And done
         await ctx.reply("Done.", embeddify=False, wait=False)
 
 

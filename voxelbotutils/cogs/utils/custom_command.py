@@ -7,6 +7,7 @@ from discord.ext import commands
 from discord.ext.commands.core import wrap_callback
 
 from .custom_cog import Cog
+from .interactions.application_commands import ApplicationCommandType
 
 
 class DiscordArgparser(argparse.ArgumentParser):
@@ -80,6 +81,10 @@ class Command(commands.Command):
                 async def ban(self, ctx, user: discord.Member, *, namespace: argparse.Namespace):
                     ban_time: int = namespace.days  # Conversion is handled automatically
                     ...
+
+        context_command_type (voxelbotutils.ApplicationCommandType): The type of context command that your
+            given command should be added as.
+        context_command_name (str): The name of the context command that should be added.
     """
 
     def __init__(self, *args, **kwargs):
@@ -91,6 +96,8 @@ class Command(commands.Command):
         self.add_slash_command: bool = kwargs.get('add_slash_command', True)
         self.argument_descriptions: typing.List[str] = kwargs.get('argument_descriptions', list())
         self.argparse: list = kwargs.get('argparse', list())
+        self.context_command_type: ApplicationCommandType = kwargs.get("context_command_type", None)
+        self.context_command_name: str = kwargs.get("context_command_name", None)
 
         # Fix cooldown to be our custom type
         cooldown = self._buckets._cooldown

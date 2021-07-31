@@ -17,6 +17,8 @@ class ApplicationCommandOptionType(enum.IntEnum):
     USER = 6  #: If the option is a user.
     CHANNEL = 7  #: If the option is a channel.
     ROLE = 8  #: If the option is a role.
+    MENTIONABLE = 9  #: Any mentionable user or role.
+    NUMBER = 10  #: Any double.
 
 
 class ApplicationCommandType(enum.IntEnum):
@@ -142,7 +144,7 @@ class ApplicationCommand(object):
         application_id (int): The application ID that this command is attached to.
     """
 
-    def __init__(self, name: str, description: str, type: ApplicationCommandType = ApplicationCommandType.CHAT_INPUT):
+    def __init__(self, name: str, description: str = None, type: ApplicationCommandType = ApplicationCommandType.CHAT_INPUT):
         """
         Args:
             name (str): The name of this command.
@@ -165,9 +167,9 @@ class ApplicationCommand(object):
 
     @classmethod
     def from_data(cls, data: dict):
-        command = cls(data['name'], data['description'], ApplicationCommandType(data.get('type', 1)))
-        command.id = int(data['id'])
-        command.application_id = int(data['application_id'])
+        command = cls(data['name'], data.get('description'), ApplicationCommandType(data.get('type', 1)))
+        command.id = int(data.get('id', 0)) or None
+        command.application_id = int(data.get('application_id', 0)) or None
         for option in data.get('options', list()):
             command.add_option(ApplicationCommandOption.from_data(option))
         return command
@@ -179,7 +181,7 @@ class ApplicationCommand(object):
         v = {
             "name": self.name,
             "description": self.description,
-            # "type": self.type.value,
+            "type": self.type.value,
             "options": [i.to_json() for i in self.options],
         }
         if self.type != ApplicationCommandType.CHAT_INPUT:
