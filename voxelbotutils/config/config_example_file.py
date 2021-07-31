@@ -1,4 +1,4 @@
-# config_file = '''
+config_file = '''
 token = "bot_token"  # The token for the bot.
 owners = []  # List of owner IDs - these people override all permission checks.
 dm_uncaught_errors = false  # Whether or not to DM the owners when unhandled errors are encountered.
@@ -64,19 +64,15 @@ bot_support_role_id = 0  # The ID used to determine whether or not the user is p
     # Your bot invite (if enabled) will always be added as the first button.
     # [bot_info.links.Website]
     #     url = "https://example.com/#your_website_url"
-    #     emoji = "\U0001f517"
+    #     emoji = "\U0001f517"  # You can give emojis too if you want
     # [bot_info.links."Support Server"]  # You CAN have multiple words in a label
     #     url = "https://example.com/#your_guild_invite"
-    #     emoji = ""
     # [bot_info.links.Git]
     #     url = "https://example.com/#your_git_link"
-    #     emoji = ""
     # [bot_info.links.Donate]
     #     url = "https://example.com/#your_donate_link"
-    #     emoji = ""
     # [bot_info.links.Vote]
     #     url = "https://example.com/#your_vote_link"
-    #     emoji = ""
 
 # Used to generate the invite link.
 [oauth]
