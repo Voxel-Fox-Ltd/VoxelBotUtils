@@ -175,7 +175,7 @@ Bot Config File
 
          Whether or not the info command is enabled. It's highly recommended that this remains enabled.
 
-      .. attrribute:: content
+      .. attribute:: content
          :type: str
 
          The content that should be output in the info command. This gets put into an embed, so standard markdown is allowed.

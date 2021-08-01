@@ -34,7 +34,7 @@ class Option(MenuDisplayable):
                 arguments.
             cache_callback (typing.Optional[typing.Callable[[commands.Context, typing.List[typing.Any]], None]]):
                 An [async] function that will be given the context object and a list of the
-                converted user-provided arguments. This is provided as well as the :param:`callback` parameter
+                converted user-provided arguments. This is provided as well as the :code:`callback` parameter
                 so as to allow for the seperation of different reusable methods.
             allow_none (bool): Whether or not the option should allow :code:`None` as a valid input.
         """

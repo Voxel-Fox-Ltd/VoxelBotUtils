@@ -148,7 +148,7 @@ class Menu(MenuDisplayable):
 
     async def get_sendable_data(self, ctx: commands.Context) -> dict:
         """
-        Gets a dictionary of sendable objects to unpack for the :method:`start` method.
+        Gets a dictionary of sendable objects to unpack for the :func:`start` method.
         """
 
         # Make our output lists
