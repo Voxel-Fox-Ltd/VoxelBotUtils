@@ -440,15 +440,21 @@ class MinimalBot(commands.AutoShardedBot):
             image_url=image_url, embeddify_file=embeddify_file,
         )
         content = str(content) if content not in [None, _empty] else content
+
+        # Check embed (singular)
         if embed not in [None, _empty] and embeds not in [None, _empty]:
             raise discord.InvalidArgument('cannot pass both embed and embeds parameter to send()')
         if embed not in [None, _empty]:  # Explicit check because embeds can be falsy
             embeds = [embed]
-            embed = None  # Not used elsewhere
+            embed = None  # Not used elsewhere but let's reset it here anyway
+
+        # Check embeds (multiple)
         if embeds and len(embeds) > 10:
             raise discord.InvalidArgument('embeds parameter must be a list of up to 10 elements')
         if embeds:
             embeds = [e.to_dict() for e in embeds]
+        elif embed is None:
+            embeds = []
 
         # Work out our allowed mentions
         if allowed_mentions not in [None, _empty]:
