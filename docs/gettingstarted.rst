@@ -14,11 +14,15 @@ Command Line
 
 There's a few available things from the commandline (CMD) that you can do with VoxelBotUtils. You can run the module either as :code:`python3 -m voxelbotutils`, or it's registered as a plain :code:`voxelbotutils` to your PATH on install that you can run instead.
 
+.. _cmd_create_config:
+
 * :code:`$ voxelbotutils create-config`
 
    * :code:`bot` - this creates a set of bot config files
    * :code:`website` - this creates a set of website config files
    * :code:`all` - this creates a set of all available config files
+
+.. _cmd_run_bot:
 
 * :code:`$ voxelbotutils run-bot`
 
@@ -28,6 +32,8 @@ There's a few available things from the commandline (CMD) that you can do with V
    * :code:`--max [amount]` - the maximum shard ID for this instance
    * :code:`--shardcount [amount]` - the number of shards that the bot should identify as (not the number of shards for this instance)
    * :code:`--loglevel [level]` - the :code:`logging.Logger` loglevel that you want to start the bot with
+
+.. _cmd_commands:
 
 * :code:`$ voxelbotutils commands`
 

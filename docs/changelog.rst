@@ -12,8 +12,13 @@ New Features
 """""""""""""""""""""""""""""""""""""""
 
 * A new :code:`info` command and :class:`config<BotConfig.bot_info>`
-* :code:`vbu run-shell` as a new command line argument.
-* :code:`vbu commands [add|remove]` as a new command line argument.
+* :code:`vbu run-shell` as a new :ref:`command line argument<cmd_run_shell>`.
+* :code:`vbu commands [add|remove]` as a new :ref:`command line argument<cmd_commands>`.
+
+Changed Features
+"""""""""""""""""""""""""""""""""""""""
+
+* Fixed :func:`ComponentInteractionPayload.update_message` not functioning the same as :func:`discord.Message.edit`.
 
 0.5.9
 --------------------------------------
