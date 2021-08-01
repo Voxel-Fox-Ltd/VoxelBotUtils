@@ -29,6 +29,13 @@ There's a few available things from the commandline (CMD) that you can do with V
    * :code:`--shardcount [amount]` - the number of shards that the bot should identify as (not the number of shards for this instance)
    * :code:`--loglevel [level]` - the :code:`logging.Logger` loglevel that you want to start the bot with
 
+* :code:`$ voxelbotutils commands`
+
+   * :code:`[action]` - the action you want to take for your commands - this can be :code:`add` or :code:`remove`
+   * :code:`[bot_directory]` - the directory that the bot files are located in; defaults to `.`
+   * :code:`[config_file]` - the path to the config file to use; defaults to `config/config.toml`
+   * :code:`--guild [guild_id]` - if you want to perform the action for a specific guild, you can specify its ID here
+
 Getting Started With Bots
 ---------------------------------------
 
