@@ -33,7 +33,10 @@ class ComponentInteractionPayload(InteractionMessageable):
         Sends an update to the original message as an interaction response.
         """
 
-        return await self.send(*args, wait=False, _no_wait_response_type=7, **kwargs)
+        v = await self.message.edit(*args, wait=False, _no_wait_response_type=7, **kwargs)
+        self._sent_ack_response = True
+        self._sent_message_response = True
+        return v
 
     @staticmethod
     def get_component_from_payload(components, search_id):
