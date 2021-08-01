@@ -47,7 +47,8 @@ class BaseComponent(object):
         """
 
         if not isinstance(other, BaseComponent):
-            raise TypeError("Can't compare {} and {}".format(self.__class__, other.__class__))
+            return False
+            # raise TypeError("Can't compare {} and {}".format(self.__class__, other.__class__))
         return self.to_dict() == other.to_dict()
 
     def __hash__(self):

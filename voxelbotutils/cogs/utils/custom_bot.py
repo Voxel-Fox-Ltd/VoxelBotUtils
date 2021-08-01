@@ -18,7 +18,7 @@ from discord.ext import commands
 from discord.abc import Messageable
 import upgradechat
 
-from .custom_context import Context, PrintContext
+from .custom_context import Context
 from .database import DatabaseConnection
 from .redis import RedisConnection
 from .statsd import StatsdConnection
@@ -85,6 +85,15 @@ def get_prefix(bot, message: discord.Message):
 
 class RouteV8(discord.http.Route):
     BASE = 'https://discord.com/api/v8'
+
+
+class _EmptyProxy(object):
+
+    def __bool__(self):
+        return False
+
+
+_empty = _EmptyProxy()
 
 
 class MinimalBot(commands.AutoShardedBot):
@@ -400,15 +409,15 @@ class MinimalBot(commands.AutoShardedBot):
         return content, embed
 
     async def _send_button_message(
-            self, messageable, content: str = None, *, tts: bool = False,
-            embed: discord.Embed = None, file: discord.File = None,
-            files: typing.List[discord.File] = None, delete_after: float = None,
-            nonce: str = None, allowed_mentions: discord.AllowedMentions = None,
-            reference: discord.MessageReference = None, mention_author: bool = None,
-            components: MessageComponents = None,
-            ephemeral: bool = False, embeddify: bool = None,
-            image_url: bool = None, embeddify_file: bool = True,
-            wait: bool = True, embeds: typing.List[discord.Embed] = None,
+            self, messageable, content: str = _empty, *, tts: bool = False,
+            embed: discord.Embed = _empty, file: discord.File = _empty,
+            files: typing.List[discord.File] = _empty, delete_after: float = _empty,
+            nonce: str = _empty, allowed_mentions: discord.AllowedMentions = _empty,
+            reference: discord.MessageReference = _empty, mention_author: bool = _empty,
+            components: MessageComponents = _empty,
+            ephemeral: bool = False, embeddify: bool = _empty,
+            image_url: bool = _empty, embeddify_file: bool = True,
+            wait: bool = True, embeds: typing.List[discord.Embed] = _empty,
             _no_wait_response_type: int = 4):
         """
         An alternative send method so that we can add components to messages.
@@ -418,10 +427,6 @@ class MinimalBot(commands.AutoShardedBot):
 
         # Work out where we want to send to
         channel = await messageable._get_channel()
-        content, embed = self.get_context_message(
-            messageable, content=content, embed=embed, file=file, embeddify=embeddify,
-            image_url=image_url, embeddify_file=embeddify_file,
-        )
         try:
             state = messageable._state
         except AttributeError:
@@ -430,19 +435,23 @@ class MinimalBot(commands.AutoShardedBot):
         await lock.acquire()
 
         # Work out the main content
-        content = str(content) if content is not None else None
-        if embed is not None and embeds is not None:
+        content, embed = self.get_context_message(
+            messageable, content=content, embed=embed, file=file, embeddify=embeddify,
+            image_url=image_url, embeddify_file=embeddify_file,
+        )
+        content = str(content) if content not in [None, _empty] else content
+        if embed not in [None, _empty] and embeds not in [None, _empty]:
             raise discord.InvalidArgument('cannot pass both embed and embeds parameter to send()')
-        if embed is not None:
+        if embed not in [None, _empty]:  # Explicit check because embeds can be falsy
             embeds = [embed]
-            embed = None
+            embed = None  # Not used elsewhere
         if embeds and len(embeds) > 10:
             raise discord.InvalidArgument('embeds parameter must be a list of up to 10 elements')
         if embeds:
             embeds = [e.to_dict() for e in embeds]
 
         # Work out our allowed mentions
-        if allowed_mentions is not None:
+        if allowed_mentions not in [None, _empty]:
             if state.allowed_mentions is not None:
                 allowed_mentions = state.allowed_mentions.merge(allowed_mentions).to_dict()
             else:
@@ -451,17 +460,17 @@ class MinimalBot(commands.AutoShardedBot):
             allowed_mentions = state.allowed_mentions and state.allowed_mentions.to_dict()
 
         # Work out our message references
-        if mention_author is not None:
+        if mention_author not in [None, _empty]:
             allowed_mentions = allowed_mentions or discord.AllowedMentions().to_dict()
             allowed_mentions['replied_user'] = bool(mention_author)
-        if reference is not None:
+        if reference not in [None, _empty]:
             try:
                 reference = reference.to_message_reference_dict()
             except AttributeError:
                 raise discord.InvalidArgument('reference parameter must be Message or MessageReference') from None
 
         # Make sure the files are valid
-        if file is not None and files is not None:
+        if file not in [None, _empty] and files not in [None, _empty]:
             raise discord.InvalidArgument('cannot pass both file and files parameter to send()')
         if file:
             files = [file]
@@ -471,7 +480,7 @@ class MinimalBot(commands.AutoShardedBot):
             raise discord.InvalidArgument('files parameter must be a list of File')
 
         # Fix up the components
-        if components:
+        if components not in [None, _empty]:
             if not isinstance(components, MessageComponents):
                 raise TypeError(f"Components kwarg must be of type {MessageComponents}")
             components = components.to_dict()
@@ -505,27 +514,31 @@ class MinimalBot(commands.AutoShardedBot):
 
         # Build a payload to send
         payload = {}
-        if content:
+        if content is not _empty:
             payload['content'] = content
         if tts:
             payload['tts'] = True
-        if embeds:
+        if embeds is not _empty:
             payload['embeds'] = embeds
-        if nonce:
+        if nonce is not _empty:
             payload['nonce'] = nonce
-        if allowed_mentions:
+        if allowed_mentions is not _empty:
             payload['allowed_mentions'] = allowed_mentions
-        if reference:
+        if reference is not _empty:
             payload['message_reference'] = reference
-        if components:
-            payload['components'] = components
+        if components is not _empty:
+            if components is None or components.components:
+                payload['components'] = list()
+            else:
+                payload['components'] = components
         if ephemeral:
             if not getattr(messageable, "CAN_SEND_EPHEMERAL", False):
                 raise ValueError("Cannot send ephemeral messages with type {0.__class__}".format(messageable))
             payload['flags'] = discord.message.MessageFlags(ephemeral=True).value
+        self.logger.info(payload)
 
         # Send the HTTP requests, including files
-        if files is not None:
+        if files not in [None, _empty]:
             form = []
             form.append({'name': 'payload_json', 'value': discord.utils.to_json(payload)})
             try:
@@ -580,7 +593,7 @@ class MinimalBot(commands.AutoShardedBot):
             ret = ComponentMessage(state=state, channel=channel, data=response_data)
 
         # See if we want to delete the message
-        if delete_after is not None:
+        if delete_after not in [None, _empty]:
             await ret.delete(delay=delete_after)
 
         # Return the created message
@@ -646,9 +659,6 @@ class MinimalBot(commands.AutoShardedBot):
             flags.suppress_embeds = suppress
             fields['flags'] = flags.value
 
-        # See if we should delete the message
-        delete_after = fields.pop('delete_after', None)
-
         # Make the allowed mentions
         try:
             allowed_mentions = fields.pop('allowed_mentions')
@@ -670,6 +680,8 @@ class MinimalBot(commands.AutoShardedBot):
             pass
         else:
             fields['attachments'] = [a.to_dict() for a in attachments]
+
+        delete_after = fields.pop('delete_after', None)
 
         # Edit the message
         if fields:

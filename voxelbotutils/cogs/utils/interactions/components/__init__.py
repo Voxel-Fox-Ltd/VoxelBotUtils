@@ -28,12 +28,12 @@ class ComponentInteractionPayload(InteractionMessageable):
 
         await self.defer(defer_type=6)
 
-    async def update_message(self, *args, **kwargs):
+    async def update_message(self, **kwargs):
         """
         Sends an update to the original message as an interaction response.
         """
 
-        v = await self.message.edit(*args, wait=False, _no_wait_response_type=7, **kwargs)
+        v = await self.send(wait=False, _no_wait_response_type=7, **kwargs)
         self._sent_ack_response = True
         self._sent_message_response = True
         return v
