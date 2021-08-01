@@ -8,9 +8,9 @@ Responding to an Interaction
 
 Interactions need to be responded to, or it shows as "this interaction has failed" in the Discord UI. The Discord API supports a few ways of responding:
 
-* :method:`defer<voxelbotutils.InteractionMessageable.defer>` an interaction, which gives a "processing" message, and respond later.
-* :method:`defer_update<voxelbotutils.InteractionMessageable.defer_update>` an interaction, which doesn't give a processing message, and respond later. This is only available on components.
-* :method:`respond<voxelbotutils.InteractionMessageable.respond>` to an interaction, and receive no :class:`discord.Message` object back.
+* :func:`defer<voxelbotutils.InteractionMessageable.defer>` an interaction, which gives a "processing" message, and respond later.
+* :func:`defer_update<voxelbotutils.InteractionMessageable.defer_update>` an interaction, which doesn't give a processing message, and respond later. This is only available on components.
+* :func:`respond<voxelbotutils.InteractionMessageable.respond>` to an interaction, and receive no :class:`discord.Message` object back.
 
 Slash Commands
 ------------------------------------------
