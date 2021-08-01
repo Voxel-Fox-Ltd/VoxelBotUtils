@@ -73,6 +73,7 @@ class InteractionHandler(vbu.Cog):
                     break
         ctx.command_name = command_name
         ctx.given_values = given_values
+        ctx.is_interaction = True
 
         # Return context
         self.logger.debug("Returning context object")

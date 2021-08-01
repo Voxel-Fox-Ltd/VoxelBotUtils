@@ -257,11 +257,14 @@ def set_event_loop():
     try:
         import uvloop
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+        return
     except ImportError:
         pass
-    if sys.platform == 'win32':
-        loop = asyncio.ProactorEventLoop()
-        asyncio.set_event_loop(loop)
+    if sys.platform.startswith('win32'):
+        if sys.version_info[0] == 3 and sys.version_info[1] >= 8:
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        else:
+            asyncio.set_event_loop(asyncio.ProactorEventLoop())
 
 
 def run_bot(args: argparse.Namespace) -> None:
@@ -620,6 +623,52 @@ def run_shell(args: argparse.Namespace) -> None:
     if bot.config.get('redis', {}).get('enabled', False):
         logger.info("Closing redis pool")
         RedisConnection.pool.close()
+
+    logger.info("Closing asyncio loop")
+    loop.stop()
+    loop.close()
+
+
+def run_modify_commands(args: argparse.Namespace) -> None:
+    """
+    Modifies the commands available for the slash command instance
+
+    Args:
+        args (argparse.Namespace): The arguments namespace that wants to be run.
+    """
+
+    os.chdir(args.bot_directory)
+    set_event_loop()
+
+    # And run file
+    bot = Bot(config_file=args.config_file)
+    loop = bot.loop
+
+    # Set up loggers
+    bot.logger = logger.getChild("bot")
+    set_default_log_levels(args)
+
+    # Load the bot's extensions
+    logger.info('Loading extensions... ')
+    bot.load_all_extensions()
+
+    # Run the bot
+    logger.info("Running bot")
+    loop.run_until_complete(bot.login())
+
+    # Perform our action
+    ctx = PrintContext(bot)
+    if args.action == "add":
+        ctx.command = bot.get_command("addapplicationcommands")
+        coro = ctx.invoke(ctx.command, args.guild)
+    else:
+        ctx.command = bot.get_command("removeapplicationcommands")
+        coro = ctx.invoke(ctx.command, args.guild)
+    loop.run_until_complete(coro)
+
+    # Logout the bot
+    logger.info("Logging out bot")
+    loop.run_until_complete(bot.close())
 
     logger.info("Closing asyncio loop")
     loop.stop()

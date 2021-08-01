@@ -2,9 +2,7 @@ import argparse
 import typing
 import pathlib
 
-import discord
-
-from .runner import run_bot, run_website, run_sharder, run_shell
+from .runner import run_bot, run_website, run_sharder, run_shell, run_modify_commands
 
 
 def create_file(*path, content: str = None):
@@ -45,6 +43,7 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     website_subparser = runner_subparser.add_parser("run-website")
     sharder_subparser = runner_subparser.add_parser("run-sharder")
     shell_subparser = runner_subparser.add_parser("run-shell")
+    application_subparser = runner_subparser.add_parser("commands")
     create_config_subparser = runner_subparser.add_parser("create-config")
     check_config_subparser = runner_subparser.add_parser("check-config")
     runner_subparser.add_parser("version")
@@ -75,6 +74,12 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     # Set up the shell arguments
     shell_subparser.add_argument("bot_directory", nargs="?", default=".", help="The directory containing a config and a cogs folder for the bot to run.")
     shell_subparser.add_argument("config_file", nargs="?", default="config/config.toml", help="The configuration for the bot.")
+
+    # Set up the shell arguments
+    application_subparser.add_argument("action", help="The action yuou want to take on your application commands.", choices=["add", "remove"])
+    application_subparser.add_argument("bot_directory", nargs="?", default=".", help="The directory containing a config and a cogs folder for the bot to run.")
+    application_subparser.add_argument("config_file", nargs="?", default="config/config.toml", help="The configuration for the bot.")
+    application_subparser.add_argument("--guild", nargs="?", default=None, type=int, help="The guild that you want to modify the application commands for.")
 
     # See what we want to make a config file for
     create_config_subparser.add_argument("config_type", nargs=1, help="The type of config file that we want to create.", choices=["bot", "website", "all"])
@@ -190,6 +195,8 @@ def main():
         run_sharder(args)
     elif args.subcommand == "run-shell":
         run_shell(args)
+    elif args.subcommand == "commands":
+        run_modify_commands(args)
 
 
 if __name__ == '__main__':

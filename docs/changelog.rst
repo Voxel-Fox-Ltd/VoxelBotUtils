@@ -13,6 +13,7 @@ New Features
 
 * A new :code:`info` command and :class:`config<BotConfig.bot_info>`
 * :code:`vbu run-shell` as a new command line argument.
+* :code:`vbu commands [add|remove]` as a new command line argument.
 
 0.5.9
 --------------------------------------
