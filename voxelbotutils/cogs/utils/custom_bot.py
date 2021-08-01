@@ -18,7 +18,7 @@ from discord.ext import commands
 from discord.abc import Messageable
 import upgradechat
 
-from .custom_context import Context
+from .custom_context import Context, PrintContext
 from .database import DatabaseConnection
 from .redis import RedisConnection
 from .statsd import StatsdConnection
@@ -905,6 +905,24 @@ class Bot(MinimalBot):
         """
 
         return await self._run_sql_exit_on_error(db, "SELECT * FROM {0} WHERE key=$1".format(table_name), key)
+
+    async def _add_application_commands(self, guild_id: int = None):
+        """
+        A user-runnable version of the `addapplicationcommands` command.
+        """
+
+        ctx = PrintContext(self)
+        ctx.command = self.get_command("addapplicationcommands")
+        await ctx.invoke(ctx.command, guild_id)
+
+    async def _remove_application_commands(self, guild_id: int = None):
+        """
+        A user-runnable version of the `addapplicationcommands` command.
+        """
+
+        ctx = PrintContext(self)
+        ctx.command = self.get_command("removeapplicationcommands")
+        await ctx.invoke(ctx.command, guild_id)
 
     async def fetch_support_guild(self) -> typing.Optional[discord.Guild]:
         """

@@ -6,6 +6,7 @@ import argparse
 from discord.ext import commands
 from discord.ext.commands.core import wrap_callback
 
+from .custom_context import PrintContext
 from .custom_cog import Cog
 from .interactions.application_commands import ApplicationCommandType
 
@@ -165,8 +166,9 @@ class Command(commands.Command):
 
         ctx.command = self
 
-        if not await self.can_run(ctx):
-            raise commands.CheckFailure('The check functions for command {0.qualified_name} failed.'.format(self))
+        if not isinstance(ctx, PrintContext):
+            if not await self.can_run(ctx):
+                raise commands.CheckFailure('The check functions for command {0.qualified_name} failed.'.format(self))
 
         if self._max_concurrency is not None:
             await self._max_concurrency.acquire(ctx)

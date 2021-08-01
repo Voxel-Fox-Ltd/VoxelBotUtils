@@ -12,6 +12,7 @@ from .cogs.utils.database import DatabaseConnection
 from .cogs.utils.redis import RedisConnection
 from .cogs.utils.statsd import StatsdConnection
 from .cogs.utils.custom_bot import Bot
+from .cogs.utils.custom_context import PrintContext
 from .cogs.utils.shard_manager import ShardManagerServer
 
 
@@ -553,6 +554,7 @@ def run_shell(args: argparse.Namespace) -> None:
         'vbu': vbu,
         'discord': discord,
         'commands': commands,
+        'ctx': PrintContext(bot),
     }
 
     # Run the bot
@@ -570,7 +572,7 @@ def run_shell(args: argparse.Namespace) -> None:
 
             # See if they want to save that to a var
             var_name = None
-            if (match := re.search(r"^([a-zA-Z_][a-zA-Z0-9_]*) ?=", line)):
+            if (match := re.search(r"^([a-zA-Z_][a-zA-Z0-9_\.]*) ?=", line)):
                 var_name = match.group(1)
                 line = line.replace(match.group(0), "").lstrip()
             elif (match := re.search(r"^(?:from (?:[a-zA-Z_][a-zA-Z0-9_]*) )?import ([a-zA-Z_][a-zA-Z0-9_]*)", line)):
@@ -585,21 +587,24 @@ def run_shell(args: argparse.Namespace) -> None:
             code = f'async def _func():\n{textwrap.indent(line, "  ")}'
 
             # Run the function
-            exec(code, env)
-            func = env['_func']
             try:
-                ret = loop.run_until_complete(func())
+                exec(code, env)
+                func = env['_func']
+                try:
+                    ret = loop.run_until_complete(func())
 
-            # Catch any errors
+                # Catch any errors
+                except Exception:
+                    print(traceback.format_exc().rstrip())
+
+                # Deal with the result
+                else:
+                    if var_name is not None:
+                        env.update({var_name: ret})
+                    elif ret is not None:
+                        print(repr(ret))
             except Exception:
                 print(traceback.format_exc().rstrip())
-
-            # Deal with the result
-            else:
-                if var_name is not None:
-                    env.update({var_name: ret})
-                elif ret is not None:
-                    print(repr(ret))
 
     except KeyboardInterrupt:
         logger.info("Logging out bot")

@@ -184,6 +184,8 @@ class ApplicationCommand(object):
             "type": self.type.value,
             "options": [i.to_json() for i in self.options],
         }
+        if self.description is None:
+            v.pop("description", None)
         if self.type != ApplicationCommandType.CHAT_INPUT:
             v.pop("options", None)
         return v

@@ -49,7 +49,10 @@ class Context(commands.Context):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.original_author_id = self.author.id
+        try:
+            self.original_author_id = self.author.id
+        except AttributeError:
+            self.original_author_id = None
         self.is_slash_command = False
         self.is_interaction = False
         self._send_interaction_response_task = None
@@ -120,3 +123,37 @@ class Context(commands.Context):
         if x:
             return x
         return AbstractMentionable(id, fallback, fallback)
+
+
+class _NoRequestTyping(object):
+
+    async def __aenter__(self):
+        pass
+
+    async def __aexit__(self, *args):
+        pass
+
+
+class _FakeStateMessage(object):
+
+    def __init__(self, state):
+        self._state = state
+
+
+class PrintContext(Context):
+
+    def __init__(self, bot):
+        super().__init__(
+            message=_FakeStateMessage(bot._connection),
+            bot=bot,
+            prefix=">>> ",
+        )
+
+    async def send(self, content, *args, **kwargs):
+        print(content, args, kwargs)
+
+    async def trigger_typing(self):
+        pass
+
+    def typing(self):
+        return _NoRequestTyping()

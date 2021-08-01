@@ -236,7 +236,6 @@ class ApplicationCommandHandler(vbu.Cog):
 
         kwargs = {
             "name": command.context_command_name or command.name,
-            "description": "ContextCommand",
             "type": command.context_command_type,
         }
         application_command = vbu.ApplicationCommand(**kwargs)
@@ -260,18 +259,21 @@ class ApplicationCommandHandler(vbu.Cog):
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
-    async def addapplicationcommands(self, ctx, guild_only: bool, *commands: str):
+    async def addapplicationcommands(self, ctx, guild_id: int = None, *commands: str):
         """
         Adds all of the bot's interaction commands to the global interaction handler.
         """
 
         # Get the commands we want to add
-        ctx.author = ctx.guild.me
         if commands:
             commands_to_add = [await self.convert_into_application_command(ctx, self.bot.get_command(i)) for i in commands]
         else:
             commands_to_add: typing.List[vbu.ApplicationCommand] = self.convert_all_into_application_command(ctx)
         command_names_to_add = [i.name for i in commands_to_add]
+
+        # See if we want it guild-specific
+        if guild_id:
+            guild = await self.bot.fetch_guild(guild_id)
 
         # Start typing because this takes a while
         async with ctx.typing():
@@ -280,24 +282,24 @@ class ApplicationCommandHandler(vbu.Cog):
             if commands:
 
                 # Get the commands that currently exist
-                if guild_only:
-                    commands_current: typing.List[vbu.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
+                if guild_id:
+                    commands_current: typing.List[vbu.ApplicationCommand] = await self.bot.get_guild_application_commands(guild)
                 else:
                     commands_current: typing.List[vbu.ApplicationCommand] = await self.bot.get_global_application_commands()
 
                 # See which commands we need to delete
                 commands_to_remove = [i for i in commands_current if i.name not in command_names_to_add and i.type == vbu.ApplicationCommandType]
                 for command in commands_to_remove:
-                    if guild_only:
-                        await self.bot.delete_guild_application_command(ctx.guild, command)
+                    if guild_id:
+                        await self.bot.delete_guild_application_command(guild, command)
                     else:
                         await self.bot.delete_global_application_command(command)
                     self.logger.info(f"Removed slash command for {command.name}")
 
             # Add commands
             try:
-                if guild_only:
-                    await self.bot.bulk_create_guild_application_commands(ctx.guild, commands_to_add)
+                if guild_id:
+                    await self.bot.bulk_create_guild_application_commands(guild, commands_to_add)
                 else:
                     await self.bot.bulk_create_global_application_commands(commands_to_add)
             except discord.HTTPException as e:
@@ -313,23 +315,27 @@ class ApplicationCommandHandler(vbu.Cog):
                 return
 
         # And we done
-        await ctx.reply("Done.", embeddify=False)
+        await ctx.send("Added slash commands.", embeddify=False, wait=False)
 
     @vbu.command(aliases=['removeslashcommands', 'removeslashcommand', 'removeapplicationcommand'], add_slash_command=False)
     @commands.guild_only()
     @commands.is_owner()
     @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
-    async def removeapplicationcommands(self, ctx, guild_only: bool, *commands: str):
+    async def removeapplicationcommands(self, ctx, guild_id: int = None, *commands: str):
         """
         Removes the bot's interaction commands from the global interaction handler.
         """
+
+        # See if we want it guild-specific
+        if guild_id:
+            guild = await self.bot.fetch_guild(guild_id)
 
         # Start typing because this takes a while
         async with ctx.typing():
 
             # Get the commands that currently exist
-            if guild_only:
-                commands_current: typing.List[vbu.ApplicationCommand] = await self.bot.get_guild_application_commands(ctx.guild)
+            if guild_id:
+                commands_current: typing.List[vbu.ApplicationCommand] = await self.bot.get_guild_application_commands(guild)
             else:
                 commands_current: typing.List[vbu.ApplicationCommand] = await self.bot.get_global_application_commands()
 
@@ -337,14 +343,14 @@ class ApplicationCommandHandler(vbu.Cog):
             for command in commands_current:
                 if commands and command.name not in commands:
                     continue
-                if guild_only:
-                    await self.bot.delete_guild_application_command(ctx.guild, command)
+                if guild_id:
+                    await self.bot.delete_guild_application_command(guild, command)
                 else:
                     await self.bot.delete_global_application_command(command)
                 self.logger.info(f"Removed slash command for {command.name}")
 
         # And we done
-        await ctx.reply("Done.", embeddify=False, wait=False)
+        await ctx.send("Removed slash commands.", embeddify=False, wait=False)
 
 
 def setup(bot: vbu.Bot):
