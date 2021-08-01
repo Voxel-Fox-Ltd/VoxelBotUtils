@@ -441,9 +441,11 @@ class MinimalBot(commands.AutoShardedBot):
         )
         content = str(content) if content not in [None, _empty] else content
 
-        # Check embed (singular)
+        # Make sure they didn't dupe the fields
         if embed not in [None, _empty] and embeds not in [None, _empty]:
             raise discord.InvalidArgument('cannot pass both embed and embeds parameter to send()')
+
+        # Check embed (singular)
         if embed not in [None, _empty]:  # Explicit check because embeds can be falsy
             embeds = [embed]
             embed = None  # Not used elsewhere but let's reset it here anyway
@@ -533,7 +535,7 @@ class MinimalBot(commands.AutoShardedBot):
         if reference is not _empty:
             payload['message_reference'] = reference
         if components is not _empty:
-            if components is None or components.components:
+            if components is None:
                 payload['components'] = list()
             else:
                 payload['components'] = components
@@ -1392,22 +1394,25 @@ class Bot(MinimalBot):
         return await super().invoke(ctx)
 
     def get_context_message(
-            self, messageable, content: str, *, embed: discord.Embed = None,
-            file: discord.File = None, embeddify: bool = None,
-            image_url: str = None, embeddify_file: bool = True,
+            self, messageable, content: str, *, embed: discord.Embed = _empty,
+            file: discord.File = _empty, embeddify: bool = _empty,
+            image_url: str = _empty, embeddify_file: bool = True,
             **kwargs) -> typing.Tuple[str, discord.Embed]:
         """
         Takes a set of messageable content and outputs a string/Embed tuple that can be pushed
         into a messageable object.
         """
 
-        if embeddify is None and image_url is not None:
+        # Take embeddify from args
+        if embeddify in [None, _empty] and image_url not in [None, _empty]:
             embeddify = True
-        if embeddify is None:
+
+        # Take embeddify from config
+        if embeddify not in [None, _empty]:
             embeddify = self.embeddify
 
         # See if we need to check channel permissions at all
-        if embeddify is False or embed is not None:
+        if not embeddify or embed is not None:
             should_not_embed = True
         else:
             try:
