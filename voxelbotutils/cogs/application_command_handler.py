@@ -120,13 +120,13 @@ class ApplicationCommandHandler(vbu.Cog):
         ]
 
         # Filter out owner-only commands
-        commands = [
-            i for i in commands
-            if not any(
-                o for o in i.checks
-                if not f"{o.__module__}.{o.__qualname__}".startswith("discord.ext.commands.core.is_owner.")
-            )
-        ]
+        # commands = [
+        #     i for i in commands
+        #     if not any(
+        #         o for o in i.checks
+        #         if not f"{o.__module__}.{o.__qualname__}".startswith("discord.ext.commands.core.is_owner.")
+        #     )
+        # ]
 
         # And return
         return commands
@@ -269,7 +269,6 @@ class ApplicationCommandHandler(vbu.Cog):
             commands_to_add = [await self.convert_into_application_command(ctx, self.bot.get_command(i)) for i in commands]
         else:
             commands_to_add: typing.List[vbu.ApplicationCommand] = self.convert_all_into_application_command(ctx)
-        command_names_to_add = [i.name for i in commands_to_add]
 
         # See if we want it guild-specific
         if guild_id:
@@ -277,24 +276,6 @@ class ApplicationCommandHandler(vbu.Cog):
 
         # Start typing because this takes a while
         async with ctx.typing():
-
-            # Remove old slash commands if we're adding all of them as new
-            if commands:
-
-                # Get the commands that currently exist
-                if guild_id:
-                    commands_current: typing.List[vbu.ApplicationCommand] = await self.bot.get_guild_application_commands(guild)
-                else:
-                    commands_current: typing.List[vbu.ApplicationCommand] = await self.bot.get_global_application_commands()
-
-                # See which commands we need to delete
-                commands_to_remove = [i for i in commands_current if i.name not in command_names_to_add and i.type == vbu.ApplicationCommandType]
-                for command in commands_to_remove:
-                    if guild_id:
-                        await self.bot.delete_guild_application_command(guild, command)
-                    else:
-                        await self.bot.delete_global_application_command(command)
-                    self.logger.info(f"Removed slash command for {command.name}")
 
             # Add commands
             try:
@@ -315,7 +296,7 @@ class ApplicationCommandHandler(vbu.Cog):
                 return
 
         # And we done
-        await ctx.send("Added slash commands.", embeddify=False, wait=False)
+        await ctx.send(f"Added slash commands - {commands_to_add!r}", embeddify=False, wait=False)
 
     @vbu.command(aliases=['removeslashcommands', 'removeslashcommand', 'removeapplicationcommand'], add_slash_command=False)
     @commands.guild_only()
