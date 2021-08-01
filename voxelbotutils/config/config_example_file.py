@@ -1,4 +1,4 @@
-config_file = '''
+config_file = r'''
 token = "bot_token"  # The token for the bot.
 owners = []  # List of owner IDs - these people override all permission checks.
 dm_uncaught_errors = false  # Whether or not to DM the owners when unhandled errors are encountered.
@@ -29,19 +29,19 @@ bot_support_role_id = 0  # The ID used to determine whether or not the user is p
 
 # The intents that the bot should start with
 [intents]
-    guilds = true  # Guilds - Used for guild join/remove, channel create/delete/update, Bot.get_channel, Bot.guilds, Bot.get_guild.
+    guilds = true  # Guilds - Used for guild join/remove, channel create/delete/update, Bot.get_channel, Bot.guilds, Bot.get_guild. This is REALLY needed.
     members = false  # Members (privileged intent) - Used for member join/remove/update, Member.roles, Member.nick, User.name, Bot.get_user, Guild.get_member etc.
-    bans = true  # Bans - Used for member ban/unban.
-    emojis = true  # Emojis - Used for guild emojis update, Bot.get_emoji, Guild.emojis.
-    integrations = true  # Integrations - Used for guild integrations update.
-    webhooks = true  # Webhooks - Used for guild webhooks update.
-    invites = true  # Invites - Used for invite create/delete.
-    voice_states = true  # Voice states - Used for voice state update, VoiceChannel.members, Member.voice.
+    bans = false  # Bans - Used for member ban/unban.
+    emojis = false  # Emojis - Used for guild emojis update, Bot.get_emoji, Guild.emojis.
+    integrations = false  # Integrations - Used for guild integrations update.
+    webhooks = false  # Webhooks - Used for guild webhooks update.
+    invites = false  # Invites - Used for invite create/delete.
+    voice_states = false  # Voice states - Used for voice state update, VoiceChannel.members, Member.voice.
     presences = false  # Presences (privileged intent) - Used for member update (for activities and status), Member.status.
-    guild_messages = true  # Guild messages (privileged intent) - Used for message events in guilds.
-    dm_messages = true  # DM messages (privileged intent) - Used for message events in DMs.
-    guild_reactions = true  # Guild reactions - Used for [raw] reaction add/remove/clear events in guilds.
-    dm_reactions = true  # DM reactions - Used for [raw] reaction add/remove/clear events in DMs.
+    guild_messages = false  # Guild messages (privileged intent) - Used for message events in guilds.
+    dm_messages = false  # DM messages (privileged intent) - Used for message events in DMs.
+    guild_reactions = false  # Guild reactions - Used for [raw] reaction add/remove/clear events in guilds.
+    dm_reactions = false  # DM reactions - Used for [raw] reaction add/remove/clear events in DMs.
     guild_typing = false  # Guild typing - Used for the typing event in guilds.
     dm_typing = false  # DM typing - Used for the typing event in DMs.
 

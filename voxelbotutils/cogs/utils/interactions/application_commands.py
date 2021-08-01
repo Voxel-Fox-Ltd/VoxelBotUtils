@@ -158,6 +158,9 @@ class ApplicationCommand(object):
         self.id: int = None
         self.application_id: int = None
 
+    def __repr__(self):
+        return f"ApplcationCommand<name={self.name}, type={self.type.name}>"
+
     def add_option(self, option: ApplicationCommandOption):
         """
         Add an option to this command instance.

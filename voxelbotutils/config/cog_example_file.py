@@ -1,4 +1,4 @@
-cog_example = '''
+cog_example = r'''
 import voxelbotutils as vbu
 
 

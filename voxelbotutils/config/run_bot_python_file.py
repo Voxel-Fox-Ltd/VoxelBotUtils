@@ -1,4 +1,4 @@
-run_bot_python_file = """#!/usr/bin/env python
+run_bot_python_file = r"""#!/usr/bin/env python
 import voxelbotutils.__main__
 parser = voxelbotutils.__main__.get_default_program_arguments()
 args = parser.parse_args(['run-bot', '.'])

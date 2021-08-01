@@ -1,4 +1,4 @@
-website_frontend_content = """
+website_frontend_content = r"""
 from aiohttp.web import HTTPFound, Request, Response, RouteTableDef
 from voxelbotutils import web as webutils
 import aiohttp_session
@@ -9,7 +9,7 @@ from aiohttp_jinja2 import template
 routes = RouteTableDef()
 """
 
-website_backend_content = website_frontend_content.rstrip() + '''
+website_backend_content = website_frontend_content.rstrip() + r'''
 
 
 @routes.get("/login_processor")

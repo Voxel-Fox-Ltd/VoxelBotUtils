@@ -1,4 +1,4 @@
-web_config_file = """
+web_config_file = r"""
 website_base_url = "http://localhost:8080"  # This will be used to dynamically make the redirect url internally
 login_url = "/login"  # The url or route used to prompt the user to login
 routes = [ "frontend", "backend", ]  # These routes `/website/<filename>` will have their `routes` variable imported which will be loaded into the bot's route table
