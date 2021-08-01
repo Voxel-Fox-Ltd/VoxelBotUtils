@@ -535,7 +535,6 @@ class MinimalBot(commands.AutoShardedBot):
             if not getattr(messageable, "CAN_SEND_EPHEMERAL", False):
                 raise ValueError("Cannot send ephemeral messages with type {0.__class__}".format(messageable))
             payload['flags'] = discord.message.MessageFlags(ephemeral=True).value
-        self.logger.info(payload)
 
         # Send the HTTP requests, including files
         if files not in [None, _empty]:
