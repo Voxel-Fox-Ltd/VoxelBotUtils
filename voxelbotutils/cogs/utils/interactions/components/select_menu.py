@@ -82,7 +82,7 @@ class SelectMenu(DisableableComponent):
 
     def __init__(
             self, custom_id: str, options: typing.List[SelectOption], placeholder: str = None,
-            min_values: int = None, max_values: int = None, disabled: bool = False):
+            min_values: int = 1, max_values: int = 1, disabled: bool = False):
         """
         Args:
             custom_id (str): The custom ID for this component.
@@ -96,8 +96,8 @@ class SelectMenu(DisableableComponent):
         self.custom_id = custom_id
         self.options = options
         self.placeholder = placeholder
-        self.min_values = min_values or 1
-        self.max_values = max_values or 1
+        self.min_values = min_values
+        self.max_values = max_values
         self.disabled = disabled
 
     def to_dict(self):
