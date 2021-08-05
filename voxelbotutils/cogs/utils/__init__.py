@@ -19,6 +19,9 @@ from .help_command import HelpCommand  # noqa
 from .models import ComponentMessage, ComponentWebhookMessage  # noqa
 from .time_formatter import TimeFormatter  # noqa
 
+# And now things we want to override our Dpy things with
+from .dpy_checks import *  # noqa
+
 
 def command(*args, **kwargs):
     return _dpy_commands.command(*args, cls=Command, **kwargs)

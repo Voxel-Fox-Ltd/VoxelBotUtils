@@ -7,6 +7,8 @@ Discord.py Changes
 In order to make aspects of this library work, some aspects of the default Discord.py library have been modified. Though they present non-breaking behaviour, it's important to note them here.
 
 * :code:`discord.abc.Messageable`'s send method and :code:`discord.Message`'s edit methods have been altered to have the :attr:`components` and :attr:`ephemeral` arguments. :attr:`components` refers to an instance of :class:`voxelbotutils.MessageComponents`, and :attr:`ephemeral` refers to whether or not the sent message should be ephemeral (which only works with interactions responses - slash commands and components).
+* :code:`discord.ext.commands.bot_has_permissions` has been superseded by :code:`voxelbotutils.bot_has_permissions` as a drop-in replacement because the first is incompatible with slash commands.
+* :code:`discord.ext.commands.bot_has_guild_permissions` has been superseded by :code:`voxelbotutils.bot_has_guild_permissions` as a drop-in replacement because the first is incompatible with slash commands.
 
 Utils
 ---------------------------------------
