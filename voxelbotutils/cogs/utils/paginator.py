@@ -105,7 +105,10 @@ class Paginator(object):
         if self.max_pages == 0:
             await ctx.send("There's no data to be shown.")
             return
-
+        
+        # Set up our initial components as to not get hit with an UnboundLocalError
+        components = self.get_pagination_components()
+        
         # Loop the reaction handler
         last_payload = None
         while True:
@@ -127,39 +130,9 @@ class Paginator(object):
             # Set a default for these things
             payload.setdefault("content", None)
             payload.setdefault("embed", None)
-
+            
             # Work out what components to show
-            components = MessageComponents(
-                ActionRow(
-                    Button(
-                        label="Start",
-                        custom_id="START",
-                        disabled=self.current_page == 0,
-                    ),
-                    Button(
-                        label="Previous",
-                        custom_id="PREVIOUS",
-                        style=ButtonStyle.SECONDARY,
-                        disabled=self.current_page == 0,
-                    ),
-                    Button(
-                        label="Stop",
-                        custom_id="STOP",
-                        style=ButtonStyle.DANGER,
-                    ),
-                    Button(
-                        label="Next",
-                        custom_id="NEXT",
-                        style=ButtonStyle.SECONDARY,
-                        disabled=self.max_pages != "?" and self.current_page >= self.max_pages - 1,
-                    ),
-                    Button(
-                        label="End",
-                        custom_id="END",
-                        disabled=self.max_pages == "?" or self.current_page >= self.max_pages - 1,
-                    ),
-                )
-            )
+            components = self.get_pagination_components()
 
             # See if the content is unchanged
             if payload != last_payload:
@@ -201,6 +174,41 @@ class Paginator(object):
 
         # Let us break from the loop
         ctx.bot.loop.create_task(self._edit_message(ctx, components=components.disable_components()))
+
+    def get_pagination_components(self):
+        components = MessageComponents(
+                    ActionRow(
+                        Button(
+                            label="Start",
+                            custom_id="START",
+                            disabled=self.current_page == 0,
+                        ),
+                        Button(
+                            label="Previous",
+                            custom_id="PREVIOUS",
+                            style=ButtonStyle.SECONDARY,
+                            disabled=self.current_page == 0,
+                        ),
+                        Button(
+                            label="Stop",
+                            custom_id="STOP",
+                            style=ButtonStyle.DANGER,
+                        ),
+                        Button(
+                            label="Next",
+                            custom_id="NEXT",
+                            style=ButtonStyle.SECONDARY,
+                            disabled=self.max_pages != "?" and self.current_page >= self.max_pages - 1,
+                        ),
+                        Button(
+                            label="End",
+                            custom_id="END",
+                            disabled=self.max_pages == "?" or self.current_page >= self.max_pages - 1,
+                        ),
+                    )
+                )
+        
+        return components
 
     async def get_page(self, page_number: int) -> typing.List[typing.Any]:
         """
