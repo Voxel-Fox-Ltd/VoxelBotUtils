@@ -36,6 +36,7 @@ class InteractionMessageable(Messageable):
         component (typing.Optional[BaseComponent]): The component that triggered this interaction.
             It may be none if the interaction that triggered this wasn't a component, such as when
             slash commands are used.
+        values (typing.Optional(typing.List[str])): A list of values that were passed through from the component.
     """
 
     is_interaction = True
