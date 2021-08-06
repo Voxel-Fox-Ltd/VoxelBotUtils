@@ -5,7 +5,7 @@ from .select_menu import SelectMenu, SelectOption  # noqa
 from .models import BaseComponent, DisableableComponent, ComponentHolder # noqa
 from .action_row import ActionRow, MessageComponents, component_types # noqa
 from ..interaction_messageable import InteractionMessageable
-from ...models import ComponentMessage
+from ...models import ComponentWebhookMessage
 
 
 class ComponentInteractionPayload(InteractionMessageable):
@@ -85,7 +85,7 @@ class ComponentInteractionPayload(InteractionMessageable):
         v.channel = channel
         v.guild = guild
         try:
-            v.message = ComponentMessage(channel=channel, data=data['message'], state=state)
+            v.message = ComponentWebhookMessage(channel=channel, data=data['message'], state=state)
         except KeyError:
             v.message = discord.PartialMessage(channel=channel, id=int(data['message']['id']))
         if guild:
