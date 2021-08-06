@@ -115,7 +115,11 @@ class InteractionHandler(vbu.Cog):
                 else:
                     sig = ctx.command.clean_params[name]
                 converter = ctx.command._get_converter(sig)
-                v = await ctx.command.do_conversion(ctx, converter, value, sig)
+                try:
+                    v = await ctx.command.do_conversion(ctx, converter, value, sig)
+                except commands.CommandError as exc:
+                    await ctx.command.dispatch_error(ctx, exc)
+                    return
                 if sig.kind in [inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD]:
                     positional_converted.append(v)
                 else:
