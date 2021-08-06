@@ -33,7 +33,7 @@ class RedisConnection(object):
     logger: logging.Logger = logging.getLogger("vbu.redis")
     lock_manager: aioredlock.Aioredlock = None
 
-    def __init__(self, connection: aioredis.Redis = None):
+    def __init__(self, connection: aioredis.RedisConnection = None):
         """:meta private:"""
 
         self.conn = connection
