@@ -14,11 +14,32 @@ New Features
 * A new :code:`info` command and :class:`config<BotConfig.bot_info>`
 * :code:`vbu run-shell` as a new :ref:`command line argument<cmd_run_shell>`.
 * :code:`vbu commands [add|remove]` as a new :ref:`command line argument<cmd_commands>`.
+* A drop-in replacement check for :func:`discord.ext.commands.bot_has_permissions` and :func:`discord.ext.commands.bot_has_guild_permissions` in the form of :func:`bot_has_permissions` and :func:`bot_has_guild_permissions`. These perform the original checks for message commands, and are ignored for application commands.
 
 Changed Features
 """""""""""""""""""""""""""""""""""""""
 
 * Fixed :func:`ComponentInteractionPayload.update_message` not functioning the same as :func:`discord.Message.edit`.
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""
+
+* Fix error where the paginator says components are undefined.
+* Fix slash command arguments not being stripped.
+* Fix slash command conversion errors not being dispatched.
+
+Removed Features
+"""""""""""""""""""""""""""""""""""""""
+
+* :code:`help_command` and :code:`command_data` have been removed from the config. :code:`help_command` will still be parsed, but is no longer present in the default config file. A help command is not necessary in the world of slash commands, so configuring it is not high on the agenda.
+
+0.5.10
+--------------------------------------
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""
+
+* Fixed menus being created without default permissions.
 
 0.5.9
 --------------------------------------

@@ -95,6 +95,12 @@ ComponentMessage
 .. autoclass:: voxelbotutils.ComponentMessage
 .. autoclass:: voxelbotutils.ComponentWebhookMessage
 
+bot_has_permissions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: voxelbotutils.bot_has_permissions
+.. autofunction:: voxelbotutils.bot_has_guild_permissions
+
 Slash Commands
 ---------------------------------------------------
 
