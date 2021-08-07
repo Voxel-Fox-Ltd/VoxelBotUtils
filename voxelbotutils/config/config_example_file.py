@@ -59,6 +59,8 @@ bot_support_role_id = 0  # The ID used to determine whether or not the user is p
         You're also able to __use__ **standard** *markdown*.
         This will also be `.format`ted with your bot instance, so you can do things like {bot.user.id} and that should come out properly.
     """
+    thumbnail = ""  # A url to an image to be added to the embed
+    image = ""  # A url to an image to be added to the embed
 
     # These are added as link buttons the bottom of the message.
     # Your bot invite (if enabled) will always be added as the first button.
