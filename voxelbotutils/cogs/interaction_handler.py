@@ -67,7 +67,7 @@ class InteractionHandler(vbu.Cog):
         ctx.invoked_with = invoker
         ctx.command = self.bot.get_command(command_name)
         if ctx.command is None and 'target_id' in payload['data']:
-            for i in list(self.bot.commands):
+            for i in self.bot.walk_commands():
                 if getattr(i, "context_command_name", None) == command_name:
                     ctx.command = i
                     break

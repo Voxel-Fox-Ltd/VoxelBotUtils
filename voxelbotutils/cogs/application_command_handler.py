@@ -255,7 +255,10 @@ class ApplicationCommandHandler(vbu.Cog):
         filtered_commands = self.filter_commands(commands)
         for command in filtered_commands:
             application_commands.append(self.convert_into_slash_command(command))
-            if getattr(command, "context_command_type", None):
+        for command in ctx.bot.walk_commands():
+            if not self.filter_commands([command]):
+                continue
+            if getattr(command, "context_command_type", None) is not None:
                 application_commands.append(self.convert_into_context_command(command))
         return application_commands
 
