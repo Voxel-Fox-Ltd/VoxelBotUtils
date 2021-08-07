@@ -319,21 +319,31 @@ class ApplicationCommandHandler(vbu.Cog):
         # Start typing because this takes a while
         async with ctx.typing():
 
-            # Get the commands that currently exist
-            if guild_id:
-                commands_current: typing.List[vbu.ApplicationCommand] = await self.bot.get_guild_application_commands(guild)
-            else:
-                commands_current: typing.List[vbu.ApplicationCommand] = await self.bot.get_global_application_commands()
+            # See if we only want to remove specific commands
+            if commands:
 
-            # See which commands we need to delete
-            for command in commands_current:
-                if commands and command.name not in commands:
-                    continue
+                # Get the commands that currently exist
                 if guild_id:
-                    await self.bot.delete_guild_application_command(guild, command)
+                    commands_current: typing.List[vbu.ApplicationCommand] = await self.bot.get_guild_application_commands(guild)
                 else:
-                    await self.bot.delete_global_application_command(command)
-                self.logger.info(f"Removed slash command for {command.name}")
+                    commands_current: typing.List[vbu.ApplicationCommand] = await self.bot.get_global_application_commands()
+
+                # See which commands we need to delete
+                for command in commands_current:
+                    if commands and command.name not in commands:
+                        continue
+                    if guild_id:
+                        await self.bot.delete_guild_application_command(guild, command)
+                    else:
+                        await self.bot.delete_global_application_command(command)
+                    self.logger.info(f"Removed slash command for {command.name}")
+
+            # We want to remove EVERYTHING
+            else:
+                if guild_id:
+                    await self.bot.bulk_create_guild_application_commands(guild, [])
+                else:
+                    await self.bot.bulk_create_global_application_commands([])
 
         # And we done
         await ctx.send("Removed slash commands.", embeddify=False, wait=False)
