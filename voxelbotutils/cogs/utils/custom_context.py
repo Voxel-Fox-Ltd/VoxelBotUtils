@@ -151,6 +151,13 @@ class PrintContext(Context):
 
     async def send(self, content, *args, **kwargs):
         print(content, args, kwargs)
+        if (file := kwargs.pop("file", None)):
+            if isinstance(file.fp, str):
+                pass
+            else:
+                loc = file.fp.tell()
+                print(file.fp.read())
+                file.fp.seek(loc)
 
     async def trigger_typing(self):
         pass
