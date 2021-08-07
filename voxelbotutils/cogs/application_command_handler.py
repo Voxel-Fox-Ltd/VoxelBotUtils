@@ -40,6 +40,7 @@ class ApplicationCommandHandler(vbu.Cog):
         str: vbu.ApplicationCommandOptionType.STRING,
         int: vbu.ApplicationCommandOptionType.INTEGER,
         float: vbu.ApplicationCommandOptionType.NUMBER,
+        bool: vbu.ApplicationCommandOptionType.BOOLEAN,
         inspect._empty: vbu.ApplicationCommandOptionType.STRING,
     }
 

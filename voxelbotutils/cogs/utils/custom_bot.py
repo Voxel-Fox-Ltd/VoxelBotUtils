@@ -24,6 +24,7 @@ from .redis import RedisConnection
 from .statsd import StatsdConnection
 from .analytics_log_handler import AnalyticsLogHandler, AnalyticsClientSession
 from .interactions.components import MessageComponents
+from .interactions.interaction_messageable import InteractionMessageable
 from .models import ComponentMessage, ComponentWebhookMessage
 from .shard_manager import ShardManagerClient
 from . import interactions
@@ -415,7 +416,7 @@ class MinimalBot(commands.AutoShardedBot):
             nonce: str = _empty, allowed_mentions: discord.AllowedMentions = _empty,
             reference: discord.MessageReference = _empty, mention_author: bool = _empty,
             components: MessageComponents = _empty,
-            ephemeral: bool = False, embeddify: bool = _empty,
+            ephemeral: bool = False, embeddify: bool = None,
             image_url: bool = _empty, embeddify_file: bool = True,
             wait: bool = True, embeds: typing.List[discord.Embed] = _empty,
             _no_wait_response_type: int = 4):
@@ -1395,25 +1396,33 @@ class Bot(MinimalBot):
 
     def get_context_message(
             self, messageable, content: str, *, embed: discord.Embed = _empty,
-            file: discord.File = _empty, embeddify: bool = _empty,
-            image_url: str = _empty, embeddify_file: bool = True,
+            file: discord.File = _empty, embeddify: bool = None,
+            image_url: str = None, embeddify_file: bool = True,
             **kwargs) -> typing.Tuple[str, discord.Embed]:
         """
         Takes a set of messageable content and outputs a string/Embed tuple that can be pushed
         into a messageable object.
         """
 
-        # Take embeddify from args
-        if embeddify in [None, _empty] and image_url not in [None, _empty]:
+        # We got an embed? Let's go
+        if embed:
+            return content, embed
+
+        # If an image url is set, auto-set embeddify
+        if embeddify is None and image_url not in [None, _empty]:
             embeddify = True
 
-        # Take embeddify from config
-        if embeddify in [None, _empty]:
+        # If embeddify isn't set, grab from the config
+        elif embeddify is None:
             embeddify = self.embeddify
 
-        # See if we need to check channel permissions at all
-        if not embeddify or embed is not None:
-            should_not_embed = True
+        # See if we're done now
+        if embeddify is False:
+            return content, embed
+
+        # Check the channel permissions
+        if isinstance(messageable, InteractionMessageable):
+            missing_embed_permission = False
         else:
             try:
                 try:
@@ -1424,14 +1433,16 @@ class Bot(MinimalBot):
                 missing_embed_permission = not discord.Permissions(embed_links=True).is_subset(channel_permissions)
             except AttributeError:
                 missing_embed_permission = False
-            should_not_embed = any([
-                missing_embed_permission,
-                embeddify is False,
-                embed is not None,
-            ])
 
-        # Can't embed? Just send it normally
-        if should_not_embed:
+        # Collate our content and see if we're ABLE to send embeds
+        should_not_embed = any((
+            missing_embed_permission,
+            embeddify is False,
+            embed not in [None, _empty],
+        ))
+
+        # Can't embed or have no content? Just send it normally
+        if should_not_embed or content in [None, _empty]:
             return content, embed
 
         # No current embed, and we _want_ to embed it? Alright!
@@ -1442,7 +1453,7 @@ class Bot(MinimalBot):
         self.set_footer_from_config(embed)
 
         # Set image
-        if image_url is not None:
+        if image_url not in [None, _empty]:
             embed.set_image(url=image_url)
         if file and file.filename and embeddify_file:
             file_is_image = any([

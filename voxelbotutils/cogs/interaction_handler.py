@@ -33,7 +33,11 @@ class InteractionHandler(vbu.Cog):
         # Put our options in a dict
         given_values = {}
         for i in options:
-            given_values[i['name']] = i['value'].strip()
+            value = str(i['value'])
+            # if isinstance(value, str):
+            given_values[i['name']] = value.strip()
+            # else:
+            #     given_values[i['name']] = value
 
         # If we have a target_id, then the interaction is a context menu
         if 'target_id' in payload['data']:
