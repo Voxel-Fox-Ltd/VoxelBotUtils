@@ -5,7 +5,7 @@ from .select_menu import SelectMenu, SelectOption  # noqa
 from .models import BaseComponent, DisableableComponent, ComponentHolder # noqa
 from .action_row import ActionRow, MessageComponents, component_types # noqa
 from ..interaction_messageable import InteractionMessageable
-from ...models import ComponentWebhookMessage
+from ...models import ComponentMessage, ComponentWebhookMessage
 
 
 class ComponentInteractionPayload(InteractionMessageable):
