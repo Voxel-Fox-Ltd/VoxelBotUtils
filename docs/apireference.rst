@@ -101,6 +101,11 @@ bot_has_permissions
 .. autofunction:: voxelbotutils.bot_has_permissions
 .. autofunction:: voxelbotutils.bot_has_guild_permissions
 
+defer_response
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: voxelbotutils.defer_response
+
 Slash Commands
 ---------------------------------------------------
 

@@ -2,6 +2,7 @@ import asyncio
 import collections
 
 import discord
+from discord.ext import commands
 from discord.abc import Messageable, Typing
 
 
@@ -128,3 +129,19 @@ class InteractionMessageable(Messageable):
 
     def history(self, *args, **kwargs):
         raise Exception("This action is not available for this messagable type.")
+
+
+def defer_response(ephemeral: bool = False):
+    """
+    A "check" that defers the response when called. As checks are run before converters, this will defer
+    the response immediately. Useful if your converters run database calls.
+
+    Args:
+        ephemeral (bool, optional): Whether or not the defer response should be ephemeral.
+    """
+
+    async def predicate(ctx):
+        if isinstance(ctx, InteractionMessageable):
+            await ctx.defer(ephemeral=ephemeral)
+        return True
+    return commands.check(predicate)
