@@ -2,6 +2,7 @@ import typing
 import io
 import json
 import inspect
+import textwrap
 
 import discord
 from discord.ext import commands
@@ -296,7 +297,8 @@ class ApplicationCommandHandler(vbu.Cog):
                 return
 
         # And we done
-        await ctx.send(f"Added slash commands - {commands_to_add!r}", embeddify=False, wait=False)
+        output_strings = textwrap.indent("\n".join([repr(i) for i in commands_to_add]), "    ")
+        await ctx.send(f"Added slash commands:\n{output_strings}\n", embeddify=False, wait=False)
 
     @vbu.command(aliases=['removeslashcommands', 'removeslashcommand', 'removeapplicationcommand'], add_slash_command=False)
     @commands.guild_only()
