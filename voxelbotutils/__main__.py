@@ -1,6 +1,7 @@
 import argparse
 import typing
 import pathlib
+import textwrap
 
 from .runner import run_bot, run_website, run_sharder, run_shell, run_modify_commands
 
@@ -110,7 +111,8 @@ def check_config_value(
 
     # See if the item was a str when it should be something else
     if not isinstance(base_config_value, type(compare_config_value)):
-        print(f"Wrong value {base_config_key} type was provided in your config file - should be type {type(base_config_value).__name__}.")
+        default_value = compare_config_value if not isinstance(compare_config_value, str) else textwrap.dedent(compare_config_value).replace("\n", "\\n")
+        print(f"Wrong value {base_config_key} type was provided in your config file - should be type {type(base_config_value).__name__} (default `{default_value}`).")
         if isinstance(base_config_value, dict):
             for i, o in base_config_value.items():
                 check_config_value(base_config_key + [i], o, None)
