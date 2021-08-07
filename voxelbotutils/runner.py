@@ -257,7 +257,6 @@ def set_event_loop():
     try:
         import uvloop
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-        return
     except ImportError:
         pass
     if sys.platform.startswith('win32'):
@@ -265,6 +264,12 @@ def set_event_loop():
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
         else:
             asyncio.set_event_loop(asyncio.ProactorEventLoop())
+
+    def exception_handler(context):
+        if context.get("exception"):
+            logger.error(context.get("message", ""), exc_info=context["exception"])
+        asyncio.get_event_loop().default_exception_handler(context)
+    asyncio.get_event_loop().set_exception_handler(exception_handler)
 
 
 def run_bot(args: argparse.Namespace) -> None:
