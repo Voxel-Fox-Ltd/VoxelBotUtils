@@ -8,12 +8,15 @@ from .runner import run_bot, run_website, run_sharder, run_shell, run_modify_com
 def create_file(*path, content: str = None):
     joined_folder_path = pathlib.Path("./").joinpath(*path[:-1])
     joined_file_path = pathlib.Path("./").joinpath(*path)
-    joined_folder_path.mkdir(parents=True, exist_ok=True)
-    try:
-        with open(joined_file_path, "x") as a:
-            a.write(content)
-    except FileExistsError:
-        print(f"File {joined_file_path} was not created as one already exists.")
+    if content:
+        joined_folder_path.mkdir(parents=True, exist_ok=True)
+        try:
+            with open(joined_file_path, "x") as a:
+                a.write(content)
+        except FileExistsError:
+            print(f"File {joined_file_path} was not created as one already exists.")
+    else:
+        joined_file_path.mkdir(parents=True, exist_ok=True)
 
 
 # Parse arguments
@@ -137,25 +140,24 @@ def main():
             create_file("config", "website.toml", content=config.web_config_file.lstrip())
             create_file("config", "website.example.toml", content=config.web_config_file.lstrip())
             create_file("config", "database.pgsql", content=config.database_file.lstrip())
-            # create_file("run_website.bat", content="py -m voxelbotutils run-website .\n")
             create_file("_run_website.sh", content="vbu run-website .\n")
-            create_file(".gitignore", content="__pycache__/\nconfig/config.toml\nconfig/website.toml\n")
+            create_file(".gitignore", content="__pycache__/\n.venv/\nconfig/config.toml\nconfig/website.toml\n")
             create_file("requirements.txt", content="voxelbotutils[web]\n")
             create_file("website", "frontend.py", content=config.website_frontend_content.lstrip())
             create_file("website", "backend.py", content=config.website_backend_content.lstrip())
             create_file("website", "static", ".gitkeep", content="\n")
             create_file("website", "templates", ".gitkeep", content="\n")
+            create_file(".venv")
             print("Created website config file.")
         if config_type in ["bot", "all"]:
             create_file("config", "config.toml", content=config.config_file.lstrip())
             create_file("config", "config.example.toml", content=config.config_file.lstrip())
             create_file("config", "database.pgsql", content=config.database_file.lstrip())
             create_file("cogs", "ping_command.py", content=config.cog_example.lstrip())
-            # create_file("run_bot.bat", content="py -m voxelbotutils run-bot .\n")
             create_file("_run_bot.sh", content="vbu run-bot .\n")
-            # create_file("run_bot.py", content=config.run_bot_python_file.lstrip())
             create_file(".gitignore", content="__pycache__/\nconfig/config.toml\nconfig/website.toml\n")
             create_file("requirements.txt", content="voxelbotutils\n")
+            create_file(".venv")
             print("Created bot config file.")
         exit(1)
 
@@ -164,11 +166,12 @@ def main():
         config_type = args.config_type[0]
         from . import config
         import toml
-        if config_type == "web":
+        if config_type == "website":
             base_config_file_text = config.web_config_file.lstrip()
         elif config_type == "bot":
             base_config_file_text = config.config_file.lstrip()
-        # todo: what happens if the option given isn't web or bot?
+        else:
+            exit(1)
         base_config_file = toml.loads(base_config_file_text)
         try:
             with open(args.config_file) as a:
@@ -178,6 +181,7 @@ def main():
             exit(0)
         for key, value in base_config_file.items():
             check_config_value([key], value, compare_config_file.get(key))
+        print("Completed config check.")
         exit(1)
 
     # If we just want the version
