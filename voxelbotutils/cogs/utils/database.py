@@ -39,6 +39,7 @@ class DatabaseConnection(object):
     config: dict = None
     pool: asyncpg.pool.Pool = None
     logger: logging.Logger = logging.getLogger("vbu.database")
+    enabled: bool = False
     __slots__ = ('conn', 'transaction', 'is_active',)
 
     def __init__(self, connection: asyncpg.Connection = None, transaction: asyncpg.transaction.Transaction = None):
@@ -64,6 +65,7 @@ class DatabaseConnection(object):
             cls.logger.critical("Database create pool method is being run when the database is disabled")
             exit(1)
         cls.pool = await asyncpg.create_pool(**modified_config)
+        self.enabled = True
 
     @classmethod
     async def get_connection(cls) -> 'DatabaseConnection':
