@@ -1408,7 +1408,7 @@ class Bot(MinimalBot):
             embeddify = True
 
         # Take embeddify from config
-        if embeddify not in [None, _empty]:
+        if embeddify in [None, _empty]:
             embeddify = self.embeddify
 
         # See if we need to check channel permissions at all
