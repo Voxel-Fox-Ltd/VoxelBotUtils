@@ -24,7 +24,7 @@ def is_config_set(*config_keys):
         try:
             for key in config_keys:
                 working_config = working_config[key]
-        except KeyError:
+        except (KeyError, TypeError):
             raise ConfigNotSet()
         if not working_config:
             ctx.bot.logger.warning(f"No config is set for {'.'.join(config_keys)}")
