@@ -85,7 +85,8 @@ class ComponentInteractionPayload(InteractionMessageable):
         v.channel = channel
         v.guild = guild
         try:
-            v.message = ComponentWebhookMessage(channel=channel, data=data['message'], state=state)
+            # v.message = ComponentWebhookMessage(channel=channel, data=data['message'], state=state)
+            v.message = ComponentMessage(channel=channel, data=data['message'], state=state)
         except KeyError:
             v.message = discord.PartialMessage(channel=channel, id=int(data['message']['id']))
         if guild:

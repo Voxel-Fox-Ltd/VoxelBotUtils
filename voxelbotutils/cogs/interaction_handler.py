@@ -143,7 +143,7 @@ class InteractionHandler(vbu.Cog):
         elif payload['d']['type'] == 3:
             clicked_button_payload = vbu.interactions.components.ComponentInteractionPayload.from_payload(
                 payload['d'], self.bot._connection,
-            )
+            )  # TODO should this be a webhook connection state?
             # clicked_button_payload._send_interaction_response_callback()
             self.bot.dispatch("button_click", clicked_button_payload)  # DEPRECATED PLEASE DO NOT USE
             self.bot.dispatch("component_interaction", clicked_button_payload)
