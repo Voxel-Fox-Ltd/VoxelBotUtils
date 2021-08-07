@@ -265,11 +265,24 @@ def set_event_loop():
         else:
             asyncio.set_event_loop(asyncio.ProactorEventLoop())
 
-    def exception_handler(context):
-        if context.get("exception"):
-            logger.error(context.get("message", ""), exc_info=context["exception"])
-        asyncio.get_event_loop().default_exception_handler(context)
-    asyncio.get_event_loop().set_exception_handler(exception_handler)
+    def callback(future):
+        try:
+            e = future.exception()
+            if e is None:
+                return
+            raise e
+        except (asyncio.CancelledError, asyncio.InvalidStateError):
+            return
+        except Exception as e:
+            logger.error("Error in task was hit", exc_info=e)
+
+    def task_factory(loop, coro):
+        t = asyncio.Task(coro, loop=loop)
+        t.add_done_callback(callback)
+        return t
+
+    loop = asyncio.get_event_loop()
+    loop.set_task_factory(task_factory)
 
 
 def run_bot(args: argparse.Namespace) -> None:
