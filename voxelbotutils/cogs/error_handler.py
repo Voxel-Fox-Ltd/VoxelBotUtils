@@ -203,6 +203,7 @@ class ErrorHandler(vbu.Cog):
                 text,
                 allowed_mentions=discord.AllowedMentions.none(),
                 ephemeral=ephemeral,
+                wait=False,
             )
         except discord.Forbidden:
             try:
@@ -210,6 +211,7 @@ class ErrorHandler(vbu.Cog):
                     author_text or text,
                     allowed_mentions=discord.AllowedMentions.none(),
                     ephemeral=ephemeral,
+                    wait=False,
                 )
             except discord.Forbidden:
                 pass
