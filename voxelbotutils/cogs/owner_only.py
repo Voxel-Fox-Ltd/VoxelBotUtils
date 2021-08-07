@@ -66,7 +66,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
     @vbu.command()
     @commands.is_owner()
     @vbu.checks.is_config_set("redis", "enabled")
-    @commands.bot_has_permissions(send_messages=True, attach_files=True, add_reactions=True)
+    @vbu.bot_has_permissions(send_messages=True, attach_files=True, add_reactions=True)
     async def redis(self, ctx: vbu.Context, *, content: str):
         """
         Pings a command to be run over redis.
@@ -85,7 +85,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
     @vbu.command(aliases=['src'])
     @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True, attach_files=True, add_reactions=True)
+    @vbu.bot_has_permissions(send_messages=True, attach_files=True, add_reactions=True)
     async def source(self, ctx: vbu.Context, *, command_name: str):
         """
         Shows you the source for a given command.
@@ -119,7 +119,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
     @vbu.command(aliases=['pm', 'dm', 'send'])
     @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True, add_reactions=True)
+    @vbu.bot_has_permissions(send_messages=True, add_reactions=True)
     async def message(self, ctx: vbu.Context, snowflake: int, *, content: str = None):
         """
         DMs a user the given content.
@@ -201,7 +201,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
     @vbu.command(aliases=['evall', 'eval'])
     @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True)
+    @vbu.bot_has_permissions(send_messages=True)
     async def ev(self, ctx: vbu.Context, *, content: str = None):
         """
         Evaluates some Python code.
@@ -302,7 +302,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
     @vbu.command(aliases=['rld', 'rl'])
     @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True)
+    @vbu.bot_has_permissions(send_messages=True)
     async def reload(self, ctx: vbu.Context, *cog_name: str):
         """
         Unloads and reloads a cog from the bot.
@@ -392,7 +392,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
     @vbu.command()
     @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True)
+    @vbu.bot_has_permissions(send_messages=True)
     async def runsql(self, ctx: vbu.Context, *, sql: str):
         """
         Runs a line of SQL into the database.
@@ -443,7 +443,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
     @vbu.group()
     @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True)
+    @vbu.bot_has_permissions(send_messages=True)
     async def botuser(self, ctx: vbu.Context):
         """
         A parent command for the bot user configuration section.
@@ -453,7 +453,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
     @botuser.command(name='name', aliases=['username'])
     @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True)
+    @vbu.bot_has_permissions(send_messages=True)
     async def botuser_name(self, ctx: vbu.Context, *, username: str):
         """
         Lets you set the username for the bot account.
@@ -466,7 +466,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
     @botuser.command(name='avatar', aliases=['photo', 'image', 'picture'])
     @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True)
+    @vbu.bot_has_permissions(send_messages=True)
     async def botuser_avatar(self, ctx: vbu.Context, *, image_url: typing.Optional[str]):
         """
         Lets you set the profile picture of the bot.
@@ -485,7 +485,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
     @botuser.command(name='activity', aliases=['game'])
     @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True)
+    @vbu.bot_has_permissions(send_messages=True)
     async def botuser_activity(self, ctx: vbu.Context, activity_type: str, *, name: typing.Optional[str]):
         """
         Changes the activity of the bot.
@@ -499,7 +499,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
     @botuser.command(name='status')
     @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True)
+    @vbu.bot_has_permissions(send_messages=True)
     async def botuser_status(self, ctx: vbu.Context, status: str):
         """
         Changes the online status of the bot.
@@ -510,7 +510,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
     @vbu.command(aliases=['sudo'])
     @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True)
+    @vbu.bot_has_permissions(send_messages=True)
     async def su(self, ctx, who: discord.User, *, command: str):
         """
         Run a command as another user.
@@ -535,7 +535,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
     @vbu.command(aliases=['sh'])
     @commands.is_owner()
-    @commands.bot_has_permissions(send_messages=True)
+    @vbu.bot_has_permissions(send_messages=True)
     async def shell(self, ctx: vbu.Context, *, command: str):
         """
         Run a shell command.
@@ -585,7 +585,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
         pass
 
     @export.command(name="commands")
-    @commands.bot_has_permissions(send_messages=True, attach_files=True)
+    @vbu.bot_has_permissions(send_messages=True, attach_files=True)
     @commands.is_owner()
     async def export_commands(self, ctx: vbu.Context):
         """
@@ -620,7 +620,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
         await ctx.send(file=discord.File(io.StringIO('\n'.join(lines)), filename="commands.md"))
 
     @export.command(name="guild")
-    @commands.bot_has_permissions(send_messages=True, attach_files=True)
+    @vbu.bot_has_permissions(send_messages=True, attach_files=True)
     @vbu.checks.is_config_set('database', 'enabled')
     @commands.is_owner()
     async def export_guild(self, ctx: vbu.Context, guild_id: typing.Optional[int]):
@@ -708,7 +708,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
         await ctx.send(file=file)
 
     @export.command(name="table")
-    @commands.bot_has_permissions(send_messages=True, attach_files=True)
+    @vbu.bot_has_permissions(send_messages=True, attach_files=True)
     @vbu.checks.is_config_set('database', 'enabled')
     @commands.is_owner()
     async def export_table(self, ctx: vbu.Context, table_name: str):
