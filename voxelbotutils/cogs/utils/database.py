@@ -65,7 +65,7 @@ class DatabaseConnection(object):
             cls.logger.critical("Database create pool method is being run when the database is disabled")
             exit(1)
         cls.pool = await asyncpg.create_pool(**modified_config)
-        self.enabled = True
+        cls.enabled = True
 
     @classmethod
     async def get_connection(cls) -> 'DatabaseConnection':
