@@ -159,61 +159,64 @@ class ApplicationCommandHandler(vbu.Cog):
         else:
             application_command = vbu.ApplicationCommand(**kwargs)
 
-        # Go through its args
-        for index, arg in enumerate(command.clean_params.values()):
-            arg_type = None
-            safe_arg_type = None
-            required = True
-            if self.is_typing_optional(arg.annotation):
-                arg_type = self.get_non_optional_type(arg.annotation)
-                required = False
-            elif self.is_typing_union(arg.annotation):
-                arg_type = self.get_union_type(arg.annotation)
-            else:
-                arg_type = arg.annotation
+        # Don't try and convert groups
+        if not isinstance(command, vbu.Group):
 
-            try:
+            # Go through its args
+            for index, arg in enumerate(command.clean_params.values()):
+                arg_type = None
+                safe_arg_type = None
+                required = True
+                if self.is_typing_optional(arg.annotation):
+                    arg_type = self.get_non_optional_type(arg.annotation)
+                    required = False
+                elif self.is_typing_union(arg.annotation):
+                    arg_type = self.get_union_type(arg.annotation)
+                else:
+                    arg_type = arg.annotation
 
-                # See if it's one of our common types
-                if arg_type in self.COMMAND_TYPE_MAPPER:
-                    safe_arg_type = self.COMMAND_TYPE_MAPPER[arg_type]
+                try:
 
-                # It isn't - let's see if it's a subclass
+                    # See if it's one of our common types
+                    if arg_type in self.COMMAND_TYPE_MAPPER:
+                        safe_arg_type = self.COMMAND_TYPE_MAPPER[arg_type]
+
+                    # It isn't - let's see if it's a subclass
+                    if safe_arg_type is None:
+                        for i, o in self.COMMAND_TYPE_MAPPER.items():
+                            if i in arg_type.mro()[1:]:
+                                safe_arg_type = o
+                                break
+
+                    # It isn't - let's try and get an attr from the class
+                    if safe_arg_type is None:
+                        safe_arg_type = getattr(arg_type, "SLASH_COMMAND_ARG_TYPE", None)
+
+                except Exception:
+                    raise Exception(f"Hit an error converting `{command.qualified_name}` command.")
+
+                # Make sure the type exists
                 if safe_arg_type is None:
-                    for i, o in self.COMMAND_TYPE_MAPPER.items():
-                        if i in arg_type.mro()[1:]:
-                            safe_arg_type = o
-                            break
+                    raise Exception(f"Couldn't convert {arg_type} into a valid slash command argument type for command `{command.qualified_name}`.")
 
-                # It isn't - let's try and get an attr from the class
-                if safe_arg_type is None:
-                    safe_arg_type = getattr(arg_type, "SLASH_COMMAND_ARG_TYPE", None)
+                # Say if it's optional
+                if arg.default is not inspect._empty or self.is_typing_optional(arg.annotation):
+                    required = False
 
-            except Exception:
-                raise Exception(f"Hit an error converting `{command.qualified_name}` command.")
+                # Get the description
+                description = f"The {arg.name} that you want to use for the {command.qualified_name} command."
+                try:
+                    description = command.argument_descriptions[index] or description
+                except (AttributeError, IndexError):
+                    pass
 
-            # Make sure the type exists
-            if safe_arg_type is None:
-                raise Exception(f"Couldn't convert {arg_type} into a valid slash command argument type for command `{command.qualified_name}`.")
-
-            # Say if it's optional
-            if arg.default is not inspect._empty or self.is_typing_optional(arg.annotation):
-                required = False
-
-            # Get the description
-            description = f"The {arg.name} that you want to use for the {command.qualified_name} command."
-            try:
-                description = command.argument_descriptions[index] or description
-            except (AttributeError, IndexError):
-                pass
-
-            # Add option
-            application_command.add_option(vbu.ApplicationCommandOption(
-                name=arg.name,
-                description=description,
-                type=safe_arg_type,
-                required=required,
-            ))
+                # Add option
+                application_command.add_option(vbu.ApplicationCommandOption(
+                    name=arg.name,
+                    description=description,
+                    type=safe_arg_type,
+                    required=required,
+                ))
 
         # Go through its subcommands
         if isinstance(command, vbu.Group):
