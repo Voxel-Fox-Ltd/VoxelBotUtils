@@ -13,25 +13,25 @@ except Exception:
 # Here are the requirements
 requirements = [
     "discord.py>=1.7,<2.0",
-    "toml",
-    "asyncpg",
+    "toml>=0.10.2,<0.11",
+    "asyncpg>=0.21.0,<0.22",
     "aioredis>=1.3,<2.0",
-    "aioredlock",
-    "aiodogstatsd",
-    "aiohttp",
-    "upgradechatpy>=1.0.3"
+    "aioredlock>=0.7.0,<0.8",
+    "aiodogstatsd>=0.14.0,<0.15",
+    "aiohttp",  # no versioning here because I trust u
+    "upgradechatpy>=1.0.3<2.0"
 ]
 
 
 # Here are some MORE requirements
 extras = {
     "web": [
-        "cryptography",
-        "aiohttp_jinja2",
-        "aiohttp_session",
-        "jinja2",
-        "markdown",
-        "htmlmin",
+        "cryptography>=3.3.1,<4.0",
+        "aiohttp_jinja2>=1.4.2,<2.0",
+        "aiohttp_session>=2.9.0,<3.0",
+        "jinja2>=2.11.2,<3.0",
+        "markdown>=3.3.3,<4.0",
+        "htmlmin>=0.1.12,<0.2",
     ],
     "docs": [
         "sphinx",
