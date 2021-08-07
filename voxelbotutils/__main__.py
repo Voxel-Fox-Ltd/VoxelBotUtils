@@ -101,9 +101,11 @@ def check_config_value(
     Recursively checks a config item to see if it's valid against a base config item
     """
 
+    default_value = compare_config_value if not isinstance(compare_config_value, str) else textwrap.dedent(compare_config_value).replace("\n", "\\n")
+
     # See if the item was omitted
     if isinstance(compare_config_value, type(None)):
-        print(f"No value {base_config_key} was provided in your config file - should be type {type(base_config_value).__name__}.")
+        print(f"No value {base_config_key} was provided in your config file - should be type {type(base_config_value).__name__} (default `{default_value}`).")
         if isinstance(base_config_value, dict):
             for i, o in base_config_value.items():
                 check_config_value(base_config_key + [i], o, None)
@@ -111,7 +113,6 @@ def check_config_value(
 
     # See if the item was a str when it should be something else
     if not isinstance(base_config_value, type(compare_config_value)):
-        default_value = compare_config_value if not isinstance(compare_config_value, str) else textwrap.dedent(compare_config_value).replace("\n", "\\n")
         print(f"Wrong value {base_config_key} type was provided in your config file - should be type {type(base_config_value).__name__} (default `{default_value}`).")
         if isinstance(base_config_value, dict):
             for i, o in base_config_value.items():
