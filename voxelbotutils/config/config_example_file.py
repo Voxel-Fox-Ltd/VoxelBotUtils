@@ -1,7 +1,7 @@
 config_file = r'''
 token = "bot_token"  # The token for the bot.
 owners = []  # List of owner IDs - these people override all permission checks.
-dm_uncaught_errors = false  # Whether or not to DM the owners when unhandled errors are encountered.
+dm_uncaught_errors = true  # Whether or not to DM the owners when unhandled errors are encountered.
 user_agent = ""  # A custom string to populate Bot.user_agent with.
 guild_settings_prefix_column = "prefix"  # Used if multiple bots connect to the same database and need to seperate their prefixes.
 ephemeral_error_messages = true  # Whether or not error messages [from slash commands] should be ephemeral.
