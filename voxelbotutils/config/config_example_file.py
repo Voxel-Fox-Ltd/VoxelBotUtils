@@ -25,7 +25,7 @@ bot_support_role_id = 0  # The ID used to determine whether or not the user is p
         shard_disconnect = false
         shard_ready = false
         bot_ready = false
-        unhandled_error = false
+        unhandled_error = true
 
 # The intents that the bot should start with
 [intents]
