@@ -1,47 +1,20 @@
 VoxelBotUtils
 =========================================
 
-VoxelBotUtils is a library built as an extension for Discord.py to speed up Discord bot development. It includes a whole slew of features that are commonly used in a lot of bots so you don't need to keep writing them every time. Listed below are the features you get automatically (based on your config file, most of the time) but also included in the library are a bunch of utility classes and functions for if you still want to run your own bot class rather than having VoxelBotUtils do that for you automatically via CMD.
-
-* Bot Stats cog
-
-   * github command - links to a repo as set in your config
-   * invite command - gives an invite link for your bot
-   * vote command - gives a vote link to your bot on Top.gg
-   * stats command - shows some statistics for your bot
+VoxelBotUtils (VBU) is an extension for Discord.py to speed up Discord bot development. It includes a whole slew of features that are commonly used in a lot of bots so you don't need to keep writing them every time. Many features are available to you by default:
 
 * Logging using Python's :code:`logging.Logger` classes
 * Webhook sends on different events
 * Built-in error handling for all of Discord.py's errors
+* Built-in PostgreSQL database connector
 * Bot stats posting via StatsD and DataDog
 * A help command that doesn't look like trash
-* :doc:`Interactions handling<interactions-howto>`
-
-   * Slash commands
-   * Buttons
-
-* Misc Commands cog
-
-   * server - give a link to your server
-   * donate - give a link to your donate page
-   * website - give a link to your website
-   * info - shows information for a bot
-   * echo - the classic echo command
-
-* Owner Only cog
-
-   * redis - run a command on all instances of your bot via redis
-   * source - show the source for a command
-   * message - send a message to a user or channel
-   * ev - run arbitrary Python code
-   * reload - reload a cog
-   * runsql - run arbitrary Postgres code
-   * botuser - change aspects of your bot user
-   * su - run a command as another user
-   * shell - run arbitrary shell code
-
+* `Interaction handling<interactions-howto>`, such as slash commands and buttons.
+* Owner-only commands
 * Presence auto-updating based on Twitch streamers
 * Inbuilt prefix command
+* Website utilities
+* And more
 
 .. toctree::
    :maxdepth: 4
@@ -53,7 +26,7 @@ Documentation Contents
 .. toctree::
    :maxdepth: 1
 
-   gettingstarted
+   usage
    apireference
    config-files-directory
    changelog

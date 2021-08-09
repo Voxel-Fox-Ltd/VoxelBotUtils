@@ -1,73 +1,37 @@
+![GitHub stars badge](https://img.shields.io/github/stars/Voxel-Fox-Ltd/VoxelBotUtils)
+![PyPi version info](https://img.shields.io/pypi/v/voxelbotutils.svg)
+![PyPi Python versions](https://img.shields.io/pypi/pyversions/voxelbotutils.svg)
+![Twitter badge](https://img.shields.io/twitter/url?url=https%3A%2F%2Fgithub.com%2FVoxel-Fox-Ltd%2FVoxelBotUtils)
+
 # VoxelBotUtils
 
-VoxelBotUtils is a package for extending the Discord.py library, intending to make creating bots just a lil bit faster by dealing with the overhead, like config files, help commands, and a bunch of more common utils like `TimeValue`. 
+VoxelBotUtils (VBU) is an extension for Discord.py to speed up Discord bot development. It includes a whole slew of features that are commonly used in a lot of bots so you don't need to keep writing them every time. Many features are available to you by default:
 
-# Usage
+* Logging using Python's `logging.Logger` classes.
+* Webhook sends on different events.
+* Built-in error handling for all of Discord.py's errors.
+* Built-in PostgreSQL database connector.
+* Bot stats posting via StatsD and DataDog.
+* A help command that doesn't look like trash.
+* Interaction handling, such as slash commands and buttons.
+* Owner-only commands.
+* Presence auto-updating based on Twitch streamers.
+* Inbuilt prefix command.
+* Website utilities.
+* And more...
 
-This package is intended to be used via the commandline as a module. Running `py -m voxelbotutils --create-config-file` will create a default config file for you, and running `py -m voxelbotutils .` will run the current folder as a bot, using data in `config/config.toml` and loading the cogs from `cogs/*`.
+# Basic Usage
 
-## What's in it
-
-You may be thinking "why the heck would I use this?"
-
-### Database
-
-I've included a database util! It's great! I like it! It uses PostgreSQL, using the data supplied in your [config file](voxelbotutils/config/config.example.toml). Used like so:
-
-```py
-async with self.bot.database() as db:
-    await db("INSERT INTO table_name (a, b, c) VALUES ($1, $2, $3)", 1, 2, 3)
-    data = await db("SELECT * FROM table_name")
-for row in data:  # data is used the same as a dictionary
-    print(row['a'])
-```
-
-### Redis
-
-Redis; what a gem. I've only used it a couple of times so I'm not a big expert and I've not added a whole bunch to the util for it, but it's used in much the same way as the database in terms of SET/GET at least.
-
-```py
-async with self.bot.redis() as re:
-    await re.set("KEY", "Value")
-    data = await re.get("KEY")
-if data is not None:
-    print(data)
-```
-
-### Cooldowns
-
-Rapptz's cooldown handling is not great if you want to do anything more complicated than "you all get cooldowns for X time". You want cooldowns in some channels and not others? You want cooldowns based on roles? That's possible with this.
-
-```py
-@voxelbotutils.command()
-@voxelbotutils.cooldown.cooldown(1, 60, commands.BucketType.user, cls=voxelbotutils.cooldown.RoleBasedCooldown())
-async def commandname(self, ctx):
-    ...
-
-@voxelbotutils.command()
-@voxelbotutils.cooldown.cooldown(1, 60, commands.BucketType.user, cls=voxelbotutils.cooldown.CooldownWithChannelExemptions(cooldown_in=["general"]))
-async def commandname(self, ctx):
-    ...
-```
-
-The current cooldowns I've got built into this right now aren't really wonderful but all of the systems are there for if you want to expand it.
-
-### Context Embeds
-
-Setting up embeds always looked a bit messy to me, so I just added support for the `with` syntax so I could clean it up a lil. Apart from that they work pretty much identically to normal embeds.
-
-```py
-with voxelbotutils.Embed() as embed:
-    embed.set_author_to_user(user=self.bot.get_user(user_id))
-    embed.description = "Lorem ipsum"
-    embed.use_random_colour()
-```
-
+* Install VBU via pip - `pip install voxelbotutils`.
+* Create your config file via CMD - `vbu create-config bot`.
+* Update your auto-generated config file in `config/config.toml`.
+* (Optional) Add/change any cogs you wish inside of the `cogs/` folder.
+* Run your bot - `vbu run-bot`.
 
 # Docs
 
-Documentation can be found [here](https://voxelbotutils.readthedocs.io/)
+Documentation for the package and its usage can be [found here](https://voxelbotutils.readthedocs.io/).
 
 # Installing
 
-The package is available via pypi - `pip install voxelbotutils` - but this package will always be further up-to-date with experimental or incomplete features should you wish to use that.
+The package is available via PyPi - `pip install voxelbotutils`. The tags on this repo can be used to keep up-to-date with different releases. The master branch is not guaranteed to be fully working, whereas PyPi releases are.
