@@ -11,7 +11,7 @@ class BotStats(vbu.Cog):
     @vbu.bot_has_permissions(send_messages=True)
     async def info(self, ctx: vbu.Context):
         """
-        Give you some of the bot's info.
+        Gives you information about the bot, including some important links, such as its invite.
         """
 
         # Get the info embed
