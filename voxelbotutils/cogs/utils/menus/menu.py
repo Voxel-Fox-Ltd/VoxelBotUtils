@@ -198,7 +198,7 @@ class MenuIterable(Menu, Option):
             row_component_display: typing.Callable[[commands.Context, dict], str],
             converters: typing.List[Converter],
             select_sql_args: typing.Callable[[commands.Context], typing.List[typing.Any]] = None,
-            insert_sql_args: typing.Callable[[commands.Context, dict], typing.List[typing.Any]] = None,
+            insert_sql_args: typing.Callable[[commands.Context, typing.List[typing.Any]], typing.List[typing.Any]] = None,
             delete_sql_args: typing.Callable[[commands.Context, dict], typing.List[typing.Any]] = None,
             cache_callback: typing.Optional[typing.Callable[[commands.Context, typing.List[typing.Any]], None]] = None,
             cache_delete_callback: typing.Optional[typing.Callable[[commands.Context, typing.List[typing.Any]], None]] = None,
@@ -209,10 +209,10 @@ class MenuIterable(Menu, Option):
             select_sql_args (typing.Callable[[commands.Context], typing.List[typing.Any]]): A function returning a
                 list of arguments that should be passed to the database select.
             insert_sql (str): The SQL that should be used to insert the data into the database.
-            insert_sql_args (typing.Callable[[commands.Context], typing.List[typing.Any]]): A function returning a
-                list of arguments that should be passed to the database insert.
+            insert_sql_args (typing.Callable[[commands.Context, typing.List[typing.Any]], typing.List[typing.Any]]): A
+                function returning a list of arguments that should be passed to the database insert.
             delete_sql (str): The SQL that should be used to delete a row from the database.
-            delete_sql_args (typing.Callable[[commands.Context], typing.List[typing.Any]]): A function returning a
+            delete_sql_args (typing.Callable[[commands.Context, dict], typing.List[typing.Any]]): A function returning a
                 list of arguments that should be passed to the database delete.
             row_text_display (typing.Callable[[commands.Context, dict], str]): A function returning a string which should
                 be showed in the menu.
