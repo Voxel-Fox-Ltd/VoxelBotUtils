@@ -1470,7 +1470,7 @@ class Bot(MinimalBot):
         content = self.config.get('embed', dict()).get('content', '').format(ctx=self) or None
 
         # Set author
-        author_data = self.config.get('embed', dict()).get('author')
+        author_data = self.config.get('embed', dict()).get('author', {})
         if author_data.get('enabled', False):
             name = author_data.get('name', '').format(ctx=self) or discord.Embed.Empty
             url = author_data.get('url', '').format(ctx=self) or discord.Embed.Empty
