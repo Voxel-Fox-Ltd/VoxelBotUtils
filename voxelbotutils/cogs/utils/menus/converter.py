@@ -35,7 +35,9 @@ class Converter(object):
                 input is valid. These will be silently ignored if a :code:`components` parameter is passed.
             converter (typing.Union[typing.Callable[[str], typing.Any], commands.Converter]): A callable that
                 will be used to convert the user's input. If a converter fails then :code:`None` will be returned,
-                so use the given checks to make sure that this does not happen if this behaviour is undesirable.
+                so use the given checks to make sure that this does not happen if this behaviour is undesirable. If you set
+                :code:`components`, then this function should instead take the payload instance that was given back by the
+                user's interaction.
             components (voxelbotutils.MessageComponents): An instance of message components to be sent by the bot.
                 If components are sent then the bot will not accept a message as a response, only an interaction
                 with the component.
@@ -92,7 +94,7 @@ class Converter(object):
                 await payload.defer_update()
             except asyncio.TimeoutError:
                 raise ConverterTimeout(self.timeout_message)
-            return await self.converter.convert(ctx, payload.component)
+            return await self.converter.convert(ctx, payload)
 
         # Loop until a valid input is received
         def check(message):
