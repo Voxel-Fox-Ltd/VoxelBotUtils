@@ -3,6 +3,14 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.6.1
+--------------------------------------
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""
+
+* Fixed error where embeddified messages would require an author.
+
 0.6.0
 --------------------------------------
 
