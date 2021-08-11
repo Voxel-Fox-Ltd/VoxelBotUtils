@@ -32,6 +32,7 @@ class RedisConnection(object):
     pool: aioredis.Redis = None
     logger: logging.Logger = logging.getLogger("vbu.redis")
     lock_manager: aioredlock.Aioredlock = None
+    enabled: bool = False
 
     def __init__(self, connection: aioredis.RedisConnection = None):
         """:meta private:"""
@@ -49,12 +50,13 @@ class RedisConnection(object):
 
         cls.config = config.copy()
         modified_config = config.copy()
-        modified_config.pop('shard_manager_enabled', False)
+        modified_config.pop('shard_manager_enabled', False)  # No longer present, here from old configs
         if modified_config.pop('enabled', True) is False:
             raise NotImplementedError("The Redis connection has been disabled.")
         address = modified_config.pop('host'), modified_config.pop('port')
         cls.pool = await aioredis.create_redis_pool(address, **modified_config)
         cls.lock_manager = aioredlock.Aioredlock([cls.pool])
+        cls.enabled = True
 
     @classmethod
     async def get_connection(cls):
