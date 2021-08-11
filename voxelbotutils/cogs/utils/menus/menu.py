@@ -1,5 +1,6 @@
 import asyncio
 import typing
+import inspect
 
 import discord
 from discord.ext import commands
@@ -12,6 +13,7 @@ from .converter import Converter
 from ..interactions.components import Button, ButtonStyle, MessageComponents
 from ..custom_cog import Cog
 from ..custom_command import Command
+from ..dpy_checks import bot_has_permissions
 
 
 def _do_nothing(return_value=None):
@@ -43,12 +45,23 @@ class Menu(MenuDisplayable):
         self.component_display = component_display  # Used for nested menus
         self._options = list(options)
 
-    def create_cog(self, bot=None, *, cog_name: str = "Bot Settings", name: str = "setup", aliases: typing.List[str] = None, permissions: typing.Optional[typing.List[str]] = [], **command_kwargs):
+    def create_cog(
+            self, bot=None, *, cog_name: str = "Bot Settings", name: str = "settings",
+            aliases: typing.List[str] = ["setup"], permissions: typing.List[str] = None,
+            post_invoke: typing.Callable[[commands.Context], None] = None, **command_kwargs):
         """
         Creates a cog that can be loaded into the bot in a setup method.
+
+        Args:
+            bot: The bot object. If given, the cog will be instantiated with that object.
+            cog_name (str, optional): The name of the cog to be added.
+            name (str, optional): The name of the command to be added.
+            aliases (typing.List[str], optional): A list of aliases to be added to the settings command.
+            permissions (typing.List[str]): A list of permission names should be required for the command run.
+            post_invoke (typing.Callable[[discord.ext.commands.Context], None]): A post-invoke method that can be called.
         """
 
-        aliases = aliases or ["settings"]
+        permissions = permissions or list()
 
         class NestedCog(Cog, name=cog_name):
 
@@ -58,8 +71,19 @@ class Menu(MenuDisplayable):
 
             @commands.command(cls=Command, name=name, aliases=aliases, **command_kwargs)
             @commands.has_permissions(**{i: True for i in permissions})
-            async def setup(nested_self, ctx):
+            @bot_has_permissions(send_messages=True, embed_links=True)
+            async def settings(nested_self, ctx):
+                """
+                Modify some of the bot's settings.
+                """
+
                 await self.start(ctx)
+                if post_invoke is None:
+                    return
+                if inspect.iscoroutine(post_invoke):
+                    await post_invoke(ctx)
+                else:
+                    post_invoke(ctx)
 
         if bot:
             return NestedCog(bot)
