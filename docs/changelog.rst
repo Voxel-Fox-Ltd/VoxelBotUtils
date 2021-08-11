@@ -6,10 +6,17 @@ A human-readable list of changes between versions.
 0.6.1
 --------------------------------------
 
+Changed Features
+"""""""""""""""""""""""""""""""""""""""
+
+* Add :code:`post_invoke` kwarg to :func:`menus.Menu.create_cog`.
+* Change how converters work for components in :class:`menus.Converter`.
+
 Bugs Fixed
 """""""""""""""""""""""""""""""""""""""
 
 * Fixed error where embeddified messages would require an author.
+* Fix type hinting for :func:`menus.Menu.create_cog`
 
 0.6.0
 --------------------------------------
