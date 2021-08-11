@@ -5,8 +5,8 @@ class CommandEvent(vbu.Cog):
 
     CONTENT_LIMIT = 50
 
-    @vbu.Cog.listener()
-    async def on_command(self, ctx: vbu.Context):
+    @vbu.Cog.listener("on_command")
+    async def on_command_log(self, ctx: vbu.Context):
         """
         Pinged when a command is invoked.
         """
@@ -26,6 +26,17 @@ class CommandEvent(vbu.Cog):
         if ctx.guild is None:
             return logger.info(f"{invoke_text} ({ctx.invoked_with}) ~ (G0/C{ctx.channel.id}/U{ctx.author.id}) :: {content}")
         logger.info(f"{invoke_text} ({ctx.invoked_with}) ~ (G{ctx.guild.id}/C{ctx.channel.id}/U{ctx.author.id}) :: {content}")
+
+    @vbu.Cog.listener("on_command")
+    async def on_command_statsd(self, ctx: vbu.Context):
+        """
+        Ping statsd.
+        """
+
+        command_stats_name = ctx.command.qualified_name.replace(' ', '_')
+        command_stats_tags = {"command_name": command_stats_name, "slash_command": ctx.is_interaction}
+        async with self.bot.stats() as stats:
+            stats.increment("discord.bot.commands", tags=command_stats_tags)
 
 
 def setup(bot: vbu.Bot):

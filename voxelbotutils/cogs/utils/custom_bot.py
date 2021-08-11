@@ -1383,16 +1383,16 @@ class Bot(MinimalBot):
         await self.set_default_presence()
         self.logger.info('Bot loaded.')
 
-    async def invoke(self, ctx):
-        """:meta private:"""
+    # async def invoke(self, ctx):
+    #     """:meta private:"""
 
-        if ctx.command is None:
-            return await super().invoke(ctx)
-        command_stats_name = ctx.command.qualified_name.replace(' ', '_')
-        command_stats_tags = {"command_name": command_stats_name, "slash_command": ctx.is_interaction}
-        async with self.stats() as stats:
-            stats.increment("discord.bot.commands", tags=command_stats_tags)
-        return await super().invoke(ctx)
+    #     if ctx.command is None:
+    #         return await super().invoke(ctx)
+    #     command_stats_name = ctx.command.qualified_name.replace(' ', '_')
+    #     command_stats_tags = {"command_name": command_stats_name, "slash_command": ctx.is_interaction}
+    #     async with self.stats() as stats:
+    #         stats.increment("discord.bot.commands", tags=command_stats_tags)
+    #     return await super().invoke(ctx)
 
     def get_context_message(
             self, messageable, content: str, *, embed: discord.Embed = _empty,
