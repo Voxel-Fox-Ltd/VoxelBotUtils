@@ -184,10 +184,17 @@ class ApplicationCommandHandler(vbu.Cog):
 
                     # It isn't - let's see if it's a subclass
                     if safe_arg_type is None:
-                        for i, o in self.COMMAND_TYPE_MAPPER.items():
-                            if i in arg_type.mro()[1:]:
-                                safe_arg_type = o
-                                break
+                        try:
+                            arg_type.mro()
+                            for i, o in self.COMMAND_TYPE_MAPPER.items():
+                                if i in arg_type.mro()[1:]:
+                                    safe_arg_type = o
+                                    break
+                        except AttributeError:
+                            for i, o in self.COMMAND_TYPE_MAPPER.items():
+                                if isinstance(arg_type, i):
+                                    safe_arg_type = o
+                                    break
 
                     # It isn't - let's try and get an attr from the class
                     if safe_arg_type is None:
