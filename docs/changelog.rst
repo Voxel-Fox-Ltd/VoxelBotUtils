@@ -3,6 +3,15 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.6.2
+--------------------------------------
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""
+
+* Fixed subclass instances not being converted to slash commands properly.
+* Fix statsd logging for slash commands.
+
 0.6.1
 --------------------------------------
 
