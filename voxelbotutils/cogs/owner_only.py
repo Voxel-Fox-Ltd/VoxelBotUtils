@@ -276,7 +276,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
         # If the function did return a value
         result_raw = stdout_value or ret  # What's returned from the function
-        result = str(result_raw)  # The result as a string
+        result = repr(result_raw)  # The result as it's representation
         if result_raw is None:
             return
         filetype = "py"
