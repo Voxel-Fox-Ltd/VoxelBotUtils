@@ -8,7 +8,7 @@ class BotStats(vbu.Cog):
 
     @vbu.command()
     @vbu.checks.is_config_set('bot_info', 'enabled')
-    @vbu.bot_has_permissions(send_messages=True)
+    @vbu.bot_has_permissions(send_messages=True, embed_links=True)
     async def info(self, ctx: vbu.Context):
         """
         Gives you information about the bot, including some important links, such as its invite.
