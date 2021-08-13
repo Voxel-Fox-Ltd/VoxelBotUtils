@@ -61,7 +61,7 @@ class Menu(MenuDisplayable):
             post_invoke (typing.Callable[[discord.ext.commands.Context], None]): A post-invoke method that can be called.
         """
 
-        permissions = permissions or list()
+        permissions = permissions or ["manage_guild"]
 
         class NestedCog(Cog, name=cog_name):
 
