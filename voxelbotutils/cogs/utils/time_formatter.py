@@ -12,7 +12,7 @@ class TimeFormatter(object):
         short_date (str): The given time formatted as "6 July 2021".
         short_datetime (str): The given time formatted as "6 July 2021 14:11".
         long_datetime (str): The given time formatted as "Tuesday, 6 July 2021 14:11".
-        relative_time (str): The given time formatted as "10 hours ago".
+        relative_time (str): The given time formatted as "10 hours ago" or "in 10 hours".
     """
 
     def __init__(self, time: dt):
