@@ -5,7 +5,10 @@ import sys
 import typing
 import os
 import importlib
+import io
+import traceback
 
+import discord
 import toml
 
 from .cogs.utils.database import DatabaseConnection
@@ -253,6 +256,70 @@ async def start_redis_pool(config: dict) -> None:
     logger.info("Created redis pool successfully")
 
 
+class EventLoopCallbackHandler(object):
+
+    bot = None
+
+    @classmethod
+    def callback(cls, future):
+        # Print exceptions to console
+        try:
+            e = future.exception()
+            if e is None:
+                return
+            raise e
+        except (asyncio.CancelledError, asyncio.InvalidStateError):
+            return
+        except Exception as e:
+            logger.error("Error in task was hit", exc_info=e)
+            if cls.bot is None:
+                return
+            cls.bot.loop.create_task(cls.send_error_webhook(e))
+
+    @classmethod
+    async def send_error_webhook(cls, error):
+        # Ping unhandled errors to the owners and to the event webhook
+        error_string = "".join(traceback.format_exception(None, error, error.__traceback__))
+        file_handle = io.StringIO(error_string + "\n")
+        error_text = (
+            f"Error `{error}` encountered.\nGuild `None`, channel `None`, "
+            f"user `None`\n```\n[Task error]\n```"
+        )
+
+        # DM to owners
+        if cls.bot.config.get('dm_uncaught_errors', False):
+            for owner_id in cls.bot.owner_ids:
+                owner = cls.bot.get_user(owner_id) or await cls.bot.fetch_user(owner_id)
+                file_handle.seek(0)
+                await owner.send(error_text, file=discord.File(file_handle, filename="error_log.py"))
+
+        # Ping to the webook
+        event_webhook: discord.Webhook = cls.bot.get_event_webhook("unhandled_error")
+        try:
+            avatar_url = str(cls.bot.user.avatar_url)
+        except Exception:
+            avatar_url = None
+        try:
+            username = cls.bot.user.name
+        except Exception:
+            username = cls.bot.application_id
+            if username is None:
+                username = cls.bot.config.get("oauth", {}).get("client_id", None) or "Application ID not found"
+        if event_webhook:
+            file_handle.seek(0)
+            try:
+                file = discord.File(file_handle, filename="error_log.py")
+                await event_webhook.send(
+                    error_text,
+                    file=file,
+                    username=f"{username} - Error",
+                    avatar_url=avatar_url,
+                    allowed_mentions=discord.AllowedMentions.none(),
+                )
+            except discord.HTTPException as e:
+                cls.logger.error(f"Failed to send webhook for event unhandled_error - {e}")
+
+
 def set_event_loop():
     try:
         import uvloop
@@ -265,20 +332,9 @@ def set_event_loop():
         else:
             asyncio.set_event_loop(asyncio.ProactorEventLoop())
 
-    def callback(future):
-        try:
-            e = future.exception()
-            if e is None:
-                return
-            raise e
-        except (asyncio.CancelledError, asyncio.InvalidStateError):
-            return
-        except Exception as e:
-            logger.error("Error in task was hit", exc_info=e)
-
     def task_factory(loop, coro):
         t = asyncio.Task(coro, loop=loop)
-        t.add_done_callback(callback)
+        t.add_done_callback(EventLoopCallbackHandler.callback)
         return t
 
     loop = asyncio.get_event_loop()
@@ -300,6 +356,7 @@ def run_bot(args: argparse.Namespace) -> None:
     shard_ids = validate_sharding_information(args)
     bot = Bot(shard_count=args.shardcount, shard_ids=shard_ids, config_file=args.config_file)
     loop = bot.loop
+    EventLoopCallbackHandler.bot = bot
 
     # Set up loggers
     bot.logger = logger.getChild("bot")
