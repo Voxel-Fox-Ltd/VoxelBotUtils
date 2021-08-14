@@ -9,6 +9,7 @@ import traceback
 import time
 import typing
 import inspect
+import importlib
 
 import discord
 from discord.ext import commands
@@ -207,6 +208,11 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
         Evaluates some Python code.
         """
 
+        try:
+            utils = importlib.import_module("cogs.utils", package=None)
+        except ModuleNotFoundError:
+            utils = None
+
         # Make the environment
         env = {
             'bot': self.bot,
@@ -219,6 +225,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
             'vbu': vbu,
             'discord': discord,
             'commands': commands,
+            'utils': utils,
         }
         # env.update(globals())
 
