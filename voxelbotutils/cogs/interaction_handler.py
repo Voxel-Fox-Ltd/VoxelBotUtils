@@ -83,6 +83,32 @@ class InteractionHandler(vbu.Cog):
         self.logger.debug("Returning context object")
         return ctx
 
+    async def parse_arguments(self, ctx: vbu.Context):
+        """
+        Parse the arguments for a given context.
+        """
+
+        # Convert our given values
+        self.logger.debug("Converterting interaction args for command %s" % (ctx.command.name))
+        ctx.args = [ctx] if ctx.command.cog is None else [ctx.command.cog, ctx]
+        ctx.kwargs = {}
+        for name, value in ctx.given_values.items():
+            if name is None:
+                for name, sig in ctx.command.clean_params.items():
+                    break  # Just get the first param - deliberately shadow "name"
+            else:
+                sig = ctx.command.clean_params[name]
+            converter = ctx.command._get_converter(sig)
+            # try:
+            v = await ctx.command.do_conversion(ctx, converter, value, sig)
+            # except commands.CommandError as exc:
+            #     await ctx.command.dispatch_error(ctx, exc)
+            #     return
+            if sig.kind in [inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD]:
+                ctx.args.append(v)
+            else:
+                ctx.kwargs[name] = v
+
     @vbu.Cog.listener()
     async def on_socket_response(self, payload: dict):
         """
@@ -101,45 +127,44 @@ class InteractionHandler(vbu.Cog):
         elif payload['d']['type'] == 2:
             ctx = await self.get_context_from_interaction(payload['d'])
 
-            # Raise a commandnotfound
+            # Raise a CommandNotFound
             if ctx.command is None:
                 if ctx.invoked_with:
                     exc = commands.CommandNotFound('Command "{}" is not found'.format(ctx.invoked_with))
                     self.bot.dispatch('command_error', ctx, exc)
                 return
 
-            # Convert our given values
-            self.logger.debug("Converterting interaction args for command %s" % (ctx.command.name))
-            positional_converted = []
-            kwarg_converted = {}
-            for name, value in ctx.given_values.items():
-                if name is None:
-                    for name, sig in ctx.command.clean_params.items():
-                        break  # Just get the first param - deliberately shadow "name"
+            # Parse cooldowns and args
+            if ctx.command._max_concurrency is not None:
+                await ctx.command._max_concurrency.acquire(ctx)
+            try:
+                if ctx.command.cooldown_after_parsing:
+                    await self.parse_arguments(ctx)
+                    ctx.command._prepare_cooldowns(ctx)
                 else:
-                    sig = ctx.command.clean_params[name]
-                converter = ctx.command._get_converter(sig)
-                try:
-                    v = await ctx.command.do_conversion(ctx, converter, value, sig)
-                except commands.CommandError as exc:
-                    await ctx.command.dispatch_error(ctx, exc)
-                    return
-                if sig.kind in [inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD]:
-                    positional_converted.append(v)
-                else:
-                    kwarg_converted[name] = v
+                    ctx.command._prepare_cooldowns(ctx)
+                    await self.parse_arguments(ctx)
+
+                await ctx.command.call_before_hooks(ctx)
+            except commands.CommandError as e:
+                await ctx.command.dispatch_error(ctx, e)
+                return
+            except Exception as e:
+                if ctx.command._max_concurrency is not None:
+                    await ctx.command._max_concurrency.release(ctx)
+                await ctx.command.dispatch_error(ctx, e)
+                return
 
             # And invoke
             self.logger.debug("Invoking interaction context for command %s" % (ctx.command.name))
             self.bot.dispatch("command", ctx)
             try:
-                if await self.bot.can_run(ctx):
-                    if await ctx.command.can_run(ctx):
-                        await ctx.invoke(ctx.command, *positional_converted, **kwarg_converted)
+                if await ctx.command.can_run(ctx):
+                    await ctx.invoke(ctx.command, *ctx.args, **ctx.kwargs)
                 else:
-                    raise commands.CheckFailure('The global check once functions failed.')
-            except commands.CommandError as exc:
-                await ctx.command.dispatch_error(ctx, exc)
+                    raise commands.CheckFailure()
+            except commands.CommandError as e:
+                await ctx.command.dispatch_error(ctx, e)
             else:
                 self.bot.dispatch("command_completion", ctx)
 
@@ -148,7 +173,6 @@ class InteractionHandler(vbu.Cog):
             clicked_button_payload = vbu.interactions.components.ComponentInteractionPayload.from_payload(
                 payload['d'], self.bot._connection,
             )  # TODO should this be a webhook connection state?
-            # clicked_button_payload._send_interaction_response_callback()
             self.bot.dispatch("button_click", clicked_button_payload)  # DEPRECATED PLEASE DO NOT USE
             self.bot.dispatch("component_interaction", clicked_button_payload)
             return
