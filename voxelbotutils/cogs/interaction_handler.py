@@ -99,11 +99,7 @@ class InteractionHandler(vbu.Cog):
             else:
                 sig = ctx.command.clean_params[name]
             converter = ctx.command._get_converter(sig)
-            # try:
-            v = await ctx.command.do_conversion(ctx, converter, value, sig)
-            # except commands.CommandError as exc:
-            #     await ctx.command.dispatch_error(ctx, exc)
-            #     return
+            v = await ctx.command.do_conversion(ctx, converter, value, sig)  # Could raise; that's fine
             if sig.kind in [inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD]:
                 ctx.args.append(v)
             else:
@@ -140,9 +136,9 @@ class InteractionHandler(vbu.Cog):
             try:
                 if ctx.command.cooldown_after_parsing:
                     await self.parse_arguments(ctx)
-                    ctx.command._prepare_cooldowns(ctx)
+                    await ctx.command._prepare_cooldowns(ctx)
                 else:
-                    ctx.command._prepare_cooldowns(ctx)
+                    await ctx.command._prepare_cooldowns(ctx)
                     await self.parse_arguments(ctx)
 
                 await ctx.command.call_before_hooks(ctx)
@@ -160,7 +156,7 @@ class InteractionHandler(vbu.Cog):
             self.bot.dispatch("command", ctx)
             try:
                 if await ctx.command.can_run(ctx):
-                    await ctx.invoke(ctx.command, *ctx.args, **ctx.kwargs)
+                    await ctx.command.callback(*ctx.args, **ctx.kwargs)
                 else:
                     raise commands.CheckFailure()
             except commands.CommandError as e:

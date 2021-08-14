@@ -3,6 +3,20 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.6.3
+--------------------------------------
+
+Changed Features
+"""""""""""""""""""""""""""""""""""""""
+
+* Set the default permission for :func:`menus.Menu.create_cog` to :code:`manage_guild`.
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""
+
+* Fixed cooldowns not parsing correctly for slash commands.
+* Fixed the :code:`info` command raising an error for missing permissions for embeds.
+
 0.6.2
 --------------------------------------
 
