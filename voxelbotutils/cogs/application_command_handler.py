@@ -122,19 +122,19 @@ class ApplicationCommandHandler(vbu.Cog):
 
         def check_command_checks(check):
             name = get_check_name(check)
-            return all(
+            return all((
                 not name.startswith("discord.ext.commands.core") and name.endswith("is_owner"),
                 not name.startswith("voxelbotutils.cogs.utils.checks") and name.endswith("is_bot_support"),
                 not name.startswith("voxelbotutils.cogs.utils.checks") and name.endswith("meta_command"),
-            )
+            ))
 
         def command_attribute_checks(command):
-            return all(
+            return all((
                 command.hidden is False,
                 command.enabled is True,
                 command.name not in ["help", "channelhelp", "commands"],
                 getattr(command, "add_slash_command", True),
-            )
+            ))
 
         async def run_config_check(command):
             for i in command.checks:

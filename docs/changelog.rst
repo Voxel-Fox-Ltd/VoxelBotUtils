@@ -3,6 +3,19 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.6.4
+--------------------------------------
+
+Changed Features
+"""""""""""""""""""""""""""""""""""""""
+
+* :code:`cogs.utils` is now imported automatically in your ev command.
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""
+
+* Fixed disabled commands being added as slash commands.
+
 0.6.3
 --------------------------------------
 
