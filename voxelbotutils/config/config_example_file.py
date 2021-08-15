@@ -82,7 +82,7 @@ bot_support_role_id = 0  # The ID used to determine whether or not the user is p
     response_type = ""  # The response type given to the redirect URI.
     redirect_uri = ""  # Where the user should be redirected to upon authorizing.
     client_id = ""  #  If not set then will use the bot's ID.
-    scope = "bot"  # The scope that will be generated with the invite link, space seperated (applications.commands for slash).
+    scope = "bot applications.commands"  # The scope that will be generated with the invite link, space seperated (applications.commands for slash).
     permissions = []  # args here are passed directly to discord.Permissions as True.
 
 # This data is passed directly over to `asyncpg.connect()`.
