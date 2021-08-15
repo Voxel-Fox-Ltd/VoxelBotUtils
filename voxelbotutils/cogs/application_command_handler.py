@@ -109,26 +109,58 @@ class ApplicationCommandHandler(vbu.Cog):
         except AttributeError:
             return None
 
-    @staticmethod
-    def filter_commands(commands: list) -> list:
+    async def filter_commands(self, commands: list) -> list:
         """
         Return a list of filtered commands.
         """
 
-        # Make sure they're enabled and visible
-        commands = [
-            i for i in commands
-            if i.hidden is False and i.enabled is True and i.name not in ["help", "channelhelp", "commands"] and getattr(i, "add_slash_command", True)
-        ]
+        class ConfigContext(object):
+            bot = self.bot
 
-        # Filter out owner-only commands
-        # commands = [
-        #     i for i in commands
-        #     if not any(
-        #         o for o in i.checks
-        #         if not f"{o.__module__}.{o.__qualname__}".startswith("discord.ext.commands.core.is_owner.")
-        #     )
-        # ]
+        def get_check_name(check):
+            return f"{check.__module__}.{check.__qualname__.split('.')[0]}"
+
+        def check_command_checks(check):
+            name = get_check_name(check)
+            return all(
+                not name.startswith("discord.ext.commands.core") and name.endswith("is_owner"),
+                not name.startswith("voxelbotutils.cogs.utils.checks") and name.endswith("is_bot_support"),
+                not name.startswith("voxelbotutils.cogs.utils.checks") and name.endswith("meta_command"),
+            )
+
+        def command_attribute_checks(command):
+            return all(
+                command.hidden is False,
+                command.enabled is True,
+                command.name not in ["help", "channelhelp", "commands"],
+                getattr(command, "add_slash_command", True),
+            )
+
+        async def run_config_check(command):
+            for i in command.checks:
+                name = get_check_name(check)
+                if not name.startswith("voxelbotutils.cogs.utils.checks"):
+                    continue
+                if not name.endswith("is_config_set"):
+                    continue
+                try:
+                    await check(ConfigContext)
+                except Exception:
+                    return False
+            return True
+
+        async def check(command):
+            if not command_attribute_checks(command):
+                return False
+            for i in command.checks:
+                if not check_command_checks(i):
+                    return False
+            if not await run_config_check(command):
+                return False
+            return True
+
+        # Make sure they're enabled and visible
+        commands = [i for i in commands if await check(i)]
 
         # And return
         return commands
@@ -137,7 +169,7 @@ class ApplicationCommandHandler(vbu.Cog):
     def get_command_description(command) -> str:
         return command.short_doc or f"Allows you to run the {command.qualified_name} command"
 
-    def convert_into_slash_command(
+    async def convert_into_slash_command(
             self, command: typing.Union[vbu.Command, vbu.Group], *,
             is_option: bool = False) -> vbu.ApplicationCommand:
         """
@@ -230,11 +262,11 @@ class ApplicationCommandHandler(vbu.Cog):
         if isinstance(command, vbu.Group):
             subcommands = list(command.commands)
             valid_subcommands = []
-            for i in self.filter_commands(subcommands):
+            for i in await self.filter_commands(subcommands):
                 if getattr(i, 'add_slash_command', True):
                     valid_subcommands.append(i)
             for subcommand in valid_subcommands:
-                converted_option = self.convert_into_slash_command(subcommand, is_option=True)
+                converted_option = await self.convert_into_slash_command(subcommand, is_option=True)
                 application_command.add_option(converted_option)
 
         # Return command
@@ -253,18 +285,18 @@ class ApplicationCommandHandler(vbu.Cog):
         application_command = vbu.ApplicationCommand(**kwargs)
         return application_command
 
-    def convert_all_into_application_command(self, ctx: vbu.Context) -> typing.List[vbu.ApplicationCommand]:
+    async def convert_all_into_application_command(self, ctx: vbu.Context) -> typing.List[vbu.ApplicationCommand]:
         """
         Convert all of the commands for the bot into application commands.
         """
 
         application_commands = []
         commands = list(ctx.bot.commands)
-        filtered_commands = self.filter_commands(commands)
+        filtered_commands = await self.filter_commands(commands)
         for command in filtered_commands:
-            application_commands.append(self.convert_into_slash_command(command))
+            application_commands.append(await self.convert_into_slash_command(command))
         for command in ctx.bot.walk_commands():
-            if not self.filter_commands([command]):
+            if not await self.filter_commands([command]):
                 continue
             if getattr(command, "context_command_type", None) is not None:
                 application_commands.append(self.convert_into_context_command(command))
@@ -283,7 +315,7 @@ class ApplicationCommandHandler(vbu.Cog):
         if commands:
             commands_to_add = [await self.convert_into_application_command(ctx, self.bot.get_command(i)) for i in commands]
         else:
-            commands_to_add: typing.List[vbu.ApplicationCommand] = self.convert_all_into_application_command(ctx)
+            commands_to_add: typing.List[vbu.ApplicationCommand] = await self.convert_all_into_application_command(ctx)
 
         # See if we want it guild-specific
         if guild_id:
