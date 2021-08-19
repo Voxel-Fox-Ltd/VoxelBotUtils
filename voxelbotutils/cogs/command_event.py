@@ -23,9 +23,10 @@ class CommandEvent(vbu.Cog):
                 invoke_text = "Context invoked"
             else:
                 invoke_text = "Interaction invoked"
+        logger_prefix = f"{invoke_text} ({ctx.command.qualified_name.strip()})"
         if ctx.guild is None:
-            return logger.info(f"{invoke_text} ({ctx.invoked_with}) ~ (G0/C{ctx.channel.id}/U{ctx.author.id}) :: {content}")
-        logger.info(f"{invoke_text} ({ctx.invoked_with}) ~ (G{ctx.guild.id}/C{ctx.channel.id}/U{ctx.author.id}) :: {content}")
+            return logger.info(f"{logger_prefix} ~ (G0/C{ctx.channel.id}/U{ctx.author.id}) :: {content}")
+        logger.info(f"{logger_prefix} ~ (G{ctx.guild.id}/C{ctx.channel.id}/U{ctx.author.id}) :: {content}")
 
     @vbu.Cog.listener("on_command")
     async def on_command_statsd(self, ctx: vbu.Context):
