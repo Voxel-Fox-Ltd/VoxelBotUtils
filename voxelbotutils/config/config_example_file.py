@@ -50,6 +50,12 @@ bot_support_role_id = 0  # The ID used to determine whether or not the user is p
     topgg_token = ""  # The token used to post data to top.gg.
     discordbotlist_token = ""  # The token used to post data to discordbotlist.com.
 
+# Some simple command data outputs
+[command_Data]
+    guild_invite = ""
+    donate_link = ""
+    website_link = ""
+
 # The info command is the slash command equivelant of "help", giving all relevant data.
 [bot_info]
     enabled = true
