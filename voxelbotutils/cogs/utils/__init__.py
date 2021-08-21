@@ -44,3 +44,18 @@ _html_minifier = _re.compile(r"\s{2,}|\n")
 
 def minify_html(text: str) -> str:
     return _html_minifier.sub("", text)
+
+
+def defer(ephemeral: bool = False):
+    """
+    A defer check so that we can defer a response immediately when the command is run instead
+    of after the converters have run.
+
+    Args:
+        ephemeral (bool, optional): Whether the defer should be ephemeral or not.
+    """
+
+    async def predicate(ctx: Context):
+        await ctx.defer(ephemeral=ephemeral)
+        return True
+    return _dpy_commands.check(predicate)

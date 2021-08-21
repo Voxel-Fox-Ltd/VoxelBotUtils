@@ -234,6 +234,11 @@ SelectMenu
 Checks
 -------------------------------------------------
 
+defer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: voxelbotutils.defer
+
 checks.is_config_set
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

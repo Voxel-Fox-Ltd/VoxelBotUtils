@@ -68,7 +68,7 @@ class Context(commands.Context):
         """:meta private: Deprecated"""
         pass
 
-    async def defer(self):
+    async def defer(self, *args, **kwargs):
         """
         A defer method so we can use the same code for slash commands
         as we do for text commands.

@@ -6,10 +6,17 @@ A human-readable list of changes between versions.
 0.6.4
 --------------------------------------
 
+New Features
+"""""""""""""""""""""""""""""""""""""""
+
+* Add :func:`defer` check.
+
 Changed Features
 """""""""""""""""""""""""""""""""""""""
 
 * :code:`cogs.utils` is now imported automatically in your ev command.
+* Update webhook timestamps to use Discord time formatters.
+* Add different filtering for slash command adds.
 
 Bugs Fixed
 """""""""""""""""""""""""""""""""""""""
