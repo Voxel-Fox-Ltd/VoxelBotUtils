@@ -126,6 +126,17 @@ def check_config_value(
     return
 
 
+def get_next_version(current_version) -> str:
+    """
+    Get the next version that we can use in the requirements file.
+    """
+
+    release, major, minor = [int(i) for i in current_version.split(".")]
+    if release == 0:
+        return f"0.{major + 1}.0"
+    return f"{release + 1}.0.0"
+
+
 def main():
     """
     The main method for running all of vbu.
@@ -134,6 +145,8 @@ def main():
     # Wew let's see if we want to run a bot
     parser = get_default_program_arguments()
     args = parser.parse_args()
+    from . import __version__
+    next_version = get_next_version(__version__)
 
     # Let's see if we copyin bois
     if args.subcommand == "create-config":
@@ -145,7 +158,7 @@ def main():
             create_file("config", "database.pgsql", content=config.database_file.lstrip())
             create_file("_run_website.sh", content="vbu run-website .\n")
             create_file(".gitignore", content="__pycache__/\n.venv/\nconfig/config.toml\nconfig/website.toml\n")
-            create_file("requirements.txt", content="voxelbotutils[web]\n")
+            create_file("requirements.txt", content=f"voxelbotutils[web]>={__version__},<{next_version}\n")
             create_file("website", "frontend.py", content=config.website_frontend_content.lstrip())
             create_file("website", "backend.py", content=config.website_backend_content.lstrip())
             create_file("website", "static", ".gitkeep", content="\n")
@@ -159,7 +172,7 @@ def main():
             create_file("cogs", "ping_command.py", content=config.cog_example.lstrip())
             create_file("_run_bot.sh", content="vbu run-bot .\n")
             create_file(".gitignore", content="__pycache__/\nconfig/config.toml\nconfig/website.toml\n")
-            create_file("requirements.txt", content="voxelbotutils\n")
+            create_file("requirements.txt", content=f"voxelbotutils>={__version__},<{next_version}\n")
             create_file(".venv")
             print("Created bot config file.")
         exit(1)
@@ -189,7 +202,6 @@ def main():
 
     # If we just want the version
     elif args.subcommand == "version":
-        from . import __version__
         print(f"VoxelBotUtils v{__version__}")
         exit(1)
 
