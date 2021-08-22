@@ -416,13 +416,21 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
         # See how long our lines are
         for row in rows:
             for header in headers:
-                column_widths[header] = max([column_widths[header], len(str(row[header]))])
+                row_value = row[header]
+                if row_value is None:
+                    continue
+                column_widths[header] = max([column_widths[header], len(repr(row_value))])
 
         # Work out our rows
         for row in rows:
             working = ""
             for header in headers:
-                working += format(str(row[header]), f" <{column_widths[header]}") + "|"
+                row_value = row[header]
+                if row_value is None:
+                    row_display = ""
+                else:
+                    row_display = repr(row_value)
+                working += format(row_display, f" <{column_widths[header]}") + "|"
             lines.append(working[:-1])
 
         # Add on our headers
