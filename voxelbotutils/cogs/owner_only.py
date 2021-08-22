@@ -299,13 +299,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
         text += self.get_execution_time(end_time, start_time)
 
         # Output to chat
-        if len(text) > 2000:
-            try:
-                return await ctx.send(self.get_execution_time(end_time, start_time), file=discord.File(io.StringIO(result), filename=f"ev.{filetype}"))
-            except discord.HTTPException:
-                return await ctx.send("I don't have permission to attach files here.", embeddify=False)
-        else:
-            return await ctx.send(text, embeddify=False)
+        return await ctx.send(self.get_execution_time(end_time, start_time), file=discord.File(io.StringIO(result), filename=f"ev.{filetype}"))
 
     @vbu.command(aliases=['rld', 'rl'])
     @commands.is_owner()
@@ -442,11 +436,8 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
         # Send it out
         string_output = '\n'.join(lines)
-        try:
-            await ctx.send(f"```\n{string_output}```", embeddify=False)
-        except discord.HTTPException:
-            file = discord.File(io.StringIO(string_output), filename="runsql.txt")
-            await ctx.send(file=file)
+        file = discord.File(io.StringIO(string_output), filename="runsql.txt")
+        await ctx.send(file=file)
 
     @vbu.group()
     @commands.is_owner()
