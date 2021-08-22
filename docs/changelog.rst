@@ -3,6 +3,19 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.6.5
+--------------------------------------
+
+New Features
+"""""""""""""""""""""""""""""""""""""""
+
+* Add vbu version to the auto-generated requirements file.
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""
+
+* Fixed slash command command check.
+
 0.6.4
 --------------------------------------
 

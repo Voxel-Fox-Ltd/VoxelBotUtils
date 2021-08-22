@@ -123,9 +123,9 @@ class ApplicationCommandHandler(vbu.Cog):
         def check_command_checks(check):
             name = get_check_name(check)
             return all((
-                not name.startswith("discord.ext.commands.core") and name.endswith("is_owner"),
-                not name.startswith("voxelbotutils.cogs.utils.checks") and name.endswith("is_bot_support"),
-                not name.startswith("voxelbotutils.cogs.utils.checks") and name.endswith("meta_command"),
+                not (name.startswith("discord.ext.commands.core") and name.endswith("is_owner")),
+                not (name.startswith("voxelbotutils.cogs.utils.checks") and name.endswith("is_bot_support")),
+                not (name.startswith("voxelbotutils.cogs.utils.checks") and name.endswith("meta_command")),
             ))
 
         def command_attribute_checks(command):
