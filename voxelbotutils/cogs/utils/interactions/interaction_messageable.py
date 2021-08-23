@@ -147,13 +147,15 @@ def defer_response(ephemeral: bool = False):
     return commands.check(predicate)
 
 
-def component_check(user: discord.User, message: discord.Message, no_interact_message: str):
+def component_check(user: discord.User, message: discord.Message, no_interact_message: str = None):
     """
     A check for a wait_for that allows only a user to interact with the given
     button, outputting the no interaction message.
 
     .. versionadded:: 0.6.6
     """
+
+    no_interact_message = no_interact_message or f"Only {user.mention} can interact with this component."
 
     def check(payload: InteractionMessageable):
         if payload.message.id != message.id:
