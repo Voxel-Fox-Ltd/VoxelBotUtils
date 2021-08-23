@@ -232,7 +232,7 @@ class ApplicationCommandHandler(vbu.Cog):
 
                     # It isn't - let's see if it's an enum
                     if safe_arg_type is None and not choices:
-                        if isinstance(arg_type, enum.Enum):
+                        if isinstance(arg_type, (enum.Enum, enum.IntEnum, enum.EnumMeta)):
                             for i in arg_type:
                                 choices.append(vbu.ApplicationCommandOptionChoice(i.name, i.name))
                             safe_arg_type = vbu.ApplicationCommandOptionType.STRING
