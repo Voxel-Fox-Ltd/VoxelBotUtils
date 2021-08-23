@@ -153,6 +153,12 @@ def _set_default_log_level(logger_name, log_filter, formatter, loglevel):
     # logger.critical("Test critical message")
 
 
+def create_subclassed_loggers():
+    DatabaseConnection.logger = logging.getLogger("vbu.database")
+    RedisConnection.logger = logging.getLogger("vbu.redis")
+    StatsdConnection.logger = logging.getLogger("vbu.statsd")
+
+
 def set_default_log_levels(args: argparse.Namespace) -> None:
     """
     Set the default levels for the logger.
@@ -166,6 +172,7 @@ def set_default_log_levels(args: argparse.Namespace) -> None:
     # formatter = logging.Formatter('{asctime} | {levelname: <8} | {module}:{funcName}:{lineno} - {message}', style='{')
     formatter = logging.Formatter('{asctime} | {levelname: <8} | {name}: {message}', style='{')
     log_filter = LogFilter(logging.WARNING)
+    create_subclassed_loggers()
     loggers = [
         'vbu',
         'discord',

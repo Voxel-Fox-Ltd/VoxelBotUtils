@@ -3,6 +3,14 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.6.6
+--------------------------------------
+
+New Features
+"""""""""""""""""""""""""""""""""""""""
+
+* Support enums in slash commands.
+
 0.6.5
 --------------------------------------
 

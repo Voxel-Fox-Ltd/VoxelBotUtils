@@ -3,6 +3,7 @@ import io
 import json
 import inspect
 import textwrap
+import enum
 
 import discord
 from discord.ext import commands
@@ -27,7 +28,7 @@ class ApplicationCommandHandler(vbu.Cog):
         commands.RoleConverter: vbu.ApplicationCommandOptionType.ROLE,
         vbu.converters.UserID: vbu.ApplicationCommandOptionType.USER,
         vbu.converters.ChannelID: vbu.ApplicationCommandOptionType.CHANNEL,
-        vbu.converters.EnumConverter: vbu.ApplicationCommandOptionType.STRING,
+        # vbu.converters.EnumConverter: vbu.ApplicationCommandOptionType.STRING,
         vbu.converters.BooleanConverter: vbu.ApplicationCommandOptionType.BOOLEAN,
         vbu.converters.ColourConverter: vbu.ApplicationCommandOptionType.STRING,
         vbu.converters.FilteredUser: vbu.ApplicationCommandOptionType.USER,
@@ -200,6 +201,7 @@ class ApplicationCommandHandler(vbu.Cog):
                 arg_type = None
                 safe_arg_type = None
                 required = True
+                choices = []
                 if self.is_typing_optional(arg.annotation):
                     arg_type = self.get_non_optional_type(arg.annotation)
                     required = False
@@ -215,7 +217,7 @@ class ApplicationCommandHandler(vbu.Cog):
                         safe_arg_type = self.COMMAND_TYPE_MAPPER[arg_type]
 
                     # It isn't - let's see if it's a subclass
-                    if safe_arg_type is None:
+                    if safe_arg_type is None and not choices:
                         try:
                             arg_type.mro()
                             for i, o in self.COMMAND_TYPE_MAPPER.items():
@@ -228,8 +230,15 @@ class ApplicationCommandHandler(vbu.Cog):
                                     safe_arg_type = o
                                     break
 
+                    # It isn't - let's see if it's an enum
+                    if safe_arg_type is None and not choices:
+                        if isinstance(arg_type, enum.Enum):
+                            for i in arg_type:
+                                choices.append(vbu.ApplicationCommandOptionChoice(i.name, i.name))
+                            safe_arg_type = vbu.ApplicationCommandOptionType.STRING
+
                     # It isn't - let's try and get an attr from the class
-                    if safe_arg_type is None:
+                    if safe_arg_type is None and not choices:
                         safe_arg_type = getattr(arg_type, "SLASH_COMMAND_ARG_TYPE", None)
 
                 except Exception:
@@ -251,12 +260,15 @@ class ApplicationCommandHandler(vbu.Cog):
                     pass
 
                 # Add option
-                application_command.add_option(vbu.ApplicationCommandOption(
+                generated_option = vbu.ApplicationCommandOption(
                     name=arg.name,
                     description=description,
                     type=safe_arg_type,
                     required=required,
-                ))
+                )
+                for c in choices:
+                    generated_option.add_choice(c)
+                application_command.add_option(generated_option)
 
         # Go through its subcommands
         if isinstance(command, vbu.Group):
