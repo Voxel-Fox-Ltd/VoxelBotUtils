@@ -145,3 +145,21 @@ def defer_response(ephemeral: bool = False):
             await ctx.defer(ephemeral=ephemeral)
         return True
     return commands.check(predicate)
+
+
+def component_check(user: discord.User, message: discord.Message, no_interact_message: str):
+    """
+    A check for a wait_for that allows only a user to interact with the given
+    button, outputting the no interaction message.
+
+    .. versionadded:: 0.6.6
+    """
+
+    def check(payload: InteractionMessageable):
+        if payload.message.id != message.id:
+            return False
+        if payload.user.id != user.id:
+            payload.bot.loop.create_task(payload.send(no_interact_message, wait=False))
+            return False
+        return True
+    return check

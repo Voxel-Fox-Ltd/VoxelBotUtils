@@ -10,6 +10,7 @@ New Features
 """""""""""""""""""""""""""""""""""""""
 
 * Support enums in slash commands.
+* Add :func:`component_check` method.
 
 0.6.5
 --------------------------------------

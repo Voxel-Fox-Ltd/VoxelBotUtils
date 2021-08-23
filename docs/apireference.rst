@@ -95,6 +95,11 @@ ComponentMessage
 .. autoclass:: voxelbotutils.ComponentMessage
 .. autoclass:: voxelbotutils.ComponentWebhookMessage
 
+component_check
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: voxelbotutils.component_check
+
 bot_has_permissions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
