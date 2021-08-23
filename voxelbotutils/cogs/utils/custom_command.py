@@ -2,6 +2,7 @@ import asyncio
 import datetime
 import typing
 import argparse
+import enum
 
 from discord.ext import commands
 from discord.ext.commands.core import wrap_callback
@@ -195,6 +196,11 @@ class Command(commands.Command):
     async def _actual_conversion(self, ctx, converter, argument, param):
         if self._check_converter_is_argparser(converter):
             converter = DiscordArgparser
+        elif isinstance(converter, (enum.Enum, enum.IntEnum, enum.EnumMeta)):
+            try:
+                return converter[argument]
+            except Exception:
+                pass
         return await super()._actual_conversion(ctx, converter, argument, param)
 
     async def transform(self, ctx, param):
