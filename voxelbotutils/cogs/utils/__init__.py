@@ -62,5 +62,5 @@ def defer(ephemeral: bool = False):
     return _dpy_commands.check(predicate)
 
 
-_formatter = Formatter()
-format = formatter.format
+_formatter = _Formatter()
+format = _formatter.format
