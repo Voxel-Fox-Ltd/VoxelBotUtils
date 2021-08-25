@@ -161,7 +161,7 @@ def component_check(user: discord.User, message: discord.Message, no_interact_me
         if payload.message.id != message.id:
             return False
         if payload.user.id != user.id:
-            payload.bot.loop.create_task(payload.send(no_interact_message, wait=False))
+            payload.bot.loop.create_task(payload.send(no_interact_message, ephemeral=True, wait=False, allowed_mentions=discord.AllowedMentions.none()))
             return False
         return True
     return check
