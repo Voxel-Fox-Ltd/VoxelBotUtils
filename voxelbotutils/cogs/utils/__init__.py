@@ -18,6 +18,7 @@ from .interactions.components import *  # noqa
 from .help_command import HelpCommand  # noqa
 from .models import ComponentMessage, ComponentWebhookMessage  # noqa
 from .time_formatter import TimeFormatter  # noqa
+from .string import Formatter as _Formatter  # noqa
 
 # And now things we want to override our Dpy things with
 from .dpy_checks import *  # noqa
@@ -59,3 +60,7 @@ def defer(ephemeral: bool = False):
         await ctx.defer(ephemeral=ephemeral)
         return True
     return _dpy_commands.check(predicate)
+
+
+_formatter = Formatter()
+format = formatter.format
