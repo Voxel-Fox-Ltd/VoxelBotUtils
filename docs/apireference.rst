@@ -108,6 +108,8 @@ format
 bot_has_permissions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Drop-in replacements for :func:`discord.ext.commands.bot_has_permissions` that work with slash commands.
+
 .. autofunction:: voxelbotutils.bot_has_permissions
 .. autofunction:: voxelbotutils.bot_has_guild_permissions
 
