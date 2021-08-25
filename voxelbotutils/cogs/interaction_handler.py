@@ -1,3 +1,4 @@
+import asyncio
 import inspect
 
 from discord.ext import commands
@@ -156,7 +157,21 @@ class InteractionHandler(vbu.Cog):
             self.bot.dispatch("command", ctx)
             try:
                 if await ctx.command.can_run(ctx):
-                    await ctx.command.callback(*ctx.args, **ctx.kwargs)
+                    try:
+                        await ctx.command.callback(*ctx.args, **ctx.kwargs)
+                    except commands.CommandError:
+                        ctx.command_failed = True
+                        raise
+                    except asyncio.CancelledError:
+                        ctx.command_failed = True
+                        return
+                    except Exception as exc:
+                        ctx.command_failed = True
+                        raise commands.CommandInvokeError(exc) from exc
+                    finally:
+                        if ctx.command._max_concurrency is not None:
+                            await ctx.command._max_concurrency.release(ctx)
+                        await ctx.command.call_after_hooks(ctx)
                 else:
                     raise commands.CheckFailure()
             except commands.CommandError as e:
