@@ -62,5 +62,8 @@ def defer(ephemeral: bool = False):
     return _dpy_commands.check(predicate)
 
 
+defer_response = defer  # oops
+
+
 _formatter = _Formatter()
 format = _formatter.format
