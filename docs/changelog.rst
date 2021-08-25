@@ -11,6 +11,7 @@ New Features
 
 * Support enums in slash commands.
 * Add :func:`component_check` method.
+* Add :func:`format`.
 
 Changed Features
 """""""""""""""""""""""""""""""""""""""

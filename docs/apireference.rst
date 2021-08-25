@@ -100,6 +100,11 @@ component_check
 
 .. autofunction:: voxelbotutils.component_check
 
+format
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: voxelbotutils.format
+
 bot_has_permissions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

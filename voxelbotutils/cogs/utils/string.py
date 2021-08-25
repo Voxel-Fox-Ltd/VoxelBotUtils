@@ -86,4 +86,33 @@ class ProgressFormatter(string.Formatter):
 
 
 class Formatter(PluralFormatter, PronounFormatter, JoinFormatter, ProgressFormatter):
-    pass
+
+    def format(self, *args, **kwargs):
+        """
+        A modified version of the normal :code:`str.format` method to have some slightly more
+        useful utilities in it.
+
+        Examples:
+
+            ::
+
+                # Saying how many of a given item you have can be a pain.
+                # Using the plural formatter, you can easily format a string to have
+                # plural nouns.
+                vbu.format("{0:plural,single,plural}", 1)  # "single"
+                vbu.format("{0:plural,single,plural}", 2)  # "plural"
+                vbu.format("{0} {0:plural,item,items}", 1)  # "1 item"
+                vbu.format("{0} {0:plural,item,items}", 2)  # "2 items"
+
+                # You have a command `inventory` - runnable as `inventory @user` defaulting the user
+                # to yourself.
+                # Pronouns for this can be a pain to update in strings. In this example, we set the
+                # pronouns by comparing the specified user to `ctx.author`
+                vbu.format("{0:pronoun,You,{1.mention}} {0:pronoun,have,has} stuff.", ctx.author == user, user.mention)
+
+                # The join formatter can "human" join a list strings.
+                items = ["a", "b", "c", "d"]
+                vbu.format("{0:humanjoin}", items)  # "a, b, c, and d"
+        """
+
+        return super().format(*args, **kwargs)
