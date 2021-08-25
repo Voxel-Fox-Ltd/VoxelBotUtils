@@ -80,7 +80,7 @@ class ComponentInteractionPayload(InteractionMessageable):
         v.data = data  # The raw gateway data
         v.component = clicked_button_object  # The component that was interacted with
         v.values = data['data'].get("values", list())  # The values that were sent through with the payload
-        v._state = bot._state
+        v._state = bot._connection
         channel, guild = v._state._get_guild_channel(data)
         v.channel = channel
         v.guild = guild
