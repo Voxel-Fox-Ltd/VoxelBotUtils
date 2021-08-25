@@ -51,7 +51,7 @@ class ComponentInteractionPayload(InteractionMessageable):
         return None
 
     @classmethod
-    def from_payload(cls, data, state):
+    def from_payload(cls, data, bot):
         """
         Construct a response from the gateway payload.
         """
@@ -80,17 +80,18 @@ class ComponentInteractionPayload(InteractionMessageable):
         v.data = data  # The raw gateway data
         v.component = clicked_button_object  # The component that was interacted with
         v.values = data['data'].get("values", list())  # The values that were sent through with the payload
-        v._state = state
-        channel, guild = state._get_guild_channel(data)
+        v._state = bot._state
+        channel, guild = v._state._get_guild_channel(data)
         v.channel = channel
         v.guild = guild
+        v.bot = bot
         try:
             # v.message = ComponentWebhookMessage(channel=channel, data=data['message'], state=state)
-            v.message = ComponentMessage(channel=channel, data=data['message'], state=state)
+            v.message = ComponentMessage(channel=channel, data=data['message'], state=v._state)
         except KeyError:
             v.message = discord.PartialMessage(channel=channel, id=int(data['message']['id']))
         if guild:
-            v.user = discord.Member(data=data['member'], guild=guild, state=state)
+            v.user = discord.Member(data=data['member'], guild=guild, state=v._state)
         else:
-            v.user = discord.User(data=data['user'], state=state)
+            v.user = discord.User(data=data['user'], state=v._state)
         return v
