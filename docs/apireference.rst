@@ -153,6 +153,8 @@ Components
 
 Components also have :ref:`their own page<interactions howto>` for a basic integration guide.
 
+.. note:: A component interaction with its custom ID set to :code:`RUNCOMMAND xxxxxxx` will automatically invoke the command :code:`xxxxxxx`, ignoring any checks and converters.
+
 InteractionMessageable
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

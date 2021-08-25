@@ -11,4 +11,5 @@ all_packages = (
     'presence_auto_updater',
     'application_command_handler',
     'interaction_handler',
+    'button_command_redirect',
 )
