@@ -16,6 +16,8 @@ Changed Features
 """""""""""""""""""""""""""""""""""""""
 
 * Add :code:`bot` attribute to :class:`ComponentInteractionPayload`.
+* The :code:`runsql` command will now always use :code:`repr` instead of :code:`str`, and will output only to a file.
+* Support :class:`enum.Enum`s in slash commands.
 
 Bugs Fixed
 """""""""""""""""""""""""""""""""""""""
