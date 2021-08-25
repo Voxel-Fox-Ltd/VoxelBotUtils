@@ -152,6 +152,11 @@ def component_check(user: discord.User, message: discord.Message, no_interact_me
     A check for a wait_for that allows only a user to interact with the given
     button, outputting the no interaction message.
 
+    Args:
+        user (discord.User): The user who's allowed to interact with the message.
+        message (discord.Message): The message that the user is allowed to interact with.
+        no_interact_message (str, optional): The content that's output when a non-valid user interacts with the button.
+
     .. versionadded:: 0.6.6
     """
 

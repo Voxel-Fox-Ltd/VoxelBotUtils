@@ -12,6 +12,16 @@ New Features
 * Support enums in slash commands.
 * Add :func:`component_check` method.
 
+Changed Features
+"""""""""""""""""""""""""""""""""""""""
+
+* Add :code:`bot` attribute to :class:`ComponentInteractionPayload`.
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""
+
+* Fixed errors in slash commands not being sent through properly.
+
 0.6.5
 --------------------------------------
 
