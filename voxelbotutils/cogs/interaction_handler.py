@@ -113,13 +113,12 @@ class InteractionHandler(vbu.Cog):
         command_name = payload.component.custom_id[len("RUNCOMMAND "):]
         command = self.bot.get_command(command_name)
         if command:
-            await payload.defer()
             payload.author = payload.user
             payload.command = command
             if command.cog:
-                payload.args = [command.cog]
+                payload.args = [command.cog, payload]
             else:
-                payload.args = []
+                payload.args = [payload]
             payload.kwargs = {}
             await self.run_command(payload)
 
