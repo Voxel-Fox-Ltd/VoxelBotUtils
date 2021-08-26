@@ -107,6 +107,49 @@ class InteractionHandler(vbu.Cog):
                 ctx.kwargs[name] = v
 
     @vbu.Cog.listener()
+    async def on_component_interaction(self, payload: vbu.ComponentInteractionPayload):
+        if not payload.component.custom_id.startswith("RUNCOMMAND"):
+            return
+        command_name = payload.component.custom_id[len("RUNCOMMAND "):]
+        command = self.bot.get_command(command_name)
+        if command:
+            await payload.defer()
+            payload.author = payload.user
+            payload.command = command
+            if command.cog:
+                payload.args = [command.cog]
+            else:
+                payload.args = []
+            payload.kwargs = {}
+            await self.run_command(payload)
+
+    async def run_command(self, ctx):
+        self.bot.dispatch("command", ctx)
+        try:
+            if await ctx.command.can_run(ctx):
+                try:
+                    await ctx.command.callback(*ctx.args, **ctx.kwargs)
+                except commands.CommandError:
+                    ctx.command_failed = True
+                    raise
+                except asyncio.CancelledError:
+                    ctx.command_failed = True
+                    return
+                except Exception as exc:
+                    ctx.command_failed = True
+                    raise commands.CommandInvokeError(exc) from exc
+                finally:
+                    if ctx.command._max_concurrency is not None:
+                        await ctx.command._max_concurrency.release(ctx)
+                    await ctx.command.call_after_hooks(ctx)
+            else:
+                raise commands.CheckFailure()
+        except commands.CommandError as e:
+            await ctx.command.dispatch_error(ctx, e)
+        else:
+            self.bot.dispatch("command_completion", ctx)
+
+    @vbu.Cog.listener()
     async def on_socket_response(self, payload: dict):
         """
         Process any interaction create payloads we may receive.
@@ -141,7 +184,6 @@ class InteractionHandler(vbu.Cog):
                 else:
                     await ctx.command._prepare_cooldowns(ctx)
                     await self.parse_arguments(ctx)
-
                 await ctx.command.call_before_hooks(ctx)
             except commands.CommandError as e:
                 await ctx.command.dispatch_error(ctx, e)
@@ -154,30 +196,7 @@ class InteractionHandler(vbu.Cog):
 
             # And invoke
             self.logger.debug("Invoking interaction context for command %s" % (ctx.command.name))
-            self.bot.dispatch("command", ctx)
-            try:
-                if await ctx.command.can_run(ctx):
-                    try:
-                        await ctx.command.callback(*ctx.args, **ctx.kwargs)
-                    except commands.CommandError:
-                        ctx.command_failed = True
-                        raise
-                    except asyncio.CancelledError:
-                        ctx.command_failed = True
-                        return
-                    except Exception as exc:
-                        ctx.command_failed = True
-                        raise commands.CommandInvokeError(exc) from exc
-                    finally:
-                        if ctx.command._max_concurrency is not None:
-                            await ctx.command._max_concurrency.release(ctx)
-                        await ctx.command.call_after_hooks(ctx)
-                else:
-                    raise commands.CheckFailure()
-            except commands.CommandError as e:
-                await ctx.command.dispatch_error(ctx, e)
-            else:
-                self.bot.dispatch("command_completion", ctx)
+            await self.run_command(ctx)
 
         # See if it was a clicked component
         elif payload['d']['type'] == 3:
