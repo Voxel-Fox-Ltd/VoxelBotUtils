@@ -245,7 +245,12 @@ class Paginator(object):
         return self._page_cache[page_number]
 
     @staticmethod
-    def default_list_formatter(m, d):
+    def default_list_formatter(m: 'Paginator', d: typing.List[typing.Union[str, discord.Embed]]):
+        """
+        The default list formatter for embeds. Takes the paginator instance and the list of data
+        to be displayed, and returns a dictionary of kwargs for a `Message.edit`.
+        """
+
         if isinstance(d[0], discord.Embed):
             return {"embeds": d}
         return Embed(
@@ -256,7 +261,12 @@ class Paginator(object):
         )
 
     @staticmethod
-    def default_ranked_list_formatter(m, d):
+    def default_ranked_list_formatter(m: 'Paginator', d: typing.List[str]):
+        """
+        The default list formatter for embeds. Takes the paginator instance and the list of strings to be displayed,
+        and returns a dictionary of kwargs for a `Message.edit`.
+        """
+
         return Embed(
             use_random_colour=True,
             description="\n".join([
