@@ -105,10 +105,10 @@ class Paginator(object):
         if self.max_pages == 0:
             await ctx.send("There's no data to be shown.")
             return
-        
+
         # Set up our initial components as to not get hit with an UnboundLocalError
         components = self.get_pagination_components()
-        
+
         # Loop the reaction handler
         last_payload = None
         while True:
@@ -123,14 +123,16 @@ class Paginator(object):
             # Format the page data
             payload = self.formatter(self, items)
             if isinstance(payload, discord.Embed):
-                payload = {"embed": payload}
+                payload = {"embeds": [payload]}
             elif isinstance(payload, str):
                 payload = {"content": payload}
+            if (embed := payload.pop("embed", None)):
+                payload.update({"embeds": [embed]})
 
             # Set a default for these things
             payload.setdefault("content", None)
-            payload.setdefault("embed", None)
-            
+            payload.setdefault("embeds", None)
+
             # Work out what components to show
             components = self.get_pagination_components()
 
@@ -243,7 +245,14 @@ class Paginator(object):
         return self._page_cache[page_number]
 
     @staticmethod
-    def default_list_formatter(m, d):
+    def default_list_formatter(m: 'Paginator', d: typing.List[typing.Union[str, discord.Embed]]):
+        """
+        The default list formatter for embeds. Takes the paginator instance and the list of data
+        to be displayed, and returns a dictionary of kwargs for a `Message.edit`.
+        """
+
+        if isinstance(d[0], discord.Embed):
+            return {"embeds": d}
         return Embed(
             use_random_colour=True,
             description="\n".join(d),
@@ -252,7 +261,12 @@ class Paginator(object):
         )
 
     @staticmethod
-    def default_ranked_list_formatter(m, d):
+    def default_ranked_list_formatter(m: 'Paginator', d: typing.List[str]):
+        """
+        The default list formatter for embeds. Takes the paginator instance and the list of strings to be displayed,
+        and returns a dictionary of kwargs for a `Message.edit`.
+        """
+
         return Embed(
             use_random_colour=True,
             description="\n".join([
