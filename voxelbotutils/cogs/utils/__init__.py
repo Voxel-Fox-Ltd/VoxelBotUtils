@@ -63,7 +63,7 @@ def defer(ephemeral: bool = False):
 
 
 defer_response = defer  # oops
-
-
 _formatter = Formatter()
 format = _formatter.format
+db = DatabaseConnection
+re = RedisConnection
