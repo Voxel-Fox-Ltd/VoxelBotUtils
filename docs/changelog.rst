@@ -13,6 +13,7 @@ New Features
 * Add :func:`component_check` method.
 * Add :func:`format`.
 * Add button commands.
+* :class:`voxelbotutils.Paginator` now supports lists of embeds.
 
 Changed Features
 """""""""""""""""""""""""""""""""""""""
