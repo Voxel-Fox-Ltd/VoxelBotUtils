@@ -3,6 +3,27 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.7.0
+--------------------------------------
+
+Discord.py has died. I will now be maintaining both VoxelBotUtils and a Discord.py fork, `Novus <https://github.com/Voxel-Fox-Ltd/Novus>`_. As such, lot of features have thus moved from VBU over to Novus. 
+
+VBU has been moved from a standalone import (``import voxelbotutils as vbu``) to a Novus ext (``from discord.ext import vbu``) to better show that it is not a standalone library.
+
+* ``ComponentMessage`` is now redundant.
+* ``bot_has_permissions`` is now redundant.
+* Slash commands have been merged into Novus.
+* Interactions have been moved into Novus as `discord.ui.*`. The models remain the same.
+* All slash command checks (and their errors) have been removed as they will be added to Novus. They have not yet been replicated.
+* All cooldown subclasses have been removed, as Novus supports a dynamic cooldown system thanks to Danny. Thanks Danny.
+* ``argparse`` is no longer interpreted by commands as Danny implemented a flags system which is - quite frankly - better.
+* ``SubcommandGroup`` and its decorator have been removed, as Novus interprets this dynamically.
+* ``InteractionMessageable`` has been superceded by :class:`discord.Interaction`.
+* ``vbu.PartialChannel`` has been removed. Novus replaces this as :func:`discord.Client.get_partial_messageable`.
+* ``vbu.TimeFormatter`` has been removed. Novus replaces this as :func:`discord.utils.format_dt`.
+* ``Context.is_interaction`` has been removed. Novus replaces this as :attr:`discord.abc.Messageable.supports_ephemeral`.
+
+
 0.6.6
 --------------------------------------
 

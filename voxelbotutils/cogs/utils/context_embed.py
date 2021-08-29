@@ -37,7 +37,7 @@ class Embed(discord.Embed):
     def __enter__(self) -> 'Embed':
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, *args, **kwargs):
         pass
 
     def __eq__(self, other):

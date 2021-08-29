@@ -5,8 +5,6 @@ import discord
 from discord.ext import commands
 
 from .errors import InvokedMetaCommand
-from .interactions.components.action_row import MessageComponents, ActionRow
-from .interactions.components.buttons import Button, ButtonStyle
 
 
 def do_nothing(value):
@@ -132,7 +130,7 @@ class SettingsMenuOption(object):
         # Send prompt
         components = None
         if reactions:
-            components = MessageComponents(*[ActionRow(emoji=i, custom_id=i) for i in reactions])
+            components = discord.ui.MessageComponents(*[discord.ui.ActionRow(emoji=i, custom_id=i) for i in reactions])
         bot_message = await self.context.send(prompt, components=components)
 
         # Wait for a response from the user

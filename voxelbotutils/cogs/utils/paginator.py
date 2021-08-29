@@ -6,7 +6,6 @@ import discord
 from discord.ext import commands
 
 from .context_embed import Embed
-from .interactions.components import MessageComponents, Button, ButtonStyle, ActionRow
 
 
 class Paginator(object):
@@ -40,8 +39,7 @@ class Paginator(object):
             per_page: int = 10,
             formatter: typing.Callable[
                 ['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]
-            ] = None,
-            remove_reaction: bool = False):
+            ] = None):
         """
         Args:
             data (typing.Union[typing.Sequence, typing.Generator, typing.Callable[[int], typing.Any]]): The
@@ -57,14 +55,16 @@ class Paginator(object):
                 directly into a :func:`discord.Message.edit`.
         """
         self.data = data
-        self.per_page = per_page
-        self.formatter = formatter
-        if self.formatter is None:
+        self.per_page: int = per_page
+        self.formatter: typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]],
+        if formatter is None:
             self.formatter = self.default_list_formatter
-        self.current_page = None
+        else:
+            self.formatter = formatter
+        self.current_page: int = None
         self._page_cache = {}
 
-        self.max_pages = '?'
+        self.max_pages: int = '?'
         self._data_is_generator = any((
             inspect.isasyncgenfunction(self.data),
             inspect.isasyncgen(self.data),
@@ -178,31 +178,31 @@ class Paginator(object):
         ctx.bot.loop.create_task(self._edit_message(ctx, components=components.disable_components()))
 
     def get_pagination_components(self):
-        components = MessageComponents(
-            ActionRow(
-                Button(
+        components = discord.ui.MessageComponents(
+            discord.ui.ActionRow(
+                discord.ui.Button(
                     label="Start",
                     custom_id="START",
                     disabled=self.current_page == 0,
                 ),
-                Button(
+                discord.ui.Button(
                     label="Previous",
                     custom_id="PREVIOUS",
-                    style=ButtonStyle.SECONDARY,
+                    style=discord.ui.ButtonStyle.SECONDARY,
                     disabled=self.current_page == 0,
                 ),
-                Button(
+                discord.ui.Button(
                     label="Stop",
                     custom_id="STOP",
-                    style=ButtonStyle.DANGER,
+                    style=discord.ui.ButtonStyle.DANGER,
                 ),
-                Button(
+                discord.ui.Button(
                     label="Next",
                     custom_id="NEXT",
-                    style=ButtonStyle.SECONDARY,
+                    style=discord.ui.ButtonStyle.SECONDARY,
                     disabled=self.max_pages != "?" and self.current_page >= self.max_pages - 1,
                 ),
-                Button(
+                discord.ui.Button(
                     label="End",
                     custom_id="END",
                     disabled=self.max_pages == "?" or self.current_page >= self.max_pages - 1,

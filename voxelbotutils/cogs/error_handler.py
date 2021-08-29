@@ -24,10 +24,10 @@ class ErrorHandler(vbu.Cog):
             (commands.UnexpectedQuoteError, commands.InvalidEndOfQuotedStringError, commands.ExpectedClosingQuoteError),
             lambda ctx, error: "The quotes in your message have been done incorrectly."
         ),
-        (
-            vbu.checks.cooldown.NoRaiseCommandOnCooldown,
-            lambda ctx, error: None
-        ),
+        # (
+        #     vbu.checks.cooldown.NoRaiseCommandOnCooldown,
+        #     lambda ctx, error: None
+        # ),
         (
             commands.CommandOnCooldown,
             lambda ctx, error: f"You can't use this command again for another {vbu.TimeValue(error.retry_after).clean_spaced}."
@@ -40,18 +40,18 @@ class ErrorHandler(vbu.Cog):
             commands.NSFWChannelRequired,
             lambda ctx, error: f"You can only run this command in channels set as NSFW. {'You can set channels as NSFW in their channel settings.' if ctx.channel.permissions_for(ctx.author).manage_channels else ''}"
         ),
-        (
-            vbu.errors.BotNotInGuild,
-            lambda ctx, error: "The bot needs to be in the guild for you to run this command."
-        ),
-        (
-            vbu.errors.IsSlashCommand,
-            lambda ctx, error: "This command cannot be run as a slash command."
-        ),
-        (
-            vbu.errors.IsNotSlashCommand,
-            lambda ctx, error: "This command can only be run as a slash command."
-        ),
+        # (
+        #     vbu.errors.BotNotInGuild,
+        #     lambda ctx, error: "The bot needs to be in the guild for you to run this command."
+        # ),
+        # (
+        #     vbu.errors.IsSlashCommand,
+        #     lambda ctx, error: "This command cannot be run as a slash command."
+        # ),
+        # (
+        #     vbu.errors.IsNotSlashCommand,
+        #     lambda ctx, error: "This command can only be run as a slash command."
+        # ),
         (
             commands.DisabledCommand,
             lambda ctx, error: "This command has been disabled."
@@ -197,7 +197,7 @@ class ErrorHandler(vbu.Cog):
         instead. If it fails that too, it just stays silent.
         """
 
-        ephemeral = ctx.is_interaction and self.bot.config.get("ephemeral_error_messages", True)
+        ephemeral = ctx.supports_ephemeral and self.bot.config.get("ephemeral_error_messages", True)
         try:
             return await ctx.send(
                 text,
@@ -210,7 +210,6 @@ class ErrorHandler(vbu.Cog):
                 return await ctx.author.send(
                     author_text or text,
                     allowed_mentions=discord.AllowedMentions.none(),
-                    ephemeral=ephemeral,
                     wait=False,
                 )
             except discord.Forbidden:

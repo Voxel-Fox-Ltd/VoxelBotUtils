@@ -1,13 +1,12 @@
 import asyncio
 import typing
 
+import discord
 from discord.ext import commands
 
 from .check import Check
 from .errors import ConverterFailure, ConverterTimeout
 from .utils import get_discord_converter
-from ..interactions.components.action_row import MessageComponents
-from ..interactions.components.models import BaseComponent
 
 
 class _FakeConverter(object):
@@ -27,7 +26,7 @@ class Converter(object):
     def __init__(
             self, prompt: str, checks: typing.List[Check] = None,
             converter: typing.Union[typing.Callable[[str], typing.Any], commands.Converter] = str,
-            components: MessageComponents = None, timeout_message: str = None):
+            components: discord.ui.MessageComponents = None, timeout_message: str = None):
         """
         Args:
             prompt (str): The message that should be sent to the user when asking for the convertable.

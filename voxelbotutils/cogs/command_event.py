@@ -18,7 +18,7 @@ class CommandEvent(vbu.Cog):
         if len(ctx.message.content) > self.CONTENT_LIMIT:
             content += '...'
         invoke_text = "Command invoked"
-        if ctx.is_interaction:
+        if ctx.supports_ephemeral:
             if getattr(ctx, "given_values", None) is not None:
                 invoke_text = "Context invoked"
             else:
@@ -35,7 +35,7 @@ class CommandEvent(vbu.Cog):
         """
 
         command_stats_name = ctx.command.qualified_name.replace(' ', '_')
-        command_stats_tags = {"command_name": command_stats_name, "slash_command": ctx.is_interaction}
+        command_stats_tags = {"command_name": command_stats_name, "slash_command": ctx.supports_ephemeral}
         async with self.bot.stats() as stats:
             stats.increment("discord.bot.commands", tags=command_stats_tags)
 

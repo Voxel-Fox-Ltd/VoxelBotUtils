@@ -10,7 +10,7 @@ from .redis import RedisChannelHandler
 
 class Cog(OriginalCog):
     """
-    A slightly modified cog class to allow for the `cache_setup` method and for the class' `logger` instance.
+    A slightly modified cog class to allow for the ``cache_setup`` method and for the class' ``logger`` instance.
 
     Attributes:
         bot (Bot): The bot instance that the cog was added to.
@@ -27,10 +27,6 @@ class Cog(OriginalCog):
                 class APICommands(voxelbotutils.Cog): pass
                 c = APICommands(bot)
                 c.qualified_name  # "API Commands"
-
-                class FuckMee6Owo(voxelbotutils.Cog): pass
-                c = FuckMee6Owo(bot)
-                c.qualified_name  # "Fuck Mee6 Owo"
     """
 
     def __init__(self, bot: Bot, logger_name: str = None):

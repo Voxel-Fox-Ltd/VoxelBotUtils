@@ -89,12 +89,6 @@ TimeFormatter
 
 .. autoclass:: voxelbotutils.TimeFormatter
 
-ComponentMessage
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.ComponentMessage
-.. autoclass:: voxelbotutils.ComponentWebhookMessage
-
 component_check
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -105,153 +99,13 @@ format
 
 .. autofunction:: voxelbotutils.format
 
-bot_has_permissions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Drop-in replacements for :func:`discord.ext.commands.bot_has_permissions` that work with slash commands.
-
-.. autofunction:: voxelbotutils.bot_has_permissions
-.. autofunction:: voxelbotutils.bot_has_guild_permissions
-
 defer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: voxelbotutils.defer
-
-Slash Commands
----------------------------------------------------
-
-Slash commands also have :ref:`their own page<interactions howto>` for a basic integration guide.
-
-ApplicationCommand
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.ApplicationCommand
-
-ApplicationCommandType
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.ApplicationCommandType
-
-ApplicationCommandOption
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.ApplicationCommandOption
-
-ApplicationCommandOptionChoice
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.ApplicationCommandOptionChoice
-
-ApplicationCommandOptionType
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.ApplicationCommandOptionType
-
-Components
----------------------------------------------------
-
-Components also have :ref:`their own page<interactions howto>` for a basic integration guide.
-
-.. note:: A component interaction with its custom ID set to :code:`RUNCOMMAND xxxxxxx` will automatically invoke the command :code:`xxxxxxx`, ignoring any checks and converters.
-
-InteractionMessageable
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.InteractionMessageable
-   :no-members:
-   :no-special-members:
-   :members: defer, respond
-
-ComponentInteractionPayload
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.cogs.utils.interactions.components.ComponentInteractionPayload
-   :no-members:
-   :no-special-members:
-   :members: defer, respond, defer_update, update_message
-
-BaseComponent
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.BaseComponent
-   :exclude-members: to_dict, from_dict
-
-   .. note::
-
-      You will not need to make instances of this class - make instances of the child classes of this instead.
-
-DisableableComponent
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.DisableableComponent
-   :exclude-members: to_dict, from_dict
-   :show-inheritance:
-
-   .. note::
-
-      You will not need to make instances of this class - make instances of the child classes of this instead.
-
-ComponentHolder
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.ComponentHolder
-   :exclude-members: to_dict, from_dict
-
-   .. note::
-
-      You will not need to make instances of this class - make instances of the child classes of this instead.
-
-MessageComponents
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.MessageComponents
-   :exclude-members: to_dict, from_dict
-   :show-inheritance:
-
-ActionRow
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.ActionRow
-   :exclude-members: to_dict, from_dict
-   :show-inheritance:
-
-ButtonStyle
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.ButtonStyle
-
-Button
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.Button
-   :exclude-members: to_dict, from_dict
-   :inherited-members:
-   :show-inheritance:
-
-SelectOption
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.SelectOption
-   :exclude-members: to_dict, from_dict
-   :inherited-members:
-   :show-inheritance:
-
-SelectMenu
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.SelectMenu
-   :exclude-members: to_dict, from_dict
-   :inherited-members:
-   :show-inheritance:
 
 Checks
 -------------------------------------------------
-
-defer
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autofunction:: voxelbotutils.defer
 
 checks.is_config_set
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

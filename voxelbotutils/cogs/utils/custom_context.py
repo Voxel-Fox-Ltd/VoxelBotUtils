@@ -35,17 +35,12 @@ class AbstractMentionable(discord.Object):
 
 class Context(commands.Context):
     """
-    A modified version of the default :class:`discord.ext.commands.Context` to allow for things like
-    slash commands and interaction responses, as well as implementing :func:`Context.clean_prefix`.
+    A modified version of the default :class:`discord.ext.commands.Context`.
 
     Attributes:
         original_author_id (int): The ID of the original person to run the command. Persists through
-            the bot's `sudo` command, if you want to check the original author.
-        clean_prefix (str): A clean version of the prefix that the command was invoked with.
-        is_interaction (bool): Whether or not the context was invoked via an interaction
+            the bot's ``sudo`` command, if you want to check the original author.
     """
-
-    CAN_SEND_EPHEMERAL = False
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -53,9 +48,6 @@ class Context(commands.Context):
             self.original_author_id = self.author.id
         except AttributeError:
             self.original_author_id = None
-        self.is_slash_command = False
-        self.is_interaction = False
-        self._send_interaction_response_task = None
 
     async def okay(self) -> None:
         """
@@ -63,28 +55,6 @@ class Context(commands.Context):
         """
 
         return await self.message.add_reaction("\N{OK HAND SIGN}")
-
-    async def ack(self):
-        """:meta private: Deprecated"""
-        pass
-
-    async def defer(self, *args, **kwargs):
-        """
-        A defer method so we can use the same code for slash commands
-        as we do for text commands.
-        """
-
-        pass
-
-    @property
-    def clean_prefix(self) -> str:
-        return self.prefix.replace(
-            f"<@{self.bot.user.id}>",
-            f"@{self.bot.user.name}",
-        ).replace(
-            f"<@!{self.bot.user.id}>",
-            f"@{self.bot.user.name}",
-        )
 
     def get_mentionable_channel(self, channel_id: int, fallback: str = "null") -> AbstractMentionable:
         """

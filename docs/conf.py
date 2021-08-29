@@ -46,7 +46,7 @@ autodoc_default_options = {
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
-    'discord': ('https://discordpy.readthedocs.io/en/latest', None),
+    'discord': ('https://novus.readthedocs.io/en/latest', None),
     'aiohttp': ('https://docs.aiohttp.org/en/stable/', None),
     'asyncpg': ('https://magicstack.github.io/asyncpg/current/', None),
     'aioredis': ('https://aioredis.readthedocs.io/en/v1.3.0/', None),

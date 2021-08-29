@@ -12,7 +12,7 @@ except Exception:
 
 # Here are the requirements
 requirements = [
-    "discord.py>=1.7,<2.0",
+    "novus>=0.0.1,<0.1",
     "toml>=0.10.2,<0.11",
     "asyncpg>=0.21.0,<0.22",
     "aioredis>=1.3,<2.0",
@@ -53,7 +53,7 @@ setuptools.setup(
     version=version,
     author="Kae Bartlett",
     author_email="kae@voxelfox.co.uk",
-    description="A set of bot utilities for Discord.py",
+    description="A set of bot utilities for Novus",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Voxel-Fox-Ltd/VoxelBotUtils",
