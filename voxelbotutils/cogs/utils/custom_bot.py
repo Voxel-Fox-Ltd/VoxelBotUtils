@@ -80,19 +80,6 @@ def get_prefix(bot, message: discord.Message):
     return commands.when_mentioned_or(*prefix)(bot, message)
 
 
-class RouteV8(discord.http.Route):
-    BASE = 'https://discord.com/api/v8'
-
-
-class _EmptyProxy(object):
-
-    def __bool__(self):
-        return False
-
-
-_empty = _EmptyProxy()
-
-
 class MinimalBot(commands.AutoShardedBot):
     """
     A minimal version of the VoxelBotUtils bot that inherits from :class:`discord.ext.commands.AutoShardedBot`
@@ -177,6 +164,9 @@ class MinimalBot(commands.AutoShardedBot):
         """
 
         return content, embed
+
+
+original_send = Messageable.send
 
 
 class Bot(MinimalBot):
@@ -280,6 +270,9 @@ class Bot(MinimalBot):
         # Store the startup method so I can see if it completed successfully
         self.startup_method = None
         self.shard_manager = None
+
+        # Update the send method
+        Messageable.send = self.wrapped_send
 
         # Regardless of whether we start statsd or not, I want to add the log handler
         handler = AnalyticsLogHandler(self)
@@ -522,7 +515,7 @@ class Bot(MinimalBot):
         if url:
             try:
                 self.logger.debug("Grabbed event webhook from config")
-                w = discord.Webhook.from_url(url, adapter=discord.AsyncWebhookAdapter(self.session))
+                w = discord.Webhook.from_url(url, session=self.session)
                 w._state = self._connection
                 return w
             except discord.InvalidArgument:
@@ -546,7 +539,7 @@ class Bot(MinimalBot):
             url = webhook_picker.get("event_webhook_url", "")
         try:
             self.logger.debug(f"Grabbed event webhook for event {event_name} from config")
-            w = discord.Webhook.from_url(url, adapter=discord.AsyncWebhookAdapter(self.session))
+            w = discord.Webhook.from_url(url, session=self.session)
             w._state = self._connection
             return w
         except discord.InvalidArgument:
@@ -839,11 +832,15 @@ class Bot(MinimalBot):
         await self.set_default_presence()
         self.logger.info('Bot loaded.')
 
+    async def wrapped_send(self, messageable, content: str = None, *, embed: discord.Embed = None, embeddify: bool = None, **kwargs):
+        if "embeds" in kwargs or "files" in kwargs:
+            return await original_send(messageable, content, embed=embed, **kwargs)
+        content, embed = self.get_context_message(messageable, content, embed=embed, embeddify=embeddify)
+        return await original_send(messageable, content, embed=embed, **kwargs)
+
     def get_context_message(
-            self, messageable, content: str, *, embed: discord.Embed = discord.utils.MISSING,
-            file: discord.File = discord.utils.MISSING, embeddify: bool = None,
-            image_url: str = None, embeddify_file: bool = True,
-            **kwargs) -> typing.Tuple[str, discord.Embed]:
+            self, messageable, content: str, *, 
+            embed: discord.Embed = discord.utils.MISSING, embeddify: bool = None) -> typing.Tuple[str, discord.Embed]:
         """
         Takes a set of messageable content and outputs a string/Embed tuple that can be pushed
         into a messageable object.
@@ -852,10 +849,6 @@ class Bot(MinimalBot):
         # We got an embed? Let's go
         if embed:
             return content, embed
-
-        # If an image url is set, auto-set embeddify
-        if embeddify is None and image_url not in [None, discord.utils.MISSING]:
-            embeddify = True
 
         # If embeddify isn't set, grab from the config
         elif embeddify is None:
@@ -896,20 +889,6 @@ class Bot(MinimalBot):
             colour=random.randint(1, 0xffffff) or self.config.get('embed', dict()).get('colour', 0),
         )
         self.set_footer_from_config(embed)
-
-        # Set image
-        if image_url not in [None, discord.utils.MISSING]:
-            embed.set_image(url=image_url)
-        if file and file.filename and embeddify_file:
-            file_is_image = any([
-                file.filename.casefold().endswith('.png'),
-                file.filename.casefold().endswith('.jpg'),
-                file.filename.casefold().endswith('.jpeg'),
-                file.filename.casefold().endswith('.gif'),
-                file.filename.casefold().endswith('.webm')
-            ])
-            if file_is_image:
-                embed.set_image(url=f'attachment://{file.filename}')
 
         # Reset content
         content: typing.Optional[str] = self.config.get('embed', dict()).get('content', '').format(ctx=self) or None
