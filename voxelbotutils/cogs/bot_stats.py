@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 
 from . import utils as vbu
 from .. import __version__
@@ -8,7 +9,7 @@ class BotStats(vbu.Cog):
 
     @vbu.command()
     @vbu.checks.is_config_set('bot_info', 'enabled')
-    @vbu.bot_has_permissions(send_messages=True, embed_links=True)
+    @commands.bot_has_permissions(send_messages=True, embed_links=True)
     async def info(self, ctx: vbu.Context):
         """
         Gives you information about the bot, including some important links, such as its invite.
@@ -32,13 +33,13 @@ class BotStats(vbu.Cog):
         links = bot_info.get("links", dict())
         buttons = []
         if (invite_link := self.get_invite_link()):
-            buttons.append(vbu.Button(label="Invite", url=invite_link, style=vbu.ButtonStyle.LINK))
+            buttons.append(discord.ui.Button(label="Invite", url=invite_link, style=discord.ui.ButtonStyle.link))
         for label, info in links.items():
-            buttons.append(vbu.Button(emoji=info.get("emoji") or None, label=label, url=info['url'], style=vbu.ButtonStyle.LINK))
-        components = vbu.MessageComponents.add_buttons_with_rows(*buttons)
+            buttons.append(discord.ui.Button(emoji=info.get("emoji") or None, label=label, url=info['url'], style=discord.ui.ButtonStyle.link))
+        components = discord.ui.MessageComponents.add_buttons_with_rows(*buttons)
 
         # And send
-        return await ctx.send(embed=info_embed, components=components, wait=False)
+        return await ctx.send(embed=info_embed, components=components)
 
     def get_invite_link(self):
         """
@@ -55,7 +56,7 @@ class BotStats(vbu.Cog):
         return self.bot.get_invite_link(**oauth)
 
     @vbu.command()
-    @vbu.bot_has_permissions(send_messages=True)
+    @commands.bot_has_permissions(send_messages=True)
     @vbu.checks.is_config_set('oauth', 'enabled')
     async def invite(self, ctx: vbu.Context):
         """
@@ -65,7 +66,7 @@ class BotStats(vbu.Cog):
         await ctx.send(f"<{self.get_invite_link()}>", embeddify=False)
 
     @vbu.command()
-    @vbu.bot_has_permissions(send_messages=True)
+    @commands.bot_has_permissions(send_messages=True)
     @vbu.checks.is_config_set('bot_listing_api_keys', 'topgg_token')
     async def vote(self, ctx: vbu.Context):
         """
@@ -159,7 +160,7 @@ class BotStats(vbu.Cog):
         return embed
 
     @vbu.command(aliases=['status', 'botinfo'], add_slash_command=False)
-    @vbu.bot_has_permissions(send_messages=True, embed_links=True)
+    @commands.bot_has_permissions(send_messages=True, embed_links=True)
     async def stats(self, ctx: vbu.Context):
         """
         Gives you the stats for the bot.

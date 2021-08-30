@@ -203,14 +203,12 @@ class ErrorHandler(vbu.Cog):
                 text,
                 allowed_mentions=discord.AllowedMentions.none(),
                 ephemeral=ephemeral,
-                wait=False,
             )
         except discord.Forbidden:
             try:
                 return await ctx.author.send(
                     author_text or text,
                     allowed_mentions=discord.AllowedMentions.none(),
-                    wait=False,
                 )
             except discord.Forbidden:
                 pass
