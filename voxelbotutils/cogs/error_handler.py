@@ -299,7 +299,7 @@ class ErrorHandler(vbu.Cog):
         # Ping to the webook
         event_webhook: discord.Webhook = self.bot.get_event_webhook("unhandled_error")
         try:
-            avatar_url = str(self.bot.user.avatar_url)
+            avatar_url = str(self.bot.user.avatar.url)
         except Exception:
             avatar_url = None
         if event_webhook:
