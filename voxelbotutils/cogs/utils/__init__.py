@@ -38,3 +38,4 @@ _formatter = Formatter()
 format = _formatter.format
 Database = DatabaseConnection
 Redis = RedisConnection
+Stats = StatsdConnection
