@@ -259,7 +259,7 @@ class ErrorHandler(vbu.Cog):
                 break
 
         # See if they're tryina fuck me up
-        if output is not None and output in ctx.message.content and isinstance(error, commands.NotOwner):
+        if output is not None and ctx.message and output in ctx.message.content and isinstance(error, commands.NotOwner):
             output = "\N{UNAMUSED FACE}"
 
         # Send a message based on the output
@@ -286,7 +286,7 @@ class ErrorHandler(vbu.Cog):
         guild_id = ctx.guild.id if ctx.guild else None
         error_text = (
             f"Error `{error}` encountered.\nGuild `{guild_id}`, channel `{ctx.channel.id}`, "
-            f"user `{ctx.author.id}`\n```\n{ctx.message.content}\n```"
+            f"user `{ctx.author.id}`\n```\n{ctx.message.content if ctx.message else '[No message content]'}\n```"
         )
 
         # DM to owners

@@ -654,7 +654,7 @@ class Bot(MinimalBot):
             avatar_url = self.user.avatar.url
         except AttributeError:
             avatar_url = embed.Empty
-        embed.set_footer(**random.choice(pool), icon_url=avatar.url)
+        embed.set_footer(**random.choice(pool), icon_url=avatar_url)
 
     @property
     def clean_prefix(self):
