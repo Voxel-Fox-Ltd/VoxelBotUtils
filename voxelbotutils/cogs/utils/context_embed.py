@@ -116,7 +116,7 @@ class Embed(discord.Embed):
             name = user.display_name
         else:
             name = str(user)
-        super().set_author(name=name, icon_url=user.avatar_url)
+        super().set_author(name=name, icon_url=user.avatar.url)
         return self
 
     def add_field(self, name: str, value: str, inline: bool = True) -> 'Embed':
