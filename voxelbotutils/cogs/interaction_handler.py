@@ -15,9 +15,9 @@ class InteractionHandler(vbu.Cog):
         ctx = await self.bot.get_slash_context(interaction=interaction)
         ctx.invoked_with = command_name
         ctx.command = command
-    	await self.bot.invoke(ctx)
+        await self.bot.invoke(ctx)
 
 
 def setup(bot: vbu.Bot):
-	x = InteractionHandler(bot)
-	bot.add_cog(x)
+    x = InteractionHandler(bot)
+    bot.add_cog(x)
