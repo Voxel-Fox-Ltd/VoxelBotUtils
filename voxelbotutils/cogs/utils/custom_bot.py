@@ -1,4 +1,4 @@
-import asyncio
+aimport asyncio
 import collections
 import glob
 import logging
@@ -133,7 +133,7 @@ class MinimalBot(commands.AutoShardedBot):
                 data_authors[user.id] = {
                     "username": user.name,
                     "discriminator": user.discriminator,
-                    "avatar_url": str(user.avatar_url),
+                    "avatar_url": str(user.avatar.url),
                     "bot": user.bot,
                     "display_name": user.display_name,
                     "color": user.colour.value,
@@ -658,10 +658,10 @@ class Bot(MinimalBot):
         if not pool:
             return
         try:
-            avatar_url = self.user.avatar_url
+            avatar_url = self.user.avatar.url
         except AttributeError:
             avatar_url = embed.Empty
-        embed.set_footer(**random.choice(pool), icon_url=avatar_url)
+        embed.set_footer(**random.choice(pool), icon_url=avatar.url)
 
     @property
     def clean_prefix(self):
@@ -922,7 +922,7 @@ class Bot(MinimalBot):
             author_data = {
                 'name': name,
                 'url': url,
-                'icon_url': self.user.avatar_url,
+                'icon_url': self.user.avatar.url,
             }
             embed.set_author(**author_data)
 
