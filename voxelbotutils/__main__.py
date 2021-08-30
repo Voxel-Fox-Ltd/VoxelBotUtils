@@ -131,7 +131,7 @@ def get_next_version(current_version) -> str:
     Get the next version that we can use in the requirements file.
     """
 
-    release, major, minor = [int(i) for i in current_version.split(".")]
+    release, major, minor = [int("".join(o for o in i if o.isdigit())) for i in current_version.split(".")]
     if release == 0:
         return f"0.{major + 1}.0"
     return f"{release + 1}.0.0"
