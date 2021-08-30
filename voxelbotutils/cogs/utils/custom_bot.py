@@ -417,10 +417,15 @@ class Bot(MinimalBot):
                 setattr(permissions_object, p, True)
             permissions = permissions_object
 
+        # Danny uses scopes instead of scope
+        # Which makes _sense_
+        # But is mildly annoying
+        scopes = scope or kwargs.get('scopes') or self.config.get('oauth', {}).get('scope', None) or 'bot'
+
         # Make the params for the url
         data = {
             'client_id': client_id or self.config.get('oauth', {}).get('client_id', None) or self.user.id,
-            'scope': scope or self.config.get('oauth', {}).get('scope', None) or 'bot',
+            'scopes': scopes.split(),
             'permissions': permissions.value,
         }
         if redirect_uri:

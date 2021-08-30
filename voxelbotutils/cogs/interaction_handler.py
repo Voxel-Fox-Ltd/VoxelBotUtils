@@ -39,7 +39,7 @@ class InteractionHandler(vbu.Cog, command_attrs={'hidden': True, 'add_slash_comm
         """
 
         guild = guild_id if guild_id is None else discord.Object(guild_id)
-        await self.bot.register_application_commands([], guild=guild)
+        await self.bot.register_application_commands(commands=None, guild=guild)
         await ctx.send("Removed slash commands.")
 
 
