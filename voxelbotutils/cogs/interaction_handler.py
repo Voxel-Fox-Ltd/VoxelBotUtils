@@ -4,7 +4,7 @@ from discord.ext import commands
 from . import utils as vbu
 
 
-class InteractionHandler(vbu.Cog):
+class InteractionHandler(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': False}):
 
     @vbu.Cog.listener()
     async def on_component_interaction(self, interaction: discord.Interaction):
@@ -16,6 +16,31 @@ class InteractionHandler(vbu.Cog):
         ctx.invoked_with = command_name
         ctx.command = command
         await self.bot.invoke(ctx)
+
+    @vbu.command(aliases=['addslashcommands', 'addslashcommand', 'addapplicationcommand'])
+    @commands.is_owner()
+    @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
+    async def addapplicationcommands(self, ctx, guild_id: int = None, *commands: str):
+        """
+        Adds all of the bot's interaction commands to the global interaction handler.
+        """
+
+        guild = guild_id if guild_id is None else discord.Object(guild_id)
+        added_commands = await self.bot.register_application_commands(guild=guild)
+        output_strings = "\n".join([f"\N{BULLET} `{i!r}`" for i in added_commands])
+        await ctx.send(f"Added slash commands:\n{output_strings}\n")
+
+    @vbu.command(aliases=['removeslashcommands', 'removeslashcommand', 'removeapplicationcommand'])
+    @commands.is_owner()
+    @commands.bot_has_permissions(send_messages=True, add_reactions=True, attach_files=True)
+    async def removeapplicationcommands(self, ctx, guild_id: int = None, *commands: str):
+        """
+        Removes the bot's interaction commands from the global interaction handler.
+        """
+
+        guild = guild_id if guild_id is None else discord.Object(guild_id)
+        await self.bot.register_application_commands([], guild=guild)
+        await ctx.send("Removed slash commands.")
 
 
 def setup(bot: vbu.Bot):
