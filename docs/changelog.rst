@@ -13,7 +13,7 @@ VBU has been moved from a standalone import (``import voxelbotutils as vbu``) to
 * ``ComponentMessage`` is now redundant.
 * ``bot_has_permissions`` is now redundant.
 * Slash commands have been merged into Novus.
-* Interactions have been moved into Novus as `discord.ui.*`. The models remain the same.
+* Interactions have been moved into Novus as ``discord.ui.*``. The models remain the same.
 * All slash command checks (and their errors) have been removed as they will be added to Novus. They have not yet been replicated.
 * All cooldown subclasses have been removed, as Novus supports a dynamic cooldown system thanks to Danny. Thanks Danny.
 * ``argparse`` is no longer interpreted by commands as Danny implemented a flags system which is - quite frankly - better.

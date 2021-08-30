@@ -10,10 +10,8 @@ from .option import Option
 from .mixins import MenuDisplayable
 from .callbacks import MenuCallbacks
 from .converter import Converter
-from ..interactions.components import Button, ButtonStyle, MessageComponents
 from ..custom_cog import Cog
 from ..custom_command import Command
-from ..dpy_checks import bot_has_permissions
 
 
 def _do_nothing(return_value=None):
@@ -48,7 +46,7 @@ class Menu(MenuDisplayable):
     def create_cog(
             self, bot=None, *, cog_name: str = "Bot Settings", name: str = "settings",
             aliases: typing.List[str] = ["setup"], permissions: typing.List[str] = None,
-            post_invoke: typing.Callable[[commands.Context], None] = None, **command_kwargs):
+            post_invoke: typing.Callable[[commands.Context], typing.Awaitable[None]] = None, **command_kwargs):
         """
         Creates a cog that can be loaded into the bot in a setup method.
 
@@ -71,7 +69,7 @@ class Menu(MenuDisplayable):
 
             @commands.command(cls=Command, name=name, aliases=aliases, **command_kwargs)
             @commands.has_permissions(**{i: True for i in permissions})
-            @bot_has_permissions(send_messages=True, embed_links=True)
+            @commands.bot_has_permissions(send_messages=True, embed_links=True)
             async def settings(nested_self, ctx):
                 """
                 Modify some of the bot's settings.

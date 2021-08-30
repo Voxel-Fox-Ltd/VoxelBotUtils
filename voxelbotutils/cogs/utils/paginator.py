@@ -56,7 +56,7 @@ class Paginator(object):
         """
         self.data = data
         self.per_page: int = per_page
-        self.formatter: typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]],
+        self.formatter: typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]]
         if formatter is None:
             self.formatter = self.default_list_formatter
         else:

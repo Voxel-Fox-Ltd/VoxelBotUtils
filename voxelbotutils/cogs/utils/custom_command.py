@@ -9,7 +9,6 @@ from discord.ext.commands.core import wrap_callback
 
 from .custom_context import PrintContext
 from .custom_cog import Cog
-from .interactions.application_commands import ApplicationCommandType
 
 
 class Command(commands.Command):
