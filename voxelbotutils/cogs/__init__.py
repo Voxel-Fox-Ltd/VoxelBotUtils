@@ -10,6 +10,6 @@ all_packages = (
     'owner_only',
     'presence_auto_updater',
     # 'application_command_handler',
-    # 'interaction_handler',
+    'interaction_handler',
     # 'button_command_redirect',
 )
