@@ -166,9 +166,6 @@ class MinimalBot(commands.AutoShardedBot):
         return content, embed
 
 
-original_send = Messageable.send
-
-
 class Bot(MinimalBot):
     """
     A bot class that inherits from :class:`voxelbotutils.MinimalBot`, detailing more VoxelBotUtils
@@ -270,9 +267,6 @@ class Bot(MinimalBot):
         # Store the startup method so I can see if it completed successfully
         self.startup_method = None
         self.shard_manager = None
-
-        # Update the send method
-        Messageable.send = self.wrapped_send
 
         # Regardless of whether we start statsd or not, I want to add the log handler
         handler = AnalyticsLogHandler(self)
@@ -831,12 +825,6 @@ class Bot(MinimalBot):
         self.logger.info("Setting activity to default")
         await self.set_default_presence()
         self.logger.info('Bot loaded.')
-
-    async def wrapped_send(self, messageable, content: str = None, *, embed: discord.Embed = None, embeddify: bool = None, **kwargs):
-        if "embeds" in kwargs or "files" in kwargs:
-            return await original_send(messageable, content, embed=embed, **kwargs)
-        content, embed = self.get_context_message(messageable, content, embed=embed, embeddify=embeddify)
-        return await original_send(messageable, content, embed=embed, **kwargs)
 
     def get_context_message(
             self, messageable, content: str, *, 
