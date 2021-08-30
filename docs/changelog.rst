@@ -8,8 +8,6 @@ A human-readable list of changes between versions.
 
 Discord.py has died. I will now be maintaining both VoxelBotUtils and a Discord.py fork, `Novus <https://github.com/Voxel-Fox-Ltd/Novus>`_. As such, lot of features have thus moved from VBU over to Novus. 
 
-VBU has been moved from a standalone import (``import voxelbotutils as vbu``) to a Novus ext (``from discord.ext import vbu``) to better show that it is not a standalone library.
-
 * ``ComponentMessage`` is now redundant.
 * ``bot_has_permissions`` is now redundant.
 * Slash commands have been merged into Novus.
