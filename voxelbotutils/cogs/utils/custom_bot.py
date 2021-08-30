@@ -426,12 +426,12 @@ class Bot(MinimalBot):
         data = {
             'client_id': client_id or self.config.get('oauth', {}).get('client_id', None) or self.user.id,
             'scopes': scopes.split(),
-            'permissions': permissions.value,
+            'permissions': permissions,
         }
         if redirect_uri:
             data['redirect_uri'] = redirect_uri
         if guild_id:
-            data['guild_id'] = guild_id
+            data['guild'] = discord.Object(guild_id)
         if response_type:
             data['response_type'] = response_type
 
