@@ -63,7 +63,7 @@ class BotStats(vbu.Cog):
         Gives you the bot's invite link.
         """
 
-        await ctx.send(f"<{self.get_invite_link()}>", embeddify=False)
+        await ctx.send(f"<{self.get_invite_link()}>")
 
     @vbu.command()
     @commands.bot_has_permissions(send_messages=True)
@@ -81,7 +81,7 @@ class BotStats(vbu.Cog):
             output_strings.append(f"<https://discordbotlist.com/bots/{bot_user_id}/upvote>")
         if not output_strings:
             return await ctx.send("Despite being enabled, the vote command has no vote links to provide :/")
-        return await ctx.send("\n".join(output_strings), embeddify=False)
+        return await ctx.send("\n".join(output_strings))
 
     async def get_stats_embed(self):
         """

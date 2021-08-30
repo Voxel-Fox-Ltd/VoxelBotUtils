@@ -165,9 +165,9 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
         # And send our data
         try:
-            await sendable.send(**payload, embeddify=False)
+            await sendable.send(**payload)
         except discord.HTTPException as e:
-            return await ctx.send(f"I couldn't send that message - `{e}`", embeddify=False)
+            return await ctx.send(f"I couldn't send that message - `{e}`")
         await ctx.okay()
 
     def _cleanup_code(self, content):
@@ -250,7 +250,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
         try:
             exec(code, env)
         except Exception as e:
-            return await ctx.send(f'```py\n{e.__class__.__name__}: {e}\n```', embeddify=False)
+            return await ctx.send(f'```py\n{e.__class__.__name__}: {e}\n```')
 
         # Grab the function we just made and run it
         func = env['func']
@@ -262,7 +262,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
         except Exception:
             end_time = time.perf_counter()
             stdout_value = stdout.getvalue() or None
-            return await ctx.send(f'```py\n{stdout_value}\n{traceback.format_exc()}\n```', embeddify=False)
+            return await ctx.send(f'```py\n{stdout_value}\n{traceback.format_exc()}\n```')
         end_time = time.perf_counter()
 
         # Oh no it didn't cause an error
@@ -278,7 +278,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
         if ret is None:
             # It might have printed something
             if stdout_value is not None:
-                await ctx.send(f'```py\n{stdout_value}\n```{self.get_execution_time(end_time, start_time)}', embeddify=False)
+                await ctx.send(f'```py\n{stdout_value}\n```{self.get_execution_time(end_time, start_time)}')
             return
 
         # If the function did return a value
@@ -552,7 +552,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
         # Send initial message
         current_data = f"$ {command}\n\n"
-        m = await ctx.send(f"```\n{current_data}```", embeddify=False)
+        m = await ctx.send(f"```\n{current_data}```")
 
         # Woah I do this a few times so let's put it in a function
         async def get_process_data(proc):

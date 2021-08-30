@@ -13,7 +13,7 @@ class MiscCommands(vbu.Cog):
         Gives the invite to the support server.
         """
 
-        await ctx.send(f"{self.bot.config['command_data']['guild_invite']}", embeddify=False)
+        await ctx.send(f"{self.bot.config['command_data']['guild_invite']}")
 
     @vbu.command(aliases=['patreon'], add_slash_command=False)
     @vbu.checks.is_config_set('command_data', 'donate_link')
@@ -23,7 +23,7 @@ class MiscCommands(vbu.Cog):
         Gives you the bot's creator's donate link.
         """
 
-        await ctx.send(f"{self.bot.config['command_data']['donate_link']}", embeddify=False)
+        await ctx.send(f"{self.bot.config['command_data']['donate_link']}")
 
     @vbu.command(add_slash_command=False)
     @commands.bot_has_permissions(send_messages=True)
@@ -33,7 +33,7 @@ class MiscCommands(vbu.Cog):
         Gives you a link to the bot's website.
         """
 
-        await ctx.send(f"{self.bot.config['command_data']['website_link']}", embeddify=False)
+        await ctx.send(f"{self.bot.config['command_data']['website_link']}")
 
 
 def setup(bot: vbu.Bot):
