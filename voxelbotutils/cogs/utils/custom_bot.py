@@ -384,16 +384,14 @@ class Bot(MinimalBot):
             return None
 
     def get_invite_link(
-            self, *, base: str = None, client_id: int = None, scope: str = None,
+            self, *, client_id: int = None, scope: str = None,
             response_type: str = None, redirect_uri: str = None,
             guild_id: int = None, permissions: discord.Permissions = None,
-            enabled: bool = None) -> str:
+            **kwargs) -> str:
         """
         Generate an invite link for the bot.
 
         Args:
-            base (str, optional): The base URL that should be used for the invite command. For almost all
-                cases, the default of `https://discord.com/oauth2/authorize` is probably fine.
             client_id (int, optional): The client ID that the invite command should use. Uses the passed
                 argument, then :attr:`the config's<BotConfig.oauth.client_id>` set client ID, and then the bot's
                 ID if nothing is found.
@@ -407,6 +405,8 @@ class Bot(MinimalBot):
         Returns:
             str: The URL for the invite.
         """
+
+        # Base and enabled are silently ignored
 
         # Make sure our permissions is a valid object
         permissions_object = discord.Permissions()
