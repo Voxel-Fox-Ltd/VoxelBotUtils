@@ -107,7 +107,7 @@ class Menu(MenuDisplayable):
 
         # Set up our base case
         sendable_data: dict = await self.get_sendable_data(ctx)
-        sent_components: MessageComponents = sendable_data['components']
+        sent_components: discord.ui.MessageComponents = sendable_data['components']
         menu_message: discord.Message = await ctx.send(**sendable_data)
 
         # Set up a function so as to get
@@ -127,7 +127,7 @@ class Menu(MenuDisplayable):
             # Wait for the user to click on a button
             try:
                 payload = await ctx.bot.wait_for("component_interaction", check=get_button_check(menu_message), timeout=60.0)
-                await payload.defer_update()
+                await payload.response.defer_update()
             except asyncio.TimeoutError:
                 break
 
@@ -186,8 +186,8 @@ class Menu(MenuDisplayable):
                 output = await i.get_display(ctx)
                 if output:
                     output_strings.append(f"\N{BULLET} {output}")
-                style = (ButtonStyle.SECONDARY if isinstance(i._callback, Menu) else None) or i._button_style or ButtonStyle.PRIMARY
-                buttons.append(Button(
+                style = (discord.ui.ButtonStyle.secondary if isinstance(i._callback, Menu) else None) or i._button_style or discord.ui.ButtonStyle.primary
+                buttons.append(discord.ui.Button(
                     i.component_display,
                     custom_id=i.component_display,
                     style=style,
@@ -195,10 +195,10 @@ class Menu(MenuDisplayable):
         ctx.database = None
 
         # Add a done button
-        buttons.append(Button("Done", custom_id="Done", style=ButtonStyle.SUCCESS))
+        buttons.append(discord.ui.Button("Done", custom_id="Done", style=discord.ui.ButtonStyle.sucess))
 
         # Output
-        components = MessageComponents.add_buttons_with_rows(*buttons)
+        components = discord.ui.MessageComponents.add_buttons_with_rows(*buttons)
         embed = discord.Embed(colour=0xffffff)
         embed.description = "\n".join(output_strings) or "No options added."
         return {
@@ -309,7 +309,7 @@ class MenuIterable(Menu, Option):
                 callback=self.delete_database_call(i),
                 cache_callback=self.cache_delete_callback(*self.cache_delete_args(i))
             )
-            v._button_style = ButtonStyle.DANGER
+            v._button_style = discord.ui.ButtonStyle.danger
             generated.append(v)
 
         # Add "add new" button
@@ -321,7 +321,7 @@ class MenuIterable(Menu, Option):
                 callback=self.insert_database_call(),
                 cache_callback=self.cache_callback
             )
-            v._button_style = ButtonStyle.SECONDARY
+            v._button_style = discord.ui.ButtonStyle.secondary
             generated.append(v)
 
         # And return

@@ -96,7 +96,7 @@ class SettingsMenuOption(object):
         # Do callback
         if isinstance(self.callback, commands.Command):
             await self.callback.invoke(self.context)
-        elif isinstasnce(self.callback, SettingsMenu):
+        elif isinstance(self.callback, SettingsMenu):
             await self.callback.start(self.context)
         else:
             called_data = self.callback(self, *returned_data)
@@ -143,7 +143,7 @@ class SettingsMenuOption(object):
                         payload.user.id == self.context.author.id,
                     ])
                 payload = await self.context.bot.wait_for("component_interaction", timeout=120, check=check)
-                await payload.defer_update()
+                await payload.response.defer_update()
                 content = str(payload.component.custom_id)
             else:
                 def check(message):
@@ -621,7 +621,7 @@ class SettingsMenu(object):
                         payload.user.id == ctx.author.id,
                     ])
                 payload = await ctx.bot.wait_for("component_interaction", check=check, timeout=timeout)
-                await payload.defer_update()
+                await payload.response.defer_update()
             except asyncio.TimeoutError:
                 break
             picked_emoji = str(payload.component.custom_id)
@@ -685,8 +685,8 @@ class SettingsMenu(object):
         self.emoji_options[self.TICK_EMOJI] = None
         emoji_list.append(self.TICK_EMOJI)
 
-        buttons = [Button(emoji=i, custom_id=i) for i in emoji_list] + [Button("Done", "done", style=ButtonStyle.SUCCESS)]
-        components = MessageComponents.add_buttons_with_rows(*buttons)
+        buttons = [discord.ui.Button(emoji=i, custom_id=i) for i in emoji_list] + [discord.ui.Button(label="Done", custom_id="done", style=discord.ui.ButtonStyle.sucess)]
+        components = discord.ui.MessageComponents.add_buttons_with_rows(*buttons)
 
         # Return data
         return {'embed': embed, "components": components}, emoji_list
