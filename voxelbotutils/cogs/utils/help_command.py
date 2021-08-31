@@ -43,7 +43,7 @@ class HelpCommand(commands.MinimalHelpCommand):
         return await self.filter_commands_classmethod(self.context, commands_to_filter)
 
     def get_command_signature(self, command: commands.Command):
-        return '{0.clean_prefix}{1.qualified_name} {1.signature}'.format(self, command)
+        return '{0.context.clean_prefix}{1.qualified_name} {1.signature}'.format(self, command)
 
     async def send_cog_help(self, cog: commands.Cog):
         """
@@ -116,7 +116,7 @@ class HelpCommand(commands.MinimalHelpCommand):
         data = {"embed": help_embed}
         content = self.context.bot.config.get("help_command", {}).get("content", None)
         if content:
-            data.update({"content": content.format(bot=self.context.bot, prefix=self.clean_prefix)})
+            data.update({"content": content.format(bot=self.context.bot, prefix=self.context.clean_prefix)})
         await self.send_to_destination(**data)
 
     async def send_to_destination(self, *args, **kwargs):
@@ -178,11 +178,11 @@ class HelpCommand(commands.MinimalHelpCommand):
         """
 
         if command.short_doc:
-            v = f"**{self.clean_prefix}{command.qualified_name}** - {command.short_doc}"
+            v = f"**{self.context.clean_prefix}{command.qualified_name}** - {command.short_doc}"
         else:
-            v = f"**{self.clean_prefix}{command.qualified_name}**"
+            v = f"**{self.context.clean_prefix}{command.qualified_name}**"
         if with_signature:
-            v += f"\n`{self.clean_prefix}{command.qualified_name} {command.signature}`"
+            v += f"\n`{self.context.clean_prefix}{command.qualified_name} {command.signature}`"
         return v
 
     def get_destination(self):
