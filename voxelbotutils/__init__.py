@@ -20,4 +20,4 @@ if _web_extras_installed():
 else:
     web = None
 
-__version__ = "0.7.0a"
+__version__ = "0.7.1a"

@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('./../'))
 # -- Project information -----------------------------------------------------
 
 project = 'VoxelBotUtils'
-copyright = '2020 Kae Bartlett'
+copyright = '2020-present Kae Bartlett'
 author = 'Kae Bartlett'
 
 

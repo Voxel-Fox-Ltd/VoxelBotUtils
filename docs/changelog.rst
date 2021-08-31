@@ -3,6 +3,19 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.7.1
+--------------------------------------
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""
+
+* Fix ``avatar.url`` being deprecated..
+* Fix ``Webhook.AsyncWebhookAdapter`` being deprecated.
+* Fix slash command logging.
+* Readd ``addslashcommands`` command.
+* Fix ``Bot.get_invite_link``.
+* Remove references to ``embeddify``.
+
 0.7.0
 --------------------------------------
 
