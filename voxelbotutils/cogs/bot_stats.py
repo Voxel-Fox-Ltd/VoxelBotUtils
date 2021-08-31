@@ -1,8 +1,11 @@
+from importlib import metadata
+import sys
+
 import discord
 from discord.ext import commands
+import pkg_resources
 
 from . import utils as vbu
-from .. import __version__
 
 
 class BotStats(vbu.Cog):
@@ -98,10 +101,19 @@ class BotStats(vbu.Cog):
 
         # Make embed
         embed = vbu.Embed(use_random_colour=True)
-        embed.set_footer(f"{self.bot.user} - VoxelBotUtils v{__version__}", icon_url=self.bot.user.avatar_url)
         if creator_id:
             embed.add_field("Creator", f"{creator!s}\n{creator_id}")
-        embed.add_field("Library", f"Discord.py {discord.__version__}")
+
+        # Add version info
+        novus_meta = metadata.metadata("novus")
+        vbu_meta = metadata.metadata("voxelbotutils")
+        embed.add_field("Library", (
+            f"Python {sys.version.split(' ', 1)[0]}, "
+            f"[Novus]({novus_meta['Home-page']}) {novus_meta['Version']}, "
+            f"[VoxelBotUtils]({vbu_meta['Home-page']}) {vbu_meta['Version']}"
+        ))
+
+        # Add guild count
         if self.bot.shard_count != len((self.bot.shard_ids or [0])):
             embed.add_field(
                 "Approximate Guild Count",
