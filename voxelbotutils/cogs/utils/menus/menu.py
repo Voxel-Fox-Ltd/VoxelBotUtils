@@ -195,7 +195,7 @@ class Menu(MenuDisplayable):
         ctx.database = None
 
         # Add a done button
-        buttons.append(discord.ui.Button("Done", custom_id="Done", style=discord.ui.ButtonStyle.sucess))
+        buttons.append(discord.ui.Button(label="Done", custom_id="Done", style=discord.ui.ButtonStyle.sucess))
 
         # Output
         components = discord.ui.MessageComponents.add_buttons_with_rows(*buttons)
