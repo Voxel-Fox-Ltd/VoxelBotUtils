@@ -121,7 +121,7 @@ class Paginator(object):
                 break
 
             # Format the page data
-            payload = self.formatter(self, items)
+            payload: typing.Dict[str, typing.Any] = self.formatter(self, items)
             if isinstance(payload, discord.Embed):
                 payload = {"embeds": [payload]}
             elif isinstance(payload, str):
@@ -146,16 +146,16 @@ class Paginator(object):
                 return
 
             # Wait for reactions to be added by the user
-            component_payload = None
+            interaction = None
             try:
                 check = lambda p: p.user.id == ctx.author.id and p.message.id == self._message.id
-                component_payload = await ctx.bot.wait_for("component_interaction", check=check, timeout=timeout)
-                await component_payload.defer_update()
+                interaction = await ctx.bot.wait_for("component_interaction", check=check, timeout=timeout)
+                await interaction.response.defer_update()
             except asyncio.TimeoutError:
                 break
 
             # Change the page number based on the reaction
-            if component_payload is None:
+            if interaction is None:
                 self.current_page = "STOP"
             else:
                 self.current_page = {
@@ -164,7 +164,7 @@ class Paginator(object):
                     "STOP": lambda i: "STOP",
                     "NEXT": lambda i: i + 1,
                     "END": lambda i: self.max_pages,
-                }[str(component_payload.component.custom_id)](self.current_page)
+                }[str(interaction.component.custom_id)](self.current_page)
             if self.current_page == "STOP":
                 break
 
@@ -188,18 +188,18 @@ class Paginator(object):
                 discord.ui.Button(
                     label="Previous",
                     custom_id="PREVIOUS",
-                    style=discord.ui.ButtonStyle.SECONDARY,
+                    style=discord.ui.ButtonStyle.secondary,
                     disabled=self.current_page == 0,
                 ),
                 discord.ui.Button(
                     label="Stop",
                     custom_id="STOP",
-                    style=discord.ui.ButtonStyle.DANGER,
+                    style=discord.ui.ButtonStyle.danger,
                 ),
                 discord.ui.Button(
                     label="Next",
                     custom_id="NEXT",
-                    style=discord.ui.ButtonStyle.SECONDARY,
+                    style=discord.ui.ButtonStyle.secondary,
                     disabled=self.max_pages != "?" and self.current_page >= self.max_pages - 1,
                 ),
                 discord.ui.Button(
