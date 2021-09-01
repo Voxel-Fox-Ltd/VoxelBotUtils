@@ -145,10 +145,6 @@ class ErrorHandler(vbu.Cog):
             lambda ctx, error: str(error).format(ctx=ctx, error=error)
         ),
         (
-            commands.ConversionError,
-            lambda ctx, error: "I failed to convert that argument - please try again in a few minutes."
-        ),
-        (
             commands.TooManyArguments,
             lambda ctx, error: f"You gave too many arguments to this command - see `{ctx.clean_prefix}help {' '.join(ctx.command.qualified_name.split(' ')[:-1] + [ctx.invoked_with])}`."
         ),
@@ -197,19 +193,18 @@ class ErrorHandler(vbu.Cog):
         instead. If it fails that too, it just stays silent.
         """
 
-        ephemeral = ctx.supports_ephemeral and self.bot.config.get("ephemeral_error_messages", True)
+        kwargs = {
+            "content": text,
+            "allowed_mentions": discord.AllowedMentions.none()
+        }
+        if isinstance(ctx, commands.SlashContext) and self.bot.config.get("ephemeral_error_messages", True):
+            kwargs.update({"ephemeral": True})
         try:
-            return await ctx.send(
-                text,
-                allowed_mentions=discord.AllowedMentions.none(),
-                ephemeral=ephemeral,
-            )
+            return await ctx.send(**kwargs)
         except discord.Forbidden:
+            kwargs["content"] = text or author_text
             try:
-                return await ctx.author.send(
-                    author_text or text,
-                    allowed_mentions=discord.AllowedMentions.none(),
-                )
+                return await ctx.author.send(**kwargs)
             except discord.Forbidden:
                 pass
         except discord.NotFound:

@@ -14,7 +14,7 @@ class Help(vbu.Cog):
     def cog_unload(self):
         self.bot.help_command = self._original_help_command
 
-    @vbu.command(name="commands", hidden=True)
+    @vbu.command(name="commands", hidden=True, add_slash_command=False)
     async def _commands(self, ctx: vbu.Context, *args):
         """
         An alias for help.
@@ -22,7 +22,7 @@ class Help(vbu.Cog):
 
         return await ctx.send_help(*args)
 
-    @vbu.command(hidden=True)
+    @vbu.command(hidden=True, add_slash_command=False)
     @commands.has_permissions(manage_messages=True)
     async def channelhelp(self, ctx: vbu.Context, *args):
         """
