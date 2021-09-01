@@ -15,6 +15,7 @@ from .paginator import Paginator
 from .help_command import HelpCommand
 from .string import Formatter
 from .component_check import component_check
+from .embeddify import Embeddify
 
 
 def command(*args, **kwargs):
@@ -36,6 +37,7 @@ def minify_html(text: str) -> str:
 
 _formatter = Formatter()
 format = _formatter.format
+embeddify = Embeddify.send
 Database = DatabaseConnection
 Redis = RedisConnection
 Stats = StatsdConnection

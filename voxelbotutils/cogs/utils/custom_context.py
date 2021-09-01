@@ -73,7 +73,7 @@ class Context(commands.Context):
             x = self.bot.get_channel(int(channel_id))
         if x:
             return x
-        return AbstractMentionable(id, fallback, fallback)
+        return AbstractMentionable(channel_id, fallback, fallback)
 
     def get_mentionable_role(self, role_id: int, fallback: str = "null") -> AbstractMentionable:
         """
@@ -92,7 +92,7 @@ class Context(commands.Context):
             x = self.guild.get_role(int(role_id))
         if x:
             return x
-        return AbstractMentionable(id, fallback, fallback)
+        return AbstractMentionable(role_id, fallback, fallback)
 
 
 class _NoRequestTyping(object):

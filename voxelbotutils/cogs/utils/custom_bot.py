@@ -4,7 +4,6 @@ import glob
 import logging
 import typing
 import copy
-from urllib.parse import urlencode
 import string
 import platform
 import random
@@ -14,8 +13,8 @@ import sys
 import aiohttp
 import toml
 import discord
+from discord.iterators import HistoryIterator
 from discord.ext import commands
-from discord.abc import Messageable
 import upgradechat
 
 from .custom_context import Context
@@ -24,6 +23,7 @@ from .redis import RedisConnection
 from .statsd import StatsdConnection
 from .analytics_log_handler import AnalyticsLogHandler, AnalyticsClientSession
 from .shard_manager import ShardManagerClient
+from .embeddify import Embeddify
 from .. import all_packages as all_vfl_package_names
 
 
@@ -87,7 +87,7 @@ class MinimalBot(commands.AutoShardedBot):
     """
 
     async def create_message_log(
-            self, messages: typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]) -> str:
+            self, messages: typing.Union[typing.List[discord.Message], HistoryIterator]) -> str:
         """
         Creates and returns an HTML log of all of the messages provided. This is an API method, and may
         raise an asyncio HTTP error.
@@ -101,7 +101,7 @@ class MinimalBot(commands.AutoShardedBot):
         """
 
         # Let's flatten the messages if we need to
-        if isinstance(messages, discord.iterators.HistoryIterator):
+        if isinstance(messages, HistoryIterator):
             messages = await messages.flatten()
 
         # Create the data we're gonna send
@@ -143,10 +143,11 @@ class MinimalBot(commands.AutoShardedBot):
 
         # Send data to the API
         data.update({"users": data_authors, "messages": data_messages[::-1]})
-        async with self.session.post("https://voxelfox.co.uk/discord/chatlog", json=data) as r:
-            return await r.text()
+        async with aiohttp.ClientSession() as session:
+            async with session.post("https://voxelfox.co.uk/discord/chatlog", json=data) as r:
+                return await r.text()
 
-    async def get_context(self, message, *, cls=None) -> 'discord.ext.commands.Context':
+    async def get_context(self, message, *, cls=None) -> Context:
         """
         Create a new context object using the utils' Context.
 
@@ -248,7 +249,10 @@ class Bot(MinimalBot):
         }
 
         # Aiohttp session
-        self.session: aiohttp.ClientSession = AnalyticsClientSession(self, loop=self.loop, headers={"User-Agent": self.user_agent})
+        self.session: aiohttp.ClientSession = AnalyticsClientSession(
+            self, loop=self.loop,
+            headers={"User-Agent": self.user_agent},
+        )
 
         # Allow database connections like this
         self.database: DatabaseConnection = DatabaseConnection
@@ -259,6 +263,9 @@ class Bot(MinimalBot):
         # Allow Statsd connections like this
         self.stats: StatsdConnection = StatsdConnection
         self.stats.config = self.config.get('statsd', {})
+
+        # Set embeddify attrs
+        Embeddify.bot = self
 
         # Gently add an UpgradeChat wrapper here - added as a property method so we can create a new instance if
         # the config is reloaded
@@ -333,7 +340,7 @@ class Bot(MinimalBot):
         # Run the user-added startup methods
         async def fake_cache_setup_method(db):
             pass
-        for cog_name, cog in self.cogs.items():
+        for _, cog in self.cogs.items():
             await getattr(cog, "cache_setup", fake_cache_setup_method)(db)
 
         # Wait for the bot to cache users before continuing
@@ -830,76 +837,6 @@ class Bot(MinimalBot):
         self.logger.info("Setting activity to default")
         await self.set_default_presence()
         self.logger.info('Bot loaded.')
-
-    def get_context_message(
-            self, messageable, content: str, *, 
-            embed: discord.Embed = discord.utils.MISSING, embeddify: bool = None) -> typing.Tuple[str, discord.Embed]:
-        """
-        Takes a set of messageable content and outputs a string/Embed tuple that can be pushed
-        into a messageable object.
-        """
-
-        # We got an embed? Let's go
-        if embed:
-            return content, embed
-
-        # If embeddify isn't set, grab from the config
-        elif embeddify is None:
-            embeddify = self.embeddify
-
-        # See if we're done now
-        if embeddify is False:
-            return content, embed
-
-        # Check the channel permissions
-        # if isinstance(messageable, InteractionMessageable):
-        #     missing_embed_permission = False
-        else:
-            try:
-                try:
-                    messageable_channel = messageable.channel
-                except AttributeError:
-                    messageable_channel = messageable
-                channel_permissions: discord.Permissions = messageable_channel.permissions_for(messageable.guild.me)
-                missing_embed_permission = not discord.Permissions(embed_links=True).is_subset(channel_permissions)
-            except AttributeError:
-                missing_embed_permission = False
-
-        # Collate our content and see if we're ABLE to send embeds
-        should_not_embed = any((
-            missing_embed_permission,
-            embeddify is False,
-            embed not in [None, discord.utils.MISSING],
-        ))
-
-        # Can't embed or have no content? Just send it normally
-        if should_not_embed or content in [None, discord.utils.MISSING]:
-            return content, embed
-
-        # No current embed, and we _want_ to embed it? Alright!
-        embed = discord.Embed(
-            description=content,
-            colour=random.randint(1, 0xffffff) or self.config.get('embed', dict()).get('colour', 0),
-        )
-        self.set_footer_from_config(embed)
-
-        # Reset content
-        content: typing.Optional[str] = self.config.get('embed', dict()).get('content', '').format(ctx=self) or None
-
-        # Set author
-        author_data = self.config.get('embed', dict()).get('author', {})
-        if author_data.get('enabled', False):
-            name = author_data.get('name', '').format(ctx=self) or discord.Embed.Empty
-            url = author_data.get('url', '').format(ctx=self) or discord.Embed.Empty
-            author_data = {
-                'name': name,
-                'url': url,
-                'icon_url': self.user.avatar.url,
-            }
-            embed.set_author(**author_data)
-
-        # Return information
-        return content, embed
 
     async def launch_shard(self, gateway, shard_id: int, *, initial: bool = False):
         """
