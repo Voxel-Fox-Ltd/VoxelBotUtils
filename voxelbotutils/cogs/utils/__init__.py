@@ -6,7 +6,7 @@ from .context_embed import Embed
 from .custom_bot import MinimalBot, Bot
 from .custom_cog import Cog
 from .custom_command import Command, Group
-from .custom_context import Context, AbstractMentionable, PrintContext
+from .custom_context import Context, AbstractMentionable, PrintContext, SlashContext
 from .database import DatabaseConnection
 from .redis import RedisConnection, RedisChannelHandler, redis_channel_handler
 from .statsd import StatsdConnection
