@@ -303,7 +303,7 @@ class EventLoopCallbackHandler(object):
         # Ping to the webook
         event_webhook: discord.Webhook = cls.bot.get_event_webhook("unhandled_error")
         try:
-            avatar_url = str(cls.bot.user.avatar.url)
+            avatar_url = str(cls.bot.user.display_avatar.url)
         except Exception:
             avatar_url = None
         try:

@@ -168,7 +168,7 @@ class HelpCommand(commands.MinimalHelpCommand):
         """
 
         embed = discord.Embed()
-        embed.set_author(name=self.context.bot.user, icon_url=self.context.bot.user.avatar.url)
+        embed.set_author(name=self.context.bot.user, icon_url=self.context.bot.user.display_avatar.url)
         embed.colour = random.randint(1, 0xffffff)
         return embed
 

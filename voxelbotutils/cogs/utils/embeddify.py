@@ -110,7 +110,7 @@ class Embeddify:
             name = author_data.get("name", "").format(bot=cls.bot) or discord.Embed.Empty
             url = author_data.get("url", "").format(bot=cls.bot) or discord.Embed.Empty
             try:
-                icon_url: typing.Optional[str] = cls.bot.user.avatar.url  # type: ignore
+                icon_url: typing.Optional[str] = cls.bot.user.display_avatar.url  # type: ignore
             except AttributeError:
                 icon_url = None
             embed.set_author(name=name, url=url, icon_url=icon_url)

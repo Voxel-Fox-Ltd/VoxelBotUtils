@@ -35,7 +35,7 @@ class ConnectEvent(vbu.Cog):
         if not event_webhook:
             return False
         try:
-            avatar_url = str(self.bot.user.avatar.url)
+            avatar_url = str(self.bot.user.display_avatar.url)
         except Exception:
             avatar_url = None
         try:
