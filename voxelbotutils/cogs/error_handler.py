@@ -145,6 +145,10 @@ class ErrorHandler(vbu.Cog):
             lambda ctx, error: str(error).format(ctx=ctx, error=error)
         ),
         (
+            commands.CommandNotFound,  # This is only handled in slash commands
+            lambda ctx, error: "I wasn't able to find that command to be able to run it."
+        ),
+        (
             commands.TooManyArguments,
             lambda ctx, error: f"You gave too many arguments to this command - see `{ctx.clean_prefix}help {' '.join(ctx.command.qualified_name.split(' ')[:-1] + [ctx.invoked_with])}`."
         ),
@@ -221,7 +225,7 @@ class ErrorHandler(vbu.Cog):
         ignored_errors = (
             commands.CommandNotFound, vbu.errors.InvokedMetaCommand,
         )
-        if isinstance(error, ignored_errors):
+        if isinstance(error, ignored_errors) and not isinstance(ctx, commands.SlashContext):
             return
 
         # See what we've got to deal with
