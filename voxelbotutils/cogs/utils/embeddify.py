@@ -94,7 +94,7 @@ class Embeddify:
 
         # Okay it's embed time
         embed = discord.Embed(
-            description=data["content"],
+            description=data.pop("content"),
             colour=discord.Colour.random() or cls.bot.config.get("embed", dict()).get("colour", 0),
         )
         cls.bot.set_footer_from_config(embed)
