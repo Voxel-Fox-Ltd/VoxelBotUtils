@@ -21,15 +21,6 @@ Cog
 .. autoclass:: voxelbotutils.Cog
    :no-special-members:
 
-Command
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: voxelbotutils.Command
-   :no-special-members:
-
-.. autoclass:: voxelbotutils.Group
-   :no-special-members:
-
 Context
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -123,21 +114,6 @@ checks.is_upgrade_chat_purchaser
 
 .. autofunction:: voxelbotutils.checks.is_upgrade_chat_purchaser
 
-.. checks.is_slash_command
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. .. autofunction:: voxelbotutils.checks.is_slash_command
-
-.. checks.is_not_slash_command
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. .. autofunction:: voxelbotutils.checks.is_not_slash_command
-
-.. checks.bot_in_guild
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. .. autofunction:: voxelbotutils.checks.bot_in_guild
-
 Converters
 ----------------------------------------------------
 
@@ -182,7 +158,6 @@ converters.FilteredMember
 .. autoclass:: voxelbotutils.converters.FilteredMember
    :no-special-members:
    :no-members:
-
 
 Menus
 ------------------------------------------------------------
@@ -258,21 +233,6 @@ errors.NotBotSupport
 
 .. autoexception:: voxelbotutils.errors.NotBotSupport
     :no-special-members:
-
-.. errors.IsSlashCommand
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. .. autoexception:: voxelbotutils.errors.IsSlashCommand
-
-.. errors.IsNotSlashCommand
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. .. autoexception:: voxelbotutils.errors.IsNotSlashCommand
-
-.. errors.BotNotInGuild
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. .. autoexception:: voxelbotutils.errors.BotNotInGuild
 
 errors.MissingRequiredArgumentString
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

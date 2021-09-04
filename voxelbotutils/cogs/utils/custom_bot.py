@@ -17,7 +17,7 @@ from discord.iterators import HistoryIterator
 from discord.ext import commands
 import upgradechat
 
-from .custom_context import Context
+from .custom_context import Context, SlashContext
 from .database import DatabaseConnection
 from .redis import RedisConnection
 from .statsd import StatsdConnection
@@ -155,6 +155,15 @@ class MinimalBot(commands.AutoShardedBot):
         """
 
         return await super().get_context(message, cls=cls or Context)
+
+    async def get_slash_context(self, interaction, *, cls=None) -> SlashContext:
+        """
+        Create a new context object using the utils' Context.
+
+        :meta private:
+        """
+
+        return await super().get_slash_context(interaction, cls=cls or SlashContext)
 
     def get_context_message(self, channel, content, embed, *args, **kwargs):
         """

@@ -33,14 +33,7 @@ class AbstractMentionable(discord.Object):
         return self.name
 
 
-class Context(commands.Context):
-    """
-    A modified version of the default :class:`discord.ext.commands.Context`.
-
-    Attributes:
-        original_author_id (int): The ID of the original person to run the command. Persists through
-            the bot's ``sudo`` command, if you want to check the original author.
-    """
+class ContextMixin:
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -48,13 +41,6 @@ class Context(commands.Context):
             self.original_author_id = self.author.id
         except AttributeError:
             self.original_author_id = None
-
-    async def okay(self) -> None:
-        """
-        Adds the okay hand reaction to a message.
-        """
-
-        return await self.message.add_reaction("\N{OK HAND SIGN}")
 
     def get_mentionable_channel(self, channel_id: int, fallback: str = "null") -> AbstractMentionable:
         """
@@ -93,6 +79,33 @@ class Context(commands.Context):
         if x:
             return x
         return AbstractMentionable(role_id, fallback, fallback)
+
+
+class Context(commands.Context, ContextMixin):
+    """
+    A modified version of the default :class:`discord.ext.commands.Context`.
+
+    Attributes:
+        original_author_id (int): The ID of the original person to run the command. Persists through
+            the bot's ``sudo`` command, if you want to check the original author.
+    """
+
+    async def okay(self) -> None:
+        """
+        Adds the okay hand reaction to a message.
+        """
+
+        return await self.message.add_reaction("\N{OK HAND SIGN}")
+
+
+class SlashContext(commands.SlashContext, ContextMixin):
+
+    async def okay(self) -> None:
+        """
+        Sends an okay hand emoji.
+        """
+
+        await self.send("\N{THUMBS UP SIGN}")
 
 
 class _NoRequestTyping(object):
