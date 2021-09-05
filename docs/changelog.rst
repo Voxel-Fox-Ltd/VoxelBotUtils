@@ -3,6 +3,48 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.7.3
+--------------------------------------
+
+Side Notes
+"""""""""""""""""""""""""
+
+* ``Command`` and ``Group`` are essentially now identical to Novus' implementation. As such there's no longer a need to decorate with ``@voxelbotutils.command()``. It hasn't been removed, but new command types (like :func:`discord.ext.context_command`) have not been added.
+*
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""
+
+* Embeddify method no longer duplicates content.
+* Fixed bot avatar sends in webhooks, help, and embeddify.
+* Add ``SlashContext`` to init.
+* Add missing ``label`` kwarg to a menu component.
+
+Changed Features
+"""""""""""""""""""""""""""""""""""""""
+
+* Explicitly add a :class:`discord.ext.commands.CommandNotFound` response for slash commands.
+
+0.7.2
+--------------------------------------
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""
+
+* Fixed component interaction in the paginator.
+
+Changed Features
+"""""""""""""""""""""""""""""""""""""""
+
+* The ``[p]stats`` embed now shows version infos for Novus, VBU, and Python.
+* Fix ephemeral kwarg always being defined.
+* ``[p]channelhelp`` and ``[p]commands`` are no longer added as slash commands.
+
+New Features
+""""""""""""""""""""""
+
+* New (undocumented) embeddify method.
+
 0.7.1
 --------------------------------------
 
