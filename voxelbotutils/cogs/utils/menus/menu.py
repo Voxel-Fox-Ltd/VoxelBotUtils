@@ -188,7 +188,7 @@ class Menu(MenuDisplayable):
                     output_strings.append(f"\N{BULLET} {output}")
                 style = (discord.ui.ButtonStyle.secondary if isinstance(i._callback, Menu) else None) or i._button_style or discord.ui.ButtonStyle.primary
                 buttons.append(discord.ui.Button(
-                    i.component_display,
+                    label=i.component_display,
                     custom_id=i.component_display,
                     style=style,
                 ))
