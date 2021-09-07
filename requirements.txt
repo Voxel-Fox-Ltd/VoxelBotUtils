@@ -1,5 +1,5 @@
 # Discord and config handling
-novus>=0.0.1,<0.1
+novus>=0.0.3,<0.1
 toml
 upgradechatpy>=1.0.3
 

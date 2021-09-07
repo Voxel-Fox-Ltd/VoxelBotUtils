@@ -33,6 +33,17 @@ There's a few available things from the commandline (CMD) that you can do with V
    * :code:`--shardcount [amount]` - the number of shards that the bot should identify as (not the number of shards for this instance)
    * :code:`--loglevel [level]` - the :code:`logging.Logger` loglevel that you want to start the bot with
 
+.. _cmd_run_interactions:
+
+* :code:`$ voxelbotutils run-interactions`
+
+   * :code:`[bot_directory]` - the directory that the bot files are located in; defaults to `.`
+   * :code:`[config_file]` - the path to the config file to use; defaults to `config/config.toml`
+   * :code:`--host` - the host that you want to run the webserver with.
+   * :code:`--port` - the port that you want to run the webserver on.
+   * :code:`--path` - the path that the route should be added as; defaults to `/interactions`
+   * :code:`--loglevel [level]` - the :code:`logging.Logger` loglevel that you want to start the bot with
+
 .. _cmd_commands:
 
 * :code:`$ voxelbotutils commands`

@@ -38,7 +38,7 @@ if version.endswith(('a', 'b', 'rc')):
 
 # Here are the requirements
 requirements = [
-    "novus>=0.0.1,<0.1",
+    "novus>=0.0.3,<0.1",
     "toml>=0.10.2,<0.11",
     "asyncpg>=0.21.0,<0.22",
     "aioredis>=1.3,<2.0",
