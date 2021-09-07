@@ -52,7 +52,7 @@ bot_support_role_id = 0  # The ID used to determine whether or not the user is p
     discordbotlist_token = ""  # The token used to post data to discordbotlist.com.
 
 # Some simple command data outputs
-[command_Data]
+[command_data]
     guild_invite = ""
     donate_link = ""
     website_link = ""
