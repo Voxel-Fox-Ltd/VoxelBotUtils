@@ -9,6 +9,7 @@ import io
 import traceback
 
 import discord
+from discord.ext import commands
 import toml
 
 from .cogs.utils.database import DatabaseConnection
@@ -390,6 +391,82 @@ def run_bot(args: argparse.Namespace) -> None:
     except KeyboardInterrupt:
         logger.info("Logging out bot")
         loop.run_until_complete(bot.close())
+
+    # We're now done running the bot, time to clean up and close
+    if bot.config.get('database', {}).get('enabled', False):
+        logger.info("Closing database pool")
+        try:
+            loop.run_until_complete(asyncio.wait_for(DatabaseConnection.pool.close(), timeout=30.0))
+        except asyncio.TimeoutError:
+            logger.error("Couldn't gracefully close the database connection pool within 30 seconds")
+    if bot.config.get('redis', {}).get('enabled', False):
+        logger.info("Closing redis pool")
+        RedisConnection.pool.close()
+
+    logger.info("Closing asyncio loop")
+    loop.stop()
+    loop.close()
+
+
+def run_interactions(args: argparse.Namespace) -> None:
+    """
+    Starts the bot, connects the database, runs the async loop forever.
+
+    Args:
+        args (argparse.Namespace): The arguments namespace that wants to be run.
+    """
+
+    from aiohttp.web import Application, AppRunner, TCPSite
+    os.chdir(args.bot_directory)
+    set_event_loop()
+
+    # And run file
+    bot = Bot(config_file=args.config_file)
+    loop = bot.loop
+    EventLoopCallbackHandler.bot = bot
+
+    # Set up loggers
+    bot.logger = logger.getChild("bot")
+    set_default_log_levels(args)
+
+    # Connect the database pool
+    if bot.config.get('database', {}).get('enabled', False):
+        db_connect_task = start_database_pool(bot.config)
+        loop.run_until_complete(db_connect_task)
+
+    # Connect the redis pool
+    if bot.config.get('redis', {}).get('enabled', False):
+        re_connect = start_redis_pool(bot.config)
+        loop.run_until_complete(re_connect)
+
+    # Load the bot's extensions
+    logger.info('Loading extensions... ')
+    bot.load_all_extensions()
+
+    # Run the bot
+    logger.info("Logging in bot")
+    loop.run_until_complete(bot.login())
+
+    # Create the webserver
+    app = Application(loop=asyncio.get_event_loop(), debug=args.debug)
+    app.router.add_routes(commands.get_interactions_routes(bot, bot.config.get("oauth", {}).get("pubkey", ""), path=args.path))
+
+    # Start the HTTP server
+    logger.info("Creating webserver...")
+    application = AppRunner(app)
+    loop.run_until_complete(application.setup())
+    webserver = TCPSite(application, host=args.host, port=args.port)
+
+    # Start the webserver
+    loop.run_until_complete(webserver.start())
+    logger.info(f"Server started - http://{args.host}:{args.port}/")
+
+    # This is the forever loop
+    try:
+        logger.info("Running webserver")
+        loop.run_forever()
+    except KeyboardInterrupt:
+        pass
 
     # We're now done running the bot, time to clean up and close
     if bot.config.get('database', {}).get('enabled', False):

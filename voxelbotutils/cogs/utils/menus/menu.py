@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import typing
 import inspect
@@ -12,6 +14,11 @@ from .callbacks import MenuCallbacks
 from .converter import Converter
 from ..custom_cog import Cog
 from ..custom_command import Command
+
+if typing.TYPE_CHECKING:
+    ContextCallable = typing.Callable[[commands.Context], None]
+    AwaitableContextCallable = typing.Awaitable[ContextCallable]
+    MaybeCoroContextCallable = typing.Union[ContextCallable, AwaitableContextCallable]
 
 
 def _do_nothing(return_value=None):
@@ -46,7 +53,7 @@ class Menu(MenuDisplayable):
     def create_cog(
             self, bot=None, *, cog_name: str = "Bot Settings", name: str = "settings",
             aliases: typing.List[str] = ["setup"], permissions: typing.List[str] = None,
-            post_invoke: typing.Callable[[commands.Context], typing.Awaitable[None]] = None, **command_kwargs):
+            post_invoke: MaybeCoroContextCallable = None, **command_kwargs) -> typing.Union[commands.Cog, typing.Type[commands.Cog]]:
         """
         Creates a cog that can be loaded into the bot in a setup method.
 
@@ -56,7 +63,8 @@ class Menu(MenuDisplayable):
             name (str, optional): The name of the command to be added.
             aliases (typing.List[str], optional): A list of aliases to be added to the settings command.
             permissions (typing.List[str]): A list of permission names should be required for the command run.
-            post_invoke (typing.Callable[[discord.ext.commands.Context], None]): A post-invoke method that can be called.
+            post_invoke (typing.Union[typing.Callable[[commands.Context], None], typing.Awaitable[typing.Callable[[commands.Context], None]]]): A
+                post-invoke method that can be called.
         """
 
         permissions = permissions if permissions is not None else ["manage_guild"]
@@ -87,7 +95,7 @@ class Menu(MenuDisplayable):
             return NestedCog(bot)
         return NestedCog
 
-    async def get_options(self, ctx: commands.Context, force_regenerate: bool = False):
+    async def get_options(self, ctx: commands.Context, force_regenerate: bool = False) -> typing.List[Option]:
         """
         Get all of the options for an instance.
         This method has an open database instance in :code:`ctx.database`.
@@ -95,7 +103,7 @@ class Menu(MenuDisplayable):
 
         return self._options
 
-    async def start(self, ctx: commands.Context, delete_message: bool = False):
+    async def start(self, ctx: commands.Context, delete_message: bool = False) -> None:
         """
         Run the menu instance.
 

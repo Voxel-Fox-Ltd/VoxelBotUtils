@@ -1,5 +1,6 @@
 config_file = r'''
 token = "bot_token"  # The token for the bot.
+pubkey = "bot_interaction_pubkey"  # The HTTP interactions pubkey for your bot.
 owners = []  # List of owner IDs - these people override all permission checks.
 dm_uncaught_errors = true  # Whether or not to DM the owners when unhandled errors are encountered.
 user_agent = ""  # A custom string to populate Bot.user_agent with.

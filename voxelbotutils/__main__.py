@@ -3,7 +3,7 @@ import typing
 import pathlib
 import textwrap
 
-from .runner import run_bot, run_website, run_sharder, run_shell, run_modify_commands
+from .runner import run_bot, run_website, run_sharder, run_shell, run_modify_commands, run_interactions
 
 
 def create_file(*path, content: str = None):
@@ -45,6 +45,7 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     runner_subparser.required = True
     bot_subparser = runner_subparser.add_parser("run-bot")
     website_subparser = runner_subparser.add_parser("run-website")
+    interactions_subparser = runner_subparser.add_parser("run-interactions")
     sharder_subparser = runner_subparser.add_parser("run-sharder")
     shell_subparser = runner_subparser.add_parser("run-shell")
     application_subparser = runner_subparser.add_parser("commands")
@@ -67,6 +68,15 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     website_subparser.add_argument("--port", nargs="?", type=int, default="8080", help="The port to run the website with.")
     website_subparser.add_argument("--debug", action="store_true", default=False, help="Whether or not to run the website in debug mode")
     website_subparser.add_argument("--loglevel", nargs="?", default="INFO", help="Global logging level - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
+
+    # Set up the interactions server arguments
+    interactions_subparser.add_argument("bot_directory", nargs="?", default=".", help="The directory containing a config and a cogs folder for the bot to run.")
+    interactions_subparser.add_argument("config_file", nargs="?", default="config/config.toml", help="The configuration for the bot.")
+    interactions_subparser.add_argument("--host", nargs="?", default="0.0.0.0", help="The host IP to run the website on.")
+    interactions_subparser.add_argument("--port", nargs="?", type=int, default="8080", help="The port to run the website with.")
+    interactions_subparser.add_argument("--path", nargs="?", type=str, default="/interactions", help="The path to run the interactions endpoint on.")
+    interactions_subparser.add_argument("--debug", action="store_true", default=False, help="Whether or not to run the website in debug mode")
+    interactions_subparser.add_argument("--loglevel", nargs="?", default="INFO", help="Global logging level - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
 
     # Set up the sharder arguments
     sharder_subparser.add_argument("config_file", nargs="?", default="config/config.toml", help="The configuration for the bot.")
@@ -208,6 +218,8 @@ def main():
     # Run things
     elif args.subcommand == "run-bot":
         run_bot(args)
+    elif args.subcommand == "run-interactions":
+        run_interactions(args)
     elif args.subcommand == "run-website":
         run_website(args)
     elif args.subcommand == "run-sharder":
