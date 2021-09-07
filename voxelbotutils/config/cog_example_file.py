@@ -1,10 +1,10 @@
 cog_example = r'''
-import voxelbotutils as vbu
+from discord.ext import commands, vbu
 
 
 class PingCommand(vbu.Cog):
 
-    @vbu.command()
+    @commands.command()
     async def ping(self, ctx: vbu.Context):
         """
         A sexy lil ping command for the bot.
