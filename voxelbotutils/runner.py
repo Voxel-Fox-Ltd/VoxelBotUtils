@@ -449,7 +449,7 @@ def run_interactions(args: argparse.Namespace) -> None:
 
     # Create the webserver
     app = Application(loop=asyncio.get_event_loop(), debug=args.debug)
-    app.router.add_routes(commands.get_interactions_routes(bot, bot.config.get("oauth", {}).get("pubkey", ""), path=args.path))
+    app.router.add_routes(commands.get_interaction_route_table(bot, bot.config.get("oauth", {}).get("pubkey", ""), path=args.path))
 
     # Start the HTTP server
     logger.info("Creating webserver...")
