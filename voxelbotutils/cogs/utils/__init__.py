@@ -7,7 +7,7 @@ from .custom_bot import MinimalBot, Bot
 from .custom_cog import Cog
 from .custom_command import Command, Group
 from .custom_context import Context, AbstractMentionable, PrintContext, SlashContext
-from .database import DatabaseConnection
+from .database import DatabaseWrapper, DatabaseTransaction
 from .redis import RedisConnection, RedisChannelHandler, redis_channel_handler
 from .statsd import StatsdConnection
 from .time_value import TimeValue
@@ -38,6 +38,7 @@ def minify_html(text: str) -> str:
 _formatter = Formatter()
 format = _formatter.format
 embeddify = Embeddify.send
-Database = DatabaseConnection
+DatabaseConnection = DatabaseWrapper
+Database = DatabaseWrapper
 Redis = RedisConnection
 Stats = StatsdConnection
