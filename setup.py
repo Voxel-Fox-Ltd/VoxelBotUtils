@@ -55,7 +55,7 @@ extras = {
         "cryptography>=3.3.1,<4.0",
         "aiohttp_jinja2>=1.4.2,<2.0",
         "aiohttp_session>=2.9.0,<3.0",
-        "jinja2>=2.11.2,<3.0",
+        "jinja2>=3.0.0,<4.0.0",
         "markdown>=3.3.3,<4.0",
         "htmlmin>=0.1.12,<0.2",
     ],
