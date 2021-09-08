@@ -551,7 +551,6 @@ def run_website(args: argparse.Namespace) -> None:
             '(?:<|(?:&lt;))@!?(?P<userid>\\d{16,23})(?:>|(?:&gt;))',
             lambda g: f'<span class="chatlog__mention">@{get_display_name(g)}</span>',
             string,
-            string,
             re.IGNORECASE | re.MULTILINE,
         )
 
