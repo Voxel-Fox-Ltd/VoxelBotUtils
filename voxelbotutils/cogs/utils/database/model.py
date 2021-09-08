@@ -10,25 +10,6 @@ if typing.TYPE_CHECKING:
         DriverPool, DriverConnection,
     )
 
-try:
-    import dotenv
-    dotenv.load_dotenv()
-except ImportError:
-    pass
-
-
-# Load our wrapper for our wrapper
-Driver: typing.Type[DriverWrapper]
-DATABASE_TYPE = os.getenv("VBU_DATABASE_TYPE", "postgres").lower()
-if DATABASE_TYPE in ["postgres", "postgresql", "psql"]:
-    from .postgres import PostgresWrapper as Driver
-elif DATABASE_TYPE == "mysql":
-    from .mysql import MysqlWrapper as Driver
-elif DATABASE_TYPE == "sqlite":
-    from .sqlite_ import SQLiteWrapper as Driver
-else:
-    raise RuntimeError("Invalid database type passed")
-
 
 class DatabaseTransaction(object):
     """
@@ -77,6 +58,7 @@ class DatabaseWrapper(object):
     pool: typing.ClassVar[DriverPool] = None  # type: ignore
     logger: logging.Logger = logging.getLogger("vbu.database")
     enabled: typing.ClassVar[bool] = False
+    driver: typing.ClassVar[typing.Type[DriverWrapper]] = None
 
     def __init__(
             self, conn=None, *, cursor: DriverConnection = None):
@@ -110,8 +92,21 @@ class DatabaseWrapper(object):
         if not config.get("enabled", True):
             raise RuntimeError("Database is not enabled in your config")
 
+        # Check which driver we want to use
+        database_type = config.get("type", "postgres").lower()
+        if database_type in ["postgres", "postgresql", "psql"]:
+            from .postgres import PostgresWrapper as Driver
+        elif database_type == "mysql":
+            from .mysql import MysqlWrapper as Driver
+        elif database_type == "sqlite":
+            from .sqlite_ import SQLiteWrapper as Driver
+        else:
+            raise RuntimeError("Invalid database type passed")
+        cls.driver = Driver
+
+
         # Start and store our pool
-        created = await Driver.create_pool(stripped_config)
+        created = await cls.driver.create_pool(stripped_config)
         cls.pool = created
         cls.enabled = True
 
@@ -126,14 +121,14 @@ class DatabaseWrapper(object):
             The connection that was aquired from the pool.
         """
 
-        return await Driver.get_connection(cls)
+        return await cls.driver.get_connection(cls)
 
     async def disconnect(self) -> None:
         """
         Releases a connection from the pool back to the mix.
         """
 
-        await Driver.release_connection(self)
+        await self.driver.release_connection(self)
 
     async def __aenter__(self) -> DatabaseWrapper:
         new_connection = await self.get_connection()
@@ -145,7 +140,7 @@ class DatabaseWrapper(object):
         return await self.disconnect()
 
     def transaction(self, *args, **kwargs) -> DatabaseTransaction:
-        return Driver.transaction(self, *args, **kwargs)
+        return self.driver.transaction(self, *args, **kwargs)
 
     async def __call__(self, sql: str, *args) -> typing.List[typing.Any]:
         """
@@ -161,7 +156,7 @@ class DatabaseWrapper(object):
 
         assert self.conn, "No connection has been established"
         self.logger.debug(f"Running SQL: {sql} {args!s}")
-        return await Driver.fetch(self, sql, *args)
+        return await self.driver.fetch(self, sql, *args)
 
     async def execute_many(self, sql: str, *args) -> None:
         raise NotImplementedError()

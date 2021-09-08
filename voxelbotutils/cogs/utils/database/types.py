@@ -103,7 +103,7 @@ class DriverWrapper(typing.Protocol):
         ...
 
     @staticmethod
-    async def fetch(dbw: DatabaseTransaction, sql: str, *args) -> typing.List[typing.Any]:
+    async def fetch(dbw: DatabaseWrapper, sql: str, *args) -> typing.List[typing.Any]:
         """
         Run some SQL in your database
         """
