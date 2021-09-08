@@ -19,16 +19,19 @@ class UserDatabaseConfig(DatabaseConfig):
     enabled: bool
 
 
-class DriverConnection(typing.Protocol):
+class DriverFetchConnection(typing.Protocol):
 
-    async def fetch(self) -> typing.List[typing.Any]:
+    async def fetch(self):
         raise NotImplementedError()
 
-    async def execute(self) -> None:
+
+class DriverExecuteConnection(typing.Protocol):
+
+    async def execute(self):
         raise NotImplementedError()
 
-    async def executemany(self) -> None:
-        raise NotImplementedError()
+
+DriverConnection = typing.Union[DriverFetchConnection, DriverExecuteConnection]
 
 
 class DriverPool(typing.Protocol):

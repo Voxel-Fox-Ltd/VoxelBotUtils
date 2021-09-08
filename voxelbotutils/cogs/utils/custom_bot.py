@@ -18,7 +18,7 @@ from discord.ext import commands
 import upgradechat
 
 from .custom_context import Context, SlashContext
-from .database import DatabaseConnection
+from .database import DatabaseWrapper
 from .redis import RedisConnection
 from .statsd import StatsdConnection
 from .analytics_log_handler import AnalyticsLogHandler, AnalyticsClientSession
@@ -186,7 +186,7 @@ class Bot(MinimalBot):
         config (dict): The :class:`config<BotConfig>` for the bot.
         session (aiohttp.ClientSession): A session instance that you can use to make web requests.
         application_id (int): The ID of this bot application.
-        database (DatabaseConnection): The database connector, as connected using the data
+        database (DatabaseWrapper): The database connector, as connected using the data
             from your :class:`config file<BotConfig.database>`.
         redis (RedisConnection): The redis connector, as connected using the data from your
             :class:`config file<BotConfig.redis>`.
@@ -264,7 +264,7 @@ class Bot(MinimalBot):
         )
 
         # Allow database connections like this
-        self.database: DatabaseConnection = DatabaseConnection
+        self.database: DatabaseWrapper = DatabaseWrapper
 
         # Allow redis connections like this
         self.redis: RedisConnection = RedisConnection

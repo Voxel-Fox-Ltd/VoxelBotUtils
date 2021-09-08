@@ -20,10 +20,12 @@ except ImportError:
 # Load our wrapper for our wrapper
 Driver: typing.Type[DriverWrapper]
 DATABASE_TYPE = os.getenv("VBU_DATABASE_TYPE", "postgres").lower()
-if DATABASE_TYPE == "postgres":
+if DATABASE_TYPE in ["postgres", "postgresql", "psql"]:
     from .postgres import PostgresWrapper as Driver
 elif DATABASE_TYPE == "mysql":
     from .mysql import MysqlWrapper as Driver
+elif DATABASE_TYPE == "sqlite":
+    from .sqlite_ import SQLiteWrapper as Driver
 else:
     raise RuntimeError("Invalid database type passed")
 
@@ -102,6 +104,7 @@ class DatabaseWrapper(object):
         # Grab the args that are valid
         config_args = ("host", "port", "database", "user", "password",)
         stripped_config: DatabaseConfig = {i: o for i, o in config.items() if i in config_args}  # type: ignore
+        cls.config = stripped_config
 
         # See if we want to even enable the database
         if not config.get("enabled", True):
@@ -109,7 +112,6 @@ class DatabaseWrapper(object):
 
         # Start and store our pool
         created = await Driver.create_pool(stripped_config)
-        assert created, "Failed to create database pool"
         cls.pool = created
         cls.enabled = True
 

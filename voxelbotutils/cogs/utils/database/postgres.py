@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 import typing
 
 import asyncpg
 
+from .types import DriverWrapper
+
 if typing.TYPE_CHECKING:
     import asyncpg.pool
     import asyncpg.transaction
-    from .types import UserDatabaseConfig, DatabaseConfig, DriverWrapper, DriverPool
+    from .types import UserDatabaseConfig, DatabaseConfig
     from .model import DatabaseWrapper, DatabaseTransaction
 
     class PostgresDatabaseWrapper(DatabaseWrapper):
@@ -41,6 +45,7 @@ class PostgresWrapper(DriverWrapper):
 
     @staticmethod
     async def release_connection(dbw: PostgresDatabaseWrapper) -> None:
+        assert dbw.conn
         await dbw.pool.release(dbw.conn)
         dbw.conn = None
         dbw.is_active = False
@@ -62,6 +67,7 @@ class PostgresWrapper(DriverWrapper):
 
     @staticmethod
     async def fetch(dbw: PostgresDatabaseWrapper, sql: str, *args) -> typing.List[typing.Any]:
+        assert dbw.conn
         x = None
         if 'select' in sql.casefold() or 'returning' in sql.casefold():
             x = await dbw.caller.fetch(sql, *args)

@@ -4,7 +4,7 @@ import re
 from discord.ext.commands import Cog as OriginalCog
 
 from .custom_bot import Bot
-from .database import DatabaseConnection
+from .database import DatabaseWrapper
 from .redis import RedisChannelHandler
 
 
@@ -69,7 +69,7 @@ class Cog(OriginalCog):
             super().qualified_name.replace(' ', '')
         ).strip()
 
-    async def cache_setup(self, database: DatabaseConnection):
+    async def cache_setup(self, database: DatabaseWrapper):
         """
         A method that gets run when the bot's startup method is run -
         intended for setting up cached information in the bot object that aren't in the
