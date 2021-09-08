@@ -45,14 +45,22 @@ class SQLiteWrapper(DriverWrapper):
         assert dbw.conn
         await dbw.conn.close()
         if dbw.cursor:
-            await dbw.cursor.close()
+            try:
+                await dbw.cursor.close()
+            except ValueError:
+                pass
+            dbw.cursor = None
         dbw.conn = None
         dbw.is_active = False
 
     @staticmethod
     async def fetch(dbw: SQLiteDatabaseWrapper, sql: str, *args) -> typing.List[typing.Any]:
         if dbw.cursor:
-            await dbw.cursor.close()
+            try:
+                await dbw.cursor.close()
+            except ValueError:
+                pass
+            dbw.cursor = None
         cursor: aiosqlite.Cursor = await dbw.caller.execute(sql, args)
         dbw.cursor = cursor
         return await cursor.fetchall() or list()
