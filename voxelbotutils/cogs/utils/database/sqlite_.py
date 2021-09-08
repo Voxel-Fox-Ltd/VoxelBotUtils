@@ -18,7 +18,7 @@ if typing.TYPE_CHECKING:
         caller: aiosqlite.Connection
 
     class SQLiteDatabaseTransaction(DatabaseTransaction):
-        _parent: SQLiteDatabaseWrapper
+        parent: SQLiteDatabaseWrapper
         _transaction: None
         is_active: bool
         commit_on_exit: bool

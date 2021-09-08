@@ -18,7 +18,7 @@ if typing.TYPE_CHECKING:
         caller: aiomysql.Cursor
 
     class MysqlDatabaseTransaction(DatabaseTransaction):
-        _parent: MysqlDatabaseWrapper
+        parent: MysqlDatabaseWrapper
         _transaction: None
         is_active: bool
         commit_on_exit: bool
@@ -52,18 +52,18 @@ class MysqlWrapper(DriverWrapper):
 
     @classmethod
     async def start_transaction(cls, tra: MysqlDatabaseTransaction):
-        assert tra._parent.conn
-        await tra._parent.conn.begin()
+        assert tra.parent.conn
+        await tra.parent.conn.begin()
 
     @staticmethod
     async def commit_transaction(tra: MysqlDatabaseTransaction) -> None:
-        assert tra._parent.conn
-        await tra._parent.conn.commit()
+        assert tra.parent.conn
+        await tra.parent.conn.commit()
 
     @staticmethod
     async def rollback_transaction(tra: MysqlDatabaseTransaction) -> None:
-        assert tra._parent.conn
-        await tra._parent.conn.rollback()
+        assert tra.parent.conn
+        await tra.parent.conn.rollback()
 
     @staticmethod
     async def fetch(dbw: MysqlDatabaseWrapper, sql: str, *args) -> typing.List[typing.Any]:

@@ -20,7 +20,7 @@ if typing.TYPE_CHECKING:
         caller: asyncpg.Connection
 
     class PostgresDatabaseTransaction(DatabaseTransaction):
-        _parent: PostgresDatabaseWrapper
+        parent: PostgresDatabaseWrapper
         _transaction: asyncpg.transaction.Transaction
         is_active: bool
         commit_on_exit: bool
@@ -52,8 +52,8 @@ class PostgresWrapper(DriverWrapper):
 
     @classmethod
     async def start_transaction(cls, tra: PostgresDatabaseTransaction):
-        assert tra._parent.conn
-        transaction = tra._parent.conn.transaction()
+        assert tra.parent.conn
+        transaction = tra.parent.conn.transaction()
         tra._transaction = transaction
         await transaction.start()
 

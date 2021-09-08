@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import typing
-import os
 
 if typing.TYPE_CHECKING:
     from .types import (
@@ -13,12 +12,24 @@ if typing.TYPE_CHECKING:
 
 class DatabaseTransaction(object):
     """
-    A model for different driver transactions.
+    A wrapper around a transaction for your database.
+
+    Parameters
+    -----------
+    commit_on_exit: :class:`bool`
+        Whether or not your changes should be automatically committed when the
+        transaction context is left.
+
+    Attributes
+    -----------
+    parent: :class:`DatabaseWrapper`
+        The connection that spawned this transaction.
     """
 
     def __init__(self, driver: typing.Type[DriverWrapper], parent: DatabaseWrapper, *, commit_on_exit: bool = True):
+        """:meta private:"""
         self._driver = driver
-        self._parent = parent
+        self.parent = parent
         self._transaction = None
         self.is_active: bool = False
         self.commit_on_exit = commit_on_exit
@@ -31,19 +42,44 @@ class DatabaseTransaction(object):
     async def __aexit__(self, *args):
         if not self.is_active:
             return
-        if self.commit_on_exit and not any(args):
-            await self.commit()
+        if any(args):
+            await self.rollback()  # Rollback errors
+        elif self.commit_on_exit:
+            await self.commit()  # Commit on exit
         else:
-            await self._driver.rollback_transaction(self)
+            await self.rollback()  # Not committed and exited the transaction
 
     async def __call__(self, *args, **kwargs):
-        return self._parent(*args, **kwargs)
+        return self.call(*args, *kwargs)
+
+    async def call(self, *args, **kwargs):
+        """
+        Run some SQL, returning it's data. See :func:`DatabaseWrapper.call`.
+        """
+
+        return self.parent.call(*args, **kwargs)
 
     async def execute_many(self, *args, **kwargs):
-        return self._parent(*args, **kwargs)
+        """
+        Run some SQL, returning it's data. See :func:`DatabaseWrapper.execute_many`.
+        """
+
+        return self.parent.execute_many(*args, **kwargs)
 
     async def commit(self):
+        """
+        Commit the changes made to the database in this transaction context.
+        """
+
         await self._driver.commit_transaction(self)
+        self.is_active = False
+
+    async def rollback(self):
+        """
+        Roll back the changes made to the database in this transaction context.
+        """
+
+        await self._driver.rollback_transaction(self)
         self.is_active = False
 
 
@@ -62,6 +98,7 @@ class DatabaseWrapper(object):
 
     def __init__(
             self, conn=None, *, cursor: DriverConnection = None):
+        """:meta private:"""
         self.conn = conn
         self.cursor = cursor
         self.is_active = False
@@ -115,22 +152,44 @@ class DatabaseWrapper(object):
         """
         Acquires a connection to the database from the pool.
 
+        Using this method does not automatically call the ``.disconnect()`` method - if you
+        want this to be handled automaticall you can use this class in a context manager.
+
+        Examples
+        ---------
+        >>> db = await vbu.Database.get_connection()
+        >>> rows = await db("SELECT 1")
+        >>> await db.disconnect()
+
         Returns
         --------
         :class:`DatabaseWrapper`
             The connection that was aquired from the pool.
         """
 
+        assert cls.driver, "No driver has been established"
         return await cls.driver.get_connection(cls)
 
     async def disconnect(self) -> None:
         """
-        Releases a connection from the pool back to the mix.
+        Releases a connection from the pool back to the mix. This should be called
+        after you're done with a database connection.
         """
 
+        if self.conn is None:
+            return
         await self.driver.release_connection(self)
 
     async def __aenter__(self) -> DatabaseWrapper:
+        """
+        Get a connection from your database and close it automatically when you're done.
+
+        Examples
+        ---------
+        >>> async with vbu.Database() as db:
+        >>>     rows = await db("SELECT 1")
+        """
+
         new_connection = await self.get_connection()
         for i in self.__slots__:
             setattr(self, i, getattr(new_connection, i))
@@ -140,18 +199,72 @@ class DatabaseWrapper(object):
         return await self.disconnect()
 
     def transaction(self, *args, **kwargs) -> DatabaseTransaction:
+        """
+        Start a database transaction.
+
+        Parameters
+        ----------
+        commit_on_exit: :class:`bool`
+            Whether or not you want to commit automatically when you exit the
+            context manager.
+            Defaults to ``True``.
+
+        Examples
+        ---------
+        >>> # This will commit automatically on exit
+        >>> async with db.transaction() as transaction:
+        >>>     await transaction("DROP TABLE example")
+
+        >>> # This needs to be committed manually
+        >>> async with db.transaction(commit_on_exit=False) as transaction:
+        >>>     await transaction("DROP TABLE example")
+        >>>     await transaction.commit()
+
+        >>> # You can rollback a transaction with `.rollback()`
+        >>> async with db.transaction() as transaction:
+        >>>     await transaction("DROP TABLE example")
+        >>>     await transaction.rollback()
+
+        >>> # Rollbacks will happen automatically if any error is hit in the
+        >>> # transaction context
+        >>> async with db.transaction() as transaction:
+        >>>     await transaction("DROP TABLE example")
+        >>>     raise Exception()
+
+        >>> # If you have `commit_on_exit` set to `False` and you don't commit then
+        >>> # your changes will be automatically rolled back on exiting the context
+        >>> async with db.transaction(commit_on_exit=False) as transaction:
+        >>>     await transaction("DROP TABLE example")
+
+        Returns
+        -------
+        :class:`DatabaseTransaction`
+            A handler for your transaction instance.
+        """
+
+        assert self.conn, "No connection has been established"
         return self.driver.transaction(self, *args, **kwargs)
 
     async def __call__(self, sql: str, *args) -> typing.List[typing.Any]:
+        return await self.call(sql, *args)
+
+    async def call(self, sql: str, *args) -> typing.List[typing.Any]:
         """
-        Runs a line of SQL and returns a list, if things are expected back, or None, if nothing of interest is happening.
+        Run a line of SQL against your database driver.
 
-        Args:
-            sql (str): The SQL that you want to run.
-            *args: The args that are passed to the SQL, in order.
+        This method can also be run as ``__call__``.
 
-        Returns:
-            typing.Union[typing.List[dict], None]: The list of rows that were returned from the database.
+        Parameters
+        ----------
+        sql: :class:`str`
+            The SQL that you want to run.
+        *args: typing.Any
+            The args that are passed to the SQL, in order.
+
+        Returns
+        --------
+        typing.List[:class:`dict`]
+            The list of rows that were returned from the database.
         """
 
         assert self.conn, "No connection has been established"
