@@ -126,11 +126,9 @@ class _FakeStateMessage(object):
 class PrintContext(Context):
 
     def __init__(self, bot):
-        super().__init__(
-            message=_FakeStateMessage(bot._connection),
-            bot=bot,
-            prefix=">>> ",
-        )
+        self.message = _FakeStateMessage(bot._connection),
+        self.bot = bot,
+        self.prefix = ">>> ",
 
     async def send(self, content, *args, **kwargs):
         print(content, args, kwargs)
