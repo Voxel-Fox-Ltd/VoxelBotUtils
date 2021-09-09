@@ -446,9 +446,10 @@ def run_interactions(args: argparse.Namespace) -> None:
     # Run the bot
     logger.info("Logging in bot")
     loop.run_until_complete(bot.login())
+    websocket_task = None
     if args.connect:
         logger.info("Connecting bot to gateway")
-        loop.run_until_complete(bot.connect())
+        websocket_task = loop.create_task(bot.connect())
 
     # Create the webserver
     app = Application(loop=asyncio.get_event_loop(), debug=args.debug)
@@ -471,7 +472,9 @@ def run_interactions(args: argparse.Namespace) -> None:
     except KeyboardInterrupt:
         pass
 
-    # We're now done running the bot, time to clean up and close
+    # We're now done running the webserver, time to clean up and close
+    if websocket_task:
+        websocket_task.cancel()
     if bot.config.get('database', {}).get('enabled', False):
         logger.info("Closing database pool")
         try:
