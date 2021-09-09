@@ -309,3 +309,7 @@ class DatabaseWrapper(object):
         assert self.conn, "No connection has been established"
         self.logger.debug(f"Running SQL: {sql} {args_list!s}")
         return await self.driver.executemany(self, sql, *args_list)
+
+    async def execute_many(self, sql: str, *args) -> None:
+        """:meta private:"""
+        return await self.executemany(sql, *args)
