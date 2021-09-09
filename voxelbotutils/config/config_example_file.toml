@@ -1,4 +1,3 @@
-config_file = r'''
 token = "bot_token"  # The token for the bot.
 pubkey = "bot_interaction_pubkey"  # The HTTP interactions pubkey for your bot.
 owners = []  # List of owner IDs - these people override all permission checks.
@@ -51,7 +50,7 @@ bot_support_role_id = 0  # The ID used to determine whether or not the user is p
     topgg_token = ""  # The token used to post data to top.gg.
     discordbotlist_token = ""  # The token used to post data to discordbotlist.com.
 
-# Some simple command data outputs
+# Some simple command data outputs.
 [command_data]
     guild_invite = ""
     donate_link = ""
@@ -147,4 +146,3 @@ bot_support_role_id = 0  # The ID used to determine whether or not the user is p
     host = "127.0.0.1"
     port = 8125  # This is the DataDog default, 9125 is the general statsd default
     constant_tags.service = ""  # Put your bot name here - leave blank to disable stats collection
-'''

@@ -92,4 +92,7 @@ setuptools.setup(
             "vbu=voxelbotutils.__main__:main",
         ],
     },
+    package_data={
+        "voxelbotutils": ["config/*"]
+    },
 )
