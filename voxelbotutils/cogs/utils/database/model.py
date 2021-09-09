@@ -257,9 +257,13 @@ class DatabaseWrapper(object):
         Parameters
         ----------
         sql: :class:`str`
-            The SQL that you want to run.
+            The SQL that you want to run. This will be parsed as a prepared statement. For
+            PostgreSQL, arguments will be in form ``$1`` numbered for each of your arguments;
+            in SQLite they'll be ``?`` and inserted in the order of your given arguments; and
+            in MySQL they'll be in format ``%s`` and inserted in the order of your given
+            arguments.
         *args: typing.Any
-            The args that are passed to the SQL, in order.
+            The arguments that are passed to your database call.
 
         Returns
         --------

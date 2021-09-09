@@ -47,65 +47,45 @@ class DriverWrapper(typing.Protocol):
 
     @staticmethod
     async def create_pool(config: DatabaseConfig) -> DriverPool:
-        """
-        Connect to your database driver using the given config.
-        """
-
-        ...
+        """Connect to your database driver using the given config."""
+        raise NotImplementedError()
 
     @staticmethod
     async def get_connection(dbw: typing.Type[DatabaseWrapper]) -> DatabaseWrapper:
-        """
-        Get a connection from the database pool and return a wrapper
-        around the given connection.
-        """
-
-        ...
+        """Get a connection from the database pool and return a wrapper around the given connection."""
+        raise NotImplementedError()
 
     @staticmethod
     async def release_connection(dbw: DatabaseWrapper) -> None:
-        """
-        Release the connection back into the pool.
-        """
-
-        ...
+        """Release the connection back into the pool."""
+        raise NotImplementedError()
 
     @classmethod
-    def transaction(cls, dbw: DatabaseWrapper, *, commit_on_exit: bool = True):
-        """
-        Make a transaction instance with the connection's current instance.
-        """
-
+    def transaction(cls: typing.Type[DriverWrapper], dbw: DatabaseWrapper, *, commit_on_exit: bool = True):
+        """Make a transaction instance with the connection's current instance."""
         return DatabaseTransaction(cls, dbw, commit_on_exit=commit_on_exit)
 
     @staticmethod
     async def start_transaction(dbw: DatabaseTransaction) -> None:
-        """
-        Start a transaction from the transaction wrapper.
-        """
-
-        ...
+        """Start a transaction from the transaction wrapper."""
+        raise NotImplementedError()
 
     @staticmethod
     async def commit_transaction(dbw: DatabaseTransaction) -> None:
-        """
-        Commit the transaction from the wrapper.
-        """
-
-        ...
+        """Commit the transaction from the wrapper."""
+        raise NotImplementedError()
 
     @staticmethod
     async def rollback_transaction(dbw: DatabaseTransaction) -> None:
-        """
-        Rollback the commits from the transaction.
-        """
-
-        ...
+        """Rollback the commits from the transaction."""
+        raise NotImplementedError()
 
     @staticmethod
     async def fetch(dbw: DatabaseWrapper, sql: str, *args) -> typing.List[typing.Any]:
-        """
-        Run some SQL in your database
-        """
+        """Run some SQL in your database."""
+        raise NotImplementedError()
 
-        ...
+    @staticmethod
+    async def execute_many(dbw: DatabaseWrapper, sql: str, *args) -> typing.List[typing.Any]:
+        """Run some SQL in your database."""
+        raise NotImplementedError()
