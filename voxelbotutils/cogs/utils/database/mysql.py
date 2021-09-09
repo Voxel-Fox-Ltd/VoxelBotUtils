@@ -70,3 +70,8 @@ class MysqlWrapper(DriverWrapper):
         await dbw.caller.execute(sql, args)
         data = await dbw.caller.fetchall()
         return data or list()
+
+    @staticmethod
+    async def executemany(dbw: MysqlDatabaseWrapper, sql: str, *args_list) -> None:
+        assert dbw.conn
+        await dbw.caller.executemany(sql, args_list)

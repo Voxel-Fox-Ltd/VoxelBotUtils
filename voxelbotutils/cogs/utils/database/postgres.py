@@ -74,3 +74,8 @@ class PostgresWrapper(DriverWrapper):
         else:
             await dbw.caller.execute(sql, *args)
         return x or list()
+
+    @staticmethod
+    async def executemany(dbw: PostgresDatabaseWrapper, sql: str, *args_list) -> None:
+        assert dbw.conn
+        await dbw.caller.executemany(sql, *args_list)

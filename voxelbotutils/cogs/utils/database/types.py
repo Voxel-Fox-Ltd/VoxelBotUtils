@@ -81,11 +81,11 @@ class DriverWrapper(typing.Protocol):
         raise NotImplementedError()
 
     @staticmethod
-    async def fetch(dbw: DatabaseWrapper, sql: str, *args) -> typing.List[typing.Any]:
+    async def fetch(dbw: DatabaseWrapper, sql: str, *args: typing.Any) -> typing.List[typing.Any]:
         """Run some SQL in your database."""
         raise NotImplementedError()
 
     @staticmethod
-    async def execute_many(dbw: DatabaseWrapper, sql: str, *args) -> typing.List[typing.Any]:
+    async def executemany(dbw: DatabaseWrapper, sql: str, *args_list: typing.Iterable[typing.Any]) -> None:
         """Run some SQL in your database."""
         raise NotImplementedError()

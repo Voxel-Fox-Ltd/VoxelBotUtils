@@ -257,13 +257,18 @@ class DatabaseWrapper(object):
         Parameters
         ----------
         sql: :class:`str`
-            The SQL that you want to run. This will be parsed as a prepared statement. For
-            PostgreSQL, arguments will be in form ``$1`` numbered for each of your arguments;
+            The SQL that you want to run. This will be parsed as a prepared or parameterized statement.
+            For PostgreSQL, arguments will be in form ``$1`` numbered for each of your arguments;
             in SQLite they'll be ``?`` and inserted in the order of your given arguments; and
             in MySQL they'll be in format ``%s`` and inserted in the order of your given
             arguments.
         *args: typing.Any
             The arguments that are passed to your database call.
+
+        Examples
+        ---------
+        >>> sql = "INSERT INTO example (a, b) VALUES ($1, $2)"
+        >>> await db.executemany(sql, 1, 2)
 
         Returns
         --------
@@ -275,10 +280,32 @@ class DatabaseWrapper(object):
         self.logger.debug(f"Running SQL: {sql} {args!s}")
         return await self.driver.fetch(self, sql, *args)
 
-    async def execute_many(self, sql: str, *args) -> None:
-        raise NotImplementedError()
+    async def executemany(self, sql: str, *args_list: typing.Iterable[typing.Any]) -> None:
+        """
+        Run a line of SQL with a multitude of arguments.
 
-    async def copy_records_to_table(
-            self, table_name: str, *, records: typing.List[typing.Any],
-            columns: typing.Tuple[str] = None, timeout: float = None) -> str:
-        raise NotImplementedError()
+        Parameters
+        ----------
+        sql: :class:`str`
+            The SQL that you want to run. This will be parsed as a prepared or parameterized statement.
+            For PostgreSQL, arguments will be in form ``$1`` numbered for each of your arguments;
+            in SQLite they'll be ``?`` and inserted in the order of your given arguments; and
+            in MySQL they'll be in format ``%s`` and inserted in the order of your given
+            arguments.
+        *args_list: typing.Iterable[typing.Any]
+            A list of arguments that should be passed into your database call.
+
+        Examples
+        ---------
+        >>> sql = "INSERT INTO example (a, b) VALUES ($1, $2)"
+        >>> await db.executemany(sql, (1, 2), (3, 4), (5, 6), (7, 8))
+
+        Returns
+        --------
+        typing.List[:class:`dict`]
+            The list of rows that were returned from the database.
+        """
+
+        assert self.conn, "No connection has been established"
+        self.logger.debug(f"Running SQL: {sql} {args_list!s}")
+        return await self.driver.executemany(self, sql, *args_list)

@@ -64,3 +64,8 @@ class SQLiteWrapper(DriverWrapper):
         cursor: aiosqlite.Cursor = await dbw.caller.execute(sql, args)
         dbw.cursor = cursor
         return await cursor.fetchall() or list()
+
+    @staticmethod
+    async def executemany(dbw: SQLiteDatabaseWrapper, sql: str, *args_list) -> None:
+        assert dbw.conn
+        await dbw.caller.executemany(sql, args_list)
