@@ -75,7 +75,7 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     website_subparser.add_argument("config_file", nargs="?", default="config/website.toml", help="The configuration for the website.")
     website_subparser.add_argument("--host", nargs="?", default="0.0.0.0", help="The host IP to run the website on.")
     website_subparser.add_argument("--port", nargs="?", type=int, default="8080", help="The port to run the website with.")
-    website_subparser.add_argument("--debug", action="store_true", default=False, help="Whether or not to run the website in debug mode")
+    website_subparser.add_argument("--debug", action="store_true", default=False, help="Whether or not to run the website in debug mode.")
     website_subparser.add_argument("--loglevel", nargs="?", default="INFO", help="Global logging level - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
 
     # Set up the interactions server arguments
@@ -84,7 +84,8 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     interactions_subparser.add_argument("--host", nargs="?", default="0.0.0.0", help="The host IP to run the website on.")
     interactions_subparser.add_argument("--port", nargs="?", type=int, default="8080", help="The port to run the website with.")
     interactions_subparser.add_argument("--path", nargs="?", type=str, default="/interactions", help="The path to run the interactions endpoint on.")
-    interactions_subparser.add_argument("--debug", action="store_true", default=False, help="Whether or not to run the website in debug mode")
+    interactions_subparser.add_argument("--connect", action="store_true", default=False, help="Whether you want your bot to connect to the Discord gateway.")
+    interactions_subparser.add_argument("--debug", action="store_true", default=False, help="Whether or not to run the website in debug mode.")
     interactions_subparser.add_argument("--loglevel", nargs="?", default="INFO", help="Global logging level - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
 
     # Set up the sharder arguments

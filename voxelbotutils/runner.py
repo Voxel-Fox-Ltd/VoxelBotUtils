@@ -421,7 +421,7 @@ def run_interactions(args: argparse.Namespace) -> None:
     set_event_loop()
 
     # And run file
-    bot = Bot(config_file=args.config_file)
+    bot = Bot(config_file=args.config_file, intents=discord.Intents.none())
     loop = bot.loop
     EventLoopCallbackHandler.bot = bot
 
@@ -446,6 +446,9 @@ def run_interactions(args: argparse.Namespace) -> None:
     # Run the bot
     logger.info("Logging in bot")
     loop.run_until_complete(bot.login())
+    if args.connect:
+        logger.info("Connecting bot to gateway")
+        loop.run_until_complete(bot.connect())
 
     # Create the webserver
     app = Application(loop=asyncio.get_event_loop(), debug=args.debug)
