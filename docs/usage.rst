@@ -42,6 +42,7 @@ There's a few available things from the commandline (CMD) that you can do with V
    * :code:`--host` - the host that you want to run the webserver with.
    * :code:`--port` - the port that you want to run the webserver on.
    * :code:`--path` - the path that the route should be added as; defaults to `/interactions`
+   * :code:`--connect` - if you want to connect your bot to the gateway as well as running the interactions webserver; shards will be automatically calculated and intents will be set to none.
    * :code:`--loglevel [level]` - the :code:`logging.Logger` loglevel that you want to start the bot with
 
 .. _cmd_commands:
