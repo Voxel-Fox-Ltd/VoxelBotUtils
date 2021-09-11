@@ -32,10 +32,16 @@ AbstractMentionable
 
 .. autoclass:: voxelbotutils.AbstractMentionable
 
-DatabaseConnection
+DatabaseWrapper
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: voxelbotutils.DatabaseConnection
+.. autoclass:: voxelbotutils.DatabaseWrapper
+   :no-special-members:
+
+DatabaseTransaction
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.DatabaseTransaction
    :no-special-members:
 
 RedisConnection
