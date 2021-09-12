@@ -323,7 +323,8 @@ class Bot(MinimalBot):
         # Get default guild settings
         default_guild_settings = await db("SELECT * FROM guild_settings WHERE guild_id=0")
         if not default_guild_settings:
-            default_guild_settings = await db("INSERT INTO guild_settings (guild_id) VALUES (0) RETURNING *")
+            await db("INSERT INTO guild_settings (guild_id) VALUES (0)")
+            default_guild_settings = await db("SELECT * FROM guild_settings WHERE guild_id=0")
         for i, o in default_guild_settings[0].items():
             self.DEFAULT_GUILD_SETTINGS.setdefault(i, o)
 
@@ -336,7 +337,8 @@ class Bot(MinimalBot):
         # Get default user settings
         default_user_settings = await db("SELECT * FROM user_settings WHERE user_id=0")
         if not default_user_settings:
-            default_user_settings = await db("INSERT INTO user_settings (user_id) VALUES (0) RETURNING *")
+            await db("INSERT INTO user_settings (user_id) VALUES (0)")
+            default_user_settings = await db("SELECT * FROM user_settings WHERE user_id=0")
         for i, o in default_user_settings[0].items():
             self.DEFAULT_USER_SETTINGS.setdefault(i, o)
 
