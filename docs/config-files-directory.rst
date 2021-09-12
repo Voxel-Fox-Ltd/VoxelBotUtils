@@ -224,6 +224,11 @@ Bot Config File
 
       The configuration for your Postgres connection.
 
+      .. attribute:: type
+         :type: str
+
+         The type of database driver that should be connected. Valid types are ``postgres`` (default, requires ``asyncpg`` to be installed), ``sqlite`` (requires ``aiosqlite`` to be installed), and ``mysql`` (requires ``aiomysql`` to be installed).
+
       .. attribute:: enabled
          :type: bool
 

@@ -93,6 +93,7 @@ bot_support_role_id = 0  # The ID used to determine whether or not the user is p
 
 # This data is passed directly over to `asyncpg.connect()`.
 [database]
+    type = "postgres"  # postgres, sqlite, mysql
     enabled = false
     user = "database_username"
     password = "database_password"
