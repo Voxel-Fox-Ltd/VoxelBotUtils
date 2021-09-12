@@ -91,13 +91,13 @@ bot_support_role_id = 0  # The ID used to determine whether or not the user is p
     scope = "bot applications.commands"  # The scope that will be generated with the invite link, space seperated (applications.commands for slash).
     permissions = []  # args here are passed directly to discord.Permissions as True.
 
-# This data is passed directly over to `asyncpg.connect()`.
+# Data needed for SQL database connections
 [database]
-    type = "postgres"  # postgres, sqlite, mysql
-    enabled = false
-    user = "database_username"
-    password = "database_password"
-    database = "database_name"
+    type = "sqlite"  # postgres, sqlite, mysql
+    enabled = true
+    user = ""
+    password = ""
+    database = ".database.sqlite"
     host = "127.0.0.1"
     port = 5432
 

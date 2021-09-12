@@ -3,6 +3,23 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.8.0
+--------------------------------------
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""
+
+* Fixed versioning for Jinja2.
+* Fixed ``get_display_name`` method for Jinja2 templating.
+* Fix ``PrintContext``.
+
+New Features
+"""""""""""""""""""""""""
+
+* Add ``--connect`` arg to the interactions webserver.
+* Support multiple database types.
+    * The database type will be set to SQLite by default.
+
 0.7.3
 --------------------------------------
 
@@ -10,7 +27,6 @@ Side Notes
 """""""""""""""""""""""""
 
 * ``Command`` and ``Group`` are essentially now identical to Novus' implementation. As such there's no longer a need to decorate with ``@voxelbotutils.command()``. It hasn't been removed, but new command types (like :func:`discord.ext.context_command`) have not been added.
-*
 
 Bugs Fixed
 """""""""""""""""""""""""""""""""""""""
@@ -24,6 +40,11 @@ Changed Features
 """""""""""""""""""""""""""""""""""""""
 
 * Explicitly add a :class:`discord.ext.commands.CommandNotFound` response for slash commands.
+
+New Features
+"""""""""""""""""""""""""""""""""""""""
+
+* Interactions webserver.
 
 0.7.2
 --------------------------------------

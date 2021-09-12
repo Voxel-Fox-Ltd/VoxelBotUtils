@@ -40,7 +40,8 @@ if version.endswith(('a', 'b', 'rc')):
 requirements = [
     "novus>=0.0.3,<0.1",
     "toml>=0.10.2,<0.11",
-    "asyncpg>=0.21.0,<0.22",
+    # "asyncpg>=0.21.0,<0.22",
+    "aiosqlite",
     "aioredis>=1.3,<2.0",
     "aioredlock>=0.7.0,<0.8",
     "aiodogstatsd>=0.14.0,<0.15",
@@ -62,6 +63,12 @@ extras = {
     "docs": [
         "sphinx",
         "sphinx_rtd_theme",
+    ],
+    "postgres": [
+        "asyncpg>=0.21.0,<0.22",
+    ],
+    "mysql": [
+        "aiomysql",
     ]
 }
 
