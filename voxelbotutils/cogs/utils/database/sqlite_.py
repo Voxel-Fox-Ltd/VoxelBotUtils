@@ -24,6 +24,17 @@ if typing.TYPE_CHECKING:
         commit_on_exit: bool
 
 
+class RowWrapper(aiosqlite.Row):
+
+    def values(self):
+        for i in self.keys():
+            yield self[i]
+
+    def items(self):
+        for i in self.keys():
+            yield (i, self[i])
+
+
 class SQLiteWrapper(DriverWrapper):
 
     @staticmethod
@@ -33,7 +44,7 @@ class SQLiteWrapper(DriverWrapper):
     @staticmethod
     async def get_connection(dbw: typing.Type[SQLiteDatabaseWrapper]) -> SQLiteDatabaseWrapper:
         connection = await aiosqlite.connect(dbw.config.get("database"))
-        connection.row_factory = aiosqlite.Row
+        connection.row_factory = RowWrapper
         v = dbw(
             conn=connection,
         )
