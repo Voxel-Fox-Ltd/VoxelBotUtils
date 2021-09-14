@@ -34,15 +34,15 @@ class Embeddify:
         Embeddify your given content.
         """
 
-        # Make sure we have a bot to read the config of
-        try:
-            assert cls.bot
-        except AssertionError:
-            return {
-                "content": content,
-                "embeds": embeds if embeds else [embed] if embed else None,
-                **kwargs
-            }
+        # # Make sure we have a bot to read the config of
+        # try:
+        #     assert cls.bot
+        # except AssertionError:
+        #     return {
+        #         "content": content,
+        #         "embeds": embeds if embeds else [embed] if embed else None,
+        #         **kwargs
+        #     }
 
         # Initial dataset
         data = {
@@ -58,15 +58,21 @@ class Embeddify:
             data['embeds'].extend(embeds)
 
         # If embeddify isn't set, grab from the config
-        if embeddify is MISSING:
+        if embeddify is MISSING and cls.bot:
             embeddify = cls.bot.embeddify
+        elif embeddify is MISSING:
+            embeddify = True
 
         # See if we're done now
         if embeddify is False:
             return data
 
+        # People testing can do anything
+        if dest is None:
+            can_send_embeds = True
+
         # Slash commands can do anything
-        if isinstance(dest, (commands.SlashContext, discord.User, discord.Member)):
+        elif isinstance(dest, (commands.SlashContext, discord.User, discord.Member)):
             can_send_embeds = True
 
         # Otherwise we have permissions to check
@@ -93,24 +99,35 @@ class Embeddify:
             return data
 
         # Okay it's embed time
+        if cls.bot:
+            colour = discord.Colour.random() or cls.bot.config.get("embed", dict()).get("colour", 0)
+        else:
+            colour = discord.Colour.random()
         embed = discord.Embed(
             description=data.pop("content"),
-            colour=discord.Colour.random() or cls.bot.config.get("embed", dict()).get("colour", 0),
+            colour=colour,
         )
-        cls.bot.set_footer_from_config(embed)
+        if cls.bot:
+            cls.bot.set_footer_from_config(embed)
 
         # Add image
         if image_url:
             embed.set_image(url=image_url)
 
         # Reset content
-        content = cls.bot.config.get("embed", dict()).get("content", "").format(bot=cls.bot)
+        if cls.bot:
+            content = cls.bot.config.get("embed", dict()).get("content", "").format(bot=cls.bot)
+        else:
+            content = None
         if not content:
             content = None
         data["content"] = content
 
         # Set author
-        author_data = cls.bot.config.get("embed", dict()).get("author", {})
+        if cls.bot:
+            author_data = cls.bot.config.get("embed", dict()).get("author", {})
+        else:
+            author_data = {}
         if author_data.get("enabled", False):
             name = author_data.get("name", "").format(bot=cls.bot) or discord.Embed.Empty
             url = author_data.get("url", "").format(bot=cls.bot) or discord.Embed.Empty

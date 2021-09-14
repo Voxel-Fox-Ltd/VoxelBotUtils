@@ -3,6 +3,16 @@ Changelog
 
 A human-readable list of changes between versions.
 
+Readd `image_url` to embeddify
+
+0.8.1
+--------------------------------------
+
+Changed Features
+"""""""""""""""""""""""""
+
+* Readd ``image_url`` kwarg to ``Embeddify.send``.
+
 0.8.0
 --------------------------------------
 
