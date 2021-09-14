@@ -29,7 +29,7 @@ class Embeddify:
     def get_embeddify(
             cls, dest: Destinations, content: typing.Optional[str] = None, *,
             embed: discord.Embed = None, embeds: typing.List[discord.Embed] = None,
-            embeddify: bool = MISSING, **kwargs) -> dict:
+            embeddify: bool = MISSING, image_url: str = MISSING, **kwargs) -> dict:
         """
         Embeddify your given content.
         """
@@ -99,10 +99,15 @@ class Embeddify:
         )
         cls.bot.set_footer_from_config(embed)
 
+        # Add image
+        if image_url:
+            embed.set_image(url=image_url)
+
         # Reset content
         content = cls.bot.config.get("embed", dict()).get("content", "").format(bot=cls.bot)
         if not content:
             content = None
+        data["content"] = content
 
         # Set author
         author_data = cls.bot.config.get("embed", dict()).get("author", {})
