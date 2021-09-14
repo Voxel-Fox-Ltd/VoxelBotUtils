@@ -75,3 +75,7 @@ class MysqlWrapper(DriverWrapper):
     async def executemany(dbw: MysqlDatabaseWrapper, sql: str, *args_list) -> None:
         assert dbw.conn
         await dbw.caller.executemany(sql, args_list)
+
+    def prepare(self) -> typing.Generator[str, None, None]:
+        while True:
+            yield "%s"

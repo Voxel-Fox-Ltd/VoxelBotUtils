@@ -79,3 +79,9 @@ class PostgresWrapper(DriverWrapper):
     async def executemany(dbw: PostgresDatabaseWrapper, sql: str, *args_list) -> None:
         assert dbw.conn
         await dbw.caller.executemany(sql, args_list)
+
+    def prepare(self) -> typing.Generator[str, None, None]:
+        start = 1
+        while True:
+            yield f"${start}"
+            start += 1

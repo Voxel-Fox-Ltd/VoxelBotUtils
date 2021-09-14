@@ -396,7 +396,8 @@ def run_bot(args: argparse.Namespace) -> None:
     if bot.config.get('database', {}).get('enabled', False):
         logger.info("Closing database pool")
         try:
-            loop.run_until_complete(asyncio.wait_for(DatabaseWrapper.pool.close(), timeout=30.0))
+            if DatabaseWrapper.pool:
+                loop.run_until_complete(asyncio.wait_for(DatabaseWrapper.pool.close(), timeout=30.0))
         except asyncio.TimeoutError:
             logger.error("Couldn't gracefully close the database connection pool within 30 seconds")
     if bot.config.get('redis', {}).get('enabled', False):
@@ -478,7 +479,8 @@ def run_interactions(args: argparse.Namespace) -> None:
     if bot.config.get('database', {}).get('enabled', False):
         logger.info("Closing database pool")
         try:
-            loop.run_until_complete(asyncio.wait_for(DatabaseWrapper.pool.close(), timeout=30.0))
+            if DatabaseWrapper.pool:
+                loop.run_until_complete(asyncio.wait_for(DatabaseWrapper.pool.close(), timeout=30.0))
         except asyncio.TimeoutError:
             logger.error("Couldn't gracefully close the database connection pool within 30 seconds")
     if bot.config.get('redis', {}).get('enabled', False):
@@ -639,7 +641,8 @@ def run_website(args: argparse.Namespace) -> None:
     if config.get('database', {}).get('enabled', False):
         logger.info("Closing database pool")
         try:
-            loop.run_until_complete(asyncio.wait_for(DatabaseWrapper.pool.close(), timeout=30.0))
+            if DatabaseWrapper.pool:
+                loop.run_until_complete(asyncio.wait_for(DatabaseWrapper.pool.close(), timeout=30.0))
         except asyncio.TimeoutError:
             logger.error("Couldn't gracefully close the database connection pool within 30 seconds")
     if config.get('redis', {}).get('enabled', False):
@@ -781,7 +784,8 @@ def run_shell(args: argparse.Namespace) -> None:
     if bot.config.get('database', {}).get('enabled', False):
         logger.info("Closing database pool")
         try:
-            loop.run_until_complete(asyncio.wait_for(DatabaseWrapper.pool.close(), timeout=30.0))
+            if DatabaseWrapper.pool:
+                loop.run_until_complete(asyncio.wait_for(DatabaseWrapper.pool.close(), timeout=30.0))
         except asyncio.TimeoutError:
             logger.error("Couldn't gracefully close the database connection pool within 30 seconds")
     if bot.config.get('redis', {}).get('enabled', False):

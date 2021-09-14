@@ -73,6 +73,7 @@ class SQLiteWrapper(DriverWrapper):
                 pass
             dbw.cursor = None
         cursor: aiosqlite.Cursor = await dbw.caller.execute(sql, args)
+        await dbw.conn.commit()
         dbw.cursor = cursor
         return await cursor.fetchall() or list()
 
@@ -80,3 +81,7 @@ class SQLiteWrapper(DriverWrapper):
     async def executemany(dbw: SQLiteDatabaseWrapper, sql: str, *args_list) -> None:
         assert dbw.conn
         await dbw.caller.executemany(sql, args_list)
+
+    def prepare(self) -> typing.Generator[str, None, None]:
+        while True:
+            yield "?"

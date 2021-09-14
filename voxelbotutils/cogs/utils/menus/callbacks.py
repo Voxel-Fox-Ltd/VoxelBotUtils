@@ -50,18 +50,29 @@ class MenuCallbacks(object):
         """
 
         async def wrapper(ctx, data: list):
-            sql = """INSERT INTO {0} ({1}, {2}) VALUES ($1, $2) ON CONFLICT ({1}) DO UPDATE SET {2}=excluded.{2}""".format(
+            prep = ctx.bot.database.driver().prepare()
+            insert_sql = f"""INSERT INTO {{0}} ({{1}}, {{2}}) VALUES ({next(prep)}, {next(prep)})"""
+            prep = ctx.bot.database.driver().prepare()
+            conflict_sql = f"""UPDATE {{0}} SET {{2}}={next(prep)} WHERE {{1}}={next(prep)}"""
+            args = (
                 table_name,
                 "guild_id" if data_location == DataLocation.GUILD else "user_id" if data_location == DataLocation.USER else None,
                 column_name
             )
             data = [i.id if cls._is_discord_object(i) else i for i in data]
             async with ctx.bot.database() as db:
-                await db(
-                    sql,
-                    ctx.guild.id if data_location == DataLocation.GUILD else ctx.author.id if data_location == DataLocation.USER else None,
-                    *data,
-                )
+                try:
+                    await db(
+                        insert_sql.format(*args),
+                        ctx.guild.id if data_location == DataLocation.GUILD else ctx.author.id if data_location == DataLocation.USER else None,
+                        *data,
+                    )
+                except Exception:  # Hopefully it's a unique violation error
+                    await db(
+                        conflict_sql.format(*args),
+                        *data,
+                        ctx.guild.id if data_location == DataLocation.GUILD else ctx.author.id if data_location == DataLocation.USER else None,
+                    )
 
         return wrapper
 
