@@ -50,14 +50,14 @@ class DatabaseTransaction(object):
             await self.rollback()  # Not committed and exited the transaction
 
     async def __call__(self, *args, **kwargs):
-        return self.call(*args, *kwargs)
+        return await self.call(*args, *kwargs)
 
     async def call(self, *args, **kwargs):
         """
         Run some SQL, returning it's data. See :func:`DatabaseWrapper.call`.
         """
 
-        return self.parent.call(*args, **kwargs)
+        return await self.parent.call(*args, **kwargs)
 
     async def execute_many(self, *args, **kwargs):
         """
