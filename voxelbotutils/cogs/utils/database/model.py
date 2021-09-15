@@ -64,7 +64,7 @@ class DatabaseTransaction(object):
         Run some SQL, returning it's data. See :func:`DatabaseWrapper.execute_many`.
         """
 
-        return self.parent.execute_many(*args, **kwargs)
+        return await self.parent.execute_many(*args, **kwargs)
 
     async def commit(self):
         """
