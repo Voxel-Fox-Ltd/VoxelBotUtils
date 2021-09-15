@@ -78,11 +78,11 @@ class ErrorHandler(vbu.Cog):
         ),
         (
             commands.MissingPermissions,
-            lambda ctx, error: f"You need the `{error.missing_perms[0]}` permission to run this command."
+            lambda ctx, error: f"You need the `{error.missing_permissions[0]}` permission to run this command."
         ),
         (
             commands.BotMissingPermissions,
-            lambda ctx, error: f"I need the `{error.missing_perms[0]}` permission for me to be able to run this command."
+            lambda ctx, error: f"I need the `{error.missing_permissions[0]}` permission for me to be able to run this command."
         ),
         (
             commands.NoPrivateMessage,
