@@ -58,7 +58,7 @@ bot_support_role_id = 0  # The ID used to determine whether or not the user is p
 
 # The info command is the slash command equivelant of "help", giving all relevant data.
 [bot_info]
-    enabled = true
+    enabled = false
     content = """
         Here you should give a basic description of your bot and what it does.
         Since this content will go directly into an embed, you're able to [link text](https://google.com).
@@ -84,7 +84,7 @@ bot_support_role_id = 0  # The ID used to determine whether or not the user is p
 
 # Used to generate the invite link.
 [oauth]
-    enabled = true  # Whether or not an invite link is enabled via the !invite command.
+    enabled = false  # Whether or not an invite link is enabled via the !invite command.
     response_type = ""  # The response type given to the redirect URI.
     redirect_uri = ""  # Where the user should be redirected to upon authorizing.
     client_id = ""  #  If not set then will use the bot's ID.
