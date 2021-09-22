@@ -3,10 +3,13 @@ Changelog
 
 A human-readable list of changes between versions.
 
-Readd `image_url` to embeddify
-
-0.8.1
+0.8.2
 --------------------------------------
+
+New Features
+"""""""""""""""""""""""""
+
+* Add ``guild_only`` to :func:`menus.Menu.create_cog`.
 
 Changed Features
 """""""""""""""""""""""""

@@ -53,7 +53,8 @@ class Menu(MenuDisplayable):
     def create_cog(
             self, bot=None, *, cog_name: str = "Bot Settings", name: str = "settings",
             aliases: typing.List[str] = ["setup"], permissions: typing.List[str] = None,
-            post_invoke: MaybeCoroContextCallable = None, **command_kwargs) -> typing.Union[commands.Cog, typing.Type[commands.Cog]]:
+            post_invoke: MaybeCoroContextCallable = None, guild_only: bool = True,
+            **command_kwargs) -> typing.Union[commands.Cog, typing.Type[commands.Cog]]:
         """
         Creates a cog that can be loaded into the bot in a setup method.
 
@@ -65,14 +66,20 @@ class Menu(MenuDisplayable):
             permissions (typing.List[str]): A list of permission names should be required for the command run.
             post_invoke (typing.Union[typing.Callable[[commands.Context], None], typing.Awaitable[typing.Callable[[commands.Context], None]]]): A
                 post-invoke method that can be called.
+            guild_only (bool): If the command should be guild-only.
         """
 
         permissions = permissions if permissions is not None else ["manage_guild"]
 
         class NestedCog(Cog, name=cog_name):
 
-            def cog_unload(self):
-                self.bot.remove_command(name)
+            def __init__(nested_self, bot):
+                super().__init__(bot)
+                if guild_only:
+                    nested_self.settings.add_check(commands.guild_only().predicate)
+
+            def cog_unload(nested_self):
+                nested_self.bot.remove_command(nested_self.settings.name)
                 super().cog_unload()
 
             @commands.command(cls=Command, name=name, aliases=aliases, **command_kwargs)
