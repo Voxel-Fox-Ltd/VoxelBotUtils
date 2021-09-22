@@ -12,6 +12,13 @@ Changed Features
 """""""""""""""""""""""""
 
 * Readd ``image_url`` kwarg to ``Embeddify.send``.
+* Oauth and bot info now default to false.
+* ``addslashcommands`` and ``ev`` now output to file if their content is too long.
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""
+
+* Add missing ``await``s to transaction object.
 
 0.8.0
 --------------------------------------
