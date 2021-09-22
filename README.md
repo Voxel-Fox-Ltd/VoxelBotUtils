@@ -7,16 +7,14 @@
 
 VoxelBotUtils (VBU) is an extension for Discord.py to speed up Discord bot development. It includes a whole slew of features that are commonly used in a lot of bots so you don't need to keep writing them every time. Many features are available to you by default:
 
-* Interaction handling, such as slash commands and buttons.
 * Built-in error handling for all of Discord.py's errors.
-* Built-in PostgreSQL database connector.
+* Built-in database connector.
 * Logging using Python's `logging.Logger` classes.
 * Webhook sends on different events.
 * Bot stats posting via StatsD and DataDog.
 * A help command that doesn't look like trash.
 * Owner-only commands.
 * Presence auto-updating based on Twitch streamers.
-* Inbuilt prefix command.
 * Website utilities.
 * And more...
 
