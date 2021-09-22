@@ -278,6 +278,8 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
         if ret is None:
             # It might have printed something
             if stdout_value is not None:
+                if len(stdout_value) >= 1_900:
+                    return await ctx.send(self.get_execution_time(end_time, start_time), file=discord.File(io.StringIO(stdout_value), filename=f"ev.txt"))
                 await ctx.send(f'```py\n{stdout_value}\n```{self.get_execution_time(end_time, start_time)}')
             return
 
