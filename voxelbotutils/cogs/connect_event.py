@@ -1,4 +1,3 @@
-from datetime import datetime as dt
 import time
 
 import discord
@@ -168,9 +167,9 @@ class ConnectEvent(vbu.Cog):
         if guild.me:
             try:
                 member_count = guild.member_count
-                text = f"Removed from guild - ``{guild.name}``/``{guild.id}`` (`{member_count}` members; `{vbu.TimeValue((dt.utcnow() - guild.me.joined_at).total_seconds()).clean_full}` guild duration) - <t:{int(time.time())}>"
+                text = f"Removed from guild - ``{guild.name}``/``{guild.id}`` (`{member_count}` members; `{vbu.TimeValue((discord.utils.utcnow() - guild.me.joined_at).total_seconds()).clean_full}` guild duration) - <t:{int(time.time())}>"
             except Exception:
-                text = f"Removed from guild - ``{guild.name}``/``{guild.id}`` (`{vbu.TimeValue((dt.utcnow() - guild.me.joined_at).total_seconds()).clean_full}` guild duration) - <t:{int(time.time())}>"
+                text = f"Removed from guild - ``{guild.name}``/``{guild.id}`` (`{vbu.TimeValue((discord.utils.utcnow() - guild.me.joined_at).total_seconds()).clean_full}` guild duration) - <t:{int(time.time())}>"
             await self.send_webhook(
                 "guild_remove",
                 text,
