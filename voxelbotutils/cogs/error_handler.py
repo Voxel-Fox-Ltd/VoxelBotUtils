@@ -238,7 +238,7 @@ class ErrorHandler(vbu.Cog):
             vbu.errors.IsNotUpgradeChatSubscriber, vbu.errors.IsNotVoter, vbu.errors.NotBotSupport,
         )
         if isinstance(error, owner_reinvoke_errors) and ctx.original_author_id in self.bot.owner_ids:
-            if self.bot.config.get("owners_ignore_check_failures", True) and isinstance(error, commands.CheckFailure):
+            if not self.bot.config.get("owners_ignore_check_failures", True) and isinstance(error, commands.CheckFailure):
                 pass
             else:
                 return await ctx.reinvoke()
