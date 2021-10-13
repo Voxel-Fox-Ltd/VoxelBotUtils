@@ -143,7 +143,7 @@ class Paginator(object):
             # See if we want to bother paginating
             last_payload = payload
             if self.max_pages == 1:
-                return
+                break
 
             # Wait for reactions to be added by the user
             interaction = None
