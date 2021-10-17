@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import typing
 
+from .model import DatabaseTransaction
+
 if typing.TYPE_CHECKING:
-    from .model import DatabaseWrapper, DatabaseTransaction
+    from .model import DatabaseWrapper
 
 
 class DatabaseConfig(typing.TypedDict):
