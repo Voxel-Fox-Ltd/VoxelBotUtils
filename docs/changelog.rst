@@ -17,11 +17,18 @@ Changed Features
 * Readd ``image_url`` kwarg to ``Embeddify.send``.
 * Oauth and bot info now default to false.
 * ``addslashcommands`` and ``ev`` now output to file if their content is too long.
+* Send added slash commands as a file when the output is too long.
 
 Bugs Fixed
 """""""""""""""""""""""""""""""""""""""
 
 * Add missing ``await``s to transaction object.
+* Change ``missing_perms`` to ``missing_permissions``.
+* Fix stdout in ``ev`` command not being changed to embed if over 2000 characters.
+* Fix naive datetime objects in connect event.
+* Fix ``owners_ignore_check_failures`` flag in config.
+* Fix buttons not being disabled in paginator.
+* Fix missing import for transactions.
 
 0.8.0
 --------------------------------------
