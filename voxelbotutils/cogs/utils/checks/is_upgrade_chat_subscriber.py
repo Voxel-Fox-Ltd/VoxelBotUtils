@@ -12,7 +12,7 @@ class IsNotUpgradeChatPurchaser(commands.CheckFailure):
         self.item_names = item_names
         super().__init__(
             f"You need to purchase `{self.item_names[0]}` to use this command - "
-            f"see `{{ctx.clean_prefix}}donate` for more information."
+            f"see `{{ctx.clean_prefix}}info` for more information."
         )
 
 
@@ -22,7 +22,7 @@ class IsNotUpgradeChatSubscriber(commands.CheckFailure):
     def __init__(self):
         super().__init__(
             "You need to be subscribed via Upgrade.Chat to run this command - "
-            "see `{ctx.clean_prefix}donate` for more information."
+            "see `{ctx.clean_prefix}info` for more information."
         )
 
 
