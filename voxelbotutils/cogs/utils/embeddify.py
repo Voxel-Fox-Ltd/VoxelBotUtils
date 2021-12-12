@@ -29,7 +29,8 @@ class Embeddify:
     def get_embeddify(
             cls, dest: Destinations, content: typing.Optional[str] = None, *,
             embed: discord.Embed = None, embeds: typing.List[discord.Embed] = None,
-            embeddify: bool = MISSING, image_url: str = MISSING, **kwargs) -> dict:
+            file: discord.File = None, embeddify: bool = MISSING,
+            image_url: str = MISSING, **kwargs) -> dict:
         """
         Embeddify your given content.
         """
@@ -48,6 +49,7 @@ class Embeddify:
         data = {
             "content": content,
             "embeds": [],
+            "file": file,
             **kwargs,
         }
         if embed and embeds:
@@ -113,6 +115,8 @@ class Embeddify:
         # Add image
         if image_url:
             embed.set_image(url=image_url)
+        elif file and file.filename and file.filename.endswith((".png", ".jpg", ".jpeg", ".webm", ".gif")):
+            embed.set_image(url=f"attachment://{file.filename}")
 
         # Reset content
         if cls.bot:
