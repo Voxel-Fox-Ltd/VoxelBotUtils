@@ -5,9 +5,9 @@
 
 # VoxelBotUtils
 
-VoxelBotUtils (VBU) is an extension for Discord.py to speed up Discord bot development. It includes a whole slew of features that are commonly used in a lot of bots so you don't need to keep writing them every time. Many features are available to you by default:
+VoxelBotUtils (VBU) is an extension for Novus to speed up Discord bot development. It includes a whole slew of features that are commonly used in a lot of bots so you don't need to keep writing them every time. Many features are available to you by default:
 
-* Built-in error handling for all of Discord.py's errors.
+* Built-in error handling for all of Novus's errors.
 * Built-in database connector.
 * Logging using Python's `logging.Logger` classes.
 * Webhook sends on different events.
