@@ -27,9 +27,9 @@ class Embeddify:
 
     @classmethod
     def get_embeddify(
-            cls, dest: Destinations, content: typing.Optional[str] = None, *,
-            embed: discord.Embed = None, embeds: typing.List[discord.Embed] = None,
-            file: discord.File = None, embeddify: bool = MISSING,
+            cls, dest: Destinations, content: typing.Optional[str] = MISSING, *,
+            embed: discord.Embed = MISSING, embeds: typing.List[discord.Embed] = MISSING,
+            file: discord.File = MISSING, embeddify: bool = MISSING,
             image_url: str = MISSING, **kwargs) -> dict:
         """
         Embeddify your given content.
@@ -49,7 +49,7 @@ class Embeddify:
         data = {
             "content": content,
             "embeds": [],
-            "file": file,
+            "file": file if file is not None else MISSING,
             **kwargs,
         }
         if embed and embeds:
@@ -113,9 +113,9 @@ class Embeddify:
             cls.bot.set_footer_from_config(embed)
 
         # Add image
-        if image_url:
+        if image_url not in (None, MISSING):
             embed.set_image(url=image_url)
-        elif file and file.filename and file.filename.endswith((".png", ".jpg", ".jpeg", ".webm", ".gif")):
+        elif file not in (None, MISSING) and file and file.filename and file.filename.endswith((".png", ".jpg", ".jpeg", ".webm", ".gif")):
             embed.set_image(url=f"attachment://{file.filename}")
 
         # Reset content
