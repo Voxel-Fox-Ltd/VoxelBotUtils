@@ -49,7 +49,6 @@ class Embeddify:
         data = {
             "content": content,
             "embeds": [],
-            "file": file if file is not None else MISSING,
             **kwargs,
         }
         if embed and embeds:
@@ -116,6 +115,7 @@ class Embeddify:
         if image_url not in (None, MISSING):
             embed.set_image(url=image_url)
         elif file not in (None, MISSING) and file and file.filename and file.filename.endswith((".png", ".jpg", ".jpeg", ".webm", ".gif")):
+            data["file"] = file
             embed.set_image(url=f"attachment://{file.filename}")
 
         # Reset content
