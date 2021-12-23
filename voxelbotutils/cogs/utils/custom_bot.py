@@ -869,7 +869,11 @@ class Bot(MinimalBot):
         port = shard_manager_config.get('port', 8888)
 
         # Connect using our shard manager
-        shard_manager = await ShardManagerClient.open_connection(host, port)
+        try:
+            shard_manager = await ShardManagerClient.open_connection(host, port)
+        except ConnectionRefusedError:
+            self.logger.info("Failed to connect to shard manager - waiting 10 seconds.")
+            return await self.launch_shard(gateway, shard_id, initial=initial)
         await shard_manager.ask_to_connect(shard_id)
         await super().launch_shard(gateway, shard_id, initial=initial)
         await shard_manager.done_connecting(shard_id)
