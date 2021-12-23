@@ -44,14 +44,10 @@ class ErrorHandler(vbu.Cog):
         #     vbu.errors.BotNotInGuild,
         #     lambda ctx, error: "The bot needs to be in the guild for you to run this command."
         # ),
-        # (
-        #     vbu.errors.IsSlashCommand,
-        #     lambda ctx, error: "This command cannot be run as a slash command."
-        # ),
-        # (
-        #     vbu.errors.IsNotSlashCommand,
-        #     lambda ctx, error: "This command can only be run as a slash command."
-        # ),
+        (
+            commands.IsNotSlashCommand,
+            lambda ctx, error: "This command can only be run as a slash command."
+        ),
         (
             commands.DisabledCommand,
             lambda ctx, error: "This command has been disabled."
@@ -296,7 +292,7 @@ class ErrorHandler(vbu.Cog):
                 await owner.send(error_text, file=discord.File(file_handle, filename="error_log.py"))
 
         # Ping to the webook
-        event_webhook: discord.Webhook = self.bot.get_event_webhook("unhandled_error")
+        event_webhook: typing.Optional[discord.Webhook] = self.bot.get_event_webhook("unhandled_error")
         try:
             avatar_url = str(self.bot.user.display_avatar.url)
         except Exception:
