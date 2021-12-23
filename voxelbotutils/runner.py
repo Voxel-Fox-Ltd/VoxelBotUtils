@@ -140,18 +140,13 @@ def _set_default_log_level(logger_name, log_filter, formatter, loglevel):
     stdout_logger = logging.StreamHandler(sys.stdout)
     stdout_logger.addFilter(log_filter)
     stdout_logger.setFormatter(formatter)
-    set_log_level(stdout_logger, loglevel)
+    set_log_level(stdout_logger, loglevel)  # type: ignore
     logger.addHandler(stdout_logger)
 
     stderr_logger = logging.StreamHandler(sys.stderr)
     stderr_logger.setFormatter(formatter)
-    set_log_level(stderr_logger, loglevel, logging.WARNING)
+    set_log_level(stderr_logger, loglevel, logging.WARNING)  # type: ignore
     logger.addHandler(stderr_logger)
-
-    # logger.warning("Test warning message")
-    # logger.info("Test info message")
-    # logger.error("Test error message")
-    # logger.critical("Test critical message")
 
 
 def create_subclassed_loggers():
@@ -187,7 +182,7 @@ def set_default_log_levels(args: argparse.Namespace) -> None:
         _set_default_log_level(i, log_filter, formatter, getattr(args, "loglevel", "ERROR"))
 
 
-async def create_initial_database(db) -> None:
+async def create_initial_database(db: DatabaseWrapper) -> bool:
     """
     Create the initial database using the internal database.psql file.
     """
@@ -264,12 +259,22 @@ async def start_redis_pool(config: dict) -> None:
     logger.info("Created redis pool successfully")
 
 
-class EventLoopCallbackHandler(object):
+class EventLoopCallbackHandler:
+    """
+    A callback handler for errors in the event loop so that they
+    print to console properly, as well as sending to the event webhook
+    if one is set up.
 
-    bot = None
+    Attributes
+    -----------
+    bot: :class:`voxelbotutils.Bot`
+        The bot instance that the event loop is running.
+    """
+
+    bot: typing.Optional[Bot] = None
 
     @classmethod
-    def callback(cls, future):
+    def callback(cls, future: asyncio.Future):
         # Print exceptions to console
         try:
             e = future.exception()
@@ -294,15 +299,21 @@ class EventLoopCallbackHandler(object):
             f"user `None`\n```\n[Task error]\n```"
         )
 
+        # Assert some stuff
+        assert cls.bot
+        assert cls.bot.config
+        assert cls.bot.user
+
         # DM to owners
         if cls.bot.config.get('dm_uncaught_errors', False):
             for owner_id in cls.bot.owner_ids:
                 owner = cls.bot.get_user(owner_id) or await cls.bot.fetch_user(owner_id)
                 file_handle.seek(0)
-                await owner.send(error_text, file=discord.File(file_handle, filename="error_log.py"))
+                file = discord.File(file_handle, filename="error_log.py")  # type: ignore
+                await owner.send(error_text, file=file)
 
         # Ping to the webook
-        event_webhook: discord.Webhook = cls.bot.get_event_webhook("unhandled_error")
+        event_webhook: typing.Optional[discord.Webhook] = cls.bot.get_event_webhook("unhandled_error")
         try:
             avatar_url = str(cls.bot.user.display_avatar.url)
         except Exception:
