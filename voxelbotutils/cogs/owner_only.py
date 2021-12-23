@@ -43,11 +43,16 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
         guild_id = payload['guild_id']
         author_id = payload['author_id']
         channel: discord.TextChannel = await self.bot.fetch_channel(channel_id)
-        guild: discord.Guild = await self.bot.fetch_guild(guild_id)
-        channel.guild = guild
-        author: discord.Member = await guild.fetch_member(author_id)
-        bot: discord.Member = await guild.fetch_member(self.bot.user.id)
-        guild._add_member(bot)
+        if guild_id:
+            guild: discord.Guild = await self.bot.fetch_guild(guild_id)
+            channel.guild = guild
+            author: discord.Member = await guild.fetch_member(author_id)
+            bot: discord.Member = await guild.fetch_member(self.bot.user.id)
+            guild._add_member(bot)
+        else:
+            guild = None
+            author: discord.User = await self.bot.fetch_user(author_id)
+            bot: discord.User = self.bot.user
         message: discord.Message = await channel.fetch_message(message_id)
         message.author = author
 
@@ -79,7 +84,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
             await re.publish("RunRedisEval", {
                 'channel_id': ctx.channel.id,
                 'message_id': ctx.message.id,
-                'guild_id': ctx.guild.id,
+                'guild_id': ctx.guild.id if ctx.guild else None,
                 'author_id': ctx.author.id,
                 'content': content,
             })
