@@ -1,3 +1,5 @@
+import typing
+
 from . import runner  # noqa
 from .cogs.utils import *  # noqa
 
@@ -15,7 +17,7 @@ def _web_extras_installed():
     return True
 
 
-if _web_extras_installed():
+if _web_extras_installed() or typing.TYPE_CHECKING:
     from . import web
 else:
     web = None

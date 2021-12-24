@@ -10,8 +10,7 @@ class OauthGuild(object):
     Attributes:
         id (int): The ID of the guild.
         name (str): The name of the guild.
-        icon (str): The guild's icon hash.
-        icon_url (discord.Asset): The guild's icon.
+        icon (discord.Asset): The guild's icon.
         owner_id (int): The ID of the owner for the guild.
             This will either be the ID of the authenticated user or `0`.
         features (typing.List[str]): A list of features that the guild has.sa
@@ -58,8 +57,7 @@ class OauthUser(object):
     Attributes:
         id (int): The ID of the user.
         username (str): The user's username.
-        avatar (str): The user's avatar hash.
-        avatar_url (discord.Asset): The user's avatar.
+        avatar (discord.Asset): The user's avatar asset.
         discriminator (str): The user's discrimiator.
         public_flags (discord.PublicUserFlags): The user's public flags.
         locale (str): The locale of the user.
