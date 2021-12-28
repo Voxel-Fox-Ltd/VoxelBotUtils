@@ -1,4 +1,5 @@
 import asyncio
+import typing
 
 import discord
 from discord.ext import tasks
@@ -25,7 +26,7 @@ class PresenceAutoUpdater(vbu.Cog):
     def cog_unload(self):
         self.presence_auto_update_loop.cancel()
 
-    async def get_app_token(self, force_refresh: bool = False) -> str:
+    async def get_app_token(self, force_refresh: bool = False) -> typing.Optional[str]:
         """
         Get a valid app token from Twitch
         """
@@ -74,17 +75,24 @@ class PresenceAutoUpdater(vbu.Cog):
         Get the user ID for a given Twitch username.
         """
 
+        # See if we got it already
         if username in self.twitch_user_ids:
             return self.twitch_user_ids[username]
+
+        # Make up our request
         app_token = await self.get_app_token()
         headers = {
             "Authorization": f"Bearer {app_token}",
             "Client-Id": self.bot.config.get("presence", {}).get("streaming", {}).get("twitch_client_id"),
         }
         self.logger.info(f"Asking Twitch for the username of {username}")
+
+        # Send the request
         async with self.bot.session.get(self.TWITCH_USERNAME_URL, params={"login": username}, headers=headers) as r:
             data = await r.json()
         self.logger.debug(f"GET {self.TWITCH_USERNAME_URL} returned {data}")
+
+        # Get the ID of the user
         try:
             self.twitch_user_ids[username] = data["data"][0]["id"]
         except KeyError:
@@ -118,9 +126,10 @@ class PresenceAutoUpdater(vbu.Cog):
 
         # Set this up so we know who to set us to
         status_to_set = None
+        stream_data = None
 
         # Let's go through each of the usernames available and see which of them is live
-        for twitch_username in twitch_data.get("twitch_usernames"):
+        for twitch_username in twitch_data.get("twitch_usernames", list()):
 
             # Get their username
             twitch_user_id = await self.get_twitch_user_id(twitch_username)
@@ -172,10 +181,12 @@ class PresenceAutoUpdater(vbu.Cog):
                 self._user_streaming_status = status_to_set
                 return
 
-            # The stream name is different
+            # The stream name or URL is different
             if (status_to_set.name, status_to_set.url) != (self._user_streaming_status.name, self._user_streaming_status.url):
                 await self.bot.change_presence(activity=status_to_set)
                 self._user_streaming_status = status_to_set
+                if status_to_set.url != self._user_streaming_status.url:
+                    self.bot.dispatch("twitch_user_live", stream_data)
                 return
 
     @presence_auto_update_loop.before_loop
