@@ -15,20 +15,27 @@ version = ''
 with open('voxelbotutils/__init__.py') as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
+
+# Make sure there's a version
 if not version:
     raise RuntimeError('version is not set')
 
+
+# Add a commit reference if we're installing an alpha version
 if version.endswith(('a', 'b', 'rc')):
-    # append version identifier based on commit count
     try:
         import subprocess
-        p = subprocess.Popen(['git', 'rev-list', '--count', 'HEAD'],
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen(
+            ['git', 'rev-list', '--count', 'HEAD'],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        )
         out, err = p.communicate()
         if out:
             version += out.decode('utf-8').strip()
-        p = subprocess.Popen(['git', 'rev-parse', '--short', 'HEAD'],
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen(
+            ['git', 'rev-parse', '--short', 'HEAD'],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        )
         out, err = p.communicate()
         if out:
             version += '+g' + out.decode('utf-8').strip()
@@ -36,30 +43,30 @@ if version.endswith(('a', 'b', 'rc')):
         pass
 
 
-# Here are the requirements
+# Set up the requirements
 requirements = [
+    # Main requirements
     "novus>=0.0.3,<0.1",
     "toml>=0.10.2,<0.11",
-    # "asyncpg>=0.21.0,<0.22",
     "aiosqlite",
     "aioredis>=1.3,<2.0",
     "aioredlock>=0.7.0,<0.8",
     "aiodogstatsd>=0.14.0,<0.15",
     "aiohttp",  # no versioning here because I trust u
-    "upgradechatpy>=1.0.3<2.0"
+    "upgradechatpy>=1.0.3<2.0",
+
+    # Web requirements
+    "cryptography>=3.3.1,<4.0",
+    "aiohttp_jinja2>=1.4.2,<2.0",
+    "aiohttp_session>=2.9.0,<3.0",
+    "jinja2>=3.0.0,<4.0.0",
+    "markdown>=3.3.3,<4.0",
+    "htmlmin>=0.1.12,<0.2",
 ]
 
 
 # Here are some MORE requirements
 extras = {
-    "web": [
-        "cryptography>=3.3.1,<4.0",
-        "aiohttp_jinja2>=1.4.2,<2.0",
-        "aiohttp_session>=2.9.0,<3.0",
-        "jinja2>=3.0.0,<4.0.0",
-        "markdown>=3.3.3,<4.0",
-        "htmlmin>=0.1.12,<0.2",
-    ],
     "docs": [
         "sphinx",
         "sphinx_rtd_theme",
@@ -73,6 +80,7 @@ extras = {
 }
 
 
+# And we love setuptools
 setuptools.setup(
     name="voxelbotutils",
     version=version,

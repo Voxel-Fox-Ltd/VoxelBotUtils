@@ -1,26 +1,6 @@
-import typing
-
-from . import runner  # noqa
-from .cogs.utils import *  # noqa
-
-
-def _web_extras_installed():
-    try:
-        import cryptography  # noqa
-        import aiohttp_jinja2  # noqa
-        import aiohttp_session  # noqa
-        import jinja2  # noqa
-        import markdown  # noqa
-        import htmlmin  # noqa
-    except ImportError:
-        return False
-    return True
-
-
-if _web_extras_installed() or typing.TYPE_CHECKING:
-    from . import web
-else:
-    web = None
+from . import runner
+from . import web
+from .cogs.utils import *
 
 
 __version__ = "0.8.3a"
