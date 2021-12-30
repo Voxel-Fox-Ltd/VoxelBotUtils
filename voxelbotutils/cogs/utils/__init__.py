@@ -16,6 +16,7 @@ from .help_command import HelpCommand
 from .string import Formatter
 from .component_check import component_check
 from .embeddify import Embeddify
+from .twitch_stream import TwitchStream
 
 
 def command(*args, **kwargs):

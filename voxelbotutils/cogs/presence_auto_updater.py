@@ -186,7 +186,7 @@ class PresenceAutoUpdater(vbu.Cog):
                 await self.bot.change_presence(activity=status_to_set)
                 self._user_streaming_status = status_to_set
                 if status_to_set.url != self._user_streaming_status.url:
-                    self.bot.dispatch("twitch_user_live", stream_data)
+                    self.bot.dispatch("twitch_stream", vbu.TwitchStream(data=stream_data))
                 return
 
     @presence_auto_update_loop.before_loop

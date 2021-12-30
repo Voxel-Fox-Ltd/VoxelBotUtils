@@ -3,6 +3,24 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.8.3
+--------------------------------------
+
+New Features
+"""""""""""""""""""""""""
+
+* Dispatch :func:`twitch_stream` when a user goes live on Twitch, if the config is set properly.
+
+Bugs Fixed
+"""""""""""""""""""""""""""""""""""""""
+
+* Change ``donate`` to ``info`` in ``is_upgrade_chat_subscriber`` error.
+* Support single file in embeddify.
+* Change defaults of ``None`` to ``MISSING`` in embeddify.
+* Catch error in connecting to shard manager.
+* Fix ``ev`` over redis.
+* Fix icon asset for oauth models in web utils.
+
 0.8.2
 --------------------------------------
 

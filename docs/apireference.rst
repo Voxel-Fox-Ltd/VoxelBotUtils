@@ -1,6 +1,17 @@
 API Reference
 ================================
 
+Event Reference
+---------------------------------------
+
+.. function:: twitch_stream(data)
+
+   :param data: The Twitch stream that went live.
+   :type data: :class:`voxelbotutils.TwitchStream`
+
+   Pinged when a Twitch stream goes live. This only occurs if valid Twitch
+   authentication is set inside of the config.
+
 Utils
 ---------------------------------------
 
@@ -71,6 +82,11 @@ TimeValue
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: voxelbotutils.TimeValue
+
+TwitchStream
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.TwitchStream
 
 component_check
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
