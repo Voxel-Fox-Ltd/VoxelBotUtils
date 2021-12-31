@@ -1,0 +1,105 @@
+msgid "You're missing `{parameter_name}`, which is required for this command."
+msgstr "Je mist `{parameter_name}`, die vereist is voor deze opdracht."
+
+msgid "The quotes in your message have been done incorrectly."
+msgstr "De aanhalingstekens in je bericht zijn verkeerd geplaatst."
+
+msgid "You can use this command again in {timestamp}."
+msgstr "Je kan deze opdracht over {timestamp} opnieuw gebruiken."
+
+msgid "The bot isn't ready to start processing that command yet - please wait."
+msgstr "De bot is not niet bereid om die opdracht to verwerken. Even geduld a.u.b."
+
+msgid "You can only run this command in channels set as NSFW."
+msgstr "Je kan deze opdracht alleen uitvoeren in kanalen die zijn ingesteld als NSFW."
+
+msgid "This command can only be run as a slash command."
+msgstr "Deze opdracht kan alleen worden uitgevoerd als een slash-opdracht."
+
+msgid "This command has been disabled."
+msgstr "Deze opdracht is uitgeschakeld."
+
+msgid ""
+"You need to be part of the bot's support team to be able to run this command."
+msgstr "Je moet in het ondersteuningsteam van de bot zijn om deze opdracht uit te voeren."
+
+msgid ""
+"You need to have at least one of {roles} to be able to run this command."
+msgstr "Je moet den minste één van {roles} hebben on deze opdracht uit te voeren."
+
+msgid ""
+"I need to have one of the {roles} roles for you to be able to run this "
+"command."
+msgstr "Ik heb een van de {roles} rollen nodig om deze opdracht uit te voeren."
+
+msgid "You need to have the `{role}` role to be able to run this command."
+msgstr "Je hebt de `{roles}` role nodig om deze opdracht uit te voeren."
+
+msgid ""
+"I need to have the `{role}` role for you to be able to run this command."
+msgstr "Ik heb de `{role}` role nodig om deze opdracht uit te voeren."
+
+msgid "You need the `{permission}` permission to run this command."
+msgstr "Je hebt de `{permission}` permissie nodig om deze opdracht uit te voeren."
+
+msgid ""
+"I need the `{permission}` permission for me to be able to run this command."
+msgstr "Ik heb de `{permission}` permissie nodig om deze opdracht uit te voeren."
+
+msgid "This command can't be run in DMs."
+msgstr "Deze opdracht kan niet worden uitgevoerd in DMs."
+
+msgid "This command can only be run in DMs."
+msgstr "Deze opdracht kan alleen worden uitgevoerd in DMs."
+
+msgid "You need to be registered as an owner to run this command."
+msgstr "U moet als eigenaar geregistreerd zijn om deze opdracht uit te voeren."
+
+msgid "I couldn't convert `{argument}` into a message."
+msgstr "Ik kon `{argument}` niet omzetten in een bericht."
+
+msgid "I couldn't convert `{argument}` into a guild member."
+msgstr "Ik kon `{argument}' niet omzetten in een gildelid."
+
+msgid "I couldn't convert `{argument}` into a user."
+msgstr "Ik kon `{argument}' niet omzetten in een gebruiker."
+
+msgid "I couldn't convert `{argument}` into a channel."
+msgstr "Ik kon `{argument}' niet omzetten in een kanaal."
+
+msgid "I can't read messages in <#{id}>."
+msgstr "Ik kan de berichten in <#{id}> niet lezen."
+
+msgid "I couldn't convert `{argument}` into a colour."
+msgstr "Ik kon `{argument}' niet omzetten in een kleur."
+
+msgid "I couldn't convert `{argument}` into a role."
+msgstr "Ik kon `{argument}' niet omzetten in een rol."
+
+msgid "I couldn't convert `{argument}` into an invite."
+msgstr "Ik kon `{argument}' niet omzetten in een uitnodiging."
+
+msgid "I couldn't convert `{argument}` into an emoji."
+msgstr "Ik kon `{argument}' niet omzetten in een emoji."
+
+msgid "I couldn't convert `{argument}` into a boolean."
+msgstr "Ik kon `{argument}' niet omzetten in een booleaanse operator."
+
+msgid "I couldn't convert your provided `{parameter_name}`."
+msgstr "Ik kan de door u opgegeven `{parameter_name}` niet converteren."
+
+msgid "I wasn't able to find that command to be able to run it."
+msgstr "Ik heb die opdracht niet kunnen vinden."
+
+msgid "You gave too many arguments to this command."
+msgstr "Je hebt te veel argumenten gegeven voor deze opdracht."
+
+msgid "Discord is saying I'm unable to perform that action."
+msgstr "Discord zegt dat ik die actie niet kan uitvoeren."
+
+msgid ""
+"Either I or Discord messed up running this command. Please try again later."
+msgstr "Of ik of Discord hebben deze opdracht verprutst. Probeer het later opnieuw."
+
+msgid "You can't run this command right now."
+msgstr "Je kan deze opdracht nu niet uitvoeren."

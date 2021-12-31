@@ -1,12 +1,19 @@
 import io
 import traceback
 import typing
+from datetime import timedelta
+from gettext import translation as gt
+import pathlib
 
 import aiohttp
 import discord
+from discord import utils
 from discord.ext import commands
 
 from . import utils as vbu
+
+
+LOCALE_PATH = (pathlib.Path(__file__).parent.parent / "locales").resolve()
 
 
 class ErrorHandler(vbu.Cog):
@@ -14,127 +21,177 @@ class ErrorHandler(vbu.Cog):
     COMMAND_ERROR_RESPONSES = (
         (
             vbu.errors.MissingRequiredArgumentString,
-            lambda ctx, error: f"You're missing `{error.param}`, which is required for this command - see `{ctx.clean_prefix}help {' '.join(ctx.command.qualified_name.split(' ')[:-1] + [ctx.invoked_with])}`."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=["ctx.locale"], fallback=True).gettext(
+                "You're missing `{parameter_name}`, which is required for this command.",
+            ).format(parameter_name=error.param)
         ),
         (
             commands.MissingRequiredArgument,
-            lambda ctx, error: f"You're missing `{error.param.name}`, which is required for this command - see `{ctx.clean_prefix}help {' '.join(ctx.command.qualified_name.split(' ')[:-1] + [ctx.invoked_with])}`."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "You're missing `{parameter_name}`, which is required for this command.",
+            ).format(parameter_name=error.param.name)
         ),
         (
             (commands.UnexpectedQuoteError, commands.InvalidEndOfQuotedStringError, commands.ExpectedClosingQuoteError),
-            lambda ctx, error: "The quotes in your message have been done incorrectly."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "The quotes in your message have been done incorrectly.",
+            )
         ),
-        # (
-        #     vbu.checks.cooldown.NoRaiseCommandOnCooldown,
-        #     lambda ctx, error: None
-        # ),
         (
             commands.CommandOnCooldown,
-            lambda ctx, error: f"You can't use this command again for another {vbu.TimeValue(error.retry_after).clean_spaced}."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "You can use this command again in {timestamp}.",
+            ).format(timestamp=utils.format_dt(utils.utcnow() + timedelta(seconds=error.retry_after), style="R"))
         ),
         (
             vbu.errors.BotNotReady,
-            lambda ctx, error: "The bot isn't ready to start processing that command yet - please wait."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "The bot isn't ready to start processing that command yet - please wait.",
+            )
         ),
         (
             commands.NSFWChannelRequired,
-            lambda ctx, error: f"You can only run this command in channels set as NSFW. {'You can set channels as NSFW in their channel settings.' if ctx.channel.permissions_for(ctx.author).manage_channels else ''}"
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "You can only run this command in channels set as NSFW.",
+            )
         ),
-        # (
-        #     vbu.errors.BotNotInGuild,
-        #     lambda ctx, error: "The bot needs to be in the guild for you to run this command."
-        # ),
         (
             commands.IsNotSlashCommand,
-            lambda ctx, error: "This command can only be run as a slash command."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "This command can only be run as a slash command.",
+            )
         ),
         (
             commands.DisabledCommand,
-            lambda ctx, error: "This command has been disabled."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "This command has been disabled.",
+            )
         ),
         (
             vbu.errors.NotBotSupport,
-            lambda ctx, error: "You need to be part of the bot's support team to be able to run this command."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "You need to be part of the bot's support team to be able to run this command.",
+            )
         ),
         (
             commands.MissingAnyRole,
-            lambda ctx, error: f"You need to have one of the {', '.join(['`' + i + '`' for i in error.missing_roles])} roles to be able to run this command."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "You need to have at least one of {roles} to be able to run this command.",
+            ).format(roles=', '.join(f"`{i.mention}`" for i in error.missing_roles))
         ),
         (
             commands.BotMissingAnyRole,
-            lambda ctx, error: f"I need to have one of the {', '.join(['`' + i + '`' for i in error.missing_roles])} roles for you to be able to run this command."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "I need to have one of the {roles} roles for you to be able to run this command.",
+            ).format(roles=', '.join(f"`{i.mention}`" for i in error.missing_roles))
         ),
         (
             commands.MissingRole,
-            lambda ctx, error: f"You need to have the `{error.missing_role}` role to be able to run this command."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "You need to have the `{role}` role to be able to run this command.",
+            ).format(role=error.missing_role)
         ),
         (
             commands.BotMissingRole,
-            lambda ctx, error: f"I need to have the `{error.missing_role}` role for you to be able to run this command."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "I need to have the `{role}` role for you to be able to run this command.",
+            ).format(role=error.missing_role)
         ),
         (
             commands.MissingPermissions,
-            lambda ctx, error: f"You need the `{error.missing_permissions[0]}` permission to run this command."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "You need the `{permission}` permission to run this command.",
+            ).format(permission=error.missing_permissions[0].replace("_", " "))
         ),
         (
             commands.BotMissingPermissions,
-            lambda ctx, error: f"I need the `{error.missing_permissions[0]}` permission for me to be able to run this command."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "I need the `{permission}` permission for me to be able to run this command.",
+            ).format(permission=error.missing_permissions[0].replace("_", " "))
         ),
         (
             commands.NoPrivateMessage,
-            lambda ctx, error: "This command can't be run in DMs."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "This command can't be run in DMs.",
+            )
         ),
         (
             commands.PrivateMessageOnly,
-            lambda ctx, error: "This command can only be run in DMs."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "This command can only be run in DMs.",
+            )
         ),
         (
             commands.NotOwner,
-            lambda ctx, error: "You need to be registered as an owner to run this command."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "You need to be registered as an owner to run this command.",
+            )
         ),
         (
             commands.MessageNotFound,
-            lambda ctx, error: f"I couldn't convert `{error.argument}` into a message."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "I couldn't convert `{argument}` into a message.",
+            ).format(argument=error.argument)
         ),
         (
             commands.MemberNotFound,
-            lambda ctx, error: f"I couldn't convert `{error.argument}` into a guild member."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "I couldn't convert `{argument}` into a guild member.",
+            ).format(argument=error.argument)
         ),
         (
             commands.UserNotFound,
-            lambda ctx, error: f"I couldn't convert `{error.argument}` into a user."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "I couldn't convert `{argument}` into a user.",
+            ).format(argument=error.argument)
         ),
         (
             commands.ChannelNotFound,
-            lambda ctx, error: f"I couldn't convert `{error.argument}` into a channel."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "I couldn't convert `{argument}` into a channel.",
+            ).format(argument=error.argument)
         ),
         (
             commands.ChannelNotReadable,
-            lambda ctx, error: f"I can't read messages in <#{error.argument.id}>."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "I can't read messages in <#{id}>.",
+            ).format(id=error.argument.id)
         ),
         (
             commands.BadColourArgument,
-            lambda ctx, error: f"I couldn't convert `{error.argument}` into a colour."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "I couldn't convert `{argument}` into a colour.",
+            ).format(argument=error.argument)
         ),
         (
             commands.RoleNotFound,
-            lambda ctx, error: f"I couldn't convert `{error.argument}` into a role."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "I couldn't convert `{argument}` into a role.",
+            ).format(argument=error.argument)
         ),
         (
             commands.BadInviteArgument,
-            lambda ctx, error: f"I couldn't convert `{error.argument}` into an invite."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "I couldn't convert `{argument}` into an invite.",
+            ).format(argument=error.argument)
         ),
         (
             (commands.EmojiNotFound, commands.PartialEmojiConversionFailure),
-            lambda ctx, error: f"I couldn't convert `{error.argument}` into an emoji."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "I couldn't convert `{argument}` into an emoji.",
+            ).format(argument=error.argument)
         ),
         (
             commands.BadBoolArgument,
-            lambda ctx, error: f"I couldn't convert `{error.argument}` into a boolean."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "I couldn't convert `{argument}` into a boolean.",
+            ).format(argument=error.argument)
         ),
         (
             commands.BadUnionArgument,
-            lambda ctx, error: f"I couldn't convert your provided `{error.param.name}` into any type of {', '.join([i.__name__.lower() for i in error.converters])}."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "I couldn't convert your provided `{parameter_name}`.",
+            ).format(parameter_name=error.param.name)
         ),
         (
             commands.BadArgument,
@@ -142,11 +199,21 @@ class ErrorHandler(vbu.Cog):
         ),
         (
             commands.CommandNotFound,  # This is only handled in slash commands
-            lambda ctx, error: "I wasn't able to find that command to be able to run it."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "I wasn't able to find that command to be able to run it.",
+            )
+        ),
+        (
+            commands.MaxConcurrencyReached,
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "You can't run this command right now.",
+            )
         ),
         (
             commands.TooManyArguments,
-            lambda ctx, error: f"You gave too many arguments to this command - see `{ctx.clean_prefix}help {' '.join(ctx.command.qualified_name.split(' ')[:-1] + [ctx.invoked_with])}`."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "You gave too many arguments to this command.",
+            )
         ),
         (
             discord.NotFound,
@@ -158,11 +225,15 @@ class ErrorHandler(vbu.Cog):
         ),
         (
             discord.Forbidden,
-            lambda ctx, error: ("Discord is saying I'm unable to perform that action.", "Discord is saying I'm unable to perform that action - I probably don't have permission to talk in that channel.")
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "Discord is saying I'm unable to perform that action.",
+            )
         ),
         (
             (discord.HTTPException, aiohttp.ClientOSError),
-            lambda ctx, error: "Either I or Discord messed up running this command. Please try again later."
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                "Either I or Discord messed up running this command. Please try again later.",
+            )
         ),
 
         # Disabled because they're base classes for the subclasses above
@@ -173,9 +244,6 @@ class ErrorHandler(vbu.Cog):
         # (commands.UserInputError, lambda ctx, error: ""),
         # (commands.ConversionError, lambda ctx, error: ""),
         # (commands.ArgumentParsingError, lambda ctx, error: ""),
-
-        # Disabled because I've literally never used this and don't know anyone who has
-        # (commands.MaxConcurrencyReached, lambda ctx, error: ""),
 
         # Disabled because they all refer to extension and command loading
         # (commands.ExtensionError, lambda ctx, error: ""),
