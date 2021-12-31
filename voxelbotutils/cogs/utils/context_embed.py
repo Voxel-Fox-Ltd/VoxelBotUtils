@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import random
 
 import discord
@@ -34,7 +36,7 @@ class Embed(discord.Embed):
         if kwargs.pop("use_random_color", use_random_colour):
             self.use_random_colour()
 
-    def __enter__(self) -> 'Embed':
+    def __enter__(self) -> Embed:
         return self
 
     def __exit__(self, *args, **kwargs):
@@ -43,7 +45,7 @@ class Embed(discord.Embed):
     def __eq__(self, other):
         return isinstance(other, discord.Embed) and self.to_dict() == other.to_dict()
 
-    def use_random_colour(self) -> 'Embed':
+    def use_random_colour(self) -> Embed:
         """
         Sets the colour for the embed to a random one.
 
@@ -56,7 +58,7 @@ class Embed(discord.Embed):
 
     use_random_color = use_random_colour
 
-    def set_footer(self, text: str, *args, **kwargs) -> 'Embed':
+    def set_footer(self, text: str, *args, **kwargs) -> Embed:
         """
         Sets the footer of the embed.
 
@@ -72,7 +74,7 @@ class Embed(discord.Embed):
         super().set_footer(*args, text=text, **kwargs)
         return self
 
-    def set_image(self, url:str) -> 'Embed':
+    def set_image(self, url:str) -> Embed:
         """
         Sets the image of the embed.
 
@@ -86,7 +88,7 @@ class Embed(discord.Embed):
         super().set_image(url=url)
         return self
 
-    def set_thumbnail(self, url: str) -> 'Embed':
+    def set_thumbnail(self, url: str) -> Embed:
         """
         Sets the thumbnail of the embed.
 
@@ -100,7 +102,7 @@ class Embed(discord.Embed):
         super().set_thumbnail(url=url)
         return self
 
-    def set_author_to_user(self, user: discord.User, use_nick: bool = False) -> 'Embed':
+    def set_author_to_user(self, user: discord.User, use_nick: bool = False) -> Embed:
         """
         Sets the author of the embed to a given Discord user.
 
@@ -119,7 +121,7 @@ class Embed(discord.Embed):
         super().set_author(name=name, icon_url=user.avatar.url)
         return self
 
-    def add_field(self, name: str, value: str, inline: bool = True) -> 'Embed':
+    def add_field(self, name: str, value: str, inline: bool = True) -> Embed:
         """
         Adds a field to the embed without using kwargs.
 
@@ -156,7 +158,7 @@ class Embed(discord.Embed):
 
     def edit_field_by_index(
             self, index: int, *, name: str = None, value: str = None,
-            inline: bool = None) -> 'Embed':
+            inline: bool = None) -> Embed:
         """
         Edit a field in the embed using its index.
 
@@ -179,7 +181,7 @@ class Embed(discord.Embed):
 
     def edit_field_by_key(
             self, key: str, *, name: str = None, value: str = None,
-            inline: bool = None) -> 'Embed':
+            inline: bool = None) -> Embed:
         """
         Edit a field in the embed using its name as a key.
 
@@ -202,7 +204,7 @@ class Embed(discord.Embed):
         raise KeyError("Key not found in embed")
 
     @classmethod
-    def from_native(cls, embed: discord.Embed) -> 'Embed':
+    def from_native(cls, embed: discord.Embed) -> Embed:
         """
         Upgrade a native embed into a VoxelBotUtils embed.
 

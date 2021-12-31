@@ -3,7 +3,6 @@ import sys
 
 import discord
 from discord.ext import commands
-import pkg_resources
 
 from . import utils as vbu
 
@@ -36,9 +35,22 @@ class BotStats(vbu.Cog):
         links = bot_info.get("links", dict())
         buttons = []
         if (invite_link := self.get_invite_link()):
-            buttons.append(discord.ui.Button(label="Invite", url=invite_link, style=discord.ui.ButtonStyle.link))
+            buttons.append(
+                discord.ui.Button(
+                    label="Invite",
+                    url=invite_link,
+                    style=discord.ui.ButtonStyle.link,
+                )
+            )
         for label, info in links.items():
-            buttons.append(discord.ui.Button(emoji=info.get("emoji") or None, label=label, url=info['url'], style=discord.ui.ButtonStyle.link))
+            buttons.append(
+                discord.ui.Button(
+                    emoji=info.get("emoji") or None,
+                    label=label,
+                    url=info['url'],
+                    style=discord.ui.ButtonStyle.link
+                )
+            )
         components = discord.ui.MessageComponents.add_buttons_with_rows(*buttons)
 
         # And send

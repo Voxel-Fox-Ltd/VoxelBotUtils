@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import collections
 import glob
@@ -25,6 +27,9 @@ from .analytics_log_handler import AnalyticsLogHandler, AnalyticsClientSession
 from .shard_manager import ShardManagerClient
 from .embeddify import Embeddify
 from .. import all_packages as all_vfl_package_names
+
+if typing.TYPE_CHECKING:
+    from .types.config import BotConfig
 
 
 sys.path.append(".")
@@ -82,18 +87,20 @@ def get_prefix(bot, message: discord.Message):
 
 class MinimalBot(commands.AutoShardedBot):
     """
-    A minimal version of the VoxelBotUtils bot that inherits from :class:`discord.ext.commands.AutoShardedBot`
-    but gives new VBU features.
+    A minimal version of the VoxelBotUtils bot that inherits from
+    :class:`discord.ext.commands.AutoShardedBot` but gives new VBU features.
     """
 
     async def create_message_log(
-            self, messages: typing.Union[typing.List[discord.Message], HistoryIterator]) -> str:
+            self,
+            messages: typing.Union[typing.List[discord.Message], HistoryIterator],
+            ) -> str:
         """
         Creates and returns an HTML log of all of the messages provided. This is an API method, and may
         raise an asyncio HTTP error.
 
         Args:
-            messages (typing.Union[typing.List[discord.Message], discord.iterators.HistoryIterator]):
+            messages (Union[List[discord.Message], discord.iterators.HistoryIterator]):
                 The messages you want to create into a log.
 
         Returns:
@@ -109,7 +116,7 @@ class MinimalBot(commands.AutoShardedBot):
             "channel_name": messages[0].channel.name,
             "category_name": messages[0].channel.category.name,
             "guild_name": messages[0].guild.name,
-            "guild_icon_url": str(messages[0].guild.icon_url),
+            "guild_icon_url": str(messages[0].guild.icon.url),
         }
         data_authors = {}
         data_messages = []
@@ -208,28 +215,33 @@ class Bot(MinimalBot):
     """
 
     def __init__(
-            self, config_file: str = 'config/config.toml', logger: logging.Logger = None,
+            self,
+            config_file: str = 'config/config.toml',
+            logger: logging.Logger = None,
             activity: discord.BaseActivity = discord.Game(name="Reconnecting..."),
-            status: discord.Status = discord.Status.dnd, case_insensitive: bool = True,
+            status: discord.Status = discord.Status.dnd,
+            case_insensitive: bool = True,
             intents: discord.Intents = None,
             allowed_mentions: discord.AllowedMentions = discord.AllowedMentions(everyone=False),
-            *args, **kwargs):
+            *args,
+            **kwargs,
+            ):
         """
         Args:
-            config_file (str, optional): The path to the :class:`config file<BotConfig>` for the bot.
-            logger (logging.Logger, optional): The logger object that the bot should use.
-            activity (discord.Activity, optional): The default activity of the bot.
-            status (discord.Status, optional): The default status of the bot.
-            case_insensitive (bool, optional): Whether or not commands are case insensitive.
-            intents (discord.Intents, optional): The default intents for the bot. Unless subclassed, the
+            config_file (str): The path to the :class:`config file<BotConfig>` for the bot.
+            logger (logging.Logger): The logger object that the bot should use.
+            activity (discord.Activity): The default activity of the bot.
+            status (discord.Status): The default status of the bot.
+            case_insensitive (bool): Whether or not commands are case insensitive.
+            intents (discord.Intents): The default intents for the bot. Unless subclassed, the
                 intents to use will be read from your :class:`config file<BotConfig.intents>`.
-            allowed_mentions (discord.AllowedMentions, optional): The default allowed mentions for the bot.
+            allowed_mentions (discord.AllowedMentions): The default allowed mentions for the bot.
             *args: The default args that are sent to the :class:`discord.ext.commands.Bot` object.
             **kwargs: The default args that are sent to the :class:`discord.ext.commands.Bot` object.
         """
 
         # Store the config file for later
-        self.config: dict
+        self.config: BotConfig
         self.config_file = config_file
         self.logger = logger or logging.getLogger('bot')
         self.reload_config()
@@ -264,13 +276,13 @@ class Bot(MinimalBot):
         )
 
         # Allow database connections like this
-        self.database: DatabaseWrapper = DatabaseWrapper
+        self.database: typing.Type[DatabaseWrapper] = DatabaseWrapper
 
         # Allow redis connections like this
-        self.redis: RedisConnection = RedisConnection
+        self.redis: typing.Type[RedisConnection] = RedisConnection
 
         # Allow Statsd connections like this
-        self.stats: StatsdConnection = StatsdConnection
+        self.stats: typing.Type[StatsdConnection] = StatsdConnection
         self.stats.config = self.config.get('statsd', {})
 
         # Set embeddify attrs
@@ -402,10 +414,16 @@ class Bot(MinimalBot):
             return None
 
     def get_invite_link(
-            self, *, client_id: int = None, scope: str = None,
-            response_type: str = None, redirect_uri: str = None,
-            guild_id: int = None, permissions: discord.Permissions = None,
-            **kwargs) -> str:
+            self,
+            *,
+            client_id: int = None,
+            scope: str = None,
+            response_type: str = None,
+            redirect_uri: str = None,
+            guild_id: int = None,
+            permissions: discord.Permissions = None,
+            **kwargs,
+            ) -> str:
         """
         Generate an invite link for the bot.
 
@@ -564,8 +582,14 @@ class Bot(MinimalBot):
             return None
 
     async def add_delete_reaction(
-            self, message: discord.Message, valid_users: typing.Tuple[typing.Union[discord.User, discord.Member]] = None, *,
-            delete: typing.Tuple[discord.Message] = None, timeout: float = 60.0, wait: bool = False) -> None:
+            self,
+            message: discord.Message,
+            valid_users: typing.Tuple[typing.Union[discord.User, discord.Member]] = None,
+            *,
+            delete: typing.Tuple[discord.Message] = None,
+            timeout: float = 60.0,
+            wait: bool = False,
+            ) -> None:
         """
         Adds a delete reaction to the given message.
 
@@ -685,7 +709,7 @@ class Bot(MinimalBot):
         return self.config['owners']
 
     @owner_ids.setter
-    def owner_ids(self, value):
+    def owner_ids(self, _):
         pass
 
     @property
@@ -740,9 +764,6 @@ class Bot(MinimalBot):
     async def set_default_presence(self, shard_id: int = None) -> None:
         """
         Sets the default presence for the bot as appears in the :class:`config file<BotConfig.presence>`.
-
-        Args:
-            shard_id (int, optional): The shard to set the presence for.
         """
 
         # Update presence
@@ -758,7 +779,7 @@ class Bot(MinimalBot):
 
             # Update the config text
             config_text = presence.get("text", "").format(bot=self).strip()
-            if self.shard_count > 1 and include_shard_id:
+            if self.shard_count and self.shard_count > 1 and include_shard_id:
                 config_text = f"{config_text} (shard {i})".strip()
                 if config_text == f"(shard {i})":
                     config_text = f"Shard {i}"

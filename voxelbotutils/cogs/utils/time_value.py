@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import math
 import re
 from datetime import timedelta
@@ -9,19 +11,11 @@ class InvalidTimeDuration(commands.BadArgument):
     """
     A conversion error for an invalid input passed to :class:`voxelbotutils.TimeValue`.
 
-    Args:
-        value (str): The given value that was invalid.
-
     Attributes:
         value (str): The value that was given that failed to parse.
     """
 
     def __init__(self, value: str):
-        """
-        Args:
-            value (str): The given value that was invalid.
-        """
-
         self.value: str = value
 
     def __str__(self):
@@ -134,7 +128,7 @@ class TimeValue(object):
         return f"{self.__class__.__name__}.parse('{self.clean}')"
 
     @classmethod
-    async def convert(cls, ctx: commands.Context, value: str) -> 'TimeValue':
+    async def convert(cls, ctx: commands.Context, value: str) -> TimeValue:
         """
         Takes a value (1h/30m/10s/2d etc) and returns a TimeValue instance with the duration.
         Provided for use of the Discord.py module.
@@ -153,7 +147,7 @@ class TimeValue(object):
         return cls.parse(value)
 
     @classmethod
-    def parse(cls, value: str) -> 'TimeValue':
+    def parse(cls, value: str) -> TimeValue:
         """
         Takes a value (1h/30m/10s/2d etc) and returns a TimeValue instance with the duration.
 

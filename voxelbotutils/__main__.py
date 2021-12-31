@@ -6,7 +6,13 @@ import textwrap
 from .runner import run_bot, run_website, run_sharder, run_shell, run_modify_commands, run_interactions
 
 
-def get_path_relative_to_file(path) -> pathlib.Path:
+def get_path_relative_to_file(
+        path: pathlib.Path
+        ) -> pathlib.Path:
+    """
+    Get the full path for a file relative to a given location.
+    """
+
     here = pathlib.Path(__file__).parent.resolve()
     return here.joinpath(path)
 
@@ -29,7 +35,6 @@ def create_file(*path: str, content: typing.Optional[typing.Union[str, pathlib.P
         joined_file_path.mkdir(parents=True, exist_ok=True)
 
 
-# Parse arguments
 def get_default_program_arguments() -> argparse.ArgumentParser:
     """
     Set up the program arguments for the module. These include the following (all are proceeded by "python -m voxelbotutils"):
@@ -40,13 +45,13 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     "create-config bot"
     "create-config website"
 
-    Returns:
-        argparse.ArgumentParser: The arguments that were parsed
+    Returns
+    --------
+    :class:`argparse.ArgumentParser`
+        The arguments that were parsed
     """
 
-    # LOGLEVEL_CHOICES = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     LOGLEVEL_CHOICES = ["debug", "info", "warning", "error", "critical"]
-    # LOGLEVEL_CHOICES.extend([i.lower() for i in LOGLEVEL_CHOICES])
 
     # Set up our parsers and subparsers
     parser = argparse.ArgumentParser(prog="vbu")

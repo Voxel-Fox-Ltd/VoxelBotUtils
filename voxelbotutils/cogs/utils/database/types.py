@@ -44,6 +44,9 @@ class DriverPool(typing.Protocol):
     async def release(self, connection: DriverConnection) -> None:
         raise NotImplementedError()
 
+    async def close(self) -> None:
+        raise NotImplementedError()
+
 
 class DriverWrapper(typing.Protocol):
 

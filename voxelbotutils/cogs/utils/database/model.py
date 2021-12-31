@@ -94,11 +94,15 @@ class DatabaseWrapper(object):
     pool: typing.ClassVar[DriverPool] = None  # type: ignore
     logger: logging.Logger = logging.getLogger("vbu.database")
     enabled: typing.ClassVar[bool] = False
-    driver: typing.ClassVar[typing.Type[DriverWrapper]] = None
+    driver: typing.ClassVar[typing.Type[DriverWrapper]]
 
     def __init__(
-            self, conn=None, *, cursor: DriverConnection = None):
+            self,
+            conn=None,
+            *,
+            cursor: DriverConnection = None):
         """:meta private:"""
+
         self.conn = conn
         self.cursor = cursor
         self.is_active = False

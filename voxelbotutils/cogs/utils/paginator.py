@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing
 import asyncio
 import inspect
@@ -8,8 +10,8 @@ from discord.ext import commands
 from .context_embed import Embed
 
 
-class Paginator(object):
-    """
+class Paginator:
+    r"""
     An automatic paginator util that takes a list and listens for reactions on a message
     to change the content.
 
@@ -17,7 +19,7 @@ class Paginator(object):
 
         # Items will automatically be cast to strings and joined
         my_list = list(range(30))
-        p = voxelbotutils.Paginator(my_list, per_page=5)
+        p = vbu.Paginator(my_list, per_page=5)
         await p.start(ctx, timeout=15)
 
         # Alternatively you can give a function, which can return a string, an embed, or a dict
@@ -26,23 +28,27 @@ class Paginator(object):
             output = []
             for i in items:
                 output.append(f"The {i}th item")
-            output_string = "\\n".join(output)
-            embed = voxelbotutils.Embed(description=output_string)
+            output_string = "\n".join(output)
+            embed = vbu.Embed(description=output_string)
             embed.set_footer(f"Page {menu.current_page + 1}/{menu.max_pages}")
 
-        p = voxelbotutils.Paginator(my_list, formatter=my_formatter)
+        p = vbu.Paginator(my_list, formatter=my_formatter)
         await p.start(ctx)
     """
 
     def __init__(
-            self, data: typing.Union[typing.Sequence, typing.Generator, typing.Callable[[int], typing.Any]], *,
+            self,
+            data: typing.Union[typing.Sequence, typing.Generator, typing.Callable[[int], typing.Any]],
+            *,
             per_page: int = 10,
             formatter: typing.Callable[
-                ['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]
-            ] = None):
+                [Paginator, typing.Sequence[typing.Any]],
+                typing.Union[str, discord.Embed, dict]
+            ] = None,
+            ):
         """
         Args:
-            data (typing.Union[typing.Sequence, typing.Generator, typing.Callable[[int], typing.Any]]): The
+            data (Union[Sequence, Generator, Callable[[int], Any]]): The
                 data that you want to paginate.
                 If a generator or function is given then the `max_pages` will start as the string "?", and the `per_page`
                 parameter will be ignored - the formatter will be passed the content of whatever your generator returns.
@@ -50,13 +56,13 @@ class Paginator(object):
                 `StopIteration` from this function will cause the `max_pages` attribute to be set,
                 and the page will go back to what it was previously.
             per_page (int, optional): The number of items that appear on each page. This argument only works for sequences
-            formatter (typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]], optional): A
+            formatter (Callable[[Paginator, Sequence[Any]], Union[str, discord.Embed, dict]], optional): A
                 function taking the paginator instance and a list of things to display, returning a dictionary of kwargs that get passed
                 directly into a :func:`discord.Message.edit`.
         """
         self.data = data
         self.per_page: int = per_page
-        self.formatter: typing.Callable[['Paginator', typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]]
+        self.formatter: typing.Callable[[Paginator, typing.Sequence[typing.Any]], typing.Union[str, discord.Embed, dict]]
         if formatter is None:
             self.formatter = self.default_list_formatter
         else:
@@ -219,7 +225,7 @@ class Paginator(object):
             page_number (int): The page number to get.
 
         Returns:
-            typing.List[typing.Any]: The list of items that would be on the page.
+            List[Any]: The list of items that would be on the page.
         """
 
         try:
@@ -263,8 +269,9 @@ class Paginator(object):
     @staticmethod
     def default_ranked_list_formatter(m: 'Paginator', d: typing.List[str]):
         """
-        The default list formatter for embeds. Takes the paginator instance and the list of strings to be displayed,
-        and returns a dictionary of kwargs for a `Message.edit`.
+        The default list formatter for embeds. Takes the paginator instance
+        and the list of strings to be displayed, and returns a dictionary of
+        kwargs for a `Message.edit`.
         """
 
         return Embed(

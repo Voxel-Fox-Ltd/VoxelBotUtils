@@ -21,6 +21,11 @@ from .cogs.utils.shard_manager import ShardManagerServer
 
 
 class CascadingLogger(logging.getLoggerClass()):
+    """
+    A logger class that changes all of the handlers loglevels as well.
+    Stdout will change to the loglevel set, and stderr will change to the max of what's
+    been specified and WARNING.
+    """
 
     def setLevel(self, level):
         for i in self.handlers:
@@ -36,22 +41,24 @@ logging.setLoggerClass(CascadingLogger)
 logger = logging.getLogger('vbu')
 
 
-# Set up the loggers
 def set_log_level(
-        logger_to_change: typing.Union[logging.Logger, str], log_level: str,
+        logger_to_change: typing.Union[logging.Logger, str],
+        log_level: str,
         minimum_level: int = None) -> None:
     """
     Set a logger to a default log level.
 
-    Args:
-        logger_to_change (logging.Logger): The logger you want to change.
-        log_level (str): The log level that you want to set the logger to.
+    Parameters
+    -----------
+    logger_to_change: :class`logging.Logger`
+        The logger you want to change.
+    log_level: :class:`str`
+        The log level that you want to set the logger to.
 
-    Returns:
-        None
-
-    Raises:
-        ValueError: An invalid log_level was passed to the method.
+    Raises
+    -------
+    :class:`ValueError`
+        An invalid log_level was passed to the method.
     """
 
     # Make sure we're setting it to something
@@ -75,16 +82,19 @@ def set_log_level(
         logger_to_change.setLevel(level)
 
 
-# Make sure the sharding info provided is correctish
 def validate_sharding_information(args: argparse.Namespace) -> typing.Optional[typing.List[int]]:
     """
     Validate the given shard information and make sure that what's passed in is accurate.
 
-    Args:
-        args (argparse.Namespace): The parsed argparse namespace for the program.
+    Parameters
+    -----------
+    args: :class:`argparse.Namespace`
+        The parsed argparse namespace for the program.
 
-    Returns:
-        typing.List[int]: A list of shard IDs to use with the bot.
+    Returns
+    --------
+    List[:class:`int`]
+        A list of shard IDs to use with the bot.
     """
 
     # Set up some short vars for us to use
@@ -112,11 +122,12 @@ def validate_sharding_information(args: argparse.Namespace) -> typing.Optional[t
     return shard_ids
 
 
-# To make our log levels work properly, we need to set up a new filter for our stream handlers
-# We're going to send most things to stdout, but a fair few sent over to stderr
 class LogFilter(logging.Filter):
     """
     Filters (lets through) all messages with level < LEVEL.
+
+    To make our log levels work properly, we need to set up a new filter for our stream handlers
+    We're going to send most things to stdout, but a fair few sent over to stderr
     """
 
     # Props to these folks who I stole all this from
@@ -159,9 +170,12 @@ def set_default_log_levels(args: argparse.Namespace) -> None:
     """
     Set the default levels for the logger.
 
-    Args:
-        bot (Bot): The custom bot object containing the logger, database logger, and redis logger.
-        args (argparse.Namespace): The argparse namespace saying what levels to set each logger to.
+    Parameters
+    -----------
+    bot: :class:`voxelbotutils.Bot`
+        The custom bot object containing the logger, database logger, and redis logger.
+    args: :class:`argparse.Namespace`
+        The argparse namespace saying what levels to set each logger to.
     """
 
     # formatter = logging.Formatter('%(asctime)s [%(levelname)s][%(name)s] %(message)s')
@@ -290,7 +304,7 @@ class EventLoopCallbackHandler:
             cls.bot.loop.create_task(cls.send_error_webhook(e))
 
     @classmethod
-    async def send_error_webhook(cls, error):
+    async def send_error_webhook(cls, error: Exception):
         # Ping unhandled errors to the owners and to the event webhook
         error_string = "".join(traceback.format_exception(None, error, error.__traceback__))
         file_handle = io.StringIO(error_string + "\n")
@@ -336,26 +350,36 @@ class EventLoopCallbackHandler:
                     allowed_mentions=discord.AllowedMentions.none(),
                 )
             except discord.HTTPException as e:
-                cls.logger.error(f"Failed to send webhook for event unhandled_error - {e}")
+                cls.bot.logger.error(f"Failed to send webhook for event unhandled_error - {e}")
 
 
 def set_event_loop():
+    """
+    Set up the event loop policy to use for asyncio, and set up
+    a callback handler to log exceptions.
+    """
+
+    # Set up uvloop if we're on Linux
     try:
         import uvloop
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     except ImportError:
         pass
+
+    # If we're on Windows, set up a different event loop policy
     if sys.platform.startswith('win32'):
         if sys.version_info[0] == 3 and sys.version_info[1] >= 8:
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
         else:
             asyncio.set_event_loop(asyncio.ProactorEventLoop())
 
-    def task_factory(loop, coro):
+    # Set up the task factory
+    def task_factory(loop: asyncio.AbstractEventLoop, coro) -> asyncio.Task:
         t = asyncio.Task(coro, loop=loop)
         t.add_done_callback(EventLoopCallbackHandler.callback)
         return t
 
+    # And add it to our loop
     loop = asyncio.get_event_loop()
     loop.set_task_factory(task_factory)
 
@@ -364,8 +388,10 @@ def run_bot(args: argparse.Namespace) -> None:
     """
     Starts the bot, connects the database, runs the async loop forever.
 
-    Args:
-        args (argparse.Namespace): The arguments namespace that wants to be run.
+    Parameters
+    -----------
+    args: :class:`argparse.Namespace`
+        The arguments namespace that wants to be run.
     """
 
     os.chdir(args.bot_directory)
@@ -424,8 +450,10 @@ def run_interactions(args: argparse.Namespace) -> None:
     """
     Starts the bot, connects the database, runs the async loop forever.
 
-    Args:
-        args (argparse.Namespace): The arguments namespace that wants to be run.
+    Parameters
+    -----------
+    args: :class:`argparse.Namespace`
+        The arguments namespace that wants to be run.
     """
 
     from aiohttp.web import Application, AppRunner, TCPSite
@@ -507,8 +535,10 @@ def run_website(args: argparse.Namespace) -> None:
     """
     Starts the website, connects the database, logs in the specified bots, runs the async loop forever.
 
-    Args:
-        args (argparse.Namespace): The arguments namespace that wants to be run.
+    Parameters
+    -----------
+    args: :class:`argparse.Namespace`
+        The arguments namespace that wants to be run.
     """
 
     # Load our imports here so we don't need to require them all the time
@@ -669,8 +699,10 @@ def run_sharder(args: argparse.Namespace) -> None:
     """
     Starts the sharder, connects the redis, runs the async loop forever.
 
-    Args:
-        args (argparse.Namespace): The arguments namespace that wants to be run.
+    Parameters
+    -----------
+    args: :class:`argparse.Namespace`
+        The arguments namespace that wants to be run.
     """
 
     set_event_loop()
@@ -694,8 +726,10 @@ def run_shell(args: argparse.Namespace) -> None:
     """
     Starts the shell for you.
 
-    Args:
-        args (argparse.Namespace): The arguments namespace that wants to be run.
+    Parameters
+    -----------
+    args: :class:`argparse.Namespace`
+        The arguments namespace that wants to be run.
     """
 
     os.chdir(args.bot_directory)
@@ -812,8 +846,10 @@ def run_modify_commands(args: argparse.Namespace) -> None:
     """
     Modifies the commands available for the slash command instance
 
-    Args:
-        args (argparse.Namespace): The arguments namespace that wants to be run.
+    Parameters
+    -----------
+    args: :class:`argparse.Namespace`
+        The arguments namespace that wants to be run.
     """
 
     os.chdir(args.bot_directory)
@@ -838,10 +874,14 @@ def run_modify_commands(args: argparse.Namespace) -> None:
     # Perform our action
     ctx = PrintContext(bot)
     if args.action == "add":
-        ctx.command = bot.get_command("addapplicationcommands")
+        command = bot.get_command("addapplicationcommands")
+        assert command is not None
+        ctx.command = command
         coro = ctx.invoke(ctx.command, args.guild)
     else:
-        ctx.command = bot.get_command("removeapplicationcommands")
+        command = bot.get_command("removeapplicationcommands")
+        assert command is not None
+        ctx.command = command
         coro = ctx.invoke(ctx.command, args.guild)
     loop.run_until_complete(coro)
 

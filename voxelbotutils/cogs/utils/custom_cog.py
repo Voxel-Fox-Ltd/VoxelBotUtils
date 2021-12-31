@@ -1,11 +1,14 @@
+import typing
 import logging
 import re
 
 from discord.ext.commands import Cog as OriginalCog
 
-from .custom_bot import Bot
-from .database import DatabaseWrapper
 from .redis import RedisChannelHandler
+
+if typing.TYPE_CHECKING:
+    from .custom_bot import Bot
+    from .database import DatabaseWrapper
 
 
 class Cog(OriginalCog):

@@ -1,7 +1,12 @@
+from __future__ import annotations
+
 import typing
 
 import discord
 from discord.ext import commands
+
+if typing.TYPE_CHECKING:
+    from .custom_bot import Bot
 
 
 TextDestinations = typing.Union[discord.User, discord.Member, discord.TextChannel]
@@ -17,20 +22,30 @@ class Embeddify:
     A class to handle auto-embeddifying of messages.
     """
 
-    bot: typing.Optional['voxelbotutils.Bot'] = None
+    bot: typing.Optional[Bot] = None
 
     @classmethod
     async def send(
-            cls, dest: Destinations, content: typing.Optional[str],
-            **kwargs) -> discord.Message:
+            cls,
+            dest: Destinations,
+            content: typing.Optional[str],
+            **kwargs,
+            ) -> discord.Message:
         return await dest.send(**cls.get_embeddify(dest, content, **kwargs))
 
     @classmethod
     def get_embeddify(
-            cls, dest: Destinations, content: typing.Optional[str] = MISSING, *,
-            embed: discord.Embed = MISSING, embeds: typing.List[discord.Embed] = MISSING,
-            file: discord.File = MISSING, embeddify: bool = MISSING,
-            image_url: str = MISSING, **kwargs) -> dict:
+            cls,
+            dest: Destinations,
+            content: typing.Optional[str] = MISSING,
+            *,
+            embed: discord.Embed = MISSING,
+            embeds: typing.List[discord.Embed] = MISSING,
+            file: discord.File = MISSING,
+            embeddify: bool = MISSING,
+            image_url: str = MISSING,
+            **kwargs,
+            ) -> dict:
         """
         Embeddify your given content.
         """
