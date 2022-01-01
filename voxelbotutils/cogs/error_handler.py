@@ -197,12 +197,12 @@ class ErrorHandler(vbu.Cog):
             commands.BadArgument,
             lambda ctx, error: str(error).format(ctx=ctx, error=error)
         ),
-        (
-            commands.CommandNotFound,  # This is only handled in slash commands
-            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
-                "I wasn't able to find that command to be able to run it.",
-            )
-        ),
+        # (
+        #     commands.CommandNotFound,  # This is only handled in slash commands
+        #     lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+        #         "I wasn't able to find that command to be able to run it.",
+        #     )
+        # ),
         (
             commands.MaxConcurrencyReached,
             lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
@@ -289,7 +289,7 @@ class ErrorHandler(vbu.Cog):
         ignored_errors = (
             commands.CommandNotFound, vbu.errors.InvokedMetaCommand,
         )
-        if isinstance(error, ignored_errors) and not isinstance(ctx, commands.SlashContext):
+        if isinstance(error, ignored_errors):
             return
 
         # See what we've got to deal with
