@@ -2,6 +2,7 @@ import re as _re
 import gettext as _gettext
 import typing as _typing
 
+import discord as _discord
 from discord.ext import commands as _dpy_commands
 
 from . import checks, converters, errors, menus
@@ -40,7 +41,7 @@ def minify_html(text: str) -> str:
 
 
 def translation(
-        ctx: _dpy_commands.Context,
+        ctx: _typing.Union[_dpy_commands.Context, _discord.Interaction],
         domain: str,
         **kwargs
         ) -> _typing.Union[_gettext.GNUTranslations, _gettext.NullTranslations]:
@@ -63,7 +64,7 @@ def translation(
 
     return _gettext.translation(
         domain=domain,
-        localedir=kwargs.get("localedir", "./locale"),
+        localedir=kwargs.get("localedir", "./locales"),
         languages=[ctx.locale],
         fallback=kwargs.get("fallback", True),
     )
