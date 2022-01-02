@@ -1,4 +1,7 @@
 import re as _re
+import gettext as _gettext
+import typing as _typing
+
 from discord.ext import commands as _dpy_commands
 
 from . import checks, converters, errors, menus
@@ -34,6 +37,36 @@ _html_minifier = _re.compile(r"\s{2,}|\n")
 
 def minify_html(text: str) -> str:
     return _html_minifier.sub("", text)
+
+
+def translation(
+        ctx: _dpy_commands.Context,
+        domain: str,
+        **kwargs
+        ) -> _typing.Union[_gettext.GNUTranslations, _gettext.NullTranslations]:
+    """
+    Get a translation table for a given domain with the locale
+    stored in a context.
+
+    Parameters
+    -----------
+    ctx: :class:`discord.ext.commands.Context`
+        The context that you want to get the translation within.
+    domain: :class:`str`
+        The domain of the translation.
+
+    Returns
+    --------
+    Union[:class:`gettext.GNUTranslations`, :class:`gettext.NullTranslations`]
+        The transation table object that you want to ``.gettext`` for.
+    """
+
+    return _gettext.translation(
+        domain=domain,
+        localedir=kwargs.get("localedir", "./locale"),
+        languages=[ctx.locale],
+        fallback=kwargs.get("fallback", True),
+    )
 
 
 _formatter = Formatter()

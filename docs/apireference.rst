@@ -98,6 +98,11 @@ format
 
 .. autofunction:: voxelbotutils.format
 
+translation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: voxelbotutils.translation
+
 Checks
 -------------------------------------------------
 

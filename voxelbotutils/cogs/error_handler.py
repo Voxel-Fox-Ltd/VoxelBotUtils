@@ -21,7 +21,7 @@ class ErrorHandler(vbu.Cog):
     COMMAND_ERROR_RESPONSES = (
         (
             vbu.errors.MissingRequiredArgumentString,
-            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=["ctx.locale"], fallback=True).gettext(
+            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
                 "You're missing `{parameter_name}`, which is required for this command.",
             ).format(parameter_name=error.param)
         ),

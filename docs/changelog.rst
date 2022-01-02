@@ -3,6 +3,15 @@ Changelog
 
 A human-readable list of changes between versions.
 
+0.8.4
+--------------------------------------
+
+New Features
+""""""""""""""""""""""""""""""""""""
+
+* Add Dutch translations for the error text.
+* Add :func:`translation` as a slightly easier-to-use ``gettext`` module wrapper.
+
 0.8.3
 --------------------------------------
 
