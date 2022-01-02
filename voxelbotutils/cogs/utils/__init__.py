@@ -41,7 +41,7 @@ def minify_html(text: str) -> str:
 
 
 def translation(
-        ctx: _typing.Union[_dpy_commands.Context, _discord.Interaction],
+        ctx: _typing.Union[_dpy_commands.Context, _discord.Interaction, str],
         domain: str,
         **kwargs
         ) -> _typing.Union[_gettext.GNUTranslations, _gettext.NullTranslations]:
@@ -51,8 +51,9 @@ def translation(
 
     Parameters
     -----------
-    ctx: :class:`discord.ext.commands.Context`
-        The context that you want to get the translation within.
+    ctx: Union[:class:`discord.ext.commands.Context`, :class:`discord.Interaction`, :class:`str`]
+        The context that you want to get the translation within, or
+        the name of the locale that you want to get anyway.
     domain: :class:`str`
         The domain of the translation.
 
@@ -62,10 +63,16 @@ def translation(
         The transation table object that you want to ``.gettext`` for.
     """
 
+    if isinstance(ctx, (_dpy_commands.Context, _discord.Interaction)):
+        locale = ctx.locale
+    elif isinstance(ctx, str):
+        locale = ctx
+    else:
+        raise TypeError()
     return _gettext.translation(
         domain=domain,
         localedir=kwargs.get("localedir", "./locales"),
-        languages=[ctx.locale],
+        languages=[locale],
         fallback=kwargs.get("fallback", True),
     )
 
