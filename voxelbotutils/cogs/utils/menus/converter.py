@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import typing
 
@@ -7,6 +9,19 @@ from discord.ext import commands
 from .check import Check
 from .errors import ConverterFailure, ConverterTimeout
 from .utils import get_discord_converter
+
+if typing.TYPE_CHECKING:
+    AnyConverter = typing.Union[
+        typing.Callable[[typing.Union[str, discord.Interaction[str]]], typing.Any],
+        typing.Type[discord.Role],
+        typing.Type[discord.TextChannel],
+        typing.Type[discord.User],
+        typing.Type[discord.Member],
+        typing.Type[discord.VoiceChannel],
+        typing.Type[str],
+        typing.Type[int],
+        typing.Type[bool],
+    ]
 
 
 class _FakeConverter(object):
@@ -24,9 +39,12 @@ class Converter(object):
     """
 
     def __init__(
-            self, prompt: str, checks: typing.List[Check] = None,
-            converter: typing.Union[typing.Callable[[str], typing.Any], commands.Converter] = str,
-            components: discord.ui.MessageComponents = None, timeout_message: str = None):
+            self,
+            prompt: str,
+            checks: typing.List[Check] = None,
+            converter: AnyConverter = str,
+            components: discord.ui.MessageComponents = None,
+            timeout_message: str = None):
         """
         Args:
             prompt (str): The message that should be sent to the user when asking for the convertable.

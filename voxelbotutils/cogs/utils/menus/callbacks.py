@@ -1,7 +1,12 @@
+from __future__ import annotations
+
 import enum
 import typing
 
 import discord
+
+if typing.TYPE_CHECKING:
+    from ..custom_context import Context
 
 
 class DataLocation(enum.Enum):
@@ -34,7 +39,12 @@ class MenuCallbacks(object):
         )
 
     @classmethod
-    def set_table_column(cls, data_location: DataLocation, table_name: str, column_name: str):
+    def set_table_column(
+            cls,
+            data_location: DataLocation,
+            table_name: str,
+            column_name: str,
+            ) -> typing.Coroutine[typing.Any, typing.Any, None]:
         """
         Returns a wrapper that updates the guild settings table for the bot's database.
 
@@ -77,7 +87,11 @@ class MenuCallbacks(object):
         return wrapper
 
     @classmethod
-    def set_cache_from_key(cls, data_location: DataLocation, *settings_path: str):
+    def set_cache_from_key(
+            cls,
+            data_location: DataLocation,
+            *settings_path: str,
+            ) -> typing.Callable[[Context, typing.List[typing.Any]], None]:
         """
         Returns a wrapper that changes the :attr:`voxelbotutils.Bot.guild_settings` internal cache.
 
@@ -108,7 +122,11 @@ class MenuCallbacks(object):
         return wrapper
 
     @classmethod
-    def set_cache_from_keypair(cls, data_location: DataLocation, *settings_path: str):
+    def set_cache_from_keypair(
+            cls,
+            data_location: DataLocation,
+            *settings_path: str,
+            ) -> typing.Callable[[Context, typing.List[typing.Any]], None]:
         """
         Returns a wrapper that changes the :attr:`voxelbotutils.Bot.guild_settings` internal cache.
 
@@ -143,7 +161,11 @@ class MenuCallbacks(object):
     set_iterable_dict_cache = set_cache_from_keypair  # Just for consistency of method names
 
     @classmethod
-    def set_iterable_list_cache(cls, data_location: DataLocation, *settings_path):
+    def set_iterable_list_cache(
+            cls,
+            data_location: DataLocation,
+            *settings_path: str,
+            ) -> typing.Callable[[Context, typing.List[typing.Any]], None]:
         """
         Returns a wrapper that changes the :attr:`voxelbotutils.Bot.guild_settings` internal cache.
 
@@ -178,7 +200,11 @@ class MenuCallbacks(object):
         return wrapper
 
     @classmethod
-    def delete_iterable_dict_cache(cls, data_location: DataLocation, *settings_path):
+    def delete_iterable_dict_cache(
+            cls,
+            data_location: DataLocation,
+            *settings_path: str,
+            ) -> typing.Callable[[str], typing.Callable[[Context, typing.List[typing.Any]], None]]:
         """
         Returns a wrapper that changes the :attr:`voxelbotutils.Bot.guild_settings` internal cache.
         Gives a nested function that takes a :code:`key` argument that acts as the primary key of the dict.
@@ -211,7 +237,11 @@ class MenuCallbacks(object):
         return inner
 
     @classmethod
-    def delete_iterable_list_cache(cls, data_location: DataLocation, *settings_path):
+    def delete_iterable_list_cache(
+            cls,
+            data_location: DataLocation,
+            *settings_path: str,
+            ) -> typing.Callable[[str], typing.Callable[[Context, typing.List[typing.Any]], None]]:
         """
         Returns a wrapper that changes the :attr:`voxelbotutils.Bot.guild_settings` internal cache.
         Gives a nested function that takes a :code:`value` argument that acts as the data to delete.

@@ -1,12 +1,23 @@
+from __future__ import annotations
+
 import typing
-import inspect
 
 from discord.ext import commands
 
 from .errors import ConverterFailure
-from .converter import Converter
 from .mixins import MenuDisplayable
 from .utils import async_wrap_callback
+
+if typing.TYPE_CHECKING:
+    from .menu import Menu
+    from .converter import Converter
+    from ..custom_context import Context
+
+
+T = typing.TypeVar('T')
+Awai = typing.Awaitable[typing.Callable[..., T]]
+Coro = typing.Coroutine[typing.Any, typing.Any, T]
+MaybeCoro = typing.Union[T, Coro[T], Awai[T]]
 
 
 class Option(MenuDisplayable):
@@ -15,11 +26,14 @@ class Option(MenuDisplayable):
     """
 
     def __init__(
-            self, display: typing.Union[str, typing.Callable[[commands.Context], str]],
-            component_display: str = None, converters: typing.Optional[typing.List[Converter]] = None,
-            callback: typing.Callable[[commands.Context, typing.List[typing.Any]], None] = None,
-            cache_callback: typing.Optional[typing.Callable[[commands.Context, typing.List[typing.Any]], None]] = None,
-            allow_none: bool = False):
+            self,
+            display: typing.Union[str, typing.Callable[[Context], str]],
+            component_display: str = None,
+            converters: typing.Optional[typing.List[Converter]] = None,
+            callback: typing.Union[typing.Callable[[Context, typing.List[typing.Any]], MaybeCoro[None]], Menu] = None,
+            cache_callback: typing.Optional[typing.Callable[[Context, typing.List[typing.Any]], MaybeCoro[None]]] = None,
+            allow_none: bool = False,
+            ):
         """
         Attributes:
             display (typing.Union[str, typing.Callable[[commands.Context], str]]): The item
