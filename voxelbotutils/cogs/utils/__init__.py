@@ -64,15 +64,15 @@ def translation(
     """
 
     if isinstance(ctx, (_dpy_commands.Context, _discord.Interaction)):
-        locale = ctx.locale
+        languages = [ctx.locale, ctx.locale.split("-")[0]]
     elif isinstance(ctx, str):
-        locale = ctx
+        languages = [ctx]
     else:
         raise TypeError()
     return _gettext.translation(
         domain=domain,
         localedir=kwargs.get("localedir", "./locales"),
-        languages=[locale],
+        languages=languages,
         fallback=kwargs.get("fallback", True),
     )
 
