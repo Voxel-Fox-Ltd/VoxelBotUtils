@@ -12,7 +12,8 @@ if typing.TYPE_CHECKING:
     from .custom_bot import Bot
     from .database import DatabaseWrapper
 
-    BotT = typing.TypeVar("BotT", bound=Bot)
+
+BotT = typing.TypeVar("BotT", bound="Bot")
 
 
 class Cog(OriginalCog, typing.Generic[BotT]):
