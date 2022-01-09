@@ -88,7 +88,13 @@ class Menu(MenuDisplayable):
                 nested_self.bot.remove_command(nested_self.settings.name)
                 super().cog_unload()
 
-            @commands.command(cls=Command, name=name, aliases=aliases, **command_kwargs)
+            @commands.command(
+                cls=Command,
+                name=name,
+                aliases=aliases,
+                application_command_meta=command_kwargs.pop("application_command_meta", commands.ApplicationCommandMeta()),
+                **command_kwargs,
+            )
             @commands.has_permissions(**{i: True for i in permissions})
             @commands.bot_has_permissions(send_messages=True, embed_links=True)
             async def settings(nested_self, ctx):

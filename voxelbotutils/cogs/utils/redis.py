@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import typing
 import asyncio
@@ -59,7 +61,7 @@ class RedisConnection(object):
         cls.enabled = True
 
     @classmethod
-    async def get_connection(cls):
+    async def get_connection(cls) -> RedisConnection:
         """
         Acquires a connection from the connection pool.
         """
