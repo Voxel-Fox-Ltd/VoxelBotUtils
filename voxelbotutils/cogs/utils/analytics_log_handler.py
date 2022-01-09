@@ -1,3 +1,4 @@
+import typing
 import re
 import logging
 import json
@@ -82,14 +83,14 @@ class AnalyticsLogHandler(logging.NullHandler):
         self.bot = bot
 
     @classmethod
-    def get_http_event_name(cls, increment: str, method: str, url: str) -> str:
+    def get_http_event_name(cls, increment: str, method: str, url: str) -> typing.Optional[str]:
         """
         Get the name of the event that we want to increment.
         """
 
-        if increment == "discord.http":
+        if increment.startswith("discord.http"):
             possible_endpoints = cls.HTTP_EVENT_NAMES.get(method.upper(), {})
-        elif increment == "discord.webhook":
+        elif increment.startswith("discord.webhook"):
             possible_endpoints = cls.WEBHOOK_EVENT_NAMES.get(method.upper(), {})
         else:
             return None

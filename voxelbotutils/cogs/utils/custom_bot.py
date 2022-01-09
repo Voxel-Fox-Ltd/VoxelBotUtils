@@ -300,7 +300,8 @@ class Bot(MinimalBot):
         handler = AnalyticsLogHandler(self)
         handler.setLevel(logging.DEBUG)
         logging.getLogger('discord.http').addHandler(handler)
-        logging.getLogger('discord.webhook').addHandler(handler)
+        logging.getLogger('discord.webhook.async_').addHandler(handler)
+        logging.getLogger('discord.webhook.sync').addHandler(handler)
 
         # Here's the storage for cached stuff
         self.guild_settings = collections.defaultdict(lambda: copy.deepcopy(self.DEFAULT_GUILD_SETTINGS))
