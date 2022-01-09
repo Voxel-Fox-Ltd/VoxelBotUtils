@@ -146,7 +146,7 @@ class PresenceAutoUpdater(vbu.Cog):
             # See if they're live
             try:
                 stream_data = data["data"][0]
-            except IndexError:
+            except (IndexError, KeyError):
                 continue  # They aren't
 
             # Yo sick they're live
