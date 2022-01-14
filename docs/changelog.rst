@@ -12,6 +12,13 @@ New Features
 * Add Dutch translations for the error text.
 * Add :func:`translation` as a slightly easier-to-use ``gettext`` module wrapper.
 
+Changed Features
+""""""""""""""""""""""""""""""""""""
+
+* Add timer for letting shards identify with the sharder.
+* Add ``info`` as an application command.
+* Add ``application_command_meta`` to any auto-created menus.
+
 0.8.3
 --------------------------------------
 
