@@ -5,6 +5,7 @@ import enum
 import logging
 import time
 import json
+from datetime import datetime as dt, timedelta
 
 
 logger = logging.getLogger("vbu.sharder")
@@ -60,9 +61,10 @@ class ShardManagerServer(object):
         self.shards_connecting: typing.List[int] = []  #: The IDs of the shards that are currently connecting.
         self.shard_queue = asyncio.PriorityQueue()  #: The IDs of the shards that are waiting to connect.
         self.shards_in_queue: typing.List[int] = []  #: A list of shard IDs that are in the queue because apparently I can't do that lookup.
-        self.shard_wait_timers = {}  #: Timers for the shards connecting.
-        self.shard_connect_timers = {}  #: Timers for the shards connecting.
-        self.shard_stream_writers = {}  #: A dictionary containing all of the shards being handled by the connection.
+        self.shard_wait_timers = {}  #: Timer objects to see how long a shard sits in the queue.
+        self.shard_connect_timers = {}  #: Timer objects to see how long a shard takes to connect.
+        self.shard_stream_writers = {}  #: A dictionary containing all of the shards being handled by the server.
+        self.shard_identify_timestamps = []  #: A list of timestamps (within the last 5 seconds - the IDENFITY rate limit) that a shard tried to connect. Should only ever be :attr:`max_concurrency` sized or less.
 
     @staticmethod
     async def get_max_concurrency(token: str) -> int:
@@ -158,6 +160,13 @@ class ShardManagerServer(object):
     def shard_in_waitlist(self):
         return not self.shard_queue.empty()
 
+    @property
+    def identify_ratelimit_hit(self):
+        for i in self.shard_identify_timestamps:
+            if i < (dt.utcnow() - timedelta(seconds=5.5)):
+                self.shard_identify_timestamps.remove(i)
+        return len(self.shard_identify_timestamps) >= self.max_concurrency
+
     async def shard_keepalive_handler(self):
         """
         Handles sending keepalives to each of the shards.
@@ -180,13 +189,13 @@ class ShardManagerServer(object):
 
             # Remove unreachable shards
             for i in ids_to_remove:
-                self.shard_stream_writers.pop(shard_id, None)
+                self.shard_stream_writers.pop(i, None)
                 try:
-                    self.shards_connecting.remove(shard_id)
+                    self.shards_connecting.remove(i)
                 except ValueError:
                     pass
                 try:
-                    self.shards_in_queue.remove(shard_id)
+                    self.shards_in_queue.remove(i)
                 except ValueError:
                     pass
 
@@ -199,12 +208,13 @@ class ShardManagerServer(object):
         """
 
         while True:
-            while self.shard_in_waitlist and not self.max_concurrency_reached:
+            while self.shard_in_waitlist and not self.max_concurrency_reached and self.identify_ratelimit_hit:
                 _, shard_id = await self.shard_queue.get()
                 if shard_id not in self.shards_in_queue:
                     logger.info(f"I wanted to tell shard ID {shard_id} to connect but they're not in the waitlist - continuing")
                     continue
                 self.shards_connecting.append(shard_id)
+                self.shard_identify_timestamps.append(dt.utcnow())
                 self.shards_in_queue.remove(shard_id)
                 self.loop.create_task(self.send_shard_connect(shard_id))
             await asyncio.sleep(0.1)
@@ -283,7 +293,7 @@ class ShardManagerClient(object):
     @classmethod
     async def open_connection(cls, host: str, port: int):
         """
-        The method to be run when asking to connect.
+        Connect to the shard manager.
         """
 
         logger.info("Connecting to shard manager...")
@@ -293,7 +303,7 @@ class ShardManagerClient(object):
 
     async def tell_manager(self, shard_id: int, data: dict):
         """
-        Send a message over to the shard manager.
+        Send a JSON message over to the shard manager.
         """
 
         data.update({"shard": shard_id})
@@ -307,23 +317,32 @@ class ShardManagerClient(object):
         """
 
         while not self.reader.at_eof():
+
+            # Get line
             try:
                 raw_data = await self.reader.readline()
             except asyncio.IncompleteReadError:
                 return
+
+            # Decode data
             try:
                 data = json.loads(raw_data.decode())
             except Exception:
                 continue
+
+            # Go through each receivable code and then act on it
             logger.info(f"Received message from shard_manager - {data}")
             if data['op'] == ShardManagerOpCodes.CONNECT_READY.value:
                 self.can_connect.set()
+
+            # Wait a bit before trying to read a message again
             await asyncio.sleep(0.1)
 
     async def ask_to_connect(self, shard_id: int, priority: bool = False):
         """
-        A method for bots to use when connecting a shard. Waits until it recieves a message saying
-        it's okay to connect before continuing.
+        A method for bots to use when connecting a shard.
+        Waits until it recieves a message saying it's okay to connect
+        before continuing.
         """
 
         while True:
@@ -340,8 +359,9 @@ class ShardManagerClient(object):
 
     async def done_connecting(self, shard_id: int):
         """
-        A method for bots to use when connecting a shard. Waits until it recieves a message saying
-        it's okay to connect before continuing.
+        A method for bots to use when connecting a shard.
+        Waits until it recieves a message saying it's okay to
+        connect before continuing.
         """
 
         await self.tell_manager(shard_id, {
