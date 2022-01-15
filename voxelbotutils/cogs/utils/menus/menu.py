@@ -14,6 +14,7 @@ from .callbacks import MenuCallbacks
 from .converter import Converter
 from ..custom_cog import Cog
 from ..custom_command import Command
+from ..custom_bot import Bot
 
 if typing.TYPE_CHECKING:
     from ..custom_context import Context
@@ -23,8 +24,21 @@ if typing.TYPE_CHECKING:
     MaybeCoroContextCallable = typing.Union[ContextCallable, AwaitableContextCallable]
 
 
-def _do_nothing(return_value=None):
-    def wrapper(*args, **kwargs):
+T = typing.TypeVar("T")
+
+
+@typing.overload
+def _do_nothing(return_value: typing.Type[T]) -> typing.Callable[[], T]:
+    ...
+
+
+@typing.overload
+def _do_nothing(return_value=None) -> typing.Callable[[], None]:
+    ...
+
+
+def _do_nothing(return_value: typing.Optional[typing.Type[T]] = None) -> typing.Callable[[], typing.Optional[T]]:
+    def wrapper(*args, **kwargs) -> typing.Optional[T]:
         if return_value:
             return return_value()
         return return_value
@@ -56,26 +70,65 @@ class Menu(MenuDisplayable):
         self.component_display = component_display  # Used for nested menus
         self._options = list(options)
 
+    @typing.overload
     def create_cog(
-            self, bot=None, *, cog_name: str = "Bot Settings", name: str = "settings",
-            aliases: typing.List[str] = ["setup"], permissions: typing.List[str] = None,
-            post_invoke: MaybeCoroContextCallable = None, guild_only: bool = True,
-            **command_kwargs) -> typing.Union[commands.Cog, typing.Type[commands.Cog]]:
+            self,
+            bot=None,
+            **command_kwargs,
+            ) -> typing.Type[commands.Cog]:
+        ...
+
+    @typing.overload
+    def create_cog(
+            self,
+            bot: Bot,
+            **command_kwargs,
+            ) -> commands.Cog:
+        ...
+
+    def create_cog(
+            self,
+            bot: Bot = None,
+            *,
+            cog_name: str = "Bot Settings",
+            name: str = "settings",
+            aliases: typing.List[str] = ["setup"],
+            permissions: typing.List[str] = None,
+            post_invoke: MaybeCoroContextCallable = None,
+            guild_only: bool = True,
+            **command_kwargs
+            ) -> typing.Union[commands.Cog, typing.Type[commands.Cog]]:
         """
         Creates a cog that can be loaded into the bot in a setup method.
 
-        Args:
-            bot: The bot object. If given, the cog will be instantiated with that object.
-            cog_name (str, optional): The name of the cog to be added.
-            name (str, optional): The name of the command to be added.
-            aliases (typing.List[str], optional): A list of aliases to be added to the settings command.
-            permissions (typing.List[str]): A list of permission names should be required for the command run.
-            post_invoke (typing.Union[typing.Callable[[commands.Context], None], typing.Awaitable[typing.Callable[[commands.Context], None]]]): A
-                post-invoke method that can be called.
-            guild_only (bool): If the command should be guild-only.
+        Parameters
+        ----------
+        bot : Optional[Bot]
+            The bot object. If given, the cog will be instantiated with that object.
+        cog_name : Optional[str]
+            The name of the cog to be added.
+        name : Optional[str]
+            The name of the command to be added.
+        aliases : Optional[List[str]]
+            A list of aliases to be added to the settings command.
+        permissions : Optional[List[str]]
+            A list of permission names should be required for the command run.
+        post_invoke : Optional[MaybeCoroContextCallable]
+            A post-invoke method that can be called.
+        guild_only : Optional[bool]
+            If the command should be guild-only.
+        **command_kwargs
+            Arguments to be passed down to the command decorator.
+
+        Returns
+        -------
+        Union[commands.Cog, Type[commands.Cog]]
+            Either a cog type to add to your bot, or if a bot instance was passed
+            as a parameter, the added cog instance.
         """
 
         permissions = permissions if permissions is not None else ["manage_guild"]
+        meta = commands.ApplicationCommandMeta(guild_only=guild_only)
 
         class NestedCog(Cog, name=cog_name):
 
@@ -92,7 +145,7 @@ class Menu(MenuDisplayable):
                 cls=Command,
                 name=name,
                 aliases=aliases,
-                application_command_meta=command_kwargs.pop("application_command_meta", commands.ApplicationCommandMeta()),
+                application_command_meta=command_kwargs.pop("application_command_meta", meta),
                 **command_kwargs,
             )
             @commands.has_permissions(**{i: True for i in permissions})
@@ -126,10 +179,13 @@ class Menu(MenuDisplayable):
         """
         Run the menu instance.
 
-        Args:
-            ctx (commands.Context): A context object to run the settings menu from.
-            delete_messages (bool, optional): Whether or not to delete the menu when the user says
-                they're done.
+        Parameters
+        ----------
+        ctx : vbu.Context
+            A context object to run the settings menu from.
+        delete_message : Optional[bool]
+            Whether or not to delete the menu message when the menu is
+            completed.
         """
 
         # Set up our base case

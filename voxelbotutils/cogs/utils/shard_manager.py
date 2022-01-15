@@ -208,7 +208,7 @@ class ShardManagerServer(object):
         """
 
         while True:
-            while self.shard_in_waitlist and not self.max_concurrency_reached and self.identify_ratelimit_hit:
+            while self.shard_in_waitlist and not self.max_concurrency_reached and not self.identify_ratelimit_hit:
                 _, shard_id = await self.shard_queue.get()
                 if shard_id not in self.shards_in_queue:
                     logger.info(f"I wanted to tell shard ID {shard_id} to connect but they're not in the waitlist - continuing")
