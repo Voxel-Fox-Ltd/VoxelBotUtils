@@ -162,7 +162,7 @@ class Menu(MenuDisplayable):
             clicked_option = None
             options = await self.get_options(ctx)
             for i in options:
-                if i.component_display == payload.component.label:
+                if i._component_custom_id == payload.custom_id:
                     clicked_option = i
                     break
             if clicked_option is None:
@@ -216,7 +216,7 @@ class Menu(MenuDisplayable):
                 style = (discord.ui.ButtonStyle.secondary if isinstance(i._callback, Menu) else None) or i._button_style or discord.ui.ButtonStyle.primary
                 buttons.append(discord.ui.Button(
                     label=i.component_display,
-                    custom_id=i.component_display,
+                    custom_id=i._component_custom_id,
                     style=style,
                 ))
         ctx.database = None

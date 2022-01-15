@@ -55,6 +55,10 @@ class Option(MenuDisplayable):
 
         self.display = display
         self.component_display = component_display or display
+        if isinstance(self.component_display, (list, tuple)):
+            self.component_display, self._component_custom_id = self.component_display
+        else:
+            self._component_custom_id = self.component_display
         self._button_style = None
         self.converters = converters or list()
         self._callback = callback
