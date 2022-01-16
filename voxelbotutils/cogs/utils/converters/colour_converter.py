@@ -869,7 +869,7 @@ COLOURS_BY_NAME = {
     "pumpkin": 0xFF7518,
     "purple (html)": 0x800080,
     "purple (munsell)": 0x9F00C5,
-    "purple (x11)": 0xA020F0,
+    "purple": 0xA020F0,
     "purple heart": 0x69359C,
     "purple mountain majesty": 0x9678B6,
     "purple navy": 0x4E5180,
