@@ -314,9 +314,12 @@ class EventLoopCallbackHandler:
         )
 
         # Assert some stuff
-        assert cls.bot
-        assert cls.bot.config
-        assert cls.bot.user
+        try:
+            assert cls.bot
+            assert cls.bot.config
+            assert cls.bot.user
+        except AssertionError:
+            return
 
         # DM to owners
         if cls.bot.config.get('dm_uncaught_errors', False):
@@ -328,6 +331,8 @@ class EventLoopCallbackHandler:
 
         # Ping to the webook
         event_webhook: typing.Optional[discord.Webhook] = cls.bot.get_event_webhook("unhandled_error")
+        if not event_webhook:
+            return
         try:
             avatar_url = str(cls.bot.user.display_avatar.url)
         except Exception:
