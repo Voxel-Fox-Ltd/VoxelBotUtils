@@ -135,15 +135,17 @@ class BotStats(vbu.Cog):
         ))
 
         # Add guild count
-        if self.bot.shard_count != len((self.bot.shard_ids or [0])):
-            embed.add_field(
-                "Approximate Guild Count",
-                f"{int((len(self.bot.guilds) / len(self.bot.shard_ids or [0])) * self.bot.shard_count):,}",
-            )
-        else:
-            embed.add_field("Guild Count", f"{len(self.bot.guilds):,}")
+        if self.bot.guilds:
+            if self.bot.shard_count != len((self.bot.shard_ids or [0])):
+                embed.add_field(
+                    "Approximate Guild Count",
+                    f"{int((len(self.bot.guilds) / len(self.bot.shard_ids or [0])) * self.bot.shard_count):,}",
+                )
+            else:
+                embed.add_field("Guild Count", f"{len(self.bot.guilds):,}")
         embed.add_field("Shard Count", f"{self.bot.shard_count or 1:,}")
-        embed.add_field("Average WS Latency", f"{(self.bot.latency * 1000):.2f}ms")
+        if self.bot.latency:
+            embed.add_field("Average WS Latency", f"{(self.bot.latency * 1000):.2f}ms")
 
         # Get topgg data
         if self.bot.config.get('bot_listing_api_keys', {}).get("topgg_token"):
