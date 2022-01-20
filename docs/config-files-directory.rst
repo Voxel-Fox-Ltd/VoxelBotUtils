@@ -175,6 +175,11 @@ Bot Config File
 
          Whether or not the info command is enabled. It's highly recommended that this remains enabled.
 
+      .. attribute:: include_stats
+         :type: bool
+
+         Whether or not to include the general bot stats embed with the info command.
+
       .. attribute:: content
          :type: str
 

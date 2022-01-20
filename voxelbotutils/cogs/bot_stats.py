@@ -1,5 +1,6 @@
 from importlib import metadata
 import sys
+import typing
 
 import discord
 from discord.ext import commands
@@ -55,8 +56,13 @@ class BotStats(vbu.Cog):
             )
         components = discord.ui.MessageComponents.add_buttons_with_rows(*buttons)
 
+        # See if we want to include stats
+        embeds = [info_embed]
+        if bot_info.get("include_stats"):
+            embeds.append(await self.get_stats_embed())
+
         # And send
-        return await ctx.send(embed=info_embed, components=components)
+        return await ctx.send(embeds=embeds, components=components)
 
     def get_invite_link(self):
         """
@@ -100,7 +106,7 @@ class BotStats(vbu.Cog):
             return await ctx.send("Despite being enabled, the vote command has no vote links to provide :/")
         return await ctx.send("\n".join(output_strings))
 
-    async def get_stats_embed(self):
+    async def get_stats_embed(self) -> typing.Union[discord.Embed, vbu.Embed]:
         """
         Get the stats embed - now as a function so I can use it in multiple places.
         """
@@ -185,7 +191,7 @@ class BotStats(vbu.Cog):
 
         return embed
 
-    @vbu.command(aliases=['status', 'botinfo'], add_slash_command=False)
+    @vbu.command(aliases=['status', 'botinfo'])
     @commands.bot_has_permissions(send_messages=True, embed_links=True)
     async def stats(self, ctx: vbu.Context):
         """

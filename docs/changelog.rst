@@ -11,6 +11,7 @@ New Features
 
 * Add Dutch translations for the error text.
 * Add :func:`translation` as a slightly easier-to-use ``gettext`` module wrapper.
+* Add :attr:`BotConfig.bot_info.include_stats` for use with slash commands.
 
 Changed Features
 """"""""""""""""""""""""""""""""""""
