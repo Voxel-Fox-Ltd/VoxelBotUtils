@@ -13,6 +13,7 @@ class BotStats(vbu.Cog):
     @vbu.command(
         application_command_meta=commands.ApplicationCommandMeta(),
     )
+    @commands.defer()
     @vbu.checks.is_config_set('bot_info', 'enabled')
     @commands.bot_has_permissions(send_messages=True, embed_links=True)
     async def info(self, ctx: vbu.Context):
