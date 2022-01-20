@@ -143,8 +143,8 @@ class BotStats(vbu.Cog):
                 )
             else:
                 embed.add_field("Guild Count", f"{len(self.bot.guilds):,}")
-        embed.add_field("Shard Count", f"{self.bot.shard_count or 1:,}")
         if self.bot.latency >= 0:
+            embed.add_field("Shard Count", f"{self.bot.shard_count or 1:,}")
             embed.add_field("Average WS Latency", f"{(self.bot.latency * 1000):.2f}ms")
 
         # Get topgg data
