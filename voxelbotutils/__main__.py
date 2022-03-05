@@ -72,7 +72,7 @@ def get_default_program_arguments() -> argparse.ArgumentParser:
     bot_subparser.add_argument("config_file", nargs="?", default="config/config.toml", help="The configuration for the bot.")
     bot_subparser.add_argument("--min", nargs="?", type=int, default=None, help="The minimum shard ID that this instance will run with (inclusive).")
     bot_subparser.add_argument("--max", nargs="?", type=int, default=None, help="The maximum shard ID that this instance will run with (inclusive).")
-    bot_subparser.add_argument("--shardcount", nargs="?", type=int, default=None, help="The amount of shards that the bot should be using.")
+    bot_subparser.add_argument("--shardcount", nargs="?", type=int, default=1, help="The amount of shards that the bot should be using.")
     bot_subparser.add_argument("--loglevel", nargs="?", default="INFO", help="Global logging level - probably most useful is INFO and DEBUG.", choices=LOGLEVEL_CHOICES)
 
     # Set up the website arguments
