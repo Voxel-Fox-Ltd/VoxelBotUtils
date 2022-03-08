@@ -541,7 +541,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
 
         # Make a context
         new_ctx = await self.bot.get_context(msg, cls=type(ctx))
-        new_ctx.original_author_id = ctx.original_author_id
+        new_ctx.original_author_id = ctx.author.id
 
         # Invoke it dab
         await self.bot.invoke(new_ctx)
