@@ -193,6 +193,8 @@ class Menu(MenuDisplayable):
         sendable_data: dict = await self.get_sendable_data(ctx)
         sent_components: discord.ui.MessageComponents = sendable_data['components']
         menu_message: discord.Message
+
+        # Send the initial message
         if not isinstance(ctx, commands.SlashContext):
             menu_message = await ctx.send(**sendable_data)  # No interaction?
         elif ctx.interaction.response.is_done:
@@ -226,7 +228,7 @@ class Menu(MenuDisplayable):
                     timeout=60.0,
                 )
                 ctx.interaction = payload
-                await payload.response.defer_update()
+                await payload.response.edit_message(components=sent_components.disable_components())
             except asyncio.TimeoutError:
                 break
 
@@ -253,10 +255,8 @@ class Menu(MenuDisplayable):
                     await clicked_option.run(ctx)
             except ConverterTimeout as e:
                 try:
-                    await ctx.interaction.edit_original_message(
+                    await ctx.interaction.followup.send(
                         content=e.message,
-                        embeds=[],
-                        components=None,
                     )
                 except:
                     pass
@@ -267,7 +267,7 @@ class Menu(MenuDisplayable):
             # Edit the message with our new buttons
             sendable_data = await self.get_sendable_data(ctx)
             sent_components = sendable_data['components']
-            await ctx.interaction.edit_original_message(**sendable_data)
+            await ctx.interaction.followup.send(**sendable_data)
 
         # Disable the buttons before we leave
         # try:
