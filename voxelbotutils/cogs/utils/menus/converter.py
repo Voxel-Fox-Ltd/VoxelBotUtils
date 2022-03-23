@@ -6,7 +6,7 @@ import typing
 import discord
 from discord.ext import commands
 
-from .check import Check
+from .check import Check, ModalCheck
 from .errors import ConverterFailure, ConverterTimeout
 from .utils import get_discord_converter
 
@@ -82,7 +82,7 @@ class Converter(object):
                 return converter
         return _FakeConverter(converter)
 
-    async def run(self, ctx: commands.Context, messages_to_delete: list = None):
+    async def run(self, ctx: commands.SlashContext, messages_to_delete: list = None):
         """
         Ask the user for an input, run the checks, run the converter, and return. Timeout errors
         *will* be raised here, but they'll propogate all the way back up to the main menu instance,
@@ -92,51 +92,113 @@ class Converter(object):
 
         # Ask the user for an input
         messages_to_delete = messages_to_delete if messages_to_delete is not None else list()
-        sent_message = await ctx.send(self.prompt, components=self.components)
-        messages_to_delete.append(sent_message)
 
         # The input will be an interaction - branch off here
         if self.components:
+
+            # Send message to respond to
+            sent_message = await ctx.interaction.followup.send(self.prompt, components=self.components)
+            messages_to_delete.append(sent_message)
+
+            # Set up checks
             def get_button_check(given_message):
                 def button_check(payload):
                     if payload.message.id != given_message.id:
                         return False
-                    if payload.user.id == ctx.author.id:
+                    if payload.user.id == ctx.interaction.user.id:
                         return True
-                    ctx.bot.loop.create_task(payload.respond(f"Only {ctx.author.mention} can interact with these buttons.", ephemeral=True))
+                    ctx.bot.loop.create_task(payload.respond(
+                        f"Only {ctx.interaction.user.mention} can interact with these buttons.",
+                        ephemeral=True,
+                    ))
                     return False
                 return button_check
+
+            # Wait for the user to click a button
             try:
-                payload = await ctx.bot.wait_for("component_interaction", check=get_button_check(sent_message), timeout=60.0)
+                payload = await ctx.bot.wait_for(
+                    "component_interaction",
+                    check=get_button_check(sent_message),
+                    timeout=60.0,
+                )
+                ctx.interaction = payload
                 await payload.response.defer_update()
             except asyncio.TimeoutError:
                 raise ConverterTimeout(self.timeout_message)
+
+            # And convert
             return await self.converter.convert(ctx, payload)
 
         # Loop until a valid input is received
-        def check(message):
-            return all([
-                message.channel.id == ctx.channel.id,
-                message.author.id == ctx.author.id,
-            ])
         while True:
 
+            # Send a clickable button for the data
+            button = discord.ui.Button(label="Set data")
+            components = discord.ui.MessageComponents.add_buttons_with_rows(button)
+            sent_message = await ctx.interaction.followup.send(
+                self.prompt,
+                components=components,
+            )
+
+            # Wait for the button to be clicked
+            button_click: discord.Interaction = await ctx.bot.wait_for(
+                "component_interaction",
+                check=lambda i: i.user.id == ctx.interaction.user.id and i.custom_id == button.custom_id,
+                timeout=60.0,
+            )
+            ctx.interaction = button_click  # Don't defer this one so we can send a modal
+
             # Wait for an input
-            user_message = await ctx.bot.wait_for("message", check=check, timeout=60.0)
-            messages_to_delete.append(user_message)
+            modal = discord.ui.Modal(
+                title="Menu Data",
+                components=[
+                    discord.ui.ActionRow(
+                        discord.ui.InputText(
+                            label="Set data",
+                        ),
+                    ),
+                ],
+            )
+            await button_click.response.send_modal(modal)
+            modal_submission: discord.Interaction = await ctx.bot.wait_for(
+                "modal_submit",
+                check=lambda i: i.user.id == ctx.interaction.user.id and i.custom_id == modal.custom_id,
+                timeout=60.0,
+            )
+            ctx.interaction = modal_submission
+            await modal_submission.response.defer_update()
+
+            # sent_message = await ctx.send(self.prompt, components=self.components)
+            # messages_to_delete.append(sent_message)
+
+            # # Wait for an input
+            # user_message = await ctx.bot.wait_for("message", check=check, timeout=60.0)
+            # messages_to_delete.append(user_message)
+
+            # # Run it through our checks
+            # checks_failed = False
+            # for c in self.checks:
+            #     try:
+            #         checks_failed = not c.check(user_message)
+            #     except Exception:
+            #         checks_failed = True
+            #     if checks_failed:
+            #         break
 
             # Run it through our checks
             checks_failed = False
+            c = None
             for c in self.checks:
                 try:
-                    checks_failed = not c.check(user_message)
+                    assert isinstance(c, ModalCheck)
+                    checks_failed = not c.check(modal_submission)
                 except Exception:
                     checks_failed = True
                 if checks_failed:
                     break
 
             # Deal with a check failure
-            if checks_failed:
+            if checks_failed and c is not None:
                 to_send_failure_message = c.fail_message
                 if to_send_failure_message:
                     messages_to_delete.append(await ctx.send(to_send_failure_message))
@@ -147,4 +209,7 @@ class Converter(object):
                 return None  # We shouldn't reach here but this is just for good luck
 
             # And we converted properly
-            return await self.converter.convert(ctx, user_message.content)
+            return await self.converter.convert(
+                ctx,
+                modal_submission.components[0].components[0].value,
+            )

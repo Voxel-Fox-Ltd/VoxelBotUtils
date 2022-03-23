@@ -206,6 +206,11 @@ menus.Check
 
 .. autoclass:: voxelbotutils.menus.Check
 
+menus.ModalCheck
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: voxelbotutils.menus.ModalCheck
+
 menus.CheckFailureAction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -11,7 +11,7 @@ from .utils import async_wrap_callback
 if typing.TYPE_CHECKING:
     from .menu import Menu
     from .converter import Converter
-    from ..custom_context import Context
+    from ..custom_context import SlashContext
 
 
 T = typing.TypeVar('T')
@@ -27,26 +27,26 @@ class Option(MenuDisplayable):
 
     def __init__(
             self,
-            display: typing.Union[str, typing.Callable[[Context], str]],
+            display: typing.Union[str, typing.Callable[[SlashContext], str]],
             component_display: str = None,
             converters: typing.Optional[typing.List[Converter]] = None,
-            callback: typing.Union[typing.Callable[[Context, typing.List[typing.Any]], MaybeCoro[None]], Menu] = None,
-            cache_callback: typing.Optional[typing.Callable[[Context, typing.List[typing.Any]], MaybeCoro[None]]] = None,
+            callback: typing.Union[typing.Callable[[SlashContext, typing.List[typing.Any]], MaybeCoro[None]], Menu] = None,
+            cache_callback: typing.Optional[typing.Callable[[SlashContext, typing.List[typing.Any]], MaybeCoro[None]]] = None,
             allow_none: bool = False,
             ):
         """
         Attributes:
-            display (typing.Union[str, typing.Callable[[commands.Context], str]]): The item
+            display (typing.Union[str, typing.Callable[[commands.SlashContext], str]]): The item
                 that string be shown on the menu itself. If a string is passed, then it will
                 be given :code:`.format(ctx)`. If a method is passed, then it will be given a
-                :class:`discord.ext.commands.Context` object as an argument.
+                :class:`discord.ext.commands.SlashContext` object as an argument.
             component_display (str): The string that gets shown in the button for this option.
             converters (typing.Optional[typing.List[Converter]]): A list of converters that the
                 user should be asked for.
-            callback (typing.Callable[[commands.Context, typing.List[typing.Any]], None]): An [async]
+            callback (typing.Callable[[commands.SlashContext, typing.List[typing.Any]], None]): An [async]
                 function that will be given the context object and a list of the converted user-provided
                 arguments.
-            cache_callback (typing.Optional[typing.Callable[[commands.Context, typing.List[typing.Any]], None]]):
+            cache_callback (typing.Optional[typing.Callable[[commands.SlashContext, typing.List[typing.Any]], None]]):
                 An [async] function that will be given the context object and a list of the
                 converted user-provided arguments. This is provided as well as the :code:`callback` parameter
                 so as to allow for the seperation of different reusable methods.
@@ -67,7 +67,7 @@ class Option(MenuDisplayable):
         self.cache_callback = async_wrap_callback(cache_callback)
         self.allow_none = allow_none
 
-    async def run(self, ctx: commands.Context):
+    async def run(self, ctx: commands.SlashContext):
         """
         Runs the converters and callback for this given option.
         """

@@ -17,7 +17,7 @@ from ..custom_command import Command
 from ..custom_bot import Bot
 
 if typing.TYPE_CHECKING:
-    from ..custom_context import Context
+    from ..custom_context import Context, SlashContext
 
     ContextCallable = typing.Callable[[Context], None]
     AwaitableContextCallable = typing.Awaitable[ContextCallable]
@@ -148,6 +148,7 @@ class Menu(MenuDisplayable):
                 application_command_meta=command_kwargs.pop("application_command_meta", meta),
                 **command_kwargs,
             )
+            @commands.defer()
             @commands.has_permissions(**{i: True for i in permissions})
             @commands.bot_has_permissions(send_messages=True, embed_links=True)
             async def settings(nested_self, ctx):
@@ -175,13 +176,13 @@ class Menu(MenuDisplayable):
 
         return self._options
 
-    async def start(self, ctx: Context, delete_message: bool = False) -> None:
+    async def start(self, ctx: SlashContext, delete_message: bool = False) -> None:
         """
         Run the menu instance.
 
         Parameters
         ----------
-        ctx : vbu.Context
+        ctx : vbu.SlashContext
             A context object to run the settings menu from.
         delete_message : Optional[bool]
             Whether or not to delete the menu message when the menu is
@@ -191,16 +192,26 @@ class Menu(MenuDisplayable):
         # Set up our base case
         sendable_data: dict = await self.get_sendable_data(ctx)
         sent_components: discord.ui.MessageComponents = sendable_data['components']
-        menu_message: discord.Message = await ctx.send(**sendable_data)
+        menu_message: discord.Message
+        if not isinstance(ctx, commands.SlashContext):
+            menu_message = await ctx.send(**sendable_data)  # No interaction?
+        elif ctx.interaction.response.is_done:
+            menu_message = await ctx.interaction.followup.send(**sendable_data)  # Deferred interaction
+        else:
+            await ctx.interaction.response.defer()
+            menu_message = await ctx.interaction.followup.send(**sendable_data)
 
         # Set up a function so as to get
         def get_button_check(given_message):
             def button_check(payload):
                 if payload.message.id != given_message.id:
                     return False
-                if payload.user.id == ctx.author.id:
+                if payload.user.id == ctx.interaction.user.id:
                     return True
-                ctx.bot.loop.create_task(payload.respond(f"Only {ctx.author.mention} can interact with these buttons.", ephemeral=True))
+                ctx.bot.loop.create_task(payload.respond(
+                    f"Only {ctx.interaction.user.mention} can interact with these buttons.",
+                    ephemeral=True,
+                ))
                 return False
             return button_check
 
@@ -209,10 +220,18 @@ class Menu(MenuDisplayable):
 
             # Wait for the user to click on a button
             try:
-                payload = await ctx.bot.wait_for("component_interaction", check=get_button_check(menu_message), timeout=60.0)
+                payload: discord.Interaction = await ctx.bot.wait_for(
+                    "component_interaction",
+                    check=get_button_check(menu_message),
+                    timeout=60.0,
+                )
+                ctx.interaction = payload
                 await payload.response.defer_update()
             except asyncio.TimeoutError:
                 break
+
+            # From this point onwards in the loop, we'll always have an interaction
+            # within the context object.
 
             # Determine the option they clicked for
             clicked_option = None
@@ -225,15 +244,22 @@ class Menu(MenuDisplayable):
                 break
 
             # Run the given option
+            # This may change the interaction object within the context,
+            # but at all points it should be deferred (update)
             try:
-                if clicked_option.converters or isinstance(clicked_option._callback, Menu):
-                    await menu_message.edit(components=sent_components.disable_components())
                 if isinstance(clicked_option._callback, Menu):
                     await clicked_option._callback.start(ctx, delete_message=True)
                 else:
                     await clicked_option.run(ctx)
             except ConverterTimeout as e:
-                await ctx.send(e.message)
+                try:
+                    await ctx.interaction.edit_original_message(
+                        content=e.message,
+                        embeds=[],
+                        components=None,
+                    )
+                except:
+                    pass
                 break
             except asyncio.TimeoutError:
                 break
@@ -241,16 +267,16 @@ class Menu(MenuDisplayable):
             # Edit the message with our new buttons
             sendable_data = await self.get_sendable_data(ctx)
             sent_components = sendable_data['components']
-            await menu_message.edit(**sendable_data)
+            await ctx.interaction.edit_original_message(**sendable_data)
 
         # Disable the buttons before we leave
-        try:
-            if delete_message:
-                await menu_message.delete()
-            else:
-                await menu_message.edit(components=sent_components.disable_components())
-        except Exception:
-            pass
+        # try:
+        #     if delete_message:
+        #         await menu_message.delete()
+        #     else:
+        #         await menu_message.edit(components=sent_components.disable_components())
+        # except Exception:
+        #     pass
 
     async def get_sendable_data(self, ctx: Context) -> dict:
         """
