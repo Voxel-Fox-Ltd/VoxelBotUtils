@@ -156,6 +156,8 @@ class Menu(MenuDisplayable):
                 Modify some of the bot's settings.
                 """
 
+                if not isinstance(ctx, commands.SlashContext):
+                    return await ctx.send("This command can only be run as a slash command.")
                 await self.start(ctx)
                 if post_invoke is None:
                     return
@@ -168,7 +170,7 @@ class Menu(MenuDisplayable):
             return NestedCog(bot)
         return NestedCog
 
-    async def get_options(self, ctx: Context, force_regenerate: bool = False) -> typing.List[Option]:
+    async def get_options(self, ctx: SlashContext, force_regenerate: bool = False) -> typing.List[Option]:
         """
         Get all of the options for an instance.
         This method has an open database instance in :code:`ctx.database`.
@@ -278,7 +280,7 @@ class Menu(MenuDisplayable):
         # except Exception:
         #     pass
 
-    async def get_sendable_data(self, ctx: Context) -> dict:
+    async def get_sendable_data(self, ctx: SlashContext) -> dict:
         """
         Gets a dictionary of sendable objects to unpack for the :func:`start` method.
         """
@@ -401,7 +403,7 @@ class MenuIterable(Menu, Option):
                 await db(self.delete_sql, *args)
         return wrapper
 
-    async def get_options(self, ctx: Context, force_regenerate: bool = False):
+    async def get_options(self, ctx: SlashContext, force_regenerate: bool = False):
         """
         Get all of the options for an instance.
         This method has an open database instance in :code:`Context.database`.
