@@ -130,14 +130,17 @@ class Converter(object):
             return await self.converter.convert(ctx, payload)
 
         # Loop until a valid input is received
+        to_send_failure_message = None
         while True:
 
             # Send a clickable button for the data
             button = discord.ui.Button(label="Set data")
             components = discord.ui.MessageComponents.add_buttons_with_rows(button)
             sent_message = await ctx.interaction.followup.send(
-                self.prompt,
+                to_send_failure_message or self.prompt,
                 components=components,
+                allowed_mentions=discord.AllowedMentions.none(),
+                wait=True,
             )
 
             # Wait for the button to be clicked
@@ -167,6 +170,12 @@ class Converter(object):
             )
             ctx.interaction = modal_submission
             await modal_submission.response.defer_update()
+
+            # Delete the original message, just for fun
+            try:
+                await sent_message.delete()
+            except:
+                pass
 
             # sent_message = await ctx.send(self.prompt, components=self.components)
             # messages_to_delete.append(sent_message)
@@ -200,8 +209,6 @@ class Converter(object):
             # Deal with a check failure
             if checks_failed and c is not None:
                 to_send_failure_message = c.fail_message
-                if to_send_failure_message:
-                    messages_to_delete.append(await ctx.send(to_send_failure_message))
                 if c.on_failure == Check.failures.RETRY:
                     continue
                 elif c.on_failure == Check.failures.FAIL:
