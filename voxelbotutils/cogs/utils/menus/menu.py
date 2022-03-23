@@ -163,6 +163,8 @@ class Menu(MenuDisplayable):
                 # Get a guild if we need to
                 if ctx.interaction.guild_id:
                     guild = await ctx.bot.fetch_guild(ctx.interaction.guild_id)
+                    channels = await guild.fetch_channels()
+                    guild._channels = {i.id: i for i in channels}  # Fetching a guild doesn't set channels :/
                     ctx._guild = guild
 
                 # Start the menu
