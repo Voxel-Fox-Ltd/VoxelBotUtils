@@ -156,9 +156,19 @@ class Menu(MenuDisplayable):
                 Modify some of the bot's settings.
                 """
 
+                # Make sure it's a slashie
                 if not isinstance(ctx, commands.SlashContext):
                     return await ctx.send("This command can only be run as a slash command.")
+
+                # Get a guild if we need to
+                if ctx.interaction.guild_id:
+                    guild = await ctx.bot.fetch_guild(ctx.interaction.guild_id)
+                    ctx.guild = guild
+
+                # Start the menu
                 await self.start(ctx)
+
+                # Post invoke
                 if post_invoke is None:
                     return
                 if inspect.iscoroutine(post_invoke):
