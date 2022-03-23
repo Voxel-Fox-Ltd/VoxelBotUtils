@@ -87,4 +87,4 @@ class Option(MenuDisplayable):
         if not has_failed:
             await self.callback(ctx, data)
             await self.cache_callback(ctx, data)
-        ctx.bot.loop.create_task(ctx.channel.delete_messages(messages_to_delete))
+        # ctx.bot.loop.create_task(ctx.channel.delete_messages(messages_to_delete))
