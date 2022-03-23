@@ -284,13 +284,13 @@ class Menu(MenuDisplayable):
             await ctx.interaction.followup.send(**sendable_data)
 
         # Disable the buttons before we leave
-        # try:
-        #     if delete_message:
-        #         await menu_message.delete()
-        #     else:
-        #         await menu_message.edit(components=sent_components.disable_components())
-        # except Exception:
-        #     pass
+        try:
+            if delete_message:
+                await ctx.interaction.delete_original_message()
+            else:
+                await ctx.interaction.edit_original_message(components=sent_components.disable_components())
+        except Exception:
+            pass
 
     async def get_sendable_data(self, ctx: commands.SlashContext) -> dict:
         """
