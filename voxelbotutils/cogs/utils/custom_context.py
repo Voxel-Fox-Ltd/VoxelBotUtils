@@ -60,8 +60,8 @@ class ContextMixin:
         """
 
         x = None
-        if channel_id is not None:
-            x = self.bot.get_channel(int(channel_id))
+        if channel_id is not None and self.guild:
+            x = self.guild.get_channel(int(channel_id))
         if x:
             return x
         return AbstractMentionable(channel_id, fallback, fallback)
@@ -79,7 +79,7 @@ class ContextMixin:
         """
 
         x = None
-        if role_id is not None:
+        if role_id is not None and self.guild:
             x = self.guild.get_role(int(role_id))
         if x:
             return x

@@ -180,7 +180,7 @@ class Menu(MenuDisplayable):
             return NestedCog(bot)
         return NestedCog
 
-    async def get_options(self, ctx: SlashContext, force_regenerate: bool = False) -> typing.List[Option]:
+    async def get_options(self, ctx: commands.SlashContext, force_regenerate: bool = False) -> typing.List[Option]:
         """
         Get all of the options for an instance.
         This method has an open database instance in :code:`ctx.database`.
@@ -188,7 +188,7 @@ class Menu(MenuDisplayable):
 
         return self._options
 
-    async def start(self, ctx: SlashContext, delete_message: bool = False) -> None:
+    async def start(self, ctx: commands.SlashContext, delete_message: bool = False) -> None:
         """
         Run the menu instance.
 
@@ -290,7 +290,7 @@ class Menu(MenuDisplayable):
         # except Exception:
         #     pass
 
-    async def get_sendable_data(self, ctx: SlashContext) -> dict:
+    async def get_sendable_data(self, ctx: commands.SlashContext) -> dict:
         """
         Gets a dictionary of sendable objects to unpack for the :func:`start` method.
         """
@@ -413,7 +413,7 @@ class MenuIterable(Menu, Option):
                 await db(self.delete_sql, *args)
         return wrapper
 
-    async def get_options(self, ctx: SlashContext, force_regenerate: bool = False):
+    async def get_options(self, ctx: commands.SlashContext, force_regenerate: bool = False):
         """
         Get all of the options for an instance.
         This method has an open database instance in :code:`Context.database`.
