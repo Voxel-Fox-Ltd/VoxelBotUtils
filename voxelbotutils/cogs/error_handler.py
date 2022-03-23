@@ -331,6 +331,7 @@ class ErrorHandler(vbu.Cog):
                 _, _ = output
             except ValueError:
                 output = (output,)
+            self.logger.info(f"Hit error in command - {output}")
             return await self.send_to_ctx_or_author(ctx, *output)
 
         # Make sure not to send an error if it's "handled"
