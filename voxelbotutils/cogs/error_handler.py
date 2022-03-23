@@ -291,6 +291,7 @@ class ErrorHandler(vbu.Cog):
         )
         if isinstance(error, ignored_errors):
             return
+        self.logger.info(f"Hit error in command {ctx.command} - {error}")
 
         # See what we've got to deal with
         setattr(ctx, "original_author_id", getattr(ctx, "original_author_id", ctx.author.id))
@@ -331,7 +332,6 @@ class ErrorHandler(vbu.Cog):
                 _, _ = output
             except ValueError:
                 output = (output,)
-            self.logger.info(f"Hit error in command - {output}")
             return await self.send_to_ctx_or_author(ctx, *output)
 
         # Make sure not to send an error if it's "handled"
