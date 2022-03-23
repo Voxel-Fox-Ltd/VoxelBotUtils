@@ -216,8 +216,9 @@ class Converter(object):
                 return None  # We shouldn't reach here but this is just for good luck
 
             # And we converted properly
-            ctx.bot.logger.info(ctx.guild)
-            ctx.bot.logger.info(ctx.guild.channels)
+            ctx.bot.logger.info(ctx)
+            ctx.bot.logger.info(ctx._guild)
+            ctx.bot.logger.info(ctx._guild.channels)
             return await self.converter.convert(
                 ctx,
                 modal_submission.components[0].components[0].value,
