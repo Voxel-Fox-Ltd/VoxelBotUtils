@@ -20,6 +20,18 @@ Changed Features
 * Add ``info`` as an application command.
 * Add ``application_command_meta`` to any auto-created menus.
 * Add support for giving a custom ID to menu components.
+* Ask for messages in the menu by use of modals.
+* Force all settings menus to be done via slash command by default.
+
+Bugs Fixed
+""""""""""""""""""""""""""""""""""""
+
+* Fix webhook logging for statsd.
+* Add a :class:`ApplicationCommandMeta` to the settings command by default.
+* Catch error in checking if a Twitch user is live.
+* Catch error in sending errors for tasks (ironic, yes).
+* Fix ``su`` command.
+* Add timer for letting a shard identify in the sharder.
 
 0.8.3
 --------------------------------------
