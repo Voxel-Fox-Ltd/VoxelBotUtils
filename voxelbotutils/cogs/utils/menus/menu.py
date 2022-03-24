@@ -74,7 +74,14 @@ class Menu(MenuDisplayable):
     def create_cog(
             self,
             bot=None,
-            **command_kwargs,
+            *,
+            cog_name: str = "Bot Settings",
+            name: str = "settings",
+            aliases: typing.List[str] = ["setup"],
+            permissions: typing.List[str] = None,
+            post_invoke: MaybeCoroContextCallable = None,
+            guild_only: bool = True,
+            **command_kwargs
             ) -> typing.Type[commands.Cog]:
         ...
 
@@ -82,13 +89,20 @@ class Menu(MenuDisplayable):
     def create_cog(
             self,
             bot: Bot,
-            **command_kwargs,
+            *,
+            cog_name: str = "Bot Settings",
+            name: str = "settings",
+            aliases: typing.List[str] = ["setup"],
+            permissions: typing.List[str] = None,
+            post_invoke: MaybeCoroContextCallable = None,
+            guild_only: bool = True,
+            **command_kwargs
             ) -> commands.Cog:
         ...
 
     def create_cog(
             self,
-            bot: Bot = None,
+            bot: typing.Optional[Bot] = None,
             *,
             cog_name: str = "Bot Settings",
             name: str = "settings",
@@ -281,7 +295,7 @@ class Menu(MenuDisplayable):
             # Edit the message with our new buttons
             sendable_data = await self.get_sendable_data(ctx)
             sent_components = sendable_data['components']
-            await ctx.interaction.followup.send(**sendable_data)
+            menu_message = await ctx.interaction.followup.send(**sendable_data)
 
         # Disable the buttons before we leave
         try:
@@ -357,17 +371,21 @@ class MenuIterable(Menu, Option):
         Args:
             select_sql (str): The SQL that should be used to select the rows to be displayed from the database.
             select_sql_args (typing.Callable[[commands.Context], typing.List[typing.Any]]): A function returning a
-                list of arguments that should be passed to the database select.
+                list of arguments that should be passed to the database select. The list given is args that are passed
+                to the select statement.
             insert_sql (str): The SQL that should be used to insert the data into the database.
             insert_sql_args (typing.Callable[[commands.Context, typing.List[typing.Any]], typing.List[typing.Any]]): A
-                function returning a list of arguments that should be passed to the database insert.
+                function returning a list of arguments that should be passed to the database insert. The list given is
+                a list of items returned from the option.
             delete_sql (str): The SQL that should be used to delete a row from the database.
             delete_sql_args (typing.Callable[[commands.Context, dict], typing.List[typing.Any]]): A function returning a
-                list of arguments that should be passed to the database delete.
+                list of arguments that should be passed to the database delete. The dict given is a row from the database.
             row_text_display (typing.Callable[[commands.Context, dict], str]): A function returning a string which should
-                be showed in the menu.
-            row_component_display (typing.Callable[[commands.Context, dict], str]): A function returning a string
-                which should be shown on the component.
+                be showed in the menu. The dict given is the row from the database.
+            row_component_display (typing.Callable[[commands.Context, dict], typing.Union[str, typing.Tuple[str, str]]): A
+                function returning a string which should be shown on the component. The dict given is the row from the database.
+                If one string is returned, it's used for both the button and its custom ID. If two strings are given, the
+                first is used for the button and the second for the custom ID.
             converters (typing.List[Converter]): A list of converters that the user should be asked for.
             cache_callback (typing.Optional[typing.Callable[[commands.Context, typing.List[typing.Any]], None]]): Description
             cache_delete_callback (typing.Optional[typing.Callable[[commands.Context, typing.List[typing.Any]], None]]): Description
@@ -380,7 +398,7 @@ class MenuIterable(Menu, Option):
 
         self.cache_callback = cache_callback or _do_nothing()
         self.cache_delete_callback = cache_delete_callback or _do_nothing()
-        self.cache_delete_args = cache_delete_args or _do_nothing()
+        self.cache_delete_args = cache_delete_args or _do_nothing(list)
 
         self.select_sql = select_sql
         self.select_sql_args = select_sql_args or _do_nothing(list)
