@@ -56,12 +56,14 @@ requirements = [
     "upgradechatpy>=1.0.3<2.0",
 
     # Web requirements
-    "cryptography>=3.3.1,<4.0",
-    "aiohttp_jinja2>=1.4.2,<2.0",
-    "aiohttp_session>=2.9.0,<3.0",
+    # No versioning on most simply because Pip
+    # doesn't like installing very quickly if I keep it
+    "cryptography",
+    "aiohttp_jinja2",
+    "aiohttp_session",
     "jinja2>=3.0.0,<4.0.0",
-    "markdown>=3.3.3,<4.0",
-    "htmlmin>=0.1.12,<0.2",
+    "markdown",
+    "htmlmin",
 ]
 
 
@@ -72,7 +74,7 @@ extras = {
         "sphinx_rtd_theme",
     ],
     "postgres": [
-        "asyncpg>=0.21.0,<0.22",
+        "asyncpg<0.22",
     ],
     "mysql": [
         "aiomysql",
