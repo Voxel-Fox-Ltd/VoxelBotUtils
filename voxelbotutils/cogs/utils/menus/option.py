@@ -57,8 +57,8 @@ class Option(MenuDisplayable):
         self.display = display
         self.component_display = component_display or display
         if isinstance(self.component_display, (list, tuple)):
-            self.component_display = str(self.component_display[0])
             self._component_custom_id = str(self.component_display[1])
+            self.component_display = str(self.component_display[0])
         else:
             self._component_custom_id = str(self.component_display)
         self._button_style: typing.Optional[discord.ButtonStyle] = None
