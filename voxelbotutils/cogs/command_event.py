@@ -1,3 +1,5 @@
+import discord
+
 from . import utils as vbu
 
 
@@ -40,7 +42,18 @@ class CommandEvent(vbu.Cog):
         if not ctx.command:
             return
         command_stats_name = ctx.command.qualified_name.replace(' ', '_')
-        command_stats_tags = {"command_name": command_stats_name, "slash_command": ctx.supports_ephemeral}
+        is_slash_command = hasattr(ctx, "interaction")
+        command_stats_tags = {
+            "command_name": command_stats_name,
+            "slash_command": is_slash_command,
+            "guild_id": ctx.guild.id if ctx.guild else None,
+        }
+        if is_slash_command:
+            interaction: discord.Interaction = ctx.interaction  # type: ignore
+            command_stats_tags.update({
+                "user_locale": interaction.user_locale,
+                "guild_locale": interaction.guild_locale,
+            })
         async with vbu.Stats() as stats:
             stats.increment("discord.bot.commands", tags=command_stats_tags)
 
