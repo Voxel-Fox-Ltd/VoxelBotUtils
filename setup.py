@@ -46,8 +46,8 @@ if version.endswith(('a', 'b', 'rc')):
 # Set up the requirements
 requirements = [
     # Main requirements
-    "novus>=0.0.3,<0.1",
-    "toml>=0.10.2,<0.11",
+    "novus>=0.0.8",
+    "toml",
     "aiosqlite",
     "aioredis>=1.3,<2.0",
     "aioredlock>=0.7.0,<0.8",
@@ -78,7 +78,7 @@ extras = {
     ],
     "mysql": [
         "aiomysql",
-    ]
+    ],
 }
 
 

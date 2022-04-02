@@ -57,9 +57,14 @@ class ErrorHandler(vbu.Cog):
         ),
         (
             commands.IsNotSlashCommand,
-            lambda ctx, error: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
-                "This command can only be run as a slash command.",
-            )
+            lambda ctx, error: {
+                True: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                    "This command can only be run as a slash command.",
+                ),
+                False: gt("errors", localedir=LOCALE_PATH, languages=[ctx.locale], fallback=True).gettext(
+                    "This command can only be run as a slash command. Please re-invite the bot to add slash commands to your server.",
+                ),
+            }[error.missing_scope]
         ),
         (
             commands.DisabledCommand,
