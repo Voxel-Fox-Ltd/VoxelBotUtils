@@ -5,7 +5,7 @@ import typing as _typing
 import discord as _discord
 from discord.ext import commands as _dpy_commands
 
-from . import checks, converters, errors, menus
+from . import checks, converters, errors, menus, types
 from .context_embed import Embed
 from .custom_bot import MinimalBot, Bot
 from .custom_cog import Cog

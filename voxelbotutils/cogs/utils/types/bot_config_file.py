@@ -3,6 +3,29 @@ from __future__ import annotations
 from typing import Dict, List, Literal, Optional, TypedDict
 
 
+__all__ = (
+    "_EventWebhookEvents",
+    "_EventWebhook",
+    "_Intents",
+    "_BotListingApiKeys",
+    "_CommandData",
+    "_BotInfoLinks",
+    "_BotInfo",
+    "_Oauth",
+    "_Database",
+    "_Redis",
+    "_ShardManager",
+    "_EmbedAuthor",
+    "_EmbedFooter",
+    "_Embed",
+    "_PresenceStreaming",
+    "_Presence",
+    "_UpgradeChat",
+    "_Statsd",
+    "BotConfig",
+)
+
+
 class _EventWebhookEvents(TypedDict):
     guild_join: bool
     guild_remove: bool
