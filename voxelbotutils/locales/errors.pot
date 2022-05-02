@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.0.1\n"
 "X-Poedit-Basepath: ../cogs\n"
-"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-0: error_handler.py\n"
 
 #: error_handler.py:25 error_handler.py:31
 #, python-brace-format

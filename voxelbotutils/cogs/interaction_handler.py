@@ -10,9 +10,9 @@ class InteractionHandler(vbu.Cog, command_attrs={'hidden': True, 'add_slash_comm
 
     @vbu.Cog.listener()
     async def on_component_interaction(self, interaction: discord.Interaction):
-        if not interaction.component.custom_id.startswith("RUNCOMMAND"):
+        if not interaction.custom_id.startswith("RUNCOMMAND"):
             return
-        command_name = interaction.component.custom_id[len("RUNCOMMAND "):]
+        command_name = interaction.custom_id[len("RUNCOMMAND "):]
         command = self.bot.get_command(command_name)
         ctx = await self.bot.get_slash_context(interaction=interaction)
         ctx.invoked_with = command_name

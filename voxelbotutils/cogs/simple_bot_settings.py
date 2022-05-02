@@ -4,6 +4,9 @@ from discord.ext import commands
 from . import utils as vbu
 
 
+_ = vbu.translate
+
+
 class BotSettings(vbu.Cog):
 
     @vbu.command(add_slash_command=False)
@@ -20,7 +23,7 @@ class BotSettings(vbu.Cog):
         if new_prefix is None:
             current_prefix = self.bot.guild_settings[ctx.guild.id][prefix_column] or self.bot.config['default_prefix']
             return await ctx.send(
-                f"The current prefix is `{current_prefix}`.",
+                _(ctx, "bot_settings").gettext(f"The current prefix is `{current_prefix}`."),
                 allowed_mentions=discord.AllowedMentions.none(),
             )
 
@@ -28,11 +31,11 @@ class BotSettings(vbu.Cog):
         try:
             await commands.has_guild_permissions(manage_guild=True).predicate(ctx)
         except Exception:
-            return await ctx.send("You do not have permission to change the command prefix.")
+            return await ctx.send(_(ctx, "bot_settings").gettext("You do not have permission to change the command prefix."))
 
         # Validate prefix
         if len(new_prefix) > 30:
-            return await ctx.send("The maximum length a prefix can be is 30 characters.")
+            return await ctx.send(_(ctx, "bot_settings").gettext("The maximum length a prefix can be is 30 characters."))
 
         # Store setting
         self.bot.guild_settings[ctx.guild.id][prefix_column] = new_prefix
@@ -43,7 +46,7 @@ class BotSettings(vbu.Cog):
                 ctx.guild.id, new_prefix
             )
         await ctx.send(
-            f"My prefix has been updated to `{new_prefix}`.",
+            _(ctx, "bot_settings").gettext(f"My prefix has been updated to `{new_prefix}`."),
             allowed_mentions=discord.AllowedMentions.none(),
         )
 
