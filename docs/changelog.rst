@@ -22,6 +22,10 @@ Changed Features
 * Add support for giving a custom ID to menu components.
 * Ask for messages in the menu by use of modals.
 * Force all settings menus to be done via slash command by default.
+* Add better typing for menu utils.
+* Add typevar for cogs to define what the instance is.
+* Add locale to statsd logging.
+* Add a specific error for the bot not having slash command scope.
 
 Bugs Fixed
 """"""""""""""""""""""""""""""""""""
@@ -32,6 +36,9 @@ Bugs Fixed
 * Catch error in sending errors for tasks (ironic, yes).
 * Fix ``su`` command.
 * Add timer for letting a shard identify in the sharder.
+* Fix the colour purple in the colour converter.
+* Fix stats command for web-only bots.
+* Fix component display for menu iterables.
 
 0.8.3
 --------------------------------------
