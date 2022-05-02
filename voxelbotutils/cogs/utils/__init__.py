@@ -43,7 +43,8 @@ def minify_html(text: str) -> str:
 def translation(
         ctx: _typing.Union[_dpy_commands.Context, _discord.Interaction, str],
         domain: str,
-        **kwargs
+        **kwargs,
+        use_guild: bool = False,
         ) -> _typing.Union[_gettext.GNUTranslations, _gettext.NullTranslations]:
     """
     Get a translation table for a given domain with the locale
@@ -62,6 +63,8 @@ def translation(
         the name of the locale that you want to get anyway.
     domain: :class:`str`
         The domain of the translation.
+    use_guild: :class:`bool`
+        Whether or not to prioritize the guild locale over the user locale.
 
     Returns
     --------
@@ -71,6 +74,8 @@ def translation(
 
     if isinstance(ctx, (_dpy_commands.Context, _discord.Interaction)):
         languages = [ctx.locale, ctx.locale.split("-")[0]]
+        if use_guild and ctx.guild and ctx.guild_locale:
+            languages = [ctx.guild_locale, ctx.guild_locale.split("-")[0], *languages]
     elif isinstance(ctx, str):
         languages = [ctx]
     else:
