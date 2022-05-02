@@ -4,7 +4,7 @@ from discord.ext import commands
 from . import utils as vbu
 
 
-_ = vbu.translate
+_ = vbu.translation
 
 
 class BotSettings(vbu.Cog):
