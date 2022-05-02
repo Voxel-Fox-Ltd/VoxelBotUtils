@@ -49,6 +49,12 @@ def translation(
     Get a translation table for a given domain with the locale
     stored in a context.
 
+    Examples
+    ----------
+    >>> # This will get the locale from your context,
+    >>> # and will get the translation from the "errors" file.
+    >>> vbu.translation(ctx, "errors").gettext("This command is currently unavailable")
+
     Parameters
     -----------
     ctx: Union[:class:`discord.ext.commands.Context`, :class:`discord.Interaction`, :class:`str`]
