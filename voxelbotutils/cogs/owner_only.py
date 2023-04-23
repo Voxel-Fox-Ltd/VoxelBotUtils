@@ -198,7 +198,7 @@ class OwnerOnly(vbu.Cog, command_attrs={'hidden': True, 'add_slash_command': Fal
         time_taken = end - start
         precision = "seconds"
         prefixes = ["milli", "micro", "nano", "pico"]
-        index = 1
+        index = 0
         while float(format(time_taken, ".3f")) < 10:
             time_taken *= 1_000
             precision = f"{prefixes[index]}seconds"
