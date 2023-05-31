@@ -28,6 +28,9 @@ class MysqlWrapper(DriverWrapper):
 
     @staticmethod
     async def create_pool(config: DatabaseConfig) -> aiomysql.Pool:
+        # aiomysql wants the key as 'db' instead of 'database'
+        config['db'] = config['database']
+        del config['database']
         return await aiomysql.create_pool(**config, autocommit=True)
 
     @staticmethod
