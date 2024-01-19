@@ -53,7 +53,7 @@ requirements = [
     "aioredlock>=0.7.0,<0.8",
     "aiodogstatsd>=0.14.0,<0.15",
     "aiohttp",  # no versioning here because I trust u
-    "upgradechatpy>=1.0.3<2.0",
+    "upgradechatpy>=1.0.3,<2.0",
 
     # Web requirements
     # No versioning on most simply because Pip
